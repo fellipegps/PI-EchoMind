@@ -2,24 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Bot, Loader2 } from "lucide-react";
-import { authApi, tokenStorage } from "@/lib/api";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,12 +21,9 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const { access_token } = await authApi.login(username, password);
-      tokenStorage.set(access_token);
+      await login(username, password);
       toast.success("Login realizado com sucesso!");
-      router.push("/dashboard");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao realizar login";
       toast.error(msg);
@@ -48,8 +39,8 @@ export default function LoginPage() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Bot className="h-6 w-6" />
           </div>
-          <CardTitle className="text-2xl font-bold">Agente de IA Corporativo</CardTitle>
-          <CardDescription>Entre na sua conta para gerenciar seu agente</CardDescription>
+          <CardTitle className="text-2xl font-bold">EchoMind</CardTitle>
+          <CardDescription>Entre na sua conta para gerenciar o agente</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleLogin}>
@@ -63,6 +54,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">
@@ -74,6 +66,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
           </CardContent>
@@ -83,17 +76,11 @@ export default function LoginPage() {
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Entrar
             </Button>
-
-            <div className="text-center text-sm space-y-2">
-              <Link href="/recuperar-senha" className="text-primary hover:underline block">
-                Esqueci minha senha
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">Não tem uma conta? </span>
+              <Link href="/registrar-conta" className="text-primary font-medium hover:underline">
+                Criar conta
               </Link>
-              <div className="text-muted-foreground">
-                Não tem uma conta?{" "}
-                <Link href="/registrar-conta" className="text-primary font-medium hover:underline">
-                  Criar conta
-                </Link>
-              </div>
             </div>
           </CardFooter>
         </form>

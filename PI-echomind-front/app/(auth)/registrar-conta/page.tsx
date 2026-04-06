@@ -2,43 +2,42 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Bot, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [companyName, setCompanyName] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const { register } = useAuth();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres");
       return;
     }
+    if (password !== confirmPassword) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
 
     setLoading(true);
-
     try {
-      // Simulação de lógica de registro
-      // Aqui você conectaria com supabase.auth.signUp futuramente
-      console.log("Registrando:", { companyName, fullName, email });
-      
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      toast.success("Cadastro realizado! Verifique seu email para confirmar a conta.");
-      router.push("/login");
-    } catch (error) {
-      toast.error("Erro ao criar conta. Tente novamente.");
+      await register(username, password);
+      // O redirect para /login é feito dentro do AuthContext
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao criar conta";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -52,56 +51,45 @@ export default function RegisterPage() {
             <Bot className="h-6 w-6" />
           </div>
           <CardTitle className="text-2xl font-bold">Criar Conta</CardTitle>
-          <CardDescription>
-            Cadastre sua empresa para começar a usar o Agente de IA
-          </CardDescription>
+          <CardDescription>Cadastre-se para começar a usar o EchoMind</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleRegister}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="company">Nome da Empresa</Label>
-              <Input 
-                id="company" 
-                placeholder="Ex: Minha Empresa Tech" 
-                value={companyName} 
-                onChange={(e) => setCompanyName(e.target.value)} 
-                required 
+              <Label htmlFor="username">Usuário</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="seu_usuario"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoComplete="username"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="name">Seu Nome</Label>
-              <Input 
-                id="name" 
-                placeholder="Nome completo" 
-                value={fullName} 
-                onChange={(e) => setFullName(e.target.value)} 
-                required 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="seu@email.com" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input 
-                id="password" 
-                type="password" 
-                placeholder="Mínimo 6 caracteres" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <Input
+                id="password"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">Confirmar Senha</Label>
+              <Input
+                id="confirm"
+                type="password"
+                placeholder="Repita a senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
               />
             </div>
           </CardContent>
@@ -111,7 +99,6 @@ export default function RegisterPage() {
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Criar Conta
             </Button>
-
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Já tem uma conta? </span>
               <Link href="/login" className="text-primary font-medium hover:underline">

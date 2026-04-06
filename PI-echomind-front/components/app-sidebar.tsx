@@ -3,6 +3,7 @@
 import { LayoutDashboard, HelpCircle, Bot, Settings, LogOut, Database } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 import {
   Sidebar,
   SidebarContent,
@@ -17,23 +18,17 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-// 🚀 ITENS DO MENU CONFORME O ESCOPO
 const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Dashboard",          url: "/dashboard",            icon: LayoutDashboard },
   { title: "Base de Conhecimento", url: "/base-de-conhecimento", icon: Database },
-  { title: "Não Respondidas", url: "/nao-respondidas", icon: HelpCircle },
-  { title: "Agente (Totem)", url: "/agente", icon: Bot },
-  { title: "Configurações", url: "/configuracoes", icon: Settings },
+  { title: "Não Respondidas",    url: "/nao-respondidas",      icon: HelpCircle },
+  { title: "Agente (Totem)",     url: "/agente",               icon: Bot },
+  { title: "Configurações",      url: "/configuracoes",        icon: Settings },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
-
-  // TODO: BACKEND - Implementar integração com FastAPI Auth futuramente
-  const handleLogout = () => {
-    console.log("Logout acionado - Integrar com FastAPI futuramente");
-    // Exemplo: rota.push('/login')
-  };
+  const { logout, username } = useAuth();
 
   return (
     <Sidebar>
@@ -42,10 +37,19 @@ export function AppSidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Bot className="h-4 w-4" />
           </div>
-          <span className="font-semibold text-sm">EchoMind</span>
+          <div className="flex flex-col leading-tight">
+            <span className="font-semibold text-sm">EchoMind</span>
+            {username && (
+              <span className="text-xs text-muted-foreground truncate max-w-32">
+                {username}
+              </span>
+            )}
+          </div>
         </div>
       </SidebarHeader>
+
       <SidebarSeparator />
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
@@ -53,13 +57,16 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => {
                 const isActive = pathname === item.url;
-                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link 
-                        href={item.url} 
-                        className={isActive ? "bg-sidebar-accent text-sidebar-primary font-medium" : "hover:bg-sidebar-accent"}
+                      <Link
+                        href={item.url}
+                        className={
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                            : "hover:bg-sidebar-accent"
+                        }
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -72,11 +79,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            {/* BACKEND: O clique aqui deve invalidar o JWT no FastAPI */}
-            <SidebarMenuButton onClick={handleLogout} className="text-destructive hover:text-destructive">
+            <SidebarMenuButton
+              onClick={logout}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
               <LogOut className="h-4 w-4" />
               <span>Sair</span>
             </SidebarMenuButton>
