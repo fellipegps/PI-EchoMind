@@ -1,22 +1,31 @@
-fastapi==0.109.2
-uvicorn[standard]==0.27.1
-sqlalchemy[asyncio]==2.0.27
-asyncpg==0.29.0
-alembic==1.13.1
-pgvector==0.2.5
-pydantic==2.10.6
-pydantic-settings==2.7.1
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-bcrypt==4.0.1
+# ─── Framework Web ────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
 python-multipart==0.0.9
-langchain==0.3.18
-langchain-community==0.3.17
-langchain-ollama>=0.3.0,<1.0.0
-langchain-text-splitters==0.3.6
-langchain-core>=0.3.34,<1.0.0
-pypdf==4.0.1
-httpx>=0.27.0
+
+# ─── Pydantic v2 ──────────────────────────────────────────────────────────────
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# ─── Banco de Dados ───────────────────────────────────────────────────────────
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+pgvector==0.2.5
+alembic==1.13.1
+
+# ─── LangChain ────────────────────────────────────────────────────────────────
+langchain==0.2.17
+langchain-community==0.2.19
+langchain-core==0.2.43
+langchain-groq==0.1.9
+
+# ─── Embeddings locais (sem servidor externo) ─────────────────────────────────
+# sentence-transformers gera vetores de 768 dims localmente, dentro do container,
+# sem dependência de Ollama ou qualquer serviço externo.
+sentence-transformers==3.0.1
+# langchain_huggingface é o pacote atual (langchain_community.embeddings foi depreciado)
+langchain-huggingface==0.0.3
+
+# ─── Utilitários ─────────────────────────────────────────────────────────────
 python-dotenv==1.0.1
-faster-whisper==1.0.3
-edge-tts==6.1.12
+httpx>=0.27.0,<0.28.0

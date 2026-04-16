@@ -1,7 +1,0 @@
-{
-    "python-envs.defaultEnvManager": "ms-python.python:system",
-    "python.analysis.extraPaths": ["."],
-    "python.autoComplete.extraPaths": ["."]
-
-}
-

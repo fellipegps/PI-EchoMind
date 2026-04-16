@@ -1,43 +1,73 @@
-version: '3.8'
+###############################################################################
+#  EchoMind AI Totem – Docker Compose
+#
+#  Serviços:
+#    db   → PostgreSQL 16 + extensão pgvector
+#    api  → FastAPI + LangChain + Groq
+#
+#  Como usar:
+#    1. cp .env.example .env   (preencha GROQ_API_KEY e POSTGRES_PASSWORD)
+#    2. docker compose up -d
+###############################################################################
 
 services:
+
+  # ─── PostgreSQL 16 + pgvector ──────────────────────────────────────────────
   db:
     image: pgvector/pgvector:pg16
-    container_name: totem_db
-    restart: always
+    container_name: echomind_db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER:-echomind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-echomind}
+      POSTGRES_DB:       ${POSTGRES_DB:-echomind}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    # CRÍTICO: healthcheck garante que o Postgres está PRONTO (não só iniciado)
-    # antes da API tentar conectar. Sem isso, a API falha no startup.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-echomind} -d ${POSTGRES_DB:-echomind} -q"]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 30s
+    networks:
+      - echomind_net
 
+  # ─── FastAPI Backend ──────────────────────────────────────────────────────
   api:
-    build: .
-    container_name: totem_api
-    restart: always
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echomind_api
+    restart: unless-stopped
     depends_on:
       db:
-        # Aguarda o healthcheck do banco passar antes de subir a API
         condition: service_healthy
-    volumes:
-      - .:/app
-      - ./static:/app/static
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env        # carrega GROQ_API_KEY e demais variáveis do arquivo .env
+    environment:
+      DATABASE_URL:         postgresql://${POSTGRES_USER:-echomind}:${POSTGRES_PASSWORD:-echomind}@db:5432/${POSTGRES_DB:-echomind}
+      GROQ_API_KEY:         ${GROQ_API_KEY}
+      GROQ_LLM_MODEL:       ${GROQ_LLM_MODEL:-llama-3.3-70b-versatile}
+      EMBED_MODEL:          ${EMBED_MODEL:-sentence-transformers/paraphrase-multilingual-mpnet-base-v2}
+      EMBEDDING_DIM:        ${EMBEDDING_DIM:-768}
+      SIMILARITY_THRESHOLD: ${SIMILARITY_THRESHOLD:-0.70}
+      TOP_K_DOCS:           ${TOP_K_DOCS:-3}
+    ports:
+      - "8000:8000"
+    networks:
+      - echomind_net
 
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
 volumes:
-  postgres_data:
+  pgdata:
+    driver: local
+
+
+# ─── Rede interna ─────────────────────────────────────────────────────────────
+networks:
+  echomind_net:
+    driver: bridge

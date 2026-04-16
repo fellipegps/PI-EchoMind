@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useEvents } from "../hooks/use-events";
-import { CompanyEvent, EventFormState } from "../types";
+import type { EventFormState } from "../hooks/use-events";
+import type { CompanyEvent } from "@/lib/api";
 import { EVENT_TYPES } from "../constants";
 import { Search, Plus, Pencil, Trash2, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";

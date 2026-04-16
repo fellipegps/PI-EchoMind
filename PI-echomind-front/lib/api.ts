@@ -1,191 +1,212 @@
 /**
- * Cliente HTTP centralizado para a API EchoMind.
- * Lê a URL base de NEXT_PUBLIC_API_URL (default: http://localhost:8000).
+ * lib/api.ts
+ * Camada de serviço centralizada – toda comunicação com o backend FastAPI passa por aqui.
+ * Troque BASE_URL via variável de ambiente NEXT_PUBLIC_API_URL no .env.local
  */
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-// ─── Token helpers ─────────────────────────────────────────────────────────────
+// ─── Tipos espelhados dos schemas Pydantic ────────────────────────────────────
 
-const TOKEN_KEY = "echomind_token";
+export interface Faq {
+  id: string;
+  question: string;
+  answer: string;
+  show_on_totem: boolean;
+  created_at: string;
+}
 
-export const tokenStorage = {
-  get: (): string | null => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(TOKEN_KEY);
-  },
-  set: (token: string) => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(TOKEN_KEY, token);
-  },
-  clear: () => {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem(TOKEN_KEY);
-  },
-};
+export interface CompanyEvent {
+  id: string;
+  title: string;
+  event_date: string;
+  event_type: string;
+  description: string | null;
+  created_at: string;
+}
 
-// ─── HTTP client ───────────────────────────────────────────────────────────────
+export interface Config {
+  id: string;
+  company_name: string;
+  description: string | null;
+  tone_of_voice: string;
+  totem_voice_gender: string;
+  website: string | null;
+  phone: string | null;
+  address: string | null;
+  business_hours: string | null;
+  updated_at: string | null;
+}
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = tokenStorage.get();
+export interface UnansweredQuestion {
+  id: string;
+  canonical_question: string;
+  count: number;
+  first_asked: string;
+  last_asked: string;
+  similar_questions: string[];
+}
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options?.headers as Record<string, string>),
-  };
+export interface DashboardData {
+  total_questions: number;
+  unanswered_questions: number;
+  avg_response_time: string;
+  daily_interactions: { date: string; count: number }[];
+  top_faqs: { question: string; count: number }[];
+}
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+// ─── Helper interno ───────────────────────────────────────────────────────────
 
-  let res: Response;
-  try {
-    res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
-  } catch {
-    throw new Error(
-      `Não foi possível conectar ao servidor (${BASE_URL}). Verifique se o backend está rodando.`
-    );
-  }
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: { "Content-Type": "application/json", ...init?.headers },
+    ...init,
+  });
 
   if (!res.ok) {
-    let detail = `Erro ${res.status}`;
-    try {
-      const body = await res.json();
-      detail = body?.detail ?? JSON.stringify(body);
-    } catch {
-      detail = await res.text().catch(() => detail);
-    }
-    throw new Error(detail);
+    const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(detail?.detail ?? `Erro ${res.status}`);
   }
 
+  // 204 No Content
   if (res.status === 204) return undefined as T;
-
   return res.json() as Promise<T>;
 }
 
-// ─── Auth ──────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+//  CHAT – streaming
+// ══════════════════════════════════════════════════════════════════════════════
 
-export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
-
-export const authApi = {
-  /**
-   * O backend usa OAuth2PasswordRequestForm (form-data, não JSON).
-   */
-  login: async (username: string, password: string): Promise<LoginResponse> => {
-    const body = new URLSearchParams({ username, password });
-
-    let res: Response;
-    try {
-      res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
-      });
-    } catch {
-      throw new Error(
-        `Não foi possível conectar ao servidor (${BASE_URL}). Verifique se o backend está rodando.`
-      );
-    }
-
-    if (!res.ok) {
-      let detail = `Erro ${res.status}`;
-      try {
-        const b = await res.json();
-        detail = b?.detail ?? JSON.stringify(b);
-      } catch {
-        /* noop */
-      }
-      throw new Error(detail);
-    }
-
-    return res.json();
-  },
-
-  register: (username: string, password: string) =>
-    request<{ id: string; username: string }>("/api/v1/auth/register", {
+/**
+ * Envia uma mensagem e recebe tokens em streaming.
+ * @param message  Texto do usuário
+ * @param onToken  Callback chamado a cada token recebido
+ * @param onDone   Callback chamado quando o stream termina
+ */
+export async function streamChat(
+  message: string,
+  onToken: (token: string) => void,
+  onDone: () => void,
+  onError: (err: Error) => void
+): Promise<void> {
+  // 1. Tenta conectar ao backend
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
-      body: JSON.stringify({ username, password }),
-    }),
-};
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+  } catch {
+    onError(new Error("Não foi possível conectar ao servidor. Verifique se o backend está rodando."));
+    return;
+  }
 
-// ─── FAQ ──────────────────────────────────────────────────────────────────────
+  // 2. Erro HTTP antes do stream (503, 400, etc.)
+  if (!res.ok) {
+    let detail = `Erro ${res.status}`;
+    try { const body = await res.json(); detail = body?.detail ?? detail; } catch {}
+    onError(new Error(detail));
+    return;
+  }
 
-export interface FaqDTO {
-  id: string;
-  question: string;
-  answer: string;
-  category: string;
-  created_at: string;
+  // 3. Lê o stream token a token
+  try {
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let receivedAny = false;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const token = decoder.decode(value, { stream: true });
+      if (token) {
+        receivedAny = true;
+        onToken(token);
+      }
+    }
+
+    // Stream encerrou sem nenhum token = erro silencioso no backend
+    // Neste caso chama onError para o frontend mostrar algo adequado
+    if (!receivedAny) {
+      onError(new Error("A IA não retornou resposta. Verifique os logs: docker compose logs api --tail=50"));
+      return;
+    }
+
+    onDone();
+  } catch {
+    onError(new Error("Conexão interrompida durante a resposta. Tente novamente."));
+  }
 }
 
-export interface FaqCreatePayload {
-  question: string;
-  answer: string;
-  category?: string;
-}
-
-export interface FaqUpdatePayload {
-  question?: string;
-  answer?: string;
-  category?: string;
-}
+// ══════════════════════════════════════════════════════════════════════════════
+//  FAQs
+// ══════════════════════════════════════════════════════════════════════════════
 
 export const faqApi = {
-  list: () => request<FaqDTO[]>("/api/v1/faqs/"),
-  create: (payload: FaqCreatePayload) =>
-    request<FaqDTO>("/api/v1/faqs/", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-  update: (id: string, payload: FaqUpdatePayload) =>
-    request<FaqDTO>(`/api/v1/faqs/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    }),
+  list: () => request<Faq[]>("/faqs"),
+
+  listTotem: () => request<Faq[]>("/faqs/totem"),
+
+  create: (data: { question: string; answer: string; show_on_totem?: boolean }) =>
+    request<Faq>("/faqs", { method: "POST", body: JSON.stringify(data) }),
+
+  update: (id: string, data: Partial<{ question: string; answer: string; show_on_totem: boolean }>) =>
+    request<Faq>(`/faqs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+
+  toggleTotem: (id: string) =>
+    request<Faq>(`/faqs/${id}/toggle-totem`, { method: "PATCH" }),
+
   delete: (id: string) =>
-    request<void>(`/api/v1/faqs/${id}`, { method: "DELETE" }),
+    request<void>(`/faqs/${id}`, { method: "DELETE" }),
 };
 
-// ─── Events ───────────────────────────────────────────────────────────────────
-
-export interface EventDTO {
-  id: string;
-  title: string;
-  description: string | null;
-  event_date: string;
-  event_type: string;
-  created_at: string;
-}
-
-export interface EventCreatePayload {
-  title: string;
-  description?: string;
-  event_date: string;
-  event_type: string;
-}
-
-export interface EventUpdatePayload {
-  title?: string;
-  description?: string;
-  event_date?: string;
-  event_type?: string;
-}
+// ══════════════════════════════════════════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════════════════════════════════════════
 
 export const eventApi = {
-  list: () => request<EventDTO[]>("/api/v1/events/"),
-  create: (payload: EventCreatePayload) =>
-    request<EventDTO>("/api/v1/events/", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-  update: (id: string, payload: EventUpdatePayload) =>
-    request<EventDTO>(`/api/v1/events/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    }),
+  list: () => request<CompanyEvent[]>("/events"),
+
+  create: (data: { title: string; event_date: string; event_type: string; description?: string }) =>
+    request<CompanyEvent>("/events", { method: "POST", body: JSON.stringify(data) }),
+
+  update: (id: string, data: Partial<{ title: string; event_date: string; event_type: string; description: string }>) =>
+    request<CompanyEvent>(`/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+
   delete: (id: string) =>
-    request<void>(`/api/v1/events/${id}`, { method: "DELETE" }),
+    request<void>(`/events/${id}`, { method: "DELETE" }),
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  CONFIGURAÇÃO
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const configApi = {
+  get: () => request<Config>("/config"),
+
+  save: (data: Partial<Config>) =>
+    request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  PERGUNTAS NÃO RESPONDIDAS
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const unansweredApi = {
+  list: () => request<UnansweredQuestion[]>("/unanswered"),
+
+  convert: (id: string, answer: string) =>
+    request<Faq>(`/unanswered/${id}/convert`, {
+      method: "POST",
+      body: JSON.stringify({ answer }),
+    }),
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const dashboardApi = {
+  get: () => request<DashboardData>("/dashboard"),
 };

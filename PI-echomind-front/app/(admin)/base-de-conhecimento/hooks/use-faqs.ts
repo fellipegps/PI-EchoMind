@@ -1,105 +1,63 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { faqApi, FaqDTO } from "@/lib/api";
-import { Faq } from "../types";
-
-function toFaq(dto: FaqDTO): Faq {
-  return {
-    id: dto.id,
-    question: dto.question,
-    answer: dto.answer,
-    category: dto.category,
-    show_on_totem: false, // campo local — ainda não existe no backend
-    created_at: dto.created_at,
-  };
-}
+import { faqApi } from "@/lib/api";
+import type { Faq } from "@/lib/api";
 
 export function useFaqs() {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchFaqs = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await faqApi.list();
-      // Preserva o estado local de show_on_totem ao recarregar
-      setFaqs((prev) =>
-        data.map((dto) => {
-          const existing = prev.find((f) => f.id === dto.id);
-          return { ...toFaq(dto), show_on_totem: existing?.show_on_totem ?? false };
-        })
-      );
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido";
-      setError(msg);
-      toast.error(`Erro ao carregar FAQs: ${msg}`);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  // ─── Carrega FAQs do backend ─────────────────────────────────────────────
+  useEffect(() => {
+    faqApi
+      .list()
+      .then(setFaqs)
+      .catch(() => toast.error("Erro ao carregar FAQs."))
+      .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    fetchFaqs();
-  }, [fetchFaqs]);
-
+  // ─── Criar / Editar ──────────────────────────────────────────────────────
   const saveFaq = async (
-    faqForm: { question: string; answer: string },
+    form: { question: string; answer: string },
     editingId: string | null
   ) => {
     try {
       if (editingId) {
-        const updated = await faqApi.update(editingId, faqForm);
-        setFaqs((prev) =>
-          prev.map((f) =>
-            f.id === editingId
-              ? { ...toFaq(updated), show_on_totem: f.show_on_totem }
-              : f
-          )
-        );
+        const updated = await faqApi.update(editingId, form);
+        setFaqs((prev) => prev.map((f) => (f.id === editingId ? updated : f)));
         toast.success("FAQ atualizada!");
       } else {
-        const created = await faqApi.create({ ...faqForm, category: "Geral" });
-        setFaqs((prev) => [toFaq(created), ...prev]);
+        const created = await faqApi.create({ ...form, show_on_totem: false });
+        setFaqs((prev) => [created, ...prev]);
         toast.success("FAQ criada!");
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido";
-      toast.error(`Erro ao salvar FAQ: ${msg}`);
-      console.error(err);
-      // Não atualiza o estado local — só o backend é fonte da verdade
+    } catch (err: any) {
+      toast.error(err.message ?? "Erro ao salvar FAQ.");
+      throw err; // re-lança para o componente manter o dialog aberto
     }
   };
 
+  // ─── Deletar ─────────────────────────────────────────────────────────────
   const deleteFaq = async (id: string) => {
     try {
       await faqApi.delete(id);
       setFaqs((prev) => prev.filter((f) => f.id !== id));
       toast.success("FAQ excluída!");
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido";
-      toast.error(`Erro ao excluir FAQ: ${msg}`);
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err.message ?? "Erro ao excluir FAQ.");
     }
   };
 
-  const toggleTotemStatus = (id: string) => {
-    setFaqs((prev) => {
-      const faqToUpdate = prev.find((f) => f.id === id);
-      const activeCount = prev.filter((f) => f.show_on_totem).length;
-
-      if (faqToUpdate && !faqToUpdate.show_on_totem && activeCount >= 4) {
-        toast.error("Limite máximo de 4 FAQs no totem atingido!");
-        return prev;
-      }
-
-      return prev.map((f) =>
-        f.id === id ? { ...f, show_on_totem: !f.show_on_totem } : f
-      );
-    });
+  // ─── Toggle Totem ─────────────────────────────────────────────────────────
+  const toggleTotemStatus = async (id: string) => {
+    try {
+      const updated = await faqApi.toggleTotem(id);
+      setFaqs((prev) => prev.map((f) => (f.id === id ? updated : f)));
+    } catch (err: any) {
+      // Backend retorna 409 quando limite de 4 FAQs no totem é atingido
+      toast.error(err.message ?? "Erro ao alterar status do totem.");
+    }
   };
 
-  return { faqs, loading, error, saveFaq, deleteFaq, toggleTotemStatus, refresh: fetchFaqs };
+  return { faqs, loading, saveFaq, deleteFaq, toggleTotemStatus };
 }

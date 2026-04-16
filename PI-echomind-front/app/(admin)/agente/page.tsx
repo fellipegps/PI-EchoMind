@@ -3,46 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
-
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Loader2, 
-  Eraser, 
-  MessageSquareDashed, 
-} from "lucide-react";
+import { Send, Bot, User, Loader2, Eraser, MessageSquareDashed } from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/page-container";
-
-/**
- * COMO FUNCIONA A SIMULAÇÃO DE CHAT (FAKE CONVERSATION):
- * * 1. ESTADO DE MENSAGENS (messages): 
- * As mensagens são armazenadas em um array de objetos [{ role, content }].
- * - 'user': Mensagens que você digita.
- * - 'assistant': Respostas automáticas do robô.
- * * 2. FLUXO DE ENVIO (sendMessage):
- * - Primeiro, adicionamos a mensagem do usuário ao array instantaneamente.
- * - Ativamos o estado 'loading' para exibir o ícone de carregamento (Loader2).
- * - Usamos um 'setTimeout' de 1000ms (1 segundo) para simular o tempo de 
- * processamento de uma IA real.
- * * 3. RESPOSTA DINÂMICA (Mock Response):
- * - Após 1 segundo, injetamos a resposta do 'assistant' no array.
- * - Desativamos o 'loading' para remover o ícone de espera e mostrar o balão.
- * * 4. AUTO-SCROLL (useEffect):
- * - Sempre que o array de mensagens muda ou o carregamento é ativado, o 
- * useEffect detecta a mudança e move a barra de rolagem da 'div' de 
- * mensagens para o final (scrollTop = scrollHeight).
- * * 5. LIMPEZA (clearChat):
- * - Simplesmente redefine o array de mensagens para vazio [], limpando a tela.
- */
+import { streamChat } from "@/lib/api";
 
 interface Message {
   role: "user" | "assistant";
@@ -54,6 +25,8 @@ export default function ChatbotTest() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Controla se o primeiro token já foi inserido como nova mensagem
+  const firstTokenRef = useRef(true);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -62,29 +35,66 @@ export default function ChatbotTest() {
   }, [messages, loading]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    const text = input.trim();
+    if (!text || loading) return;
 
-    const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    firstTokenRef.current = true;
+
+    // Adiciona apenas a mensagem do usuário — sem mensagem vazia do assistente
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
     setLoading(true);
 
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { 
-          role: "assistant", 
-          content: `Esta é uma resposta de teste para: "${userMsg}". Agora usando ícones oficiais da Lucide!` 
-        },
-      ]);
-      setLoading(false);
-    }, 1000);
+    await streamChat(
+      text,
+      // onToken: ignora tokens vazios; no primeiro token real, cria a mensagem
+      // do assistente; nos seguintes, acumula no último item
+      (token) => {
+        if (!token) return;
+        if (firstTokenRef.current) {
+          firstTokenRef.current = false;
+          setMessages((prev) => [...prev, { role: "assistant", content: token }]);
+        } else {
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated[updated.length - 1] = {
+              role: "assistant",
+              content: updated[updated.length - 1].content + token,
+            };
+            return updated;
+          });
+        }
+      },
+      // onDone: stream chegou com conteúdo — apenas encerra o loading
+      () => {
+        setLoading(false);
+      },
+      // onError: stream vazio, erro HTTP, rede offline, etc.
+      // Mostra no toast (não polui o chat com mensagem de erro)
+      (err) => {
+        toast.error(err.message ?? "Erro ao conectar com a IA.", {
+          duration: 6000,
+        });
+        setLoading(false);
+      }
+    );
   };
 
   const clearChat = () => {
     setMessages([]);
     toast.success("Conversa reiniciada");
   };
+
+  // A última mensagem é do assistente E ainda está chegando tokens
+  const isStreaming =
+    loading &&
+    messages.length > 0 &&
+    messages[messages.length - 1].role === "assistant";
+
+  // Ainda não chegou nenhum token (loading mas sem mensagem do assistente ainda)
+  const isWaiting =
+    loading &&
+    (messages.length === 0 || messages[messages.length - 1].role === "user");
 
   return (
     <PageContainer>
@@ -99,48 +109,58 @@ export default function ChatbotTest() {
         </Button>
       </div>
 
-      <Card className="border-border bg-card pb-0 pt-4 flex flex-col h-150 overflow-hidden">
-        <CardHeader className="border-b [.border-b]:pb-4 gap-0">
+      <Card className="border-border bg-card pb-0 pt-4 flex flex-col h-[600px] overflow-hidden">
+        {/* shrink-0 garante que o header mantenha seu tamanho original */}
+        <CardHeader className="border-b [.border-b]:pb-4 gap-0 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <Bot className="h-5 w-5 text-primary" />
             </div>
             <div>
               <CardTitle className="text-lg">Chatbot de Teste</CardTitle>
-              <CardDescription>O agente responderá conforme o informações fornecidas</CardDescription>
+              <CardDescription>
+                O agente responderá conforme as informações da Base de Conhecimento
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col p-0 bg-card/50">
-          <div 
-            ref={scrollRef} 
-            className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-border"
+        {/* flex-1 e overflow-hidden aqui são essenciais para conter o scroll interno */}
+        <CardContent className="flex-1 flex flex-col p-0 bg-card/50 overflow-hidden">
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-border scroll-smooth"
           >
-            {messages.length === 0 && (
+            {messages.length === 0 && !loading && (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-3 opacity-40">
                 <div className="p-4 rounded-full bg-muted">
-                    {/* Ícone oficial substituído aqui */}
-                    <MessageSquareDashed className="h-10 w-10" />
+                  <MessageSquareDashed className="h-10 w-10" />
                 </div>
                 <p className="text-sm font-medium">Nenhuma mensagem enviada ainda.</p>
               </div>
             )}
 
             {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                key={i}
+                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
                 {msg.role === "assistant" && (
                   <div className="shrink-0 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                     <Bot className="h-4 w-4 text-primary" />
                   </div>
                 )}
-                
-                <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                  msg.role === "user" 
-                    ? "bg-primary text-primary-foreground rounded-tr-none" 
-                    : "bg-muted border border-border rounded-tl-none"
-                }`}>
+
+                <div
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm whitespace-pre-wrap ${msg.role === "user"
+                      ? "bg-primary text-primary-foreground rounded-tr-none"
+                      : "bg-muted border border-border rounded-tl-none"
+                    }`}
+                >
                   {msg.content}
+                  {isStreaming && i === messages.length - 1 && (
+                    <span className="inline-block w-0.5 h-3.5 bg-current ml-0.5 animate-pulse align-middle" />
+                  )}
                 </div>
 
                 {msg.role === "user" && (
@@ -150,20 +170,23 @@ export default function ChatbotTest() {
                 )}
               </div>
             ))}
-            
-            {loading && (
+
+            {isWaiting && (
               <div className="flex gap-3 justify-start animate-in fade-in duration-300">
                 <div className="shrink-0 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
-                <div className="bg-muted border border-border rounded-2xl rounded-tl-none px-4 py-3">
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <div className="bg-muted border border-border rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:300ms]" />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="p-4 bg-background border-t">
+          {/* shrink-0 aqui impede que o campo de input "suma" quando houver muitas mensagens */}
+          <div className="p-4 bg-background border-t shrink-0">
             <div className="flex gap-3 max-w-4xl mx-auto">
               <Input
                 value={input}
@@ -173,12 +196,16 @@ export default function ChatbotTest() {
                 disabled={loading}
                 className="bg-muted/50 border-border focus-visible:ring-primary h-11"
               />
-              <Button 
-                onClick={sendMessage} 
-                disabled={loading || !input.trim()} 
+              <Button
+                onClick={sendMessage}
+                disabled={loading || !input.trim()}
                 className="h-11 px-6 shadow-md hover:shadow-lg transition-all"
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>

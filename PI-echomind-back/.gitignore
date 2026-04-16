@@ -1,15 +1,11 @@
-# Python
+.env
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+.pytest_cache/
 .venv/
 venv/
-
-# Docker dados (se você mapeou volumes de banco de dados localmente)
-pgdata/
-
-# Variáveis de ambiente (Segurança!)
-.env
-
-# Outros
+*.egg-info/
+dist/
+build/
 .DS_Store
