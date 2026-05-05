@@ -210,3 +210,24 @@ export const unansweredApi = {
 export const dashboardApi = {
   get: () => request<DashboardData>("/dashboard"),
 };
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  TTS — Text-to-Speech via Google TTS (backend)
+// ══════════════════════════════════════════════════════════════════════════════
+
+/** Busca o áudio MP3 do backend e retorna uma Blob URL pronta para Audio(). */
+export async function fetchTTSAudio(
+  texto: string,
+  genero: "feminina" | "masculina" = "feminina"
+): Promise<string> {
+  const params = new URLSearchParams({ texto, genero });
+  const res = await fetch(`${BASE_URL}/tts?${params.toString()}`);
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(detail?.detail ?? `Erro TTS ${res.status}`);
+  }
+
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}

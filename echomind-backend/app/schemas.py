@@ -15,12 +15,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000, examples=["Onde fica a secretaria?"])
-    session_id: Optional[str] = Field(None, description="Identificador de sessão (para histórico futuro)")
 
-
-class ChatResponse(BaseModel):
-    answer: str
-    sources: list[str] = []
 
 
 # ══════════════════════════════════════════════════════════════════════════════

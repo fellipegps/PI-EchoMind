@@ -3,9 +3,9 @@ EchoMind AI Totem - Backend Principal
 FastAPI + LangChain + Groq + pgvector
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from sqlalchemy.orm import Session
 import logging
 
@@ -21,6 +21,7 @@ from .schemas import (
 )
 from . import crud
 from .rag_engine import get_rag_engine
+from .voice_service import synthesize as tts_synthesize
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 
@@ -239,6 +240,46 @@ def get_dashboard(db: Session = Depends(get_db)):
     real_avg = latency_store.summary()["avg_response_time"]
     stats["avg_response_time"] = real_avg
     return stats
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  TTS  /tts
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get(
+    "/tts",
+    summary="Síntese de voz via Microsoft Edge TTS",
+    tags=["Voz"],
+    response_class=Response,
+)
+async def tts(
+    texto: str = Query(..., min_length=1, max_length=1500, description="Texto a ser sintetizado"),
+    genero: str = Query("feminina", description="Gênero da voz: 'feminina' ou 'masculina'"),
+):
+    """
+    Recebe um texto e retorna o áudio MP3 sintetizado usando Microsoft Edge TTS.
+
+    - **texto**: texto a ser lido (máximo 1500 caracteres)
+    - **genero**: `feminina` → pt-BR-FranciscaNeural | `masculina` → pt-BR-AntonioNeural
+    """
+    if genero not in ("feminina", "masculina"):
+        raise HTTPException(status_code=400, detail="genero deve ser 'feminina' ou 'masculina'.")
+
+    try:
+        audio_bytes = await tts_synthesize(text=texto, gender=genero)
+    except RuntimeError as exc:
+        logger.error("[TTS] %s", exc)
+        raise HTTPException(status_code=502, detail=str(exc))
+
+    return Response(
+        content=audio_bytes,
+        media_type="audio/mpeg",
+        headers={
+            # Sem cache — cada texto gera áudio novo
+            "Cache-Control": "no-store",
+            "Content-Length": str(len(audio_bytes)),
+        },
+    )
 
 
 # ─── Health Check ─────────────────────────────────────────────────────────────

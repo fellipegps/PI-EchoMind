@@ -26,6 +26,12 @@ sentence-transformers==3.0.1
 # langchain_huggingface é o pacote atual (langchain_community.embeddings foi depreciado)
 langchain-huggingface==0.0.3
 
+# ─── Text-to-Speech ───────────────────────────────────────────────────────────
+# gTTS (Google Text-to-Speech) — usa a API interna do Google Translate.
+# Sem chave de API, sem token. Substitui o edge-tts que retornava 403
+# por token Microsoft revogado periodicamente.
+gTTS==2.5.1
+
 # ─── Utilitários ─────────────────────────────────────────────────────────────
 python-dotenv==1.0.1
 httpx>=0.27.0,<0.28.0

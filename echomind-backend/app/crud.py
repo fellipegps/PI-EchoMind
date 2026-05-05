@@ -18,6 +18,7 @@ from .schemas import (
     ConfigUpdate,
     DashboardResponse, DailyInteraction, TopFaq,
 )
+from .middleware import latency_store
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -258,7 +259,7 @@ def get_dashboard_stats(db: Session) -> dict:
     return {
         "total_questions": total,
         "unanswered_questions": unanswered_count,
-        "avg_response_time": "~1.2s",  # Em produção: medir real com middleware
+        "avg_response_time": latency_store.summary()["avg_response_time"],
         "daily_interactions": daily,
         "top_faqs": top_faqs[:5],
     }
