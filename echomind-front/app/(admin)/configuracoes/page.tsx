@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Loader2, Copy, LinkIcon } from "lucide-react";
+import { Loader2, Copy, ExternalLink, LinkIcon } from "lucide-react";
 import { PageContainer } from "@/components/page-container";
 import { configApi } from "@/lib/api";
 import type { Config } from "@/lib/api";
@@ -61,6 +61,10 @@ export default function SettingsPage() {
   const copyUrl = () => {
     navigator.clipboard.writeText(chatbotUrl);
     toast.success("URL copiada!");
+  };
+
+  const openTotem = () => {
+    window.open(chatbotUrl, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -200,15 +204,21 @@ export default function SettingsPage() {
             <CardDescription>URL pública para acesso à interface do assistente.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <Input
                 value={chatbotUrl}
                 readOnly
-                className="font-mono text-sm bg-background border-primary/20"
+                className="font-mono text-sm bg-background border-primary/20 sm:flex-1"
               />
-              <Button variant="outline" size="icon" onClick={copyUrl} className="shrink-0">
-                <Copy className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" onClick={copyUrl} className="shrink-0">
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button onClick={openTotem} className="gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  Abrir Totem
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
