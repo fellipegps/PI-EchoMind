@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -9,18 +9,20 @@ import { authApi } from "@/lib/api";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Verifica se há token no localStorage.
-    // Se não houver, redireciona para o login antes de renderizar qualquer
-    // página do painel admin.
     if (!authApi.isAuthenticated()) {
       router.replace("/login");
+      return;
     }
+
+    authApi.me()
+      .then(() => setCheckingAuth(false))
+      .catch(() => router.replace("/login"));
   }, [router]);
 
-  // Não renderiza nada até a verificação de auth ter ocorrido no client
-  if (typeof window !== "undefined" && !authApi.isAuthenticated()) {
+  if (checkingAuth) {
     return null;
   }
 

@@ -51,6 +51,7 @@ export interface DashboardData {
   total_questions: number;
   unanswered_questions: number;
   avg_response_time: string;
+  satisfaction_rate: number;
   daily_interactions: { date: string; count: number }[];
   top_faqs: { question: string; count: number }[];
 }
@@ -59,6 +60,13 @@ export interface TokenResponse {
   access_token: string;
   token_type: string;
   email: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 // ─── Gerenciamento do token JWT ───────────────────────────────────────────────
@@ -141,6 +149,8 @@ export const authApi = {
   },
 
   isAuthenticated: () => !!tokenStore.get(),
+
+  me: () => request<AdminUser>("/auth/me"),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -266,10 +276,10 @@ export const configApi = {
 export const unansweredApi = {
   list: () => request<UnansweredQuestion[]>("/unanswered"),
 
-  convert: (id: string, answer: string) =>
+  convert: (id: string, answer: string, question?: string) =>
     request<Faq>(`/unanswered/${id}/convert`, {
       method: "POST",
-      body: JSON.stringify({ answer }),
+      body: JSON.stringify({ answer, question }),
     }),
 
   /** Remove a pergunta da lista sem criar FAQ. */
@@ -294,6 +304,19 @@ export const unansweredApi = {
 
 export const dashboardApi = {
   get: () => request<DashboardData>("/dashboard"),
+};
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  FEEDBACK DO TOTEM
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const feedbackApi = {
+  save: (data: { question: string; answer: string; helpful: boolean }) =>
+    request<{ saved: boolean; helpful: boolean }>("/feedback", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════

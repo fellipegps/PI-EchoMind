@@ -71,6 +71,9 @@ class Faq(Base):
     question     = Column(Text, nullable=False)
     answer       = Column(Text, nullable=False)
     show_on_totem = Column(Boolean, default=False, nullable=False)
+    total_consults = Column(Integer, default=0, nullable=False)
+    positive_feedback = Column(Integer, default=0, nullable=False)
+    negative_feedback = Column(Integer, default=0, nullable=False)
     created_at   = Column(DateTime, default=utc_now, nullable=False)
     updated_at   = Column(DateTime, default=utc_now, onupdate=utc_now)
 
@@ -115,6 +118,7 @@ class Interaction(Base):
     question    = Column(Text, nullable=False)
     answer      = Column(Text, nullable=True)
     was_answered = Column(Boolean, default=True, nullable=False)
+    feedback_helpful = Column(Boolean, nullable=True)
     asked_at    = Column(DateTime, default=utc_now, nullable=False)
 
 
