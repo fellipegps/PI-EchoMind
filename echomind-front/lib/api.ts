@@ -51,17 +51,58 @@ export interface DashboardData {
   total_questions: number;
   unanswered_questions: number;
   avg_response_time: string;
+  satisfaction_rate: number;
   daily_interactions: { date: string; count: number }[];
   top_faqs: { question: string; count: number }[];
 }
 
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  email: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+// ─── Gerenciamento do token JWT ───────────────────────────────────────────────
+
+const TOKEN_KEY = "echomind_token";
+
+export const tokenStore = {
+  get: (): string | null =>
+    typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null,
+  set: (token: string) =>
+    typeof window !== "undefined" && localStorage.setItem(TOKEN_KEY, token),
+  clear: () =>
+    typeof window !== "undefined" && localStorage.removeItem(TOKEN_KEY),
+};
+
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = tokenStore.get();
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+      ...init?.headers,
+    },
     ...init,
   });
+
+  // Token expirado ou inválido — redireciona para login
+  if (res.status === 401) {
+    tokenStore.clear();
+    if (typeof window !== "undefined") window.location.href = "/login";
+    throw new Error("Sessão expirada. Faça login novamente.");
+  }
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
@@ -72,6 +113,45 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const authApi = {
+  /**
+   * POST /auth/login
+   * Envia email + senha como application/x-www-form-urlencoded
+   * (formato OAuth2PasswordRequestForm exigido pelo FastAPI).
+   * Armazena o token JWT retornado no localStorage.
+   */
+  login: async (email: string, password: string): Promise<TokenResponse> => {
+    const body = new URLSearchParams({ username: email, password });
+    const res = await fetch(`${BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(detail?.detail ?? "Email ou senha incorretos.");
+    }
+
+    const data: TokenResponse = await res.json();
+    tokenStore.set(data.access_token);
+    return data;
+  },
+
+  logout: () => {
+    tokenStore.clear();
+    if (typeof window !== "undefined") window.location.href = "/login";
+  },
+
+  isAuthenticated: () => !!tokenStore.get(),
+
+  me: () => request<AdminUser>("/auth/me"),
+};
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  CHAT – streaming
@@ -129,7 +209,7 @@ export async function streamChat(
     // Stream encerrou sem nenhum token = erro silencioso no backend
     // Neste caso chama onError para o frontend mostrar algo adequado
     if (!receivedAny) {
-      onError(new Error("A IA não retornou resposta. Verifique os logs: docker compose logs api --tail=50"));
+      onError(new Error("A IA não retornou resposta. Verifique se o backend está rodando em http://localhost:8000"));
       return;
     }
 
@@ -196,8 +276,23 @@ export const configApi = {
 export const unansweredApi = {
   list: () => request<UnansweredQuestion[]>("/unanswered"),
 
-  convert: (id: string, answer: string) =>
+  convert: (id: string, answer: string, question?: string) =>
     request<Faq>(`/unanswered/${id}/convert`, {
+      method: "POST",
+      body: JSON.stringify({ answer, question }),
+    }),
+
+  /** Remove a pergunta da lista sem criar FAQ. */
+  delete: (id: string) =>
+    request<void>(`/unanswered/${id}`, { method: "DELETE" }),
+
+  /**
+   * Curadoria Human-in-the-loop:
+   * gera embedding do par (pergunta + resposta manual) e salva no pgvector,
+   * depois remove a pergunta dos pendentes. Não cria FAQ formal.
+   */
+  learn: (id: string, answer: string) =>
+    request<void>(`/unanswered/${id}/learn`, {
       method: "POST",
       body: JSON.stringify({ answer }),
     }),
@@ -209,6 +304,19 @@ export const unansweredApi = {
 
 export const dashboardApi = {
   get: () => request<DashboardData>("/dashboard"),
+};
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  FEEDBACK DO TOTEM
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const feedbackApi = {
+  save: (data: { question: string; answer: string; helpful: boolean }) =>
+    request<{ saved: boolean; helpful: boolean }>("/feedback", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════

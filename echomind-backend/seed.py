@@ -19,13 +19,19 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from sqlalchemy import text
-from app.database import SessionLocal, engine, Base, Faq, CompanyEvent, Config
+from app.database import SessionLocal, engine, Base, Faq, CompanyEvent, Config, AdminUser
+from app.auth import hash_password
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 log = logging.getLogger("seed")
 
 
 # ─── Dados de seed ────────────────────────────────────────────────────────────
+
+# Credenciais padrão para testes locais.
+# IMPORTANTE: troque a senha antes de qualquer deploy em produção.
+SEED_ADMIN_EMAIL    = os.getenv("SEED_ADMIN_EMAIL", "admin@echomind.com")
+SEED_ADMIN_PASSWORD = os.getenv("SEED_ADMIN_PASSWORD", "EchoMind@2025")
 
 SEED_CONFIG = {
     "company_name": "UniEVANGÉLICA",
@@ -157,6 +163,30 @@ SEED_EVENTS = [
 
 # ─── Funções de seed ─────────────────────────────────────────────────────────
 
+def seed_admin(db) -> AdminUser:
+    """
+    Cria o usuário administrador padrão, se ainda não existir.
+    A senha é passada pelo hash bcrypt ANTES de ser inserida no banco —
+    garantindo que o login funcione imediatamente após rodar o seed.
+    """
+    existing = db.query(AdminUser).filter(AdminUser.email == SEED_ADMIN_EMAIL).first()
+    if existing:
+        log.info("⏭️  Usuário admin já existe (%s) — pulando.", SEED_ADMIN_EMAIL)
+        return existing
+
+    admin = AdminUser(
+        id=str(uuid.uuid4()),
+        email=SEED_ADMIN_EMAIL,
+        hashed_password=hash_password(SEED_ADMIN_PASSWORD),  # bcrypt hash
+        is_active=True,
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    log.info("✅ Usuário admin criado: %s", admin.email)
+    return admin
+
+
 def seed_config(db) -> Config:
     existing = db.query(Config).first()
     if existing:
@@ -205,13 +235,13 @@ def seed_events(db) -> list[CompanyEvent]:
     return events
 
 
-def seed_rag(db, faqs: list[Faq], events: list[CompanyEvent], config: Config):
+def seed_rag(db, faqs: list[Faq], events: list[CompanyEvent]):
     """Indexa todos os registros no pgvector via RAGEngine."""
     log.info("🔄 Iniciando indexação RAG no pgvector...")
 
     try:
-        from app.rag_engine import RAGEngine
-        engine_rag = RAGEngine(db)
+        from app.rag_engine import get_rag_engine
+        engine_rag = get_rag_engine(db)
 
         for faq in faqs:
             try:
@@ -255,19 +285,26 @@ def main():
 
     db = SessionLocal()
     try:
-        config = seed_config(db)
+        seed_admin(db)
+        seed_config(db)
         faqs   = seed_faqs(db)
         events = seed_events(db)
-        seed_rag(db, faqs, events, config)
+        seed_rag(db, faqs, events)
     finally:
         db.close()
 
     log.info("🎉 Seed concluído com sucesso!")
     log.info("")
+    log.info("   ┌─────────────────────────────────────────┐")
+    log.info("   │         CREDENCIAIS DO ADMIN             │")
+    log.info("   │  Email : %s  │", SEED_ADMIN_EMAIL)
+    log.info("   │  Senha : %s           │", SEED_ADMIN_PASSWORD)
+    log.info("   └─────────────────────────────────────────┘")
+    log.info("")
     log.info("   Próximos passos:")
-    log.info("   1. Acesse http://localhost:8000/docs para explorar a API")
-    log.info("   2. Teste o chat: POST /chat { 'message': 'Como faço minha matrícula?' }")
-    log.info("   3. Veja as FAQs: GET /faqs")
+    log.info("   1. Acesse http://localhost:3000/login e entre com as credenciais acima")
+    log.info("   2. Explore a API em http://localhost:8000/docs")
+    log.info("   3. Teste o chat: POST /chat { 'message': 'Como faço minha matrícula?' }")
 
 
 if __name__ == "__main__":

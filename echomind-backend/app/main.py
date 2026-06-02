@@ -22,7 +22,7 @@ from .schemas import (
     EventCreate, EventUpdate, EventResponse,
     ConfigUpdate, ConfigResponse,
     UnansweredQuestionResponse, ConvertToFaqRequest,
-    DashboardResponse,
+    DashboardResponse, FeedbackRequest, FeedbackResponse,
     TokenResponse, AdminUserResponse,
 )
 from . import crud
@@ -89,6 +89,7 @@ router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 router_tts = APIRouter(prefix="/tts", tags=["Voz"])
+router_feedback = APIRouter(prefix="/feedback", tags=["Feedback"])
 router_system = APIRouter(tags=["Sistema"])
 
 
@@ -146,6 +147,18 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     question = request.message.strip()
     if not question:
         raise HTTPException(status_code=400, detail="Mensagem vazia.")
+
+    cached = crud.find_cached_faq_answer(question)
+    if cached:
+        faq_id, cached_answer = cached
+        crud.increment_faq_consult(db, faq_id)
+
+        async def cached_stream_generator():
+            for char in cached_answer:
+                yield char
+            crud.save_interaction(db, question=question, answer=cached_answer)
+
+        return StreamingResponse(cached_stream_generator(), media_type="text/plain")
 
     # Inicializa o RAGEngine ANTES de abrir o stream.
     # Erros de configuração (GROQ_API_KEY ausente, etc.) geram HTTP 503
@@ -360,7 +373,7 @@ def convert_to_faq(
     _: AdminUser = Depends(get_current_user),
 ):
     """Converte uma pergunta não respondida em FAQ oficial e a indexa no RAG."""
-    faq = crud.convert_unanswered_to_faq(db, question_id, payload.answer)
+    faq = crud.convert_unanswered_to_faq(db, question_id, payload.answer, payload.question)
     if not faq:
         raise HTTPException(status_code=404, detail="Pergunta não encontrada.")
     rag.index_faq(faq)
@@ -408,6 +421,25 @@ def get_dashboard(
     stats["avg_response_time"] = real_avg
     return stats
 
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  FEEDBACK  /feedback
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router_feedback.post("", response_model=FeedbackResponse, status_code=201)
+def save_response_feedback(
+    payload: FeedbackRequest,
+    db: Session = Depends(get_db),
+):
+    """Registra avaliação simples do usuário sobre a resposta do totem."""
+    crud.save_feedback(
+        db,
+        question=payload.question.strip(),
+        answer=payload.answer.strip(),
+        helpful=payload.helpful,
+    )
+    return FeedbackResponse(saved=True, helpful=payload.helpful)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  TTS  /tts
@@ -468,5 +500,6 @@ app.include_router(router_events)
 app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)
+app.include_router(router_feedback)
 app.include_router(router_tts)
 app.include_router(router_system)

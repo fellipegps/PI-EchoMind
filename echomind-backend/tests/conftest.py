@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import uuid
 from datetime import datetime
 from typing import AsyncGenerator, Generator
@@ -24,6 +25,8 @@ from sqlalchemy.orm import sessionmaker, Session
 # ─── Patch pgvector ANTES de qualquer import do app ──────────────────────────
 # SQLite não tem Vector — substituímos por Text para os testes
 import sqlalchemy.types as types
+
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 
 class FakeVector(types.TypeDecorator):
@@ -51,7 +54,8 @@ import pgvector.sqlalchemy as pgvec_module
 pgvec_module.Vector = FakeVector
 
 # Agora importa o app (já com o patch aplicado)
-from app.database import Base, get_db
+from app.auth import get_current_user
+from app.database import AdminUser, Base, get_db
 from app.main import app
 
 # ─── Engine SQLite em memória ─────────────────────────────────────────────────
@@ -107,6 +111,12 @@ def client(db: Session) -> Generator[TestClient, None, None]:
             pass
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = lambda: AdminUser(
+        id="test-admin",
+        email="admin@test.local",
+        hashed_password="",
+        is_active=True,
+    )
 
     # Mock do RAGEngine para não precisar do Ollama
     with patch("app.main.get_rag_engine") as mock_engine_factory:

@@ -10,6 +10,7 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+from dotenv import load_dotenv
 
 # ─── Garante que o pacote `app` seja importável ───────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -18,12 +19,18 @@ from app.database import Base  # noqa: E402 — importa após ajuste do path
 
 # ─── Lê configuração do alembic.ini ──────────────────────────────────────────
 config = context.config
+load_dotenv()
 
 # Sobrescreve a URL com a variável de ambiente (prioridade sobre alembic.ini)
-database_url = os.getenv(
-    "DATABASE_URL",
-    "postgresql://echomind:echomind@localhost:5432/echomind",
-)
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    raise RuntimeError(
+        "DATABASE_URL não configurada. Defina no .env com a connection string do Supabase."
+    )
+
+if database_url.startswith("postgresql") and "sslmode" not in database_url:
+    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
+
 config.set_main_option("sqlalchemy.url", database_url)
 
 # Configura logging conforme definido no alembic.ini

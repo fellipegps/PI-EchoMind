@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { MessageCircle, MessageCircleQuestion, Clock } from "lucide-react";
+import { MessageCircle, MessageCircleQuestion, Clock, ThumbsUp } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
@@ -26,6 +26,7 @@ export default function DashboardPage() {
           total_questions: 0,
           unanswered_questions: 0,
           avg_response_time: "—",
+          satisfaction_rate: 0,
           daily_interactions: [],
           top_faqs: [],
         });
@@ -55,7 +56,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Métricas ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="border-border bg-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -93,6 +94,21 @@ export default function DashboardPage() {
               </div>
               <div className="p-3 rounded-full bg-green-500/10">
                 <Clock className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
+        <Card className="border-border bg-card">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Satisfação</p>
+                <p className="text-3xl font-bold mt-1">{data?.satisfaction_rate ?? 0}%</p>
+              </div>
+              <div className="p-3 rounded-full bg-primary/10">
+                <ThumbsUp className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>

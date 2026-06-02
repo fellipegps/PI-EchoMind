@@ -39,6 +39,9 @@ class FaqResponse(BaseModel):
     question: str
     answer: str
     show_on_totem: bool
+    total_consults: int = 0
+    positive_feedback: int = 0
+    negative_feedback: int = 0
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -121,13 +124,25 @@ class UnansweredQuestionResponse(BaseModel):
     count: int
     first_asked: datetime
     last_asked: datetime
-    similar_questions: list[str] = []
+    similar_questions: list[str] = Field(default_factory=list)
 
     model_config = {"from_attributes": True}
 
 
 class ConvertToFaqRequest(BaseModel):
     answer: str = Field(..., min_length=5, max_length=4000)
+    question: Optional[str] = Field(None, min_length=5, max_length=500)
+
+
+class FeedbackRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=2000)
+    answer: str = Field(..., min_length=1, max_length=8000)
+    helpful: bool
+
+
+class FeedbackResponse(BaseModel):
+    saved: bool
+    helpful: bool
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -148,5 +163,27 @@ class DashboardResponse(BaseModel):
     total_questions: int
     unanswered_questions: int
     avg_response_time: str
+    satisfaction_rate: float
     daily_interactions: list[DailyInteraction]
     top_faqs: list[TopFaq]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  AUTH
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TokenResponse(BaseModel):
+    """Resposta do POST /auth/login."""
+    access_token: str
+    token_type: str = "bearer"
+    email: str
+
+
+class AdminUserResponse(BaseModel):
+    """Dados públicos do usuário autenticado (sem hashed_password)."""
+    id: str
+    email: str
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

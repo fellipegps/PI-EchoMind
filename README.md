@@ -1,282 +1,186 @@
-# EchoMind — Totem de IA Institucional
+# EchoMind - Totem de IA Institucional
 
-EchoMind é um sistema de **totem interativo com IA** para instituições de ensino e empresas. Ele permite que qualquer pessoa faça perguntas por voz ou texto e receba respostas baseadas exclusivamente nas informações cadastradas pela equipe administrativa — sem invenções, sem improviso.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        EchoMind                             │
-│                                                             │
-│  Totem Público          Painel Admin         API + IA       │
-│  ┌──────────────┐      ┌─────────────┐      ┌───────────┐  │
-│  │ Voz / Texto  │─────▶│ FAQs        │─────▶│  Groq     │  │
-│  │ Perguntas    │      │ Eventos     │      │  llama-3.3│  │
-│  │ Streaming    │◀─────│ Config      │◀─────│  70b      │  │
-│  └──────────────┘      └─────────────┘      └─────┬─────┘  │
-│                                                    │        │
-│                                             ┌──────▼──────┐ │
-│                                             │  pgvector   │ │
-│                                             │  PostgreSQL │ │
-│                                             └─────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
+EchoMind e um sistema de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, pgvector, LangChain, Groq, FastEmbed e gTTS para responder perguntas com base na base de conhecimento cadastrada.
 
 ## Estrutura do projeto
 
-```
-echomind/
-├── echomind-backend-perf/   ← API FastAPI (Python)
-│   ├── app/
-│   │   ├── main.py          → rotas FastAPI
-│   │   ├── rag_engine.py    → LangChain + Groq + pgvector
-│   │   ├── database.py      → modelos ORM (SQLAlchemy)
-│   │   ├── schemas.py       → contratos Pydantic v2
-│   │   ├── crud.py          → operações de banco
-│   │   └── middleware.py    → métricas de latência
-│   ├── docker-compose.yml
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── .env.example
-│
-└── echomind-front-perf/     ← Interface Next.js (TypeScript)
-    ├── app/
-    │   ├── (admin)/         → painel administrativo
-    │   └── (totem público)/ → interface de voz + chat
-    └── lib/api.ts           → todas as chamadas ao backend
+```text
+PI-EchoMind-auth/
+├── echomind-backend/   # API FastAPI
+└── echomind-front/     # Frontend Next.js
 ```
 
----
+## Como rodar localmente
 
-## Pré-requisitos
+### Pre-requisitos
 
-| Ferramenta     | Versão   | Para que serve                           |
-|----------------|----------|------------------------------------------|
-| Docker         | 24+      | rodar Postgres + API                     |
-| Docker Compose | v2       | orquestrar os containers                 |
-| Node.js        | 18+      | rodar o frontend Next.js                 |
-| pnpm           | 8+       | gerenciador de pacotes do frontend       |
-| Conta Groq     | gratuita | gerar respostas da IA via API            |
+- Python 3.12
+- Conta no Supabase com projeto criado
+- Chave de API do Groq em console.groq.com
 
-> **Instale o pnpm:** `npm install -g pnpm`  
-> **Crie sua conta Groq:** [console.groq.com](https://console.groq.com) → API Keys → Create key
+> O backend deve ser executado com Python 3.12. Se sua maquina tiver outra
+> versao do Python instalada, como Python 3.14, instale o Python 3.12 em
+> paralelo e crie o ambiente virtual usando `py -3.12`.
 
----
+### Configuracao
 
-## Variáveis de ambiente
-
-### Backend (`echomind-backend-perf/.env`)
-
-Copie o arquivo de exemplo e preencha os valores:
+1. Entrar na pasta do backend:
 
 ```bash
-cd echomind-backend-perf
+cd echomind-backend
+```
+
+2. Criar um ambiente virtual com Python 3.12:
+
+No Windows:
+
+```powershell
+py -3.12 -m venv .venv
+```
+
+No Linux/macOS:
+
+```bash
+python3.12 -m venv .venv
+```
+
+3. Ativar o ambiente virtual:
+
+No Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+No Windows CMD:
+
+```cmd
+.venv\Scripts\activate.bat
+```
+
+No Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Depois de ativar, confira se a versao correta esta em uso:
+
+```bash
+python --version
+```
+
+O retorno deve ser `Python 3.12.x`.
+
+4. Instalar dependencias:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+5. Copiar e preencher o `.env`:
+
+```bash
 cp .env.example .env
 ```
 
-| Variável               | Obrigatório | Descrição                                             |
-|------------------------|-------------|-------------------------------------------------------|
-| `GROQ_API_KEY`         | ✅ Sim       | Chave da API Groq — obtenha em console.groq.com       |
-| `GROQ_LLM_MODEL`       | Não         | Modelo Groq (padrão: `llama-3.3-70b-specdec`)         |
-| `POSTGRES_USER`        | Não         | Usuário do banco (padrão: `echomind`)                 |
-| `POSTGRES_PASSWORD`    | ✅ Sim       | Senha do banco — **troque em produção**               |
-| `POSTGRES_DB`          | Não         | Nome do banco (padrão: `echomind`)                    |
-| `EMBED_MODEL`          | Não         | Modelo de embeddings sentence-transformers (padrão: `paraphrase-multilingual-mpnet-base-v2`) |
-| `EMBEDDING_DIM`        | Não         | Dimensão do vetor — 768 para o modelo padrão          |
-| `SIMILARITY_THRESHOLD` | Não         | Distância coseno máxima aceita (padrão: `0.70`)       |
-| `TOP_K_DOCS`           | Não         | Documentos recuperados por pergunta (padrão: `3`)     |
+Preencha `DATABASE_URL` com a connection string do Supabase e `GROQ_API_KEY` com sua chave.
 
-**Exemplo de `.env` mínimo funcional:**
-```env
-GROQ_API_KEY=gsk_sua_chave_aqui
-POSTGRES_PASSWORD=uma_senha_forte
-```
-
-### Frontend (`echomind-front-perf/.env.local`)
-
-O arquivo já existe com o valor padrão para desenvolvimento local:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Altere apenas se o backend estiver em outro endereço.
-
----
-
-## Rodando o Backend
-
-### 1. Configure o `.env`
+6. Rodar as migrations:
 
 ```bash
-cd echomind-backend-perf
-cp .env.example .env
-# Edite .env e preencha GROQ_API_KEY e POSTGRES_PASSWORD
+alembic upgrade head
 ```
 
-### 2. Suba os containers
+7. Popular o banco com dados iniciais e reindexar o pgvector:
 
 ```bash
-docker compose up -d
+python seed.py
 ```
 
-Aguarde os serviços ficarem prontos:
+8. Iniciar a API:
 
 ```bash
-docker compose ps
-# NAME               STATUS
-# echomind_db        Up (healthy)
-# echomind_api       Up (healthy)
+uvicorn app.main:app --reload
 ```
 
-> O modelo de embeddings (`sentence-transformers`) é baixado automaticamente
-> pelo container da API na primeira inicialização (~420 MB). Não é necessário
-> nenhum servidor externo de embeddings.
+### Endpoints
 
-### 3. Popule com dados iniciais (opcional)
+Acesse [http://localhost:8000/docs](http://localhost:8000/docs) para a documentacao interativa.
+
+## Variaveis de ambiente principais
+
+| Variavel | Descricao |
+| --- | --- |
+| `DATABASE_URL` | URI PostgreSQL do Supabase. O backend adiciona `sslmode=require` automaticamente quando ausente. |
+| `JWT_SECRET` | Chave usada para assinar tokens JWT. |
+| `JWT_EXPIRE_HOURS` | Validade do token JWT em horas. |
+| `SEED_ADMIN_EMAIL` | Email do admin criado pelo `seed.py`. |
+| `SEED_ADMIN_PASSWORD` | Senha do admin criado pelo `seed.py`. |
+| `GROQ_API_KEY` | Chave da API Groq. |
+| `GROQ_LLM_MODEL` | Modelo Groq usado no chat. |
+| `EMBED_MODEL` | Modelo local de embeddings. |
+| `EMBEDDING_DIM` | Dimensao do vetor no pgvector. |
+| `SIMILARITY_THRESHOLD` | Distancia maxima aceita no retrieval. |
+| `TOP_K_DOCS` | Quantidade de documentos recuperados por pergunta. |
+
+## Autenticacao
+
+As rotas administrativas usam JWT Bearer. O login e feito em `POST /auth/login` com `application/x-www-form-urlencoded`, usando `username` como email e `password` como senha.
+
+Credenciais padrao criadas pelo seed:
+
+| Campo | Valor |
+| --- | --- |
+| Email | `admin@echomind.com` |
+| Senha | `EchoMind@2025` |
+
+## Rotas principais
+
+| Metodo | Rota | Descricao |
+| --- | --- | --- |
+| `POST` | `/auth/login` | Login administrativo |
+| `GET` | `/auth/me` | Usuario autenticado |
+| `POST` | `/chat` | Chat com streaming |
+| `GET/POST/PUT/DELETE` | `/faqs` | CRUD de FAQs |
+| `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos |
+| `GET/PUT` | `/config` | Configuracoes institucionais |
+| `GET/DELETE` | `/unanswered` | Perguntas nao respondidas |
+| `POST` | `/unanswered/{id}/convert` | Converter pergunta em FAQ |
+| `POST` | `/unanswered/{id}/learn` | Ensinar resposta ao RAG |
+| `GET` | `/dashboard` | Metricas e estatisticas |
+| `GET` | `/tts` | Sintese de voz MP3 |
+| `GET` | `/health` | Health check |
+| `GET` | `/metrics` | Metricas internas |
+
+## Frontend
 
 ```bash
-docker compose exec api python seed.py
-```
-
-Cria FAQs e eventos de exemplo prontos para o chat responder.
-
-### 4. Verifique que está funcionando
-
-```bash
-# Health check
-curl http://localhost:8000/health
-# → {"status":"ok","service":"EchoMind API"}
-
-# Teste de chat com streaming
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Como faço minha matrícula?"}' \
-  --no-buffer
-```
-
-### 5. Acesse a documentação interativa
-
-👉 [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
-## Rodando o Frontend
-
-### 1. Instale as dependências
-
-```bash
-cd echomind-front-perf
+cd echomind-front
 pnpm install
-```
-
-### 2. Rode em modo desenvolvimento
-
-```bash
+copy .env.local.example .env.local
 pnpm dev
 ```
 
-Acesse:
-- **Painel Admin:** [http://localhost:3000/dashboard](http://localhost:3000/dashboard)
-- **Totem Público:** [http://localhost:3000/agente-publico](http://localhost:3000/agente-publico)
+O frontend espera a API em `http://localhost:8000` por padrao.
 
-### 3. Build para produção
+## Ordem Recomendada Apos Atualizar Embeddings
 
 ```bash
-pnpm build
-pnpm start
+cd echomind-backend
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+alembic upgrade head
+python seed.py
+uvicorn app.main:app --reload
 ```
 
----
-
-## Como o streaming funciona
-
-```
-Frontend (Next.js)          Backend (FastAPI)         Groq API
-      │                           │                       │
-      │  POST /chat               │                       │
-      │──────────────────────────▶│                       │
-      │                           │  ChatGroq.astream()   │
-      │                           │──────────────────────▶│
-      │         token "Ol"        │◀── chunk ─────────────│
-      │◀──────────────────────────│                       │
-      │         token "á"         │◀── chunk ─────────────│
-      │◀──────────────────────────│                       │
-      │      stream encerrado     │◀── [DONE] ────────────│
-      │◀──────────────────────────│                       │
-```
-
----
-
-## Telas e endpoints
-
-| Tela                   | URL no frontend           | Endpoint no backend              |
-|------------------------|---------------------------|----------------------------------|
-| Dashboard              | `/dashboard`              | `GET /dashboard`                 |
-| Testar Agente          | `/agente`                 | `POST /chat` (streaming)         |
-| Base de Conhecimento   | `/base-de-conhecimento`   | `GET/POST/PUT/DELETE /faqs`      |
-| Eventos                | `/base-de-conhecimento`   | `GET/POST/PUT/DELETE /events`    |
-| Configurações          | `/configuracoes`          | `GET/PUT /config`                |
-| Não Respondidas        | `/nao-respondidas`        | `GET /unanswered`                |
-| Totem Público          | `/agente-publico`         | `POST /chat` + `GET /faqs/totem` |
-
----
-
-## Comandos úteis
+Em outro terminal:
 
 ```bash
-# ── Backend ──────────────────────────────────────────────────────────────────
-
-# Ver logs em tempo real
-docker compose -f echomind-backend-perf/docker-compose.yml logs api -f
-
-# Reiniciar só a API (sem perder dados)
-docker compose -f echomind-backend-perf/docker-compose.yml restart api
-
-# Parar tudo sem apagar dados
-docker compose -f echomind-backend-perf/docker-compose.yml stop
-
-# Apagar tudo incluindo banco de dados
-docker compose -f echomind-backend-perf/docker-compose.yml down -v
-
-# ── Frontend ──────────────────────────────────────────────────────────────────
-
-cd echomind-front-perf && pnpm install
+cd echomind-front
 pnpm dev
-pnpm build && pnpm start
 ```
-
----
-
-## Troubleshooting
-
-**`RuntimeError: GROQ_API_KEY não definida`**
-```bash
-cat echomind-backend-perf/.env | grep GROQ_API_KEY
-# Se estiver vazia, edite o .env e reinicie:
-docker compose -f echomind-backend-perf/docker-compose.yml restart api
-```
-
-**IA responde "Não tenho informação" para tudo**
-```bash
-# Veja as distâncias nos logs — se estiverem acima do threshold, ajuste
-docker compose -f echomind-backend-perf/docker-compose.yml logs api | grep "[RAG]"
-# No .env: aumente SIMILARITY_THRESHOLD=0.80 e reinicie
-```
-
-**IA inventa informações**
-```bash
-# Diminua o threshold para aceitar apenas docs muito próximos da pergunta
-# No .env: SIMILARITY_THRESHOLD=0.50
-docker compose -f echomind-backend-perf/docker-compose.yml restart api
-```
-
-**Embeddings falham na primeira inicialização**
-```bash
-# O modelo sentence-transformers é baixado na primeira subida (~420 MB).
-# Verifique se há conexão com a internet e espaço em disco, depois reinicie:
-docker compose -f echomind-backend-perf/docker-compose.yml restart api
-```
-
-**Reconhecimento de voz não funciona no totem**  
-O Web Speech API exige **HTTPS** ou `localhost`. Em produção, sirva o frontend com HTTPS (Caddy ou nginx + Let's Encrypt).

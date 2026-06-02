@@ -5,18 +5,18 @@ crud.py – Operações de banco de dados para todas as entidades.
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from datetime import datetime, timedelta
 from typing import Optional
 
 from sqlalchemy import func, desc
 from sqlalchemy.orm import Session
 
-from .database import Faq, CompanyEvent, Config, Interaction, UnansweredQuestion
+from .database import Faq, CompanyEvent, Config, Interaction, UnansweredQuestion, utc_now
 from .schemas import (
     FaqCreate, FaqUpdate,
     EventCreate, EventUpdate,
     ConfigUpdate,
-    DashboardResponse, DailyInteraction, TopFaq,
 )
 from .middleware import latency_store
 
@@ -42,6 +42,7 @@ def create_faq(db: Session, payload: FaqCreate) -> Faq:
     db.add(faq)
     db.commit()
     db.refresh(faq)
+    get_cached_faq_answers.cache_clear()
     return faq
 
 
@@ -51,13 +52,14 @@ def update_faq(db: Session, faq_id: str, payload: FaqUpdate) -> Optional[Faq]:
         return None
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(faq, field, value)
-    faq.updated_at = datetime.utcnow()
+    faq.updated_at = utc_now()
     db.commit()
     db.refresh(faq)
+    get_cached_faq_answers.cache_clear()
     return faq
 
 
-def toggle_faq_totem(db: Session, faq_id: str):
+def toggle_faq_totem(db: Session, faq_id: str) -> Faq | str | None:
     """
     Ativa/desativa show_on_totem.
     Retorna 'limit_exceeded' se já há 4 ativas e a tentativa é de ativar.
@@ -72,7 +74,7 @@ def toggle_faq_totem(db: Session, faq_id: str):
             return "limit_exceeded"
 
     faq.show_on_totem = not faq.show_on_totem
-    faq.updated_at = datetime.utcnow()
+    faq.updated_at = utc_now()
     db.commit()
     db.refresh(faq)
     return faq
@@ -84,7 +86,46 @@ def delete_faq(db: Session, faq_id: str) -> bool:
         return False
     db.delete(faq)
     db.commit()
+    get_cached_faq_answers.cache_clear()
     return True
+
+
+@lru_cache(maxsize=1)
+def get_cached_faq_answers() -> tuple[tuple[str, str, str], ...]:
+    """Cache simples das FAQs mais consultadas para respostas instantâneas no totem."""
+    from .database import SessionLocal
+    db = SessionLocal()
+    try:
+        rows = (
+            db.query(Faq)
+            .order_by(desc(Faq.total_consults), desc(Faq.created_at))
+            .limit(10)
+            .all()
+        )
+        return tuple((row.id, row.question, row.answer) for row in rows)
+    finally:
+        db.close()
+
+
+def find_cached_faq_answer(question: str) -> Optional[tuple[str, str]]:
+    """Retorna (faq_id, answer) quando a pergunta bate com uma FAQ frequente."""
+    normalized = question.strip().lower()
+    if len(normalized) < 4:
+        return None
+    for faq_id, faq_question, faq_answer in get_cached_faq_answers():
+        fq = faq_question.strip().lower()
+        if normalized == fq or normalized in fq or fq in normalized:
+            return faq_id, faq_answer
+    return None
+
+
+def increment_faq_consult(db: Session, faq_id: str) -> None:
+    faq = db.query(Faq).filter(Faq.id == faq_id).first()
+    if not faq:
+        return
+    faq.total_consults = (faq.total_consults or 0) + 1
+    db.commit()
+    get_cached_faq_answers.cache_clear()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -114,7 +155,7 @@ def update_event(db: Session, event_id: str, payload: EventUpdate) -> Optional[C
         return None
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(event, field, value)
-    event.updated_at = datetime.utcnow()
+    event.updated_at = utc_now()
     db.commit()
     db.refresh(event)
     return event
@@ -145,7 +186,7 @@ def upsert_config(db: Session, payload: ConfigUpdate) -> Config:
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(cfg, field, value)
-    cfg.updated_at = datetime.utcnow()
+    cfg.updated_at = utc_now()
     db.commit()
     db.refresh(cfg)
     return cfg
@@ -157,7 +198,14 @@ def upsert_config(db: Session, payload: ConfigUpdate) -> Config:
 
 def save_interaction(db: Session, question: str, answer: str) -> Interaction:
     """Persiste uma interação completa para uso no Dashboard."""
-    was_answered = bool(answer) and "Não tenho informações" not in answer
+    # Detecta as duas formas de resposta negativa:
+    # 1. Fallback direto do RAG (sem docs): "Não tenho informações suficientes..."
+    # 2. Resposta do LLM quando não encontra contexto: "Não tenho essa informação..."
+    _not_answered_markers = (
+        "Não tenho informações",   # cobre ambos os fallbacks
+        "não tenho informações",
+    )
+    was_answered = bool(answer) and not any(m in answer for m in _not_answered_markers)
     interaction = Interaction(
         question=question,
         answer=answer,
@@ -195,14 +243,39 @@ def get_unanswered_questions(db: Session) -> list[dict]:
     return result
 
 
-def convert_unanswered_to_faq(db: Session, question_id: str, answer: str) -> Optional[Faq]:
+def get_unanswered_by_id(db: Session, question_id: str) -> Optional[dict]:
+    """Retorna um único registro de pergunta não respondida como dict."""
+    uq = db.query(UnansweredQuestion).filter(UnansweredQuestion.id == question_id).first()
+    if not uq:
+        return None
+    return {
+        "id": uq.id,
+        "canonical_question": uq.canonical_question,
+        "count": uq.count,
+        "first_asked": uq.first_asked,
+        "last_asked": uq.last_asked,
+        "similar_questions": json.loads(uq.similar_questions or "[]"),
+    }
+
+
+def delete_unanswered_question(db: Session, question_id: str) -> bool:
+    """Remove permanentemente uma pergunta pendente pelo ID."""
+    uq = db.query(UnansweredQuestion).filter(UnansweredQuestion.id == question_id).first()
+    if not uq:
+        return False
+    db.delete(uq)
+    db.commit()
+    return True
+
+
+def convert_unanswered_to_faq(db: Session, question_id: str, answer: str, question: Optional[str] = None) -> Optional[Faq]:
     uq = db.query(UnansweredQuestion).filter(UnansweredQuestion.id == question_id).first()
     if not uq:
         return None
 
     # Cria FAQ
     faq = Faq(
-        question=uq.canonical_question,
+        question=(question or uq.canonical_question).strip(),
         answer=answer,
         show_on_totem=False,
     )
@@ -212,7 +285,20 @@ def convert_unanswered_to_faq(db: Session, question_id: str, answer: str) -> Opt
     uq.converted = True
     db.commit()
     db.refresh(faq)
+    get_cached_faq_answers.cache_clear()
     return faq
+
+
+def save_feedback(db: Session, question: str, answer: str, helpful: bool) -> Interaction:
+    interaction = Interaction(
+        question=question,
+        answer=answer,
+        was_answered=True,
+        feedback_helpful=helpful,
+    )
+    db.add(interaction)
+    db.commit()
+    return interaction
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -228,7 +314,7 @@ def get_dashboard_stats(db: Session) -> dict:
     )
 
     # Interações dos últimos 7 dias
-    today = datetime.utcnow().date()
+    today = utc_now().date()
     daily = []
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
@@ -241,25 +327,33 @@ def get_dashboard_stats(db: Session) -> dict:
         )
         daily.append({"date": day.strftime("%d/%m"), "count": count})
 
-    # Top FAQs (por frequência nas interações – match simples por substring)
-    faqs = db.query(Faq).order_by(desc(Faq.created_at)).limit(5).all()
+    # Top FAQs por consultas diretas no cache/FAQ. Caso ainda não existam
+    # consultas registradas, mantém fallback por correspondência textual.
+    faqs = db.query(Faq).order_by(desc(Faq.total_consults), desc(Faq.created_at)).limit(5).all()
     top_faqs = []
     for faq in faqs:
-        hits = (
-            db.query(Interaction)
-            .filter(func.lower(Interaction.question).contains(
-                faq.question[:30].lower()
-            ))
-            .count()
-        )
+        hits = faq.total_consults or 0
+        if hits == 0:
+            hits = (
+                db.query(Interaction)
+                .filter(func.lower(Interaction.question).contains(
+                    faq.question[:30].lower()
+                ))
+                .count()
+            )
         top_faqs.append({"question": faq.question[:50], "count": hits or 0})
 
     top_faqs.sort(key=lambda x: x["count"], reverse=True)
+
+    feedback_total = db.query(Interaction).filter(Interaction.feedback_helpful.isnot(None)).count()
+    feedback_positive = db.query(Interaction).filter(Interaction.feedback_helpful == True).count()
+    satisfaction_rate = round((feedback_positive / feedback_total) * 100, 1) if feedback_total else 0.0
 
     return {
         "total_questions": total,
         "unanswered_questions": unanswered_count,
         "avg_response_time": latency_store.summary()["avg_response_time"],
+        "satisfaction_rate": satisfaction_rate,
         "daily_interactions": daily,
         "top_faqs": top_faqs[:5],
     }

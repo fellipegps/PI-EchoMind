@@ -68,6 +68,7 @@ os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", _MODEL_CACHE)
 # 0.70 (valor antigo) era tolerante demais — aprovava docs irrelevantes,
 # fazendo o LLM sempre receber "contexto" e nunca registrar não respondidas.
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.45"))
+UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "0.38"))
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
 RAG_WARMUP_ENABLED   = os.getenv("RAG_WARMUP_ENABLED", "true").lower() not in {
     "0",
@@ -250,7 +251,7 @@ def _load_config_cached(db: Session) -> dict:
 
 # ─── Retrieval com threshold manual ──────────────────────────────────────────
 
-async def _retrieve_docs(question: str) -> list[Document]:
+async def _retrieve_docs(question: str) -> tuple[list[Document], float | None]:
     """
     Busca os TOP_K_DOCS documentos mais próximos e filtra pela distância
     coseno bruta do pgvector — mais confiável que o score normalizado do
@@ -275,7 +276,8 @@ async def _retrieve_docs(question: str) -> list[Document]:
         logger.info("[RAG] Nenhum doc abaixo de %.2f. Menor distância: %.3f",
                     SIMILARITY_THRESHOLD, nearest)
 
-    return [doc for doc, _ in approved]
+    nearest_distance = approved[0][1] if approved else (results[0][1] if results else None)
+    return [doc for doc, _ in approved], nearest_distance
 
 
 # ─── RAGEngine ────────────────────────────────────────────────────────────────
@@ -300,7 +302,7 @@ class RAGEngine:
         2. O LLM recebeu documentos mas respondeu negativamente — significa
            que os docs eram irrelevantes (falsos positivos do retriever).
         """
-        docs = await _retrieve_docs(question)
+        docs, nearest_distance = await _retrieve_docs(question)
 
         if not docs:
             # Caso 1: retriever não encontrou nada relevante
@@ -333,6 +335,11 @@ class RAGEngine:
         )
 
         full_answer = ""
+        if nearest_distance is not None and nearest_distance >= UNCERTAIN_DISTANCE_THRESHOLD:
+            prefix = "Não tenho certeza, mas com base nas informações encontradas: "
+            full_answer += prefix
+            yield prefix
+
         async for chunk in self._llm.astream([
             SystemMessage(content=system_msg),
             HumanMessage(content=question),

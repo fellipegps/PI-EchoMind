@@ -1,37 +1,35 @@
-# ─── Framework Web ────────────────────────────────────────────────────────────
+# Web framework
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 python-multipart==0.0.9
 
-# ─── Pydantic v2 ──────────────────────────────────────────────────────────────
-pydantic==2.7.1
+# Pydantic v2
+pydantic==2.7.4
 pydantic-settings==2.2.1
 
-# ─── Banco de Dados ───────────────────────────────────────────────────────────
+# Database
 sqlalchemy==2.0.30
-psycopg2-binary==2.9.9
+psycopg2-binary
 pgvector==0.2.5
 alembic==1.13.1
 
-# ─── LangChain ────────────────────────────────────────────────────────────────
+# LangChain
 langchain==0.2.17
 langchain-community==0.2.19
 langchain-core==0.2.43
 langchain-groq==0.1.9
 
-# ─── Embeddings locais (sem servidor externo) ─────────────────────────────────
-# sentence-transformers gera vetores de 768 dims localmente, dentro do container,
-# sem dependência de Ollama ou qualquer serviço externo.
-sentence-transformers==3.0.1
-# langchain_huggingface é o pacote atual (langchain_community.embeddings foi depreciado)
-langchain-huggingface==0.0.3
+# Local embeddings without torch, safe on Windows
+fastembed==0.4.2; python_version < "3.13"
+fastembed==0.8.0; python_version >= "3.13"
 
-# ─── Text-to-Speech ───────────────────────────────────────────────────────────
-# gTTS (Google Text-to-Speech) — usa a API interna do Google Translate.
-# Sem chave de API, sem token. Substitui o edge-tts que retornava 403
-# por token Microsoft revogado periodicamente.
+# Text-to-speech
 gTTS==2.5.1
 
-# ─── Utilitários ─────────────────────────────────────────────────────────────
+# Authentication
+bcrypt==4.1.3
+python-jose[cryptography]==3.3.0
+
+# Utilities
 python-dotenv==1.0.1
 httpx>=0.27.0,<0.28.0

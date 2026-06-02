@@ -45,7 +45,11 @@ async def synthesize(text: str, gender: str = "feminina") -> bytes:
     if not text:
         raise RuntimeError("Texto vazio — nada a sintetizar.")
 
-    logger.info("[TTS] Sintetizando %d chars (gTTS pt-BR)", len(text))
+    if gender not in {"feminina", "masculina"}:
+        logger.warning("[TTS] Gênero inválido '%s'. Usando voz feminina como fallback.", gender)
+        gender = "feminina"
+
+    logger.info("[TTS] Sintetizando %d chars (gTTS pt-BR, voz=%s)", len(text), gender)
 
     loop = asyncio.get_running_loop()
 

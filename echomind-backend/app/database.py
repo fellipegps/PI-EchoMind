@@ -5,21 +5,28 @@ Modelos ORM para todas as entidades do EchoMind.
 
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
     DateTime, Integer, Index,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
 from pgvector.sqlalchemy import Vector
 
 # ─── Conexão ─────────────────────────────────────────────────────────────────
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://echomind:echomind@localhost:5432/echomind",
-)
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL não configurada. Defina no .env com a connection string do Supabase."
+    )
+
+if DATABASE_URL.startswith("postgresql") and "sslmode" not in DATABASE_URL:
+    DATABASE_URL += "?sslmode=require" if "?" not in DATABASE_URL else "&sslmode=require"
 
 engine = create_engine(
     DATABASE_URL,
@@ -31,7 +38,11 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "768"))  # 768 = paraphrase-multilingual-mpnet-base-v2
+EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "384"))  # 384 = BAAI/bge-small-en-v1.5
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 # ─── Dependency ──────────────────────────────────────────────────────────────
@@ -60,8 +71,11 @@ class Faq(Base):
     question     = Column(Text, nullable=False)
     answer       = Column(Text, nullable=False)
     show_on_totem = Column(Boolean, default=False, nullable=False)
-    created_at   = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at   = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    total_consults = Column(Integer, default=0, nullable=False)
+    positive_feedback = Column(Integer, default=0, nullable=False)
+    negative_feedback = Column(Integer, default=0, nullable=False)
+    created_at   = Column(DateTime, default=utc_now, nullable=False)
+    updated_at   = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class CompanyEvent(Base):
@@ -73,8 +87,8 @@ class CompanyEvent(Base):
     event_date  = Column(String, nullable=False)   # formato: YYYY-MM-DD
     event_type  = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    created_at  = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at  = Column(DateTime, default=utc_now, nullable=False)
+    updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class Config(Base):
@@ -90,7 +104,7 @@ class Config(Base):
     phone           = Column(String, nullable=True)
     address         = Column(Text, nullable=True)
     business_hours  = Column(String, nullable=True)
-    updated_at      = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at      = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class Interaction(Base):
@@ -104,7 +118,8 @@ class Interaction(Base):
     question    = Column(Text, nullable=False)
     answer      = Column(Text, nullable=True)
     was_answered = Column(Boolean, default=True, nullable=False)
-    asked_at    = Column(DateTime, default=datetime.utcnow, nullable=False)
+    feedback_helpful = Column(Boolean, nullable=True)
+    asked_at    = Column(DateTime, default=utc_now, nullable=False)
 
 
 class UnansweredQuestion(Base):
@@ -117,8 +132,8 @@ class UnansweredQuestion(Base):
     id                  = Column(String, primary_key=True, default=new_uuid)
     canonical_question  = Column(Text, nullable=False)   # versão "representativa"
     count               = Column(Integer, default=1, nullable=False)
-    first_asked         = Column(DateTime, default=datetime.utcnow, nullable=False)
-    last_asked          = Column(DateTime, default=datetime.utcnow, nullable=False)
+    first_asked         = Column(DateTime, default=utc_now, nullable=False)
+    last_asked          = Column(DateTime, default=utc_now, nullable=False)
     # variações detectadas (JSON list serializado como texto)
     similar_questions   = Column(Text, default="[]")     # JSON array de strings
     converted           = Column(Boolean, default=False) # True após virar FAQ
@@ -136,7 +151,7 @@ class KnowledgeDocument(Base):
     source_type = Column(String, nullable=False)               # faq | event | config
     content     = Column(Text, nullable=False)                 # texto indexado
     embedding   = Column(Vector(EMBEDDING_DIM), nullable=True) # vetor pgvector
-    created_at  = Column(DateTime, default=datetime.utcnow)
+    created_at  = Column(DateTime, default=utc_now)
 
     __table_args__ = (
         Index(
@@ -147,3 +162,14 @@ class KnowledgeDocument(Base):
             postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
     )
+
+
+class AdminUser(Base):
+    """Usuário administrador com acesso ao painel de gestão do EchoMind."""
+    __tablename__ = "admin_users"
+
+    id              = Column(String, primary_key=True, default=new_uuid)
+    email           = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable=False)
+    is_active       = Column(Boolean, default=True, nullable=False)
+    created_at      = Column(DateTime, default=utc_now, nullable=False)

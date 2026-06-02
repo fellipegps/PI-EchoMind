@@ -20,6 +20,13 @@ interface Message {
   content: string;
 }
 
+const userFriendlyError = (err: Error) => {
+  if (err.message.toLowerCase().includes("docker")) {
+    return "A IA não retornou resposta. Verifique se o backend está rodando em http://localhost:8000";
+  }
+  return err.message;
+};
+
 export default function ChatbotTest() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -72,7 +79,7 @@ export default function ChatbotTest() {
       // onError: stream vazio, erro HTTP, rede offline, etc.
       // Mostra no toast (não polui o chat com mensagem de erro)
       (err) => {
-        toast.error(err.message ?? "Erro ao conectar com a IA.", {
+        toast.error(userFriendlyError(err) ?? "Erro ao conectar com a IA.", {
           duration: 6000,
         });
         setLoading(false);

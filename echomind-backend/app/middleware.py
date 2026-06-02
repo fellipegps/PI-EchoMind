@@ -12,7 +12,6 @@ import time
 import logging
 import statistics
 from collections import deque
-from datetime import datetime
 from typing import Callable
 
 from fastapi import Request, Response
