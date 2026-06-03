@@ -137,13 +137,10 @@ export default function SettingsPage() {
                 >
                   <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="feminina">Francisca — Feminina (pt-BR)</SelectItem>
-                    <SelectItem value="masculina">Antônio — Masculino (pt-BR)</SelectItem>
+                    <SelectItem value="feminina">Feminina (pt-BR)</SelectItem>
+                    <SelectItem value="masculina">Masculino (pt-BR)</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  Vozes neurais Microsoft Edge — alta fidelidade, geradas pelo servidor.
-                </p>
               </div>
             </div>
 
