@@ -349,7 +349,6 @@ export default function TotemPage() {
         }}
       >
         <section className="hero-section">
-          
           <h1 className="hero-title">
             Olá! Como posso <br />
             <span className="title-accent">te ajudar hoje?</span>
