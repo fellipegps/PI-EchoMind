@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Mic, ChevronRight, X, Volume2, VolumeX, Send, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Mic, ChevronRight, X, Volume2, VolumeX, Send, ThumbsUp, ThumbsDown, Keyboard } from "lucide-react";
 import { streamChat, faqApi, configApi, feedbackApi } from "@/lib/api";
 import type { Faq } from "@/lib/api";
 
@@ -167,7 +167,6 @@ export default function TotemPage() {
   const [typedQuestion, setTypedQuestion] = useState("");
   const [lastQuestion, setLastQuestion] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
-  const [todayCount, setTodayCount] = useState(0);
   const [voiceGender, setVoiceGender] = useState<"feminina" | "masculina">("feminina");
 
   const { state, setState, transcript, setTranscript, barHeights, startListening, stopListening } =
@@ -187,9 +186,6 @@ export default function TotemPage() {
   useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
 
   useEffect(() => {
-    const storedCount = Number(localStorage.getItem("echomind_today_count") ?? "0");
-    setTodayCount(storedCount);
-
     const cachedFaqs = localStorage.getItem("echomind_offline_faqs");
     if (cachedFaqs) {
       try { setTotemFaqs(JSON.parse(cachedFaqs)); } catch {}
@@ -257,10 +253,6 @@ export default function TotemPage() {
       () => {
         if (controller.signal.aborted) return;
 
-        const nextCount = todayCount + 1;
-        setTodayCount(nextCount);
-        localStorage.setItem("echomind_today_count", String(nextCount));
-
         const remaining = pendingTextRef.current.trim();
         if (remaining) enqueue(remaining);
         pendingTextRef.current = "";
@@ -299,7 +291,7 @@ export default function TotemPage() {
         setTimeout(resetToIdle, 4000);
       }
     );
-  }, [setState, enqueue, cancel, getGeneration, resetToIdle, todayCount]);
+  }, [setState, enqueue, cancel, getGeneration, resetToIdle]);
 
   // CORREÇÃO Bug 4: handleFaqClick não chama sendToAI diretamente.
   // Passa pelo estado "processing" — o useEffect abaixo detecta a
@@ -357,14 +349,12 @@ export default function TotemPage() {
         }}
       >
         <section className="hero-section">
-          <p className="hero-eyebrow">Assistente Virtual</p>
+          
           <h1 className="hero-title">
             Olá! Como posso <br />
             <span className="title-accent">te ajudar hoje?</span>
           </h1>
           <div className="pulse-wrapper">
-            <div className="pulse-ring pulse-before" />
-            <div className="pulse-ring pulse-after" />
             <button className="cta-button" onClick={startListening}>
               <Mic className="cta-icon" strokeWidth={1.5} />
               <span className="cta-label">Falar agora</span>
@@ -372,6 +362,7 @@ export default function TotemPage() {
           </div>
 
           <div className="text-chat">
+            <Keyboard className="text-chat-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
             <input
               value={typedQuestion}
               onChange={(event) => setTypedQuestion(event.target.value)}
@@ -466,56 +457,51 @@ export default function TotemPage() {
         )}
       </div>
 
-      <footer className="totem-footer">Já respondi {todayCount} perguntas hoje • Powered by EchoMind AI</footer>
-
       <style>{`
-        .totem-root{position:relative;min-height:100vh;width:100%;background:#050816;color:#f8fbff;font-family:Inter,system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
-        .bg-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(1,166,253,.18) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(circle at center,black,transparent 78%)}
-        .bg-fade{position:absolute;inset:0;background:radial-gradient(ellipse 60% 45% at 50% 15%,rgba(1,166,253,.22),transparent 70%),radial-gradient(ellipse 40% 40% at 80% 80%,rgba(124,58,237,.18),transparent 70%)}
+        .totem-root{position:relative;min-height:100vh;width:100%;background:#fff;color:#172033;font-family:Inter,system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+        .bg-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(1,166,253,.08) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 72%)}
+        .bg-fade{position:absolute;inset:0;background:linear-gradient(180deg,#f6fbff 0%,rgba(246,251,255,.42) 38%,#fff 100%)}
         .totem-main{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:46px;padding:40px;transition:all .4s ease}
         .hero-section{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;width:min(920px,92vw)}
-        .hero-eyebrow{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#88d8ff;background:rgba(1,166,253,.10);border:1px solid rgba(1,166,253,.22);padding:8px 14px;border-radius:999px}
-        .hero-title{font-size:clamp(42px,7vw,78px);font-weight:800;color:#fff;line-height:1.02;letter-spacing:-.06em;text-shadow:0 24px 80px rgba(1,166,253,.35)}
+        .hero-eyebrow{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#0277bd;background:#eef9ff;border:1px solid #ccecff;padding:8px 14px;border-radius:999px}
+        .hero-title{font-size:clamp(42px,7vw,78px);font-weight:800;color:#172033;line-height:1.02;letter-spacing:0;text-shadow:none}
         .title-accent{color:#01a6fd}
-        .pulse-wrapper{position:relative;width:184px;height:184px;display:flex;align-items:center;justify-content:center;margin-top:12px}
-        .pulse-ring{position:absolute;width:100%;height:100%;background:linear-gradient(135deg,#01a6fd,#7c3aed);border-radius:50%;z-index:1;opacity:.36;animation:pulse 2s ease-out infinite;filter:blur(.2px)}
-        .pulse-after{animation-delay:1s}
-        @keyframes pulse{100%{transform:scale(1.6);opacity:0}}
-        .cta-button{position:relative;z-index:2;width:146px;height:146px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 24px 80px rgba(1,166,253,.22),inset 0 0 40px rgba(255,255,255,.04);backdrop-filter:blur(18px);transition:transform .2s,border-color .2s,background .2s}
-        .cta-button:hover{transform:translateY(-3px);border-color:rgba(1,166,253,.75);background:rgba(1,166,253,.12)}
+        .pulse-wrapper{position:relative;width:164px;height:164px;display:flex;align-items:center;justify-content:center;margin-top:12px}
+        .cta-button{position:relative;z-index:2;width:146px;height:146px;border-radius:50%;background:#01a6fd;border:1px solid #01a6fd;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 18px 40px rgba(1,166,253,.24);transition:transform .2s,border-color .2s,background .2s,box-shadow .2s}
+        .cta-button:hover{transform:translateY(-3px);border-color:#0186cc;background:#0195e4;box-shadow:0 22px 48px rgba(1,166,253,.28)}
         .cta-button:active{transform:scale(.96)}
-        .cta-icon{color:#8de0ff;width:34px;height:34px}
-        .cta-label{font-size:11px;font-weight:800;text-transform:uppercase;color:#d8f4ff;margin-top:8px;letter-spacing:.08em}
-        .text-chat{display:flex;align-items:center;width:min(720px,92vw);padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(255,255,255,.08);box-shadow:0 18px 60px rgba(0,0,0,.28);backdrop-filter:blur(18px)}
-        .text-chat-input{flex:1;border:0;outline:0;background:transparent;color:#fff;padding:15px 18px;font-size:16px}
-        .text-chat-input::placeholder{color:rgba(255,255,255,.48)}
-        .text-chat-button{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:0;border-radius:50%;background:#01a6fd;color:#00111b;cursor:pointer;box-shadow:0 10px 34px rgba(1,166,253,.42)}
+        .cta-icon{color:#fff;width:34px;height:34px}
+        .cta-label{font-size:11px;font-weight:800;text-transform:uppercase;color:#fff;margin-top:8px;letter-spacing:.08em}
+        .text-chat{display:flex;align-items:center;width:min(720px,92vw);padding:8px 8px 8px 18px;border:1px solid #dceaf4;border-radius:999px;background:#fff;box-shadow:0 14px 42px rgba(24,49,83,.10)}
+        .text-chat-icon{flex:0 0 auto;color:#7b8da3}
+        .text-chat-input{flex:1;border:0;outline:0;background:transparent;color:#172033;padding:15px 14px;font-size:16px}
+        .text-chat-input::placeholder{color:#7b8da3}
+        .text-chat-button{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border:0;border-radius:50%;background:#01a6fd;color:#fff;cursor:pointer;box-shadow:0 10px 28px rgba(1,166,253,.30)}
         .faqs-section{width:100%;max-width:880px;display:flex;flex-direction:column;gap:18px}
-        .faqs-label{font-size:11px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.42);text-align:center;letter-spacing:.18em}
+        .faqs-label{font-size:11px;font-weight:700;text-transform:uppercase;color:#7b8da3;text-align:center;letter-spacing:.18em}
         .faqs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-        .faq-card{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:18px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;text-align:left;transition:all .2s;backdrop-filter:blur(14px)}
-        .faq-card:hover{border-color:rgba(1,166,253,.72);transform:translateY(-2px);background:rgba(1,166,253,.11)}
+        .faq-card{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:8px;background:#fff;border:1px solid #e3edf5;color:#172033;cursor:pointer;text-align:left;transition:all .2s;box-shadow:0 10px 28px rgba(24,49,83,.06)}
+        .faq-card:hover{border-color:#8edcff;transform:translateY(-2px);background:#f7fcff;box-shadow:0 14px 34px rgba(1,166,253,.12)}
         .faq-icon{font-size:20px}
-        .faq-text{flex:1;font-weight:600;font-size:14px;color:#eaf8ff}
-        .faq-arrow{color:#78d6ff}
-        .listen-overlay{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at center,rgba(1,166,253,.16),transparent 55%),#050816;transition:all .4s ease;gap:28px;padding:40px}
+        .faq-text{flex:1;font-weight:600;font-size:14px;color:#233249}
+        .faq-arrow{color:#01a6fd}
+        .listen-overlay{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#f6fbff 0%,#fff 100%);transition:all .4s ease;gap:28px;padding:40px}
         .wave-wrap{display:flex;gap:7px;height:86px;align-items:center}
-        .bar{width:7px;background:linear-gradient(#8de0ff,#01a6fd);border-radius:12px;transition:height .1s ease;box-shadow:0 0 18px rgba(1,166,253,.55)}
-        .speaking-indicator{display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;background:rgba(1,166,253,.12);border:2px solid rgba(1,166,253,.45);animation:speakPulse 1s ease-in-out infinite}
-        .speaking-icon{color:#8de0ff}
+        .bar{width:7px;background:linear-gradient(#70d3ff,#01a6fd);border-radius:12px;transition:height .1s ease;box-shadow:0 0 18px rgba(1,166,253,.28)}
+        .speaking-indicator{display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;background:#eef9ff;border:2px solid #9fe2ff;animation:speakPulse 1s ease-in-out infinite}
+        .speaking-icon{color:#01a6fd}
         @keyframes speakPulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.1);opacity:1}}
-        .listen-status{font-weight:800;color:#8de0ff;text-transform:uppercase;letter-spacing:.2em;font-size:13px}
-        .listen-transcript{font-size:30px;font-weight:700;text-align:center;max-width:80%;line-height:1.35;color:#fff}
-        .ai-response-box{max-width:min(900px,86vw);background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:28px;padding:30px 34px;box-shadow:0 28px 100px rgba(0,0,0,.32);backdrop-filter:blur(18px)}
-        .ai-response-text{font-size:21px;font-weight:500;line-height:1.65;color:#f7fbff;text-align:center;white-space:pre-wrap}
-        .feedback-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;color:rgba(255,255,255,.68);font-size:14px}
-        .feedback-row button{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:9px 13px;cursor:pointer}
-        .feedback-row button:hover{border-color:#01a6fd;background:rgba(1,166,253,.12)}
-        .feedback-thanks{text-align:center;color:#8de0ff;font-size:14px;margin-top:18px}
+        .listen-status{font-weight:800;color:#0277bd;text-transform:uppercase;letter-spacing:.2em;font-size:13px}
+        .listen-transcript{font-size:30px;font-weight:700;text-align:center;max-width:80%;line-height:1.35;color:#172033}
+        .ai-response-box{max-width:min(900px,86vw);background:#fff;border:1px solid #dceaf4;border-radius:16px;padding:30px 34px;box-shadow:0 24px 70px rgba(24,49,83,.12)}
+        .ai-response-text{font-size:21px;font-weight:500;line-height:1.65;color:#233249;text-align:center;white-space:pre-wrap}
+        .feedback-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;color:#6c7c90;font-size:14px}
+        .feedback-row button{display:inline-flex;align-items:center;gap:6px;border:1px solid #dceaf4;background:#fff;color:#233249;border-radius:999px;padding:9px 13px;cursor:pointer}
+        .feedback-row button:hover{border-color:#01a6fd;background:#f2fbff}
+        .feedback-thanks{text-align:center;color:#0277bd;font-size:14px;margin-top:18px}
         .cursor{display:inline-block;width:3px;height:1em;background:#01a6fd;margin-left:5px;animation:blink .8s infinite;vertical-align:middle}
         @keyframes blink{50%{opacity:0}}
-        .stop-btn{display:flex;align-items:center;gap:8px;padding:12px 24px;border-radius:30px;border:1px solid rgba(141,224,255,.5);color:#d8f4ff;background:rgba(255,255,255,.06);cursor:pointer;font-weight:700;font-size:13px;backdrop-filter:blur(12px)}
-        .totem-footer{position:absolute;bottom:20px;width:100%;text-align:center;color:rgba(255,255,255,.42);font-size:12px;z-index:5;letter-spacing:.06em}
+        .stop-btn{display:flex;align-items:center;gap:8px;padding:12px 24px;border-radius:30px;border:1px solid #b7e7fb;color:#0277bd;background:#fff;cursor:pointer;font-weight:700;font-size:13px;box-shadow:0 10px 28px rgba(24,49,83,.08)}
         @media(max-width:720px){.faqs-grid{grid-template-columns:1fr}.totem-main{gap:30px}.listen-transcript{font-size:24px}.ai-response-text{font-size:18px}.feedback-row{flex-wrap:wrap}.pulse-wrapper{width:154px;height:154px}.cta-button{width:124px;height:124px}}
       `}</style>
     </div>
