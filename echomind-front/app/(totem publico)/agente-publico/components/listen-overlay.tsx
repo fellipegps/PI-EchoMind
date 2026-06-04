@@ -66,7 +66,7 @@ export function ListenOverlay({
       ) : (
         <p className="listen-transcript">
           {transcript || "..."}
-          {state === "listening" && <span className="cursor" />}
+          {state === "listening"} 
         </p>
       )}
 

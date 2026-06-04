@@ -402,22 +402,6 @@
   margin-top: 18px;
 }
 
-.cursor {
-  display: inline-block;
-  width: 3px;
-  height: 1em;
-  background: var(--totem-brand);
-  margin-left: 5px;
-  animation: blink .8s infinite;
-  vertical-align: middle;
-}
-
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-
 .stop-btn {
   display: flex;
   align-items: center;
