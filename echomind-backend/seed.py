@@ -20,18 +20,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from sqlalchemy import text
 from app.database import SessionLocal, engine, Base, Faq, CompanyEvent, Config, AdminUser
-from app.auth import hash_password
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 log = logging.getLogger("seed")
 
 
 # ─── Dados de seed ────────────────────────────────────────────────────────────
-
-# Credenciais padrão para testes locais.
-# IMPORTANTE: troque a senha antes de qualquer deploy em produção.
-SEED_ADMIN_EMAIL    = os.getenv("SEED_ADMIN_EMAIL", "admin@echomind.com")
-SEED_ADMIN_PASSWORD = os.getenv("SEED_ADMIN_PASSWORD", "EchoMind@2025")
 
 SEED_CONFIG = {
     "company_name": "UniEVANGÉLICA",
@@ -163,28 +157,13 @@ SEED_EVENTS = [
 
 # ─── Funções de seed ─────────────────────────────────────────────────────────
 
-def seed_admin(db) -> AdminUser:
+def seed_admin(db) -> None:
     """
-    Cria o usuário administrador padrão, se ainda não existir.
-    A senha é passada pelo hash bcrypt ANTES de ser inserida no banco —
-    garantindo que o login funcione imediatamente após rodar o seed.
+    Mantido apenas por compatibilidade historica.
+    Usuarios administrativos agora devem ser criados pelo Supabase Auth.
     """
-    existing = db.query(AdminUser).filter(AdminUser.email == SEED_ADMIN_EMAIL).first()
-    if existing:
-        log.info("⏭️  Usuário admin já existe (%s) — pulando.", SEED_ADMIN_EMAIL)
-        return existing
-
-    admin = AdminUser(
-        id=str(uuid.uuid4()),
-        email=SEED_ADMIN_EMAIL,
-        hashed_password=hash_password(SEED_ADMIN_PASSWORD),  # bcrypt hash
-        is_active=True,
-    )
-    db.add(admin)
-    db.commit()
-    db.refresh(admin)
-    log.info("✅ Usuário admin criado: %s", admin.email)
-    return admin
+    log.info("Usuarios admin sao gerenciados pelo Supabase Auth - pulando seed_admin.")
+    return None
 
 
 def seed_config(db) -> Config:
@@ -285,7 +264,6 @@ def main():
 
     db = SessionLocal()
     try:
-        seed_admin(db)
         seed_config(db)
         faqs   = seed_faqs(db)
         events = seed_events(db)
@@ -295,14 +273,8 @@ def main():
 
     log.info("🎉 Seed concluído com sucesso!")
     log.info("")
-    log.info("   ┌─────────────────────────────────────────┐")
-    log.info("   │         CREDENCIAIS DO ADMIN             │")
-    log.info("   │  Email : %s  │", SEED_ADMIN_EMAIL)
-    log.info("   │  Senha : %s           │", SEED_ADMIN_PASSWORD)
-    log.info("   └─────────────────────────────────────────┘")
-    log.info("")
     log.info("   Próximos passos:")
-    log.info("   1. Acesse http://localhost:3000/login e entre com as credenciais acima")
+    log.info("   1. Crie um usuario no Supabase Auth para acessar o painel")
     log.info("   2. Explore a API em http://localhost:8000/docs")
     log.info("   3. Teste o chat: POST /chat { 'message': 'Como faço minha matrícula?' }")
 

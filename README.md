@@ -2,6 +2,13 @@
 
 EchoMind e um sistema de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, pgvector, LangChain, Groq, FastEmbed e gTTS para responder perguntas com base na base de conhecimento cadastrada.
 
+O banco de dados e o Supabase Auth sao usados via Supabase:
+
+- PostgreSQL hospedado no Supabase por `DATABASE_URL`
+- Login, cadastro e recuperacao de senha via Supabase Auth
+- O frontend guarda o `access_token` do Supabase no `localStorage`
+- O backend valida esse token nas rotas administrativas protegidas
+
 ## Estrutura do projeto
 
 ```text
@@ -15,6 +22,8 @@ PI-EchoMind-auth/
 ### Pre-requisitos
 
 - Python 3.12
+- Node.js 20+
+- Corepack/pnpm
 - Conta no Supabase com projeto criado
 - Chave de API do Groq em console.groq.com
 
@@ -85,7 +94,33 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Preencha `DATABASE_URL` com a connection string do Supabase e `GROQ_API_KEY` com sua chave.
+Preencha:
+
+- `DATABASE_URL` com a connection string do banco PostgreSQL do Supabase
+- `SUPABASE_URL` com a URL do projeto Supabase
+- `SUPABASE_SERVICE_ROLE_KEY` com a service role key do Supabase
+- `SUPABASE_ANON_KEY` com a anon/public key do Supabase
+- `GROQ_API_KEY` com sua chave Groq
+
+Exemplo:
+
+```env
+DATABASE_URL=postgresql://postgres:[SUA_SENHA]@db.[SEU_PROJECT_REF].supabase.co:5432/postgres
+
+SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+SUPABASE_ANON_KEY=eyJ...
+
+GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
+GROQ_LLM_MODEL=llama-3.3-70b-versatile
+
+EMBED_MODEL=BAAI/bge-small-en-v1.5
+EMBEDDING_DIM=384
+SIMILARITY_THRESHOLD=0.45
+TOP_K_DOCS=3
+```
+
+> Nunca exponha `SUPABASE_SERVICE_ROLE_KEY` no frontend. Ela deve ficar somente no backend.
 
 6. Rodar as migrations:
 
@@ -99,11 +134,15 @@ alembic upgrade head
 python seed.py
 ```
 
+O seed cria configuracoes, FAQs, eventos e indices do RAG. Ele nao cria mais usuario administrador local; os usuarios agora sao criados no Supabase Auth.
+
 8. Iniciar a API:
 
 ```bash
 uvicorn app.main:app --reload
 ```
+
+Por padrao, a API fica em [http://localhost:8000](http://localhost:8000).
 
 ### Endpoints
 
@@ -114,10 +153,9 @@ Acesse [http://localhost:8000/docs](http://localhost:8000/docs) para a documenta
 | Variavel | Descricao |
 | --- | --- |
 | `DATABASE_URL` | URI PostgreSQL do Supabase. O backend adiciona `sslmode=require` automaticamente quando ausente. |
-| `JWT_SECRET` | Chave usada para assinar tokens JWT. |
-| `JWT_EXPIRE_HOURS` | Validade do token JWT em horas. |
-| `SEED_ADMIN_EMAIL` | Email do admin criado pelo `seed.py`. |
-| `SEED_ADMIN_PASSWORD` | Senha do admin criado pelo `seed.py`. |
+| `SUPABASE_URL` | URL do projeto Supabase. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Chave service role usada somente no backend para operacoes administrativas de auth. |
+| `SUPABASE_ANON_KEY` | Chave anon/public do Supabase. |
 | `GROQ_API_KEY` | Chave da API Groq. |
 | `GROQ_LLM_MODEL` | Modelo Groq usado no chat. |
 | `EMBED_MODEL` | Modelo local de embeddings. |
@@ -127,20 +165,43 @@ Acesse [http://localhost:8000/docs](http://localhost:8000/docs) para a documenta
 
 ## Autenticacao
 
-As rotas administrativas usam JWT Bearer. O login e feito em `POST /auth/login` com `application/x-www-form-urlencoded`, usando `username` como email e `password` como senha.
+As rotas administrativas usam Supabase Auth.
 
-Credenciais padrao criadas pelo seed:
+O login pode ser feito de duas formas:
 
-| Campo | Valor |
-| --- | --- |
-| Email | `admin@echomind.com` |
-| Senha | `EchoMind@2025` |
+- Pelo frontend em `/login`, usando `authApi.login`
+- Pela API em `POST /auth/login`, enviando JSON:
+
+```json
+{
+  "email": "usuario@email.com",
+  "password": "sua-senha"
+}
+```
+
+O backend retorna o `access_token` do Supabase:
+
+```json
+{
+  "access_token": "...",
+  "token_type": "bearer",
+  "email": "usuario@email.com"
+}
+```
+
+O cadastro usa Supabase Auth em `POST /auth/register` ou pela tela `/registrar-conta`.
+
+A recuperacao de senha usa Supabase Auth em `POST /auth/reset-password` ou pela tela `/recuperar-senha`.
+
+Nao existem mais credenciais padrao criadas pelo `seed.py`. Para acessar o painel, crie uma conta em `/registrar-conta` ou pelo painel do Supabase em Authentication > Users.
 
 ## Rotas principais
 
 | Metodo | Rota | Descricao |
 | --- | --- | --- |
 | `POST` | `/auth/login` | Login administrativo |
+| `POST` | `/auth/register` | Cadastro de usuario no Supabase Auth |
+| `POST` | `/auth/reset-password` | Envio de email de recuperacao de senha |
 | `GET` | `/auth/me` | Usuario autenticado |
 | `POST` | `/chat` | Chat com streaming |
 | `GET/POST/PUT/DELETE` | `/faqs` | CRUD de FAQs |
@@ -158,12 +219,39 @@ Credenciais padrao criadas pelo seed:
 
 ```bash
 cd echomind-front
-pnpm install
+corepack pnpm install
 copy .env.local.example .env.local
-pnpm dev
+corepack pnpm dev
 ```
 
 O frontend espera a API em `http://localhost:8000` por padrao.
+
+Preencha `echomind-front/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+```
+
+Depois acesse [http://localhost:3000/login](http://localhost:3000/login).
+
+## Teste rapido da integracao Auth
+
+1. Suba o backend em `http://localhost:8000`.
+2. Suba o frontend em `http://localhost:3000`.
+3. Acesse `/registrar-conta` e crie um usuario.
+4. Acesse `/login` e entre com esse usuario.
+5. Ao entrar no dashboard, o frontend tera salvo o token do Supabase.
+6. Crie ou edite uma FAQ/evento para confirmar que as rotas protegidas aceitam o token.
+
+Tambem e possivel testar pelo Swagger:
+
+1. Acesse [http://localhost:8000/docs](http://localhost:8000/docs).
+2. Execute `POST /auth/login` com email e senha de um usuario do Supabase Auth.
+3. Copie o `access_token`.
+4. Clique em `Authorize` e informe `Bearer SEU_ACCESS_TOKEN`.
+5. Execute `GET /auth/me` ou alguma rota protegida.
 
 ## Ordem Recomendada Apos Atualizar Embeddings
 
@@ -182,5 +270,5 @@ Em outro terminal:
 
 ```bash
 cd echomind-front
-pnpm dev
+corepack pnpm dev
 ```

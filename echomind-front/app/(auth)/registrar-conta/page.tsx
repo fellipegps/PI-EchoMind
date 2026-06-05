@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Bot, Loader2 } from "lucide-react";
+import { authApi } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,16 +30,11 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Simulação de lógica de registro
-      // Aqui você conectaria com supabase.auth.signUp futuramente
-      console.log("Registrando:", { companyName, fullName, email });
-      
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+      await authApi.register(email, password);
       toast.success("Cadastro realizado! Verifique seu email para confirmar a conta.");
       router.push("/login");
     } catch (error) {
-      toast.error("Erro ao criar conta. Tente novamente.");
+      toast.error(error instanceof Error ? error.message : "Erro ao criar conta. Tente novamente.");
     } finally {
       setLoading(false);
     }

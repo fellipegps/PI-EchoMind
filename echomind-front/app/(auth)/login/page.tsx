@@ -25,13 +25,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Envia como application/x-www-form-urlencoded (OAuth2PasswordRequestForm)
-      // e armazena o JWT retornado no localStorage via tokenStore.
       await authApi.login(email, password);
       toast.success("Login realizado com sucesso!");
       router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error?.message ?? "Email ou senha incorretos.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Email ou senha incorretos.");
     } finally {
       setLoading(false);
     }

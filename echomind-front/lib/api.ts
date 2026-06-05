@@ -4,6 +4,8 @@
  * Troque BASE_URL via variável de ambiente NEXT_PUBLIC_API_URL no .env.local
  */
 
+import { supabase } from "./supabase";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 // ─── Tipos espelhados dos schemas Pydantic ────────────────────────────────────
@@ -86,15 +88,17 @@ export const tokenStore = {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = tokenStore.get();
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader,
-      ...init?.headers,
-    },
     ...init,
+    headers: {
+      ...Object.fromEntries(headers.entries()),
+    },
   });
 
   // Token expirado ou inválido — redireciona para login
@@ -119,31 +123,45 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const authApi = {
-  /**
-   * POST /auth/login
-   * Envia email + senha como application/x-www-form-urlencoded
-   * (formato OAuth2PasswordRequestForm exigido pelo FastAPI).
-   * Armazena o token JWT retornado no localStorage.
-   */
   login: async (email: string, password: string): Promise<TokenResponse> => {
-    const body = new URLSearchParams({ username: email, password });
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
-    });
-
-    if (!res.ok) {
-      const detail = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(detail?.detail ?? "Email ou senha incorretos.");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      throw new Error(error.message);
     }
 
-    const data: TokenResponse = await res.json();
-    tokenStore.set(data.access_token);
-    return data;
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      throw new Error("Sessão inválida. Tente novamente.");
+    }
+
+    tokenStore.set(accessToken);
+    return {
+      access_token: accessToken,
+      token_type: "bearer",
+      email: data.user?.email ?? email,
+    };
   },
 
-  logout: () => {
+  register: async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { email: data.user?.email };
+  },
+
+  resetPassword: async (email: string) => {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  logout: async () => {
+    await supabase.auth.signOut();
     tokenStore.clear();
     if (typeof window !== "undefined") window.location.href = "/login";
   },

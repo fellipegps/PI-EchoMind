@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Bot, Loader2 } from "lucide-react";
+import { authApi } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -19,16 +20,13 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      // Simulação de envio de email de recuperação
-      // Aqui você integraria com supabase.auth.resetPasswordForEmail futuramente
-      console.log("Solicitando recuperação para:", email);
-      
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+      await authApi.resetPassword(email);
       setSent(true);
       toast.success("Email de recuperação enviado!");
     } catch (error) {
-      toast.error("Erro ao processar solicitação. Tente novamente.");
+      toast.error(
+        error instanceof Error ? error.message : "Erro ao processar solicitação. Tente novamente."
+      );
     } finally {
       setLoading(false);
     }
