@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 type KeyboardInstance = {
@@ -21,6 +21,8 @@ type VirtualKeyboardProps = {
   onSubmit: () => void;
   onClose: () => void;
 };
+
+const INACTIVITY_TIMEOUT_MS = 15000;
 
 const keyboardLayout = {
   default: [
@@ -55,9 +57,28 @@ export function VirtualKeyboard({
 }: VirtualKeyboardProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const keyboardRef = useRef<KeyboardInstance | null>(null);
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onChangeRef = useRef(onChange);
   const onSubmitRef = useRef(onSubmit);
+  const onCloseRef = useRef(onClose);
   const [layoutName, setLayoutName] = useState<"default" | "shift">("default");
+
+  const clearInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  }, []);
+
+  const resetInactivityTimer = useCallback(() => {
+    clearInactivityTimer();
+
+    if (!isOpen) return;
+
+    inactivityTimerRef.current = setTimeout(() => {
+      onCloseRef.current();
+    }, INACTIVITY_TIMEOUT_MS);
+  }, [clearInactivityTimer, isOpen]);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -66,6 +87,17 @@ export function VirtualKeyboard({
   useEffect(() => {
     onSubmitRef.current = onSubmit;
   }, [onSubmit]);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    if (isOpen) resetInactivityTimer();
+    else clearInactivityTimer();
+
+    return clearInactivityTimer;
+  }, [clearInactivityTimer, isOpen, resetInactivityTimer]);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,8 +117,13 @@ export function VirtualKeyboard({
         display: keyboardDisplay,
         mergeDisplay: true,
         theme: "hg-theme-default totem-keyboard-theme",
-        onChange: (input: string) => onChangeRef.current(input),
+        onChange: (input: string) => {
+          resetInactivityTimer();
+          onChangeRef.current(input);
+        },
         onKeyPress: (button: string) => {
+          resetInactivityTimer();
+
           if (button === "{shift}") {
             setLayoutName((current) => (current === "default" ? "shift" : "default"));
           }
@@ -109,11 +146,12 @@ export function VirtualKeyboard({
         keyboardRef.current = null;
       }
     };
-  }, [isOpen, layoutName, value]);
+  }, [isOpen, layoutName, resetInactivityTimer, value]);
 
   useEffect(() => {
     keyboardRef.current?.setInput(value);
-  }, [value]);
+    if (isOpen) resetInactivityTimer();
+  }, [isOpen, resetInactivityTimer, value]);
 
   useEffect(() => {
     keyboardRef.current?.setOptions({ layoutName });
@@ -124,8 +162,9 @@ export function VirtualKeyboard({
       keyboardRef.current.destroy();
       keyboardRef.current = null;
       setLayoutName("default");
+      clearInactivityTimer();
     }
-  }, [isOpen]);
+  }, [clearInactivityTimer, isOpen]);
 
   if (!isOpen) return null;
 
