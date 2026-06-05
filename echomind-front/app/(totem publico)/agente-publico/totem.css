@@ -178,6 +178,14 @@
   box-shadow: 0 6px 16px rgba(var(--totem-shadow-dark-rgb), .04);
 }
 
+.text-chat-area {
+  width: min(900px, 92vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
 .text-chat-icon {
   flex: 0 0 auto;
   color: var(--totem-text-muted);
@@ -210,6 +218,105 @@
   cursor: pointer;
   /* Suavizado de .30 para .14 */
   box-shadow: 0 4px 12px rgba(var(--totem-shadow-brand-rgb), .14);
+}
+
+.virtual-keyboard-panel {
+  width: min(900px, 92vw);
+  padding: 14px;
+  border: 1px solid var(--totem-border-light);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 18px 38px rgba(var(--totem-shadow-dark-rgb), .09);
+}
+
+.virtual-keyboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px 12px;
+  color: var(--totem-text-subtle);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.virtual-keyboard-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--totem-border-light);
+  border-radius: 50%;
+  background: var(--totem-bg);
+  color: var(--totem-text-subtle);
+  cursor: pointer;
+}
+
+.virtual-keyboard {
+  width: 100%;
+}
+
+.totem-keyboard-theme {
+  background: transparent;
+  font-family: inherit;
+}
+
+.totem-keyboard-theme .hg-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.totem-keyboard-theme .hg-row:last-child {
+  margin-bottom: 0;
+}
+
+.totem-keyboard-theme .hg-button {
+  min-width: 0;
+  height: 54px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--totem-border-light);
+  border-radius: 8px;
+  background: var(--totem-bg);
+  color: var(--totem-text-primary);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  user-select: none;
+  box-shadow: 0 3px 8px rgba(var(--totem-shadow-dark-rgb), .04);
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.totem-keyboard-theme .hg-button:hover {
+  border-color: var(--totem-border-brand);
+  background: var(--totem-bg-faq-hover);
+}
+
+.totem-keyboard-theme .hg-button:active {
+  transform: scale(.98);
+}
+
+.totem-keyboard-theme .hg-button-bksp,
+.totem-keyboard-theme .hg-button-shift {
+  flex: 1.45;
+  color: var(--totem-brand-muted);
+}
+
+.totem-keyboard-theme .hg-button-space {
+  flex: 4;
+}
+
+.totem-keyboard-theme .hg-button-enter {
+  flex: 1.8;
+  border-color: var(--totem-brand);
+  background: var(--totem-brand);
+  color: var(--totem-bg);
 }
 
 .faqs-section {
@@ -436,6 +543,27 @@
 
   .feedback-row {
     flex-wrap: wrap;
+  }
+
+  .virtual-keyboard-panel {
+    width: min(680px, 94vw);
+    padding: 10px;
+  }
+
+  .virtual-keyboard-header {
+    padding-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .totem-keyboard-theme .hg-row {
+    gap: 5px;
+    margin-bottom: 5px;
+  }
+
+  .totem-keyboard-theme .hg-button {
+    height: 44px;
+    border-radius: 7px;
+    font-size: 14px;
   }
 
   .pulse-wrapper {
