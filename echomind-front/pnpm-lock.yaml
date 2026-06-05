@@ -44,6 +44,9 @@ importers:
       recharts:
         specifier: ^3.7.0
         version: 3.8.1(@types/react@19.2.15)(react-dom@19.2.3(react@19.2.3))(react-is@16.13.1)(react@19.2.3)(redux@5.0.1)
+      simple-keyboard:
+        specifier: ^3.8.150
+        version: 3.8.150
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -3592,6 +3595,9 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
+
+  simple-keyboard@3.8.150:
+    resolution: {integrity: sha512-OLObTXBTXQjq01K9ISuNbbokWRBbV5BvSReWXb4TrSkibCvnUtjDpaHskbgy7ATGNAN/0x9HHmqUNcy5+5gPFw==}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -7748,6 +7754,8 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-exit@4.1.0: {}
+
+  simple-keyboard@3.8.150: {}
 
   sisteransi@1.0.5: {}
 

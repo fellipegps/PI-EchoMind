@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import { ChevronRight, Keyboard, Mic, Send } from "lucide-react";
 import type { Faq } from "@/lib/api";
+import { VirtualKeyboard } from "./virtual-keyboard";
 
 type TotemIdleProps = {
   totemFaqs: Faq[];
@@ -23,6 +25,13 @@ export function TotemIdle({
   onStartListening,
   style,
 }: TotemIdleProps) {
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  const handleSubmitTyped = () => {
+    onSubmitTyped();
+    setKeyboardOpen(false);
+  };
+
   return (
     <main className="totem-main" style={style}>
       <section className="hero-section">
@@ -37,20 +46,32 @@ export function TotemIdle({
           </button>
         </div>
 
-        <div className="text-chat">
-          <Keyboard className="text-chat-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
-          <input
+        <div className="text-chat-area">
+          <div className="text-chat">
+            <Keyboard className="text-chat-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+            <input
+              value={typedQuestion}
+              onChange={(event) => onTypedQuestionChange(event.target.value)}
+              onFocus={() => setKeyboardOpen(true)}
+              onClick={() => setKeyboardOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleSubmitTyped();
+              }}
+              placeholder="Ou digite sua dúvida aqui..."
+              className="text-chat-input"
+            />
+            <button className="text-chat-button" onClick={handleSubmitTyped} aria-label="Enviar pergunta">
+              <Send size={18} />
+            </button>
+          </div>
+
+          <VirtualKeyboard
             value={typedQuestion}
-            onChange={(event) => onTypedQuestionChange(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") onSubmitTyped();
-            }}
-            placeholder="Ou digite sua dúvida aqui..."
-            className="text-chat-input"
+            isOpen={keyboardOpen}
+            onChange={onTypedQuestionChange}
+            onSubmit={handleSubmitTyped}
+            onClose={() => setKeyboardOpen(false)}
           />
-          <button className="text-chat-button" onClick={onSubmitTyped} aria-label="Enviar pergunta">
-            <Send size={18} />
-          </button>
         </div>
       </section>
 
@@ -75,4 +96,3 @@ export function TotemIdle({
     </main>
   );
 }
-
