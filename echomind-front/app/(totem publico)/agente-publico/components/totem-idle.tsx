@@ -32,8 +32,10 @@ export function TotemIdle({
     setKeyboardOpen(false);
   };
 
+  const hasFaqs = totemFaqs.length > 0;
+
   return (
-    <main className="totem-main" style={style}>
+    <main className={`totem-main ${hasFaqs ? "totem-main--with-faqs" : "totem-main--empty"}`} style={style}>
       <section className="hero-section">
         <h1 className="hero-title">
           Olá! Como posso <br />
@@ -75,7 +77,7 @@ export function TotemIdle({
         </div>
       </section>
 
-      {totemFaqs.length > 0 && (
+      {hasFaqs && (
         <section className="faqs-section">
           <p className="faqs-label">Perguntas frequentes</p>
           <div className="faqs-grid">
