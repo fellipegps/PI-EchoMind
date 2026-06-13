@@ -153,7 +153,7 @@ export const authApi = {
 
   resetPassword: async (email: string) => {
     const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
+      typeof window !== "undefined" ? `${window.location.origin}/redefinir-senha` : undefined;
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
       throw new Error(error.message);
