@@ -19,6 +19,8 @@ class CurrentUser:
     email: str
     is_active: bool
     created_at: datetime | str
+    full_name: str | None = None
+    company_name: str | None = None
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> CurrentUser:
@@ -41,10 +43,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> CurrentUser:
     if not user or not user.email:
         raise credentials_exception
 
+    metadata = (
+        getattr(user, "user_metadata", None)
+        or getattr(user, "raw_user_meta_data", None)
+        or {}
+    )
     created_at = getattr(user, "created_at", None) or datetime.now(timezone.utc)
     return CurrentUser(
         id=str(getattr(user, "id", "")),
         email=user.email,
         is_active=True,
         created_at=created_at,
+        full_name=metadata.get("full_name") if isinstance(metadata, dict) else None,
+        company_name=metadata.get("company_name") if isinstance(metadata, dict) else None,
     )

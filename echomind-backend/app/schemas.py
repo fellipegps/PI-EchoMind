@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000, examples=["Onde fica a secretaria?"])
+    tenant_id: str = Field(..., min_length=1)
 
 
 
@@ -138,6 +139,7 @@ class FeedbackRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
     answer: str = Field(..., min_length=1, max_length=8000)
     helpful: bool
+    tenant_id: str = Field(..., min_length=1)
 
 
 class FeedbackResponse(BaseModel):

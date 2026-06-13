@@ -30,7 +30,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await authApi.register(email, password);
+      await authApi.register(email, password, { fullName, companyName });
       toast.success("Cadastro realizado! Verifique seu email para confirmar a conta.");
       router.push("/login");
     } catch (error) {

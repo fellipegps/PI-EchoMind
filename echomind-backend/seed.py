@@ -19,10 +19,12 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from sqlalchemy import text
-from app.database import SessionLocal, engine, Base, Faq, CompanyEvent, Config, AdminUser
+from app.database import SessionLocal, engine, Base, Faq, CompanyEvent, Config
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(message)s")
 log = logging.getLogger("seed")
+
+SEED_TENANT_ID = os.getenv("SEED_TENANT_ID", "demo-tenant")
 
 
 # ─── Dados de seed ────────────────────────────────────────────────────────────
@@ -167,12 +169,12 @@ def seed_admin(db) -> None:
 
 
 def seed_config(db) -> Config:
-    existing = db.query(Config).first()
+    existing = db.query(Config).filter(Config.tenant_id == SEED_TENANT_ID).first()
     if existing:
         log.info("⏭️  Config já existe — pulando.")
         return existing
 
-    cfg = Config(id=str(uuid.uuid4()), **SEED_CONFIG)
+    cfg = Config(id=str(uuid.uuid4()), tenant_id=SEED_TENANT_ID, **SEED_CONFIG)
     db.add(cfg)
     db.commit()
     db.refresh(cfg)
@@ -181,14 +183,14 @@ def seed_config(db) -> Config:
 
 
 def seed_faqs(db) -> list[Faq]:
-    existing_count = db.query(Faq).count()
+    existing_count = db.query(Faq).filter(Faq.tenant_id == SEED_TENANT_ID).count()
     if existing_count > 0:
         log.info(f"⏭️  FAQs já existem ({existing_count} registros) — pulando.")
-        return db.query(Faq).all()
+        return db.query(Faq).filter(Faq.tenant_id == SEED_TENANT_ID).all()
 
     faqs = []
     for data in SEED_FAQS:
-        faq = Faq(id=str(uuid.uuid4()), **data)
+        faq = Faq(id=str(uuid.uuid4()), tenant_id=SEED_TENANT_ID, **data)
         db.add(faq)
         faqs.append(faq)
 
@@ -198,14 +200,14 @@ def seed_faqs(db) -> list[Faq]:
 
 
 def seed_events(db) -> list[CompanyEvent]:
-    existing_count = db.query(CompanyEvent).count()
+    existing_count = db.query(CompanyEvent).filter(CompanyEvent.tenant_id == SEED_TENANT_ID).count()
     if existing_count > 0:
         log.info(f"⏭️  Eventos já existem ({existing_count} registros) — pulando.")
-        return db.query(CompanyEvent).all()
+        return db.query(CompanyEvent).filter(CompanyEvent.tenant_id == SEED_TENANT_ID).all()
 
     events = []
     for data in SEED_EVENTS:
-        event = CompanyEvent(id=str(uuid.uuid4()), **data)
+        event = CompanyEvent(id=str(uuid.uuid4()), tenant_id=SEED_TENANT_ID, **data)
         db.add(event)
         events.append(event)
 
@@ -220,7 +222,7 @@ def seed_rag(db, faqs: list[Faq], events: list[CompanyEvent]):
 
     try:
         from app.rag_engine import get_rag_engine
-        engine_rag = get_rag_engine(db)
+        engine_rag = get_rag_engine(db, tenant_id=SEED_TENANT_ID)
 
         for faq in faqs:
             try:

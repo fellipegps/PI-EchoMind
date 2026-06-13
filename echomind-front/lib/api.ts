@@ -118,6 +118,26 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function publicRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      ...Object.fromEntries(headers.entries()),
+    },
+  });
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(detail?.detail ?? `Erro ${res.status}`);
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════════════════════════════════════════
@@ -142,8 +162,21 @@ export const authApi = {
     };
   },
 
-  register: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  register: async (
+    email: string,
+    password: string,
+    metadata?: { fullName?: string; companyName?: string }
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: metadata?.fullName,
+          company_name: metadata?.companyName,
+        },
+      },
+    });
     if (error) {
       throw new Error(error.message);
     }
@@ -183,6 +216,7 @@ export const authApi = {
  */
 export async function streamChat(
   message: string,
+  tenantId: string,
   onToken: (token: string) => void,
   onDone: () => void,
   onError: (err: Error) => void
@@ -193,7 +227,7 @@ export async function streamChat(
     res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, tenant_id: tenantId }),
     });
   } catch {
     onError(new Error("Não foi possível conectar ao servidor. Verifique se o backend está rodando."));
@@ -244,7 +278,8 @@ export async function streamChat(
 export const faqApi = {
   list: () => request<Faq[]>("/faqs"),
 
-  listTotem: () => request<Faq[]>("/faqs/totem"),
+  listTotem: (tenantId: string) =>
+    publicRequest<Faq[]>(`/faqs/totem?tenant_id=${encodeURIComponent(tenantId)}`),
 
   create: (data: { question: string; answer: string; show_on_totem?: boolean }) =>
     request<Faq>("/faqs", { method: "POST", body: JSON.stringify(data) }),
@@ -282,6 +317,9 @@ export const eventApi = {
 
 export const configApi = {
   get: () => request<Config>("/config"),
+
+  getPublic: (tenantId: string) =>
+    publicRequest<Config>(`/config/public?tenant_id=${encodeURIComponent(tenantId)}`),
 
   save: (data: Partial<Config>) =>
     request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
@@ -330,8 +368,8 @@ export const dashboardApi = {
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const feedbackApi = {
-  save: (data: { question: string; answer: string; helpful: boolean }) =>
-    request<{ saved: boolean; helpful: boolean }>("/feedback", {
+  save: (data: { question: string; answer: string; helpful: boolean; tenant_id: string }) =>
+    publicRequest<{ saved: boolean; helpful: boolean }>("/feedback", {
       method: "POST",
       body: JSON.stringify(data),
     }),

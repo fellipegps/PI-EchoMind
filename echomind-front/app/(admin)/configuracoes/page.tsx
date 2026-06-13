@@ -12,11 +12,13 @@ import { toast } from "sonner";
 import { Loader2, Copy, ExternalLink, LinkIcon } from "lucide-react";
 import { PageContainer } from "@/components/page-container";
 import { configApi } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 import type { Config } from "@/lib/api";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [chatbotUrl, setChatbotUrl] = useState("");
 
   const [form, setForm] = useState<Partial<Config>>({
     company_name: "",
@@ -40,23 +42,25 @@ export default function SettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user || typeof window === "undefined") return;
+      setChatbotUrl(`${window.location.origin}/agente-publico?tenant=${data.user.id}`);
+    });
+  }, []);
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const updated = await configApi.save(form);
       setForm(updated);
       toast.success("Configurações atualizadas com sucesso!");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao salvar configurações.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar configurações.");
     } finally {
       setSaving(false);
     }
   };
-
-  const chatbotUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/agente-publico`
-      : "";
 
   const copyUrl = () => {
     navigator.clipboard.writeText(chatbotUrl);

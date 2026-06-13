@@ -68,6 +68,7 @@ class Faq(Base):
     __tablename__ = "faqs"
 
     id           = Column(String, primary_key=True, default=new_uuid)
+    tenant_id    = Column(String, nullable=False, index=True)
     question     = Column(Text, nullable=False)
     answer       = Column(Text, nullable=False)
     show_on_totem = Column(Boolean, default=False, nullable=False)
@@ -83,6 +84,7 @@ class CompanyEvent(Base):
     __tablename__ = "events"
 
     id          = Column(String, primary_key=True, default=new_uuid)
+    tenant_id   = Column(String, nullable=False, index=True)
     title       = Column(Text, nullable=False)
     event_date  = Column(String, nullable=False)   # formato: YYYY-MM-DD
     event_type  = Column(String, nullable=False)
@@ -96,6 +98,7 @@ class Config(Base):
     __tablename__ = "config"
 
     id              = Column(String, primary_key=True, default=new_uuid)
+    tenant_id       = Column(String, nullable=False, index=True)
     company_name    = Column(String, nullable=False, default="EchoMind Institution")
     description     = Column(Text, nullable=True)
     tone_of_voice   = Column(String, default="profissional e cordial")
@@ -115,6 +118,7 @@ class Interaction(Base):
     __tablename__ = "interactions"
 
     id          = Column(String, primary_key=True, default=new_uuid)
+    tenant_id   = Column(String, nullable=False, index=True)
     question    = Column(Text, nullable=False)
     answer      = Column(Text, nullable=True)
     was_answered = Column(Boolean, default=True, nullable=False)
@@ -130,6 +134,7 @@ class UnansweredQuestion(Base):
     __tablename__ = "unanswered_questions"
 
     id                  = Column(String, primary_key=True, default=new_uuid)
+    tenant_id           = Column(String, nullable=False, index=True)
     canonical_question  = Column(Text, nullable=False)   # versão "representativa"
     count               = Column(Integer, default=1, nullable=False)
     first_asked         = Column(DateTime, default=utc_now, nullable=False)
@@ -147,6 +152,7 @@ class KnowledgeDocument(Base):
     __tablename__ = "knowledge_documents"
 
     id          = Column(String, primary_key=True, default=new_uuid)
+    tenant_id   = Column(String, nullable=False, index=True)
     source_id   = Column(String, nullable=False, index=True)   # ID do registro original
     source_type = Column(String, nullable=False)               # faq | event | config
     content     = Column(Text, nullable=False)                 # texto indexado

@@ -5,21 +5,47 @@ import { useRouter } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
-import { authApi } from "@/lib/api";
+import { authApi, tokenStore } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (!authApi.isAuthenticated()) {
-      router.replace("/login");
-      return;
-    }
+    let mounted = true;
 
-    authApi.me()
-      .then(() => setCheckingAuth(false))
-      .catch(() => router.replace("/login"));
+    const syncSession = async (accessToken?: string) => {
+      if (!accessToken) {
+        tokenStore.clear();
+        router.replace("/login");
+        return;
+      }
+
+      tokenStore.set(accessToken);
+      try {
+        await authApi.me();
+        if (mounted) setCheckingAuth(false);
+      } catch {
+        tokenStore.clear();
+        router.replace("/login");
+      }
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      syncSession(data.session?.access_token);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        syncSession(session?.access_token);
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   if (checkingAuth) {
