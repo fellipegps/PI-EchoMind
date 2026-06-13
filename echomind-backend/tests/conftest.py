@@ -28,7 +28,7 @@ import sqlalchemy.types as types
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
-os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
+os.environ.setdefault("SUPABASE_SECRET_KEY", "test-secret-key")
 
 
 class FakeVector(types.TypeDecorator):

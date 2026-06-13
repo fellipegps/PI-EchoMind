@@ -98,8 +98,7 @@ Preencha:
 
 - `DATABASE_URL` com a connection string do banco PostgreSQL do Supabase
 - `SUPABASE_URL` com a URL do projeto Supabase
-- `SUPABASE_SERVICE_ROLE_KEY` com a service role key do Supabase
-- `SUPABASE_ANON_KEY` com a anon/public key do Supabase
+- `SUPABASE_SECRET_KEY` com a Secret key do Supabase (`sb_secret_...`)
 - `GROQ_API_KEY` com sua chave Groq
 
 Exemplo:
@@ -108,8 +107,7 @@ Exemplo:
 DATABASE_URL=postgresql://postgres:[SUA_SENHA]@db.[SEU_PROJECT_REF].supabase.co:5432/postgres
 
 SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SECRET_KEY=sb_secret_...
 
 GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
 GROQ_LLM_MODEL=llama-3.3-70b-versatile
@@ -120,7 +118,7 @@ SIMILARITY_THRESHOLD=0.45
 TOP_K_DOCS=3
 ```
 
-> Nunca exponha `SUPABASE_SERVICE_ROLE_KEY` no frontend. Ela deve ficar somente no backend.
+> Nunca exponha `SUPABASE_SECRET_KEY` no frontend. Ela deve ficar somente no backend.
 
 6. Rodar as migrations:
 
@@ -154,8 +152,7 @@ Acesse [http://localhost:8000/docs](http://localhost:8000/docs) para a documenta
 | --- | --- |
 | `DATABASE_URL` | URI PostgreSQL do Supabase. O backend adiciona `sslmode=require` automaticamente quando ausente. |
 | `SUPABASE_URL` | URL do projeto Supabase. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Chave service role usada somente no backend para operacoes administrativas de auth. |
-| `SUPABASE_ANON_KEY` | Chave anon/public do Supabase. |
+| `SUPABASE_SECRET_KEY` | Secret key do Supabase (`sb_secret_...`) usada somente no backend para operacoes administrativas de auth. |
 | `GROQ_API_KEY` | Chave da API Groq. |
 | `GROQ_LLM_MODEL` | Modelo Groq usado no chat. |
 | `EMBED_MODEL` | Modelo local de embeddings. |
@@ -231,7 +228,7 @@ Preencha `echomind-front/.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
 Depois acesse [http://localhost:3000/login](http://localhost:3000/login).
