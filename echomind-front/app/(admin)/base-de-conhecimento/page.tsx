@@ -1,9 +1,10 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, CalendarIcon } from "lucide-react";
+import { BookOpen, CalendarIcon, FileText } from "lucide-react";
 import { FaqTab } from "./components/faq-tab";
 import { EventTab } from "./components/event-tab";
+import { DocumentTab } from "./components/document-tab";
 import { PageContainer } from "@/components/page-container";
 
 export default function KnowledgeBasePage() {
@@ -24,6 +25,9 @@ export default function KnowledgeBasePage() {
           <TabsTrigger value="events" className="gap-2 px-4 py-2 text-sm font-medium transition-all">
             <CalendarIcon className="h-4 w-4" /> Eventos
           </TabsTrigger>
+          <TabsTrigger value="documents" className="gap-2 px-4 py-2 text-sm font-medium transition-all">
+            <FileText className="h-4 w-4" /> Documentos
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="faqs" className="mt-0 outline-none">
@@ -32,6 +36,10 @@ export default function KnowledgeBasePage() {
 
         <TabsContent value="events" className="mt-0 outline-none">
           <EventTab />
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-0 outline-none">
+          <DocumentTab />
         </TabsContent>
       </Tabs>
     </PageContainer>
