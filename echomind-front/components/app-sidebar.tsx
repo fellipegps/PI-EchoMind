@@ -2,7 +2,7 @@
 
 import { LayoutDashboard, HelpCircle, Bot, Settings, LogOut, Database } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { authApi } from "@/lib/api";
 
 // 🚀 ITENS DO MENU CONFORME O ESCOPO
 const menuItems = [
@@ -28,11 +29,11 @@ const menuItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  // TODO: BACKEND - Implementar integração com FastAPI Auth futuramente
-  const handleLogout = () => {
-    console.log("Logout acionado - Integrar com FastAPI futuramente");
-    // Exemplo: rota.push('/login')
+  const handleLogout = async () => {
+    await authApi.logout();
+    router.replace("/login");
   };
 
   return (
@@ -75,7 +76,6 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            {/* BACKEND: O clique aqui deve invalidar o JWT no FastAPI */}
             <SidebarMenuButton onClick={handleLogout} className="text-destructive hover:text-destructive">
               <LogOut className="h-4 w-4" />
               <span>Sair</span>
