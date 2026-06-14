@@ -55,7 +55,7 @@ class TestListFaqs:
         client.post("/faqs", json={**sample_faq_data,
                                    "question": "Segunda pergunta completamente válida?",
                                    "show_on_totem": False})
-        resp = client.get("/faqs/totem")
+        resp = client.get("/faqs/totem?tenant_id=test-admin")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1

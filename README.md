@@ -1,186 +1,220 @@
 # EchoMind - Totem de IA Institucional
 
-EchoMind e um sistema de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, pgvector, LangChain, Groq, FastEmbed e gTTS para responder perguntas com base na base de conhecimento cadastrada.
+EchoMind e um sistema multiusuario de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, Alembic, pgvector, LangChain, Groq, FastEmbed e TTS para responder perguntas com base na base de conhecimento cadastrada por cada usuario/empresa.
 
-## Estrutura do projeto
+O projeto usa Supabase para:
+
+- PostgreSQL hospedado, acessado pelo backend via `DATABASE_URL`
+- Login, cadastro e recuperacao de senha via Supabase Auth
+- Validacao de sessoes administrativas no backend
+- Chaves opacas atuais do Supabase: `sb_secret_...` no backend e `sb_publishable_...` no frontend
+
+## Estrutura
 
 ```text
-PI-EchoMind-auth/
-├── echomind-backend/   # API FastAPI
-└── echomind-front/     # Frontend Next.js
+EchoMind-main/
+|-- echomind-backend/   # API FastAPI
+`-- echomind-front/     # Frontend Next.js
 ```
 
-## Como rodar localmente
+## Como Rodar Localmente
 
 ### Pre-requisitos
 
 - Python 3.12
-- Conta no Supabase com projeto criado
-- Chave de API do Groq em console.groq.com
+- Node.js 20+
+- Corepack/pnpm
+- Projeto criado no Supabase
+- Chave da API Groq
 
-> O backend deve ser executado com Python 3.12. Se sua maquina tiver outra
-> versao do Python instalada, como Python 3.14, instale o Python 3.12 em
-> paralelo e crie o ambiente virtual usando `py -3.12`.
+> O backend deve ser executado com Python 3.12. Se sua maquina tiver outra versao instalada, crie o ambiente virtual com `py -3.12`.
 
-### Configuracao
-
-1. Entrar na pasta do backend:
+### Backend
 
 ```bash
 cd echomind-backend
 ```
 
-2. Criar um ambiente virtual com Python 3.12:
-
 No Windows:
 
 ```powershell
 py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
 No Linux/macOS:
 
 ```bash
 python3.12 -m venv .venv
-```
-
-3. Ativar o ambiente virtual:
-
-No Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-No Windows CMD:
-
-```cmd
-.venv\Scripts\activate.bat
-```
-
-No Linux/macOS:
-
-```bash
 source .venv/bin/activate
 ```
 
-Depois de ativar, confira se a versao correta esta em uso:
-
-```bash
-python --version
-```
-
-O retorno deve ser `Python 3.12.x`.
-
-4. Instalar dependencias:
+Instale as dependencias:
 
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-5. Copiar e preencher o `.env`:
+Crie o `.env` do backend e preencha:
 
-```bash
-cp .env.example .env
+```env
+DATABASE_URL=postgresql://postgres:[SUA_SENHA]@db.[SEU_PROJECT_REF].supabase.co:5432/postgres
+
+SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+
+GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
+GROQ_LLM_MODEL=llama-3.3-70b-versatile
+
+EMBED_MODEL=BAAI/bge-small-en-v1.5
+SIMILARITY_THRESHOLD=0.45
+TOP_K_DOCS=3
 ```
 
-Preencha `DATABASE_URL` com a connection string do Supabase e `GROQ_API_KEY` com sua chave.
+Nunca exponha `SUPABASE_SECRET_KEY` no frontend.
 
-6. Rodar as migrations:
+Crie/atualize o schema do banco com Alembic:
 
 ```bash
 alembic upgrade head
 ```
 
-7. Popular o banco com dados iniciais e reindexar o pgvector:
-
-```bash
-python seed.py
-```
-
-8. Iniciar a API:
+Inicie a API:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-### Endpoints
+A API fica em [http://localhost:8000](http://localhost:8000).
 
-Acesse [http://localhost:8000/docs](http://localhost:8000/docs) para a documentacao interativa.
+### Frontend
 
-## Variaveis de ambiente principais
+```bash
+cd echomind-front
+corepack pnpm install
+copy .env.local.example .env.local
+```
 
-| Variavel | Descricao |
-| --- | --- |
-| `DATABASE_URL` | URI PostgreSQL do Supabase. O backend adiciona `sslmode=require` automaticamente quando ausente. |
-| `JWT_SECRET` | Chave usada para assinar tokens JWT. |
-| `JWT_EXPIRE_HOURS` | Validade do token JWT em horas. |
-| `SEED_ADMIN_EMAIL` | Email do admin criado pelo `seed.py`. |
-| `SEED_ADMIN_PASSWORD` | Senha do admin criado pelo `seed.py`. |
-| `GROQ_API_KEY` | Chave da API Groq. |
-| `GROQ_LLM_MODEL` | Modelo Groq usado no chat. |
-| `EMBED_MODEL` | Modelo local de embeddings. |
-| `EMBEDDING_DIM` | Dimensao do vetor no pgvector. |
-| `SIMILARITY_THRESHOLD` | Distancia maxima aceita no retrieval. |
-| `TOP_K_DOCS` | Quantidade de documentos recuperados por pergunta. |
+Preencha `echomind-front/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Inicie o frontend:
+
+```bash
+corepack pnpm dev
+```
+
+Depois acesse [http://localhost:3000/login](http://localhost:3000/login).
+
+## Banco De Dados
+
+O schema do banco e gerenciado somente por migrations Alembic. O backend nao cria tabelas automaticamente no startup.
+
+Fluxo correto apos alterar schema:
+
+```bash
+cd echomind-backend
+alembic upgrade head
+```
+
+O arquivo `seed.py` foi removido. Dados iniciais globais nao sao mais usados, porque o projeto agora e multiusuario.
+
+Cada usuario/empresa tem dados isolados por `tenant_id`. Quando um usuario autenticado acessa rotas administrativas, o backend executa o onboarding daquele tenant e cria uma configuracao inicial se ela ainda nao existir.
+
+As FAQs, eventos e demais dados devem ser cadastrados pelo painel administrativo ou por endpoints autenticados.
 
 ## Autenticacao
 
-As rotas administrativas usam JWT Bearer. O login e feito em `POST /auth/login` com `application/x-www-form-urlencoded`, usando `username` como email e `password` como senha.
+As rotas administrativas usam Supabase Auth.
 
-Credenciais padrao criadas pelo seed:
+O cadastro pode ser feito pela tela `/registrar-conta`. O login e feito em `/login`.
 
-| Campo | Valor |
-| --- | --- |
-| Email | `admin@echomind.com` |
-| Senha | `EchoMind@2025` |
+Para testar pela API:
 
-## Rotas principais
+```json
+{
+  "email": "usuario@email.com",
+  "password": "sua-senha"
+}
+```
+
+O backend retorna ou valida o `access_token` emitido pelo Supabase:
+
+```json
+{
+  "access_token": "...",
+  "token_type": "bearer",
+  "email": "usuario@email.com"
+}
+```
+
+Nao existe mais tabela local `admin_users` para login. Usuarios administrativos sao usuarios do Supabase Auth.
+
+## Totem Publico
+
+O totem publico precisa receber o tenant na URL:
+
+```text
+http://localhost:3000/agente-publico?tenant=UUID_DO_USUARIO
+```
+
+Esse UUID e o `id` do usuario no Supabase Auth. O painel de configuracoes gera essa URL.
+
+O totem mostra apenas FAQs marcadas para exibicao no totem daquele tenant.
+
+## Rotas Principais
 
 | Metodo | Rota | Descricao |
 | --- | --- | --- |
 | `POST` | `/auth/login` | Login administrativo |
-| `GET` | `/auth/me` | Usuario autenticado |
-| `POST` | `/chat` | Chat com streaming |
-| `GET/POST/PUT/DELETE` | `/faqs` | CRUD de FAQs |
-| `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos |
-| `GET/PUT` | `/config` | Configuracoes institucionais |
+| `POST` | `/auth/register` | Cadastro via Supabase Auth |
+| `POST` | `/auth/reset-password` | Envio de email de recuperacao |
+| `GET` | `/auth/me` | Usuario autenticado e onboarding do tenant |
+| `POST` | `/chat` | Chat publico com streaming e `tenant_id` |
+| `GET/POST/PUT/DELETE` | `/faqs` | CRUD de FAQs autenticado |
+| `GET` | `/faqs/totem` | FAQs publicas do totem por `tenant_id` |
+| `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
+| `GET/PUT` | `/config` | Configuracoes autenticadas do tenant |
+| `GET` | `/config/public` | Configuracao publica por `tenant_id` |
 | `GET/DELETE` | `/unanswered` | Perguntas nao respondidas |
 | `POST` | `/unanswered/{id}/convert` | Converter pergunta em FAQ |
 | `POST` | `/unanswered/{id}/learn` | Ensinar resposta ao RAG |
-| `GET` | `/dashboard` | Metricas e estatisticas |
-| `GET` | `/tts` | Sintese de voz MP3 |
+| `GET` | `/dashboard` | Metricas do tenant |
+| `POST` | `/feedback` | Feedback publico do totem |
+| `GET` | `/tts` | Sintese de voz |
 | `GET` | `/health` | Health check |
 | `GET` | `/metrics` | Metricas internas |
 
-## Frontend
+## RLS No Supabase
 
-```bash
-cd echomind-front
-pnpm install
-copy .env.local.example .env.local
-pnpm dev
+Como o frontend usa a FastAPI para acessar os dados do app, as tabelas principais nao precisam ser consultadas diretamente pela API publica do Supabase.
+
+Mesmo assim, em producao e recomendado habilitar RLS nas tabelas do schema `public` para bloquear acesso direto via PostgREST/Publishable Key. O backend continua sendo a camada responsavel por validar usuario e filtrar por `tenant_id`.
+
+A migration `0007` habilita RLS sem criar policies publicas e sem usar `FORCE ROW LEVEL SECURITY`. Isso bloqueia acesso direto pela API publica do Supabase, mas preserva o fluxo do backend via `DATABASE_URL`.
+
+O RAG atual usa as tabelas padrao do LangChain:
+
+```text
+langchain_pg_collection
+langchain_pg_embedding
 ```
 
-O frontend espera a API em `http://localhost:8000` por padrao.
+A tabela antiga `knowledge_documents` foi removida porque nao participa mais do fluxo real do RAG. O codigo do RAG tambem tenta habilitar RLS nas tabelas LangChain quando elas sao criadas pelo `PGVector`, para evitar que o alerta volte caso essas tabelas ainda nao existissem no momento da migration.
 
-## Ordem Recomendada Apos Atualizar Embeddings
+## Fluxo Rapido De Teste
 
-```bash
-cd echomind-backend
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-alembic upgrade head
-python seed.py
-uvicorn app.main:app --reload
-```
-
-Em outro terminal:
-
-```bash
-cd echomind-front
-pnpm dev
-```
+1. Rode `alembic upgrade head`.
+2. Suba o backend em `http://localhost:8000`.
+3. Suba o frontend em `http://localhost:3000`.
+4. Crie uma conta em `/registrar-conta`.
+5. Entre em `/login`.
+6. Abra configuracoes e complete os dados da empresa.
+7. Cadastre FAQs e marque ate 4 para aparecerem no totem.
+8. Copie a URL do totem em configuracoes e teste o atendimento publico.

@@ -27,6 +27,8 @@ from sqlalchemy.orm import sessionmaker, Session
 import sqlalchemy.types as types
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
+os.environ.setdefault("SUPABASE_SECRET_KEY", "test-secret-key")
 
 
 class FakeVector(types.TypeDecorator):
@@ -54,8 +56,8 @@ import pgvector.sqlalchemy as pgvec_module
 pgvec_module.Vector = FakeVector
 
 # Agora importa o app (já com o patch aplicado)
-from app.auth import get_current_user
-from app.database import AdminUser, Base, get_db
+from app.auth import CurrentUser, get_current_user
+from app.database import Base, get_db
 from app.main import app
 
 # ─── Engine SQLite em memória ─────────────────────────────────────────────────
@@ -111,11 +113,12 @@ def client(db: Session) -> Generator[TestClient, None, None]:
             pass
 
     app.dependency_overrides[get_db] = override_get_db
-    app.dependency_overrides[get_current_user] = lambda: AdminUser(
+    app.dependency_overrides[get_current_user] = lambda: CurrentUser(
         id="test-admin",
         email="admin@test.local",
-        hashed_password="",
         is_active=True,
+        created_at=datetime.utcnow(),
+        company_name="Empresa Teste",
     )
 
     # Mock do RAGEngine para não precisar do Ollama

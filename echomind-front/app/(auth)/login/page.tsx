@@ -11,7 +11,7 @@ import {
   CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Bot, Loader2 } from "lucide-react";
+import { Bot, Loader2, UserPlus } from "lucide-react";
 import { authApi } from "@/lib/api";
 
 export default function LoginPage() {
@@ -25,13 +25,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Envia como application/x-www-form-urlencoded (OAuth2PasswordRequestForm)
-      // e armazena o JWT retornado no localStorage via tokenStore.
       await authApi.login(email, password);
+      await authApi.me();
       toast.success("Login realizado com sucesso!");
       router.push("/dashboard");
-    } catch (error: any) {
-      toast.error(error?.message ?? "Email ou senha incorretos.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Email ou senha incorretos.");
     } finally {
       setLoading(false);
     }
@@ -82,6 +81,13 @@ export default function LoginPage() {
             <Button type="submit" className="w-full mt-2" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Entrar
+            </Button>
+
+            <Button asChild type="button" variant="outline" className="w-full">
+              <Link href="/registrar-conta">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Criar conta
+              </Link>
             </Button>
 
             <div className="text-center text-sm">

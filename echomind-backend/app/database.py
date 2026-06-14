@@ -9,11 +9,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
-    DateTime, Integer, Index,
+    DateTime, Integer,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
-from pgvector.sqlalchemy import Vector
 
 # ─── Conexão ─────────────────────────────────────────────────────────────────
 
@@ -37,9 +36,6 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "384"))  # 384 = BAAI/bge-small-en-v1.5
-
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -68,6 +64,7 @@ class Faq(Base):
     __tablename__ = "faqs"
 
     id           = Column(String, primary_key=True, default=new_uuid)
+    tenant_id    = Column(String, nullable=False, index=True)
     question     = Column(Text, nullable=False)
     answer       = Column(Text, nullable=False)
     show_on_totem = Column(Boolean, default=False, nullable=False)
@@ -83,6 +80,7 @@ class CompanyEvent(Base):
     __tablename__ = "events"
 
     id          = Column(String, primary_key=True, default=new_uuid)
+    tenant_id   = Column(String, nullable=False, index=True)
     title       = Column(Text, nullable=False)
     event_date  = Column(String, nullable=False)   # formato: YYYY-MM-DD
     event_type  = Column(String, nullable=False)
@@ -96,6 +94,7 @@ class Config(Base):
     __tablename__ = "config"
 
     id              = Column(String, primary_key=True, default=new_uuid)
+    tenant_id       = Column(String, nullable=False, index=True)
     company_name    = Column(String, nullable=False, default="EchoMind Institution")
     description     = Column(Text, nullable=True)
     tone_of_voice   = Column(String, default="profissional e cordial")
@@ -115,6 +114,7 @@ class Interaction(Base):
     __tablename__ = "interactions"
 
     id          = Column(String, primary_key=True, default=new_uuid)
+    tenant_id   = Column(String, nullable=False, index=True)
     question    = Column(Text, nullable=False)
     answer      = Column(Text, nullable=True)
     was_answered = Column(Boolean, default=True, nullable=False)
@@ -130,6 +130,7 @@ class UnansweredQuestion(Base):
     __tablename__ = "unanswered_questions"
 
     id                  = Column(String, primary_key=True, default=new_uuid)
+    tenant_id           = Column(String, nullable=False, index=True)
     canonical_question  = Column(Text, nullable=False)   # versão "representativa"
     count               = Column(Integer, default=1, nullable=False)
     first_asked         = Column(DateTime, default=utc_now, nullable=False)
@@ -139,37 +140,3 @@ class UnansweredQuestion(Base):
     converted           = Column(Boolean, default=False) # True após virar FAQ
 
 
-class KnowledgeDocument(Base):
-    """
-    Vetor de embedding para cada chunk de conhecimento indexado.
-    Fonte pode ser: 'faq' | 'event' | 'config'
-    """
-    __tablename__ = "knowledge_documents"
-
-    id          = Column(String, primary_key=True, default=new_uuid)
-    source_id   = Column(String, nullable=False, index=True)   # ID do registro original
-    source_type = Column(String, nullable=False)               # faq | event | config
-    content     = Column(Text, nullable=False)                 # texto indexado
-    embedding   = Column(Vector(EMBEDDING_DIM), nullable=True) # vetor pgvector
-    created_at  = Column(DateTime, default=utc_now)
-
-    __table_args__ = (
-        Index(
-            "ix_knowledge_embedding_hnsw",
-            "embedding",
-            postgresql_using="hnsw",
-            postgresql_with={"m": 16, "ef_construction": 64},
-            postgresql_ops={"embedding": "vector_cosine_ops"},
-        ),
-    )
-
-
-class AdminUser(Base):
-    """Usuário administrador com acesso ao painel de gestão do EchoMind."""
-    __tablename__ = "admin_users"
-
-    id              = Column(String, primary_key=True, default=new_uuid)
-    email           = Column(String, unique=True, nullable=False, index=True)
-    hashed_password = Column(String, nullable=False)
-    is_active       = Column(Boolean, default=True, nullable=False)
-    created_at      = Column(DateTime, default=utc_now, nullable=False)

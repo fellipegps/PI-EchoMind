@@ -4,6 +4,8 @@
  * Troque BASE_URL via variável de ambiente NEXT_PUBLIC_API_URL no .env.local
  */
 
+import { supabase } from "./supabase";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 // ─── Tipos espelhados dos schemas Pydantic ────────────────────────────────────
@@ -62,7 +64,7 @@ export interface TokenResponse {
   email: string;
 }
 
-export interface AdminUser {
+export interface CurrentUser {
   id: string;
   email: string;
   is_active: boolean;
@@ -86,15 +88,17 @@ export const tokenStore = {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = tokenStore.get();
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader,
-      ...init?.headers,
-    },
     ...init,
+    headers: {
+      ...Object.fromEntries(headers.entries()),
+    },
   });
 
   // Token expirado ou inválido — redireciona para login
@@ -114,43 +118,90 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function publicRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      ...Object.fromEntries(headers.entries()),
+    },
+  });
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(detail?.detail ?? `Erro ${res.status}`);
+  }
+
+  if (res.status === 204) return undefined as T;
+  return res.json() as Promise<T>;
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const authApi = {
-  /**
-   * POST /auth/login
-   * Envia email + senha como application/x-www-form-urlencoded
-   * (formato OAuth2PasswordRequestForm exigido pelo FastAPI).
-   * Armazena o token JWT retornado no localStorage.
-   */
   login: async (email: string, password: string): Promise<TokenResponse> => {
-    const body = new URLSearchParams({ username: email, password });
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
-    });
-
-    if (!res.ok) {
-      const detail = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(detail?.detail ?? "Email ou senha incorretos.");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      throw new Error(error.message);
     }
 
-    const data: TokenResponse = await res.json();
-    tokenStore.set(data.access_token);
-    return data;
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      throw new Error("Sessão inválida. Tente novamente.");
+    }
+
+    tokenStore.set(accessToken);
+    return {
+      access_token: accessToken,
+      token_type: "bearer",
+      email: data.user?.email ?? email,
+    };
   },
 
-  logout: () => {
+  register: async (
+    email: string,
+    password: string,
+    metadata?: { fullName?: string; companyName?: string }
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: metadata?.fullName,
+          company_name: metadata?.companyName,
+        },
+      },
+    });
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { email: data.user?.email };
+  },
+
+  resetPassword: async (email: string) => {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/redefinir-senha` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  logout: async () => {
+    await supabase.auth.signOut();
     tokenStore.clear();
     if (typeof window !== "undefined") window.location.href = "/login";
   },
 
   isAuthenticated: () => !!tokenStore.get(),
 
-  me: () => request<AdminUser>("/auth/me"),
+  me: () => request<CurrentUser>("/auth/me"),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -165,6 +216,7 @@ export const authApi = {
  */
 export async function streamChat(
   message: string,
+  tenantId: string,
   onToken: (token: string) => void,
   onDone: () => void,
   onError: (err: Error) => void
@@ -175,7 +227,7 @@ export async function streamChat(
     res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, tenant_id: tenantId }),
     });
   } catch {
     onError(new Error("Não foi possível conectar ao servidor. Verifique se o backend está rodando."));
@@ -226,7 +278,8 @@ export async function streamChat(
 export const faqApi = {
   list: () => request<Faq[]>("/faqs"),
 
-  listTotem: () => request<Faq[]>("/faqs/totem"),
+  listTotem: (tenantId: string) =>
+    publicRequest<Faq[]>(`/faqs/totem?tenant_id=${encodeURIComponent(tenantId)}`),
 
   create: (data: { question: string; answer: string; show_on_totem?: boolean }) =>
     request<Faq>("/faqs", { method: "POST", body: JSON.stringify(data) }),
@@ -264,6 +317,9 @@ export const eventApi = {
 
 export const configApi = {
   get: () => request<Config>("/config"),
+
+  getPublic: (tenantId: string) =>
+    publicRequest<Config>(`/config/public?tenant_id=${encodeURIComponent(tenantId)}`),
 
   save: (data: Partial<Config>) =>
     request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
@@ -312,8 +368,8 @@ export const dashboardApi = {
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const feedbackApi = {
-  save: (data: { question: string; answer: string; helpful: boolean }) =>
-    request<{ saved: boolean; helpful: boolean }>("/feedback", {
+  save: (data: { question: string; answer: string; helpful: boolean; tenant_id: string }) =>
+    publicRequest<{ saved: boolean; helpful: boolean }>("/feedback", {
       method: "POST",
       body: JSON.stringify(data),
     }),

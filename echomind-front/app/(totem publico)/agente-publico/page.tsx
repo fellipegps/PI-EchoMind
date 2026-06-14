@@ -16,7 +16,7 @@ export default function TotemPage() {
   const { state, setState, transcript, setTranscript, barHeights, startListening, stopListening } =
     useSpeechRecognition();
 
-  const { totemFaqs, voiceGender } = useTotemData();
+  const { totemFaqs, voiceGender, tenantId } = useTotemData();
 
   const { enqueue, cancel, speaking, getGeneration } = useTTS(voiceGender);
 
@@ -35,6 +35,7 @@ export default function TotemPage() {
     setState,
     transcript,
     setTranscript,
+    tenantId,
   });
 
   const isActive = state !== "idle";

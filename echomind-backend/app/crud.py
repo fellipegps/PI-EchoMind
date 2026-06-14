@@ -1,40 +1,87 @@
 """
-crud.py – Operações de banco de dados para todas as entidades.
+crud.py - Operacoes de banco com isolamento por tenant.
 """
 
 from __future__ import annotations
 
 import json
-from functools import lru_cache
 from datetime import datetime, timedelta
+from functools import lru_cache
 from typing import Optional
 
-from sqlalchemy import func, desc
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
-from .database import Faq, CompanyEvent, Config, Interaction, UnansweredQuestion, utc_now
-from .schemas import (
-    FaqCreate, FaqUpdate,
-    EventCreate, EventUpdate,
-    ConfigUpdate,
-)
+from .database import CompanyEvent, Config, Faq, Interaction, UnansweredQuestion, utc_now
 from .middleware import latency_store
+from .schemas import ConfigUpdate, EventCreate, EventUpdate, FaqCreate, FaqUpdate
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  FAQs
-# ══════════════════════════════════════════════════════════════════════════════
-
-def get_faqs(db: Session) -> list[Faq]:
-    return db.query(Faq).order_by(desc(Faq.created_at)).all()
+DEFAULT_TONE = "profissional e cordial"
+DEFAULT_VOICE = "feminina"
 
 
-def get_totem_faqs(db: Session) -> list[Faq]:
-    return db.query(Faq).filter(Faq.show_on_totem == True).limit(4).all()
+def ensure_tenant_onboarded(
+    db: Session,
+    tenant_id: str,
+    email: str = "",
+    company_name: str | None = None,
+    full_name: str | None = None,
+) -> Config:
+    """
+    Garante que um usuario autenticado tenha o conjunto inicial de dados.
+
+    Hoje o template cria a configuracao base do tenant. FAQs e eventos ficam
+    vazios para nao exibir conteudo ficticio no totem publico de uma empresa nova.
+    """
+    existing = get_config(db, tenant_id)
+    if existing:
+        return existing
+
+    display_name = (company_name or "").strip()
+    if not display_name:
+        display_name = email.split("@", 1)[0] if email else "Minha instituicao"
+
+    cfg = Config(
+        tenant_id=tenant_id,
+        company_name=display_name,
+        description=(
+            f"Configure aqui as informacoes oficiais de {display_name} "
+            "para orientar as respostas do agente."
+        ),
+        tone_of_voice=DEFAULT_TONE,
+        totem_voice_gender=DEFAULT_VOICE,
+    )
+    db.add(cfg)
+    db.commit()
+    db.refresh(cfg)
+    return cfg
 
 
-def create_faq(db: Session, payload: FaqCreate) -> Faq:
+# FAQs
+
+def get_faqs(db: Session, tenant_id: str) -> list[Faq]:
+    return (
+        db.query(Faq)
+        .filter(Faq.tenant_id == tenant_id)
+        .order_by(desc(Faq.created_at))
+        .all()
+    )
+
+
+def get_totem_faqs(db: Session, tenant_id: str) -> list[Faq]:
+    return (
+        db.query(Faq)
+        .filter(Faq.tenant_id == tenant_id, Faq.show_on_totem == True)
+        .order_by(desc(Faq.created_at))
+        .limit(4)
+        .all()
+    )
+
+
+def create_faq(db: Session, payload: FaqCreate, tenant_id: str) -> Faq:
     faq = Faq(
+        tenant_id=tenant_id,
         question=payload.question,
         answer=payload.answer,
         show_on_totem=payload.show_on_totem,
@@ -46,8 +93,8 @@ def create_faq(db: Session, payload: FaqCreate) -> Faq:
     return faq
 
 
-def update_faq(db: Session, faq_id: str, payload: FaqUpdate) -> Optional[Faq]:
-    faq = db.query(Faq).filter(Faq.id == faq_id).first()
+def update_faq(db: Session, faq_id: str, payload: FaqUpdate, tenant_id: str) -> Optional[Faq]:
+    faq = db.query(Faq).filter(Faq.id == faq_id, Faq.tenant_id == tenant_id).first()
     if not faq:
         return None
     for field, value in payload.model_dump(exclude_unset=True).items():
@@ -59,17 +106,17 @@ def update_faq(db: Session, faq_id: str, payload: FaqUpdate) -> Optional[Faq]:
     return faq
 
 
-def toggle_faq_totem(db: Session, faq_id: str) -> Faq | str | None:
-    """
-    Ativa/desativa show_on_totem.
-    Retorna 'limit_exceeded' se já há 4 ativas e a tentativa é de ativar.
-    """
-    faq = db.query(Faq).filter(Faq.id == faq_id).first()
+def toggle_faq_totem(db: Session, faq_id: str, tenant_id: str) -> Faq | str | None:
+    faq = db.query(Faq).filter(Faq.id == faq_id, Faq.tenant_id == tenant_id).first()
     if not faq:
         return None
 
     if not faq.show_on_totem:
-        active_count = db.query(Faq).filter(Faq.show_on_totem == True).count()
+        active_count = (
+            db.query(Faq)
+            .filter(Faq.tenant_id == tenant_id, Faq.show_on_totem == True)
+            .count()
+        )
         if active_count >= 4:
             return "limit_exceeded"
 
@@ -77,11 +124,12 @@ def toggle_faq_totem(db: Session, faq_id: str) -> Faq | str | None:
     faq.updated_at = utc_now()
     db.commit()
     db.refresh(faq)
+    get_cached_faq_answers.cache_clear()
     return faq
 
 
-def delete_faq(db: Session, faq_id: str) -> bool:
-    faq = db.query(Faq).filter(Faq.id == faq_id).first()
+def delete_faq(db: Session, faq_id: str, tenant_id: str) -> bool:
+    faq = db.query(Faq).filter(Faq.id == faq_id, Faq.tenant_id == tenant_id).first()
     if not faq:
         return False
     db.delete(faq)
@@ -90,14 +138,15 @@ def delete_faq(db: Session, faq_id: str) -> bool:
     return True
 
 
-@lru_cache(maxsize=1)
-def get_cached_faq_answers() -> tuple[tuple[str, str, str], ...]:
-    """Cache simples das FAQs mais consultadas para respostas instantâneas no totem."""
+@lru_cache(maxsize=128)
+def get_cached_faq_answers(tenant_id: str) -> tuple[tuple[str, str, str], ...]:
     from .database import SessionLocal
+
     db = SessionLocal()
     try:
         rows = (
             db.query(Faq)
+            .filter(Faq.tenant_id == tenant_id)
             .order_by(desc(Faq.total_consults), desc(Faq.created_at))
             .limit(10)
             .all()
@@ -107,20 +156,19 @@ def get_cached_faq_answers() -> tuple[tuple[str, str, str], ...]:
         db.close()
 
 
-def find_cached_faq_answer(question: str) -> Optional[tuple[str, str]]:
-    """Retorna (faq_id, answer) quando a pergunta bate com uma FAQ frequente."""
+def find_cached_faq_answer(question: str, tenant_id: str) -> Optional[tuple[str, str]]:
     normalized = question.strip().lower()
     if len(normalized) < 4:
         return None
-    for faq_id, faq_question, faq_answer in get_cached_faq_answers():
+    for faq_id, faq_question, faq_answer in get_cached_faq_answers(tenant_id):
         fq = faq_question.strip().lower()
         if normalized == fq or normalized in fq or fq in normalized:
             return faq_id, faq_answer
     return None
 
 
-def increment_faq_consult(db: Session, faq_id: str) -> None:
-    faq = db.query(Faq).filter(Faq.id == faq_id).first()
+def increment_faq_consult(db: Session, faq_id: str, tenant_id: str) -> None:
+    faq = db.query(Faq).filter(Faq.id == faq_id, Faq.tenant_id == tenant_id).first()
     if not faq:
         return
     faq.total_consults = (faq.total_consults or 0) + 1
@@ -128,16 +176,20 @@ def increment_faq_consult(db: Session, faq_id: str) -> None:
     get_cached_faq_answers.cache_clear()
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  EVENTS
-# ══════════════════════════════════════════════════════════════════════════════
+# Events
 
-def get_events(db: Session) -> list[CompanyEvent]:
-    return db.query(CompanyEvent).order_by(desc(CompanyEvent.event_date)).all()
+def get_events(db: Session, tenant_id: str) -> list[CompanyEvent]:
+    return (
+        db.query(CompanyEvent)
+        .filter(CompanyEvent.tenant_id == tenant_id)
+        .order_by(desc(CompanyEvent.event_date))
+        .all()
+    )
 
 
-def create_event(db: Session, payload: EventCreate) -> CompanyEvent:
+def create_event(db: Session, payload: EventCreate, tenant_id: str) -> CompanyEvent:
     event = CompanyEvent(
+        tenant_id=tenant_id,
         title=payload.title,
         event_date=payload.event_date,
         event_type=payload.event_type,
@@ -149,8 +201,17 @@ def create_event(db: Session, payload: EventCreate) -> CompanyEvent:
     return event
 
 
-def update_event(db: Session, event_id: str, payload: EventUpdate) -> Optional[CompanyEvent]:
-    event = db.query(CompanyEvent).filter(CompanyEvent.id == event_id).first()
+def update_event(
+    db: Session,
+    event_id: str,
+    payload: EventUpdate,
+    tenant_id: str,
+) -> Optional[CompanyEvent]:
+    event = (
+        db.query(CompanyEvent)
+        .filter(CompanyEvent.id == event_id, CompanyEvent.tenant_id == tenant_id)
+        .first()
+    )
     if not event:
         return None
     for field, value in payload.model_dump(exclude_unset=True).items():
@@ -161,8 +222,12 @@ def update_event(db: Session, event_id: str, payload: EventUpdate) -> Optional[C
     return event
 
 
-def delete_event(db: Session, event_id: str) -> bool:
-    event = db.query(CompanyEvent).filter(CompanyEvent.id == event_id).first()
+def delete_event(db: Session, event_id: str, tenant_id: str) -> bool:
+    event = (
+        db.query(CompanyEvent)
+        .filter(CompanyEvent.id == event_id, CompanyEvent.tenant_id == tenant_id)
+        .first()
+    )
     if not event:
         return False
     db.delete(event)
@@ -170,18 +235,16 @@ def delete_event(db: Session, event_id: str) -> bool:
     return True
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
+# Config
 
-def get_config(db: Session) -> Optional[Config]:
-    return db.query(Config).first()
+def get_config(db: Session, tenant_id: str) -> Optional[Config]:
+    return db.query(Config).filter(Config.tenant_id == tenant_id).first()
 
 
-def upsert_config(db: Session, payload: ConfigUpdate) -> Config:
-    cfg = db.query(Config).first()
+def upsert_config(db: Session, payload: ConfigUpdate, tenant_id: str) -> Config:
+    cfg = get_config(db, tenant_id)
     if not cfg:
-        cfg = Config()
+        cfg = Config(tenant_id=tenant_id)
         db.add(cfg)
 
     for field, value in payload.model_dump(exclude_unset=True).items():
@@ -192,21 +255,18 @@ def upsert_config(db: Session, payload: ConfigUpdate) -> Config:
     return cfg
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  INTERACTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+# Interactions
 
-def save_interaction(db: Session, question: str, answer: str) -> Interaction:
-    """Persiste uma interação completa para uso no Dashboard."""
-    # Detecta as duas formas de resposta negativa:
-    # 1. Fallback direto do RAG (sem docs): "Não tenho informações suficientes..."
-    # 2. Resposta do LLM quando não encontra contexto: "Não tenho essa informação..."
-    _not_answered_markers = (
-        "Não tenho informações",   # cobre ambos os fallbacks
+def save_interaction(db: Session, question: str, answer: str, tenant_id: str) -> Interaction:
+    not_answered_markers = (
+        "nao tenho informacoes",
+        "nao tenho informações",
         "não tenho informações",
     )
-    was_answered = bool(answer) and not any(m in answer for m in _not_answered_markers)
+    answer_text = (answer or "").lower()
+    was_answered = bool(answer) and not any(m in answer_text for m in not_answered_markers)
     interaction = Interaction(
+        tenant_id=tenant_id,
         question=question,
         answer=answer,
         was_answered=was_answered,
@@ -219,33 +279,37 @@ def save_interaction(db: Session, question: str, answer: str) -> Interaction:
     return interaction
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  UNANSWERED QUESTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+# Unanswered questions
 
-def get_unanswered_questions(db: Session) -> list[dict]:
+def get_unanswered_questions(db: Session, tenant_id: str) -> list[dict]:
     rows = (
         db.query(UnansweredQuestion)
-        .filter(UnansweredQuestion.converted == False)
+        .filter(
+            UnansweredQuestion.tenant_id == tenant_id,
+            UnansweredQuestion.converted == False,
+        )
         .order_by(desc(UnansweredQuestion.count))
         .all()
     )
-    result = []
-    for row in rows:
-        result.append({
+    return [
+        {
             "id": row.id,
             "canonical_question": row.canonical_question,
             "count": row.count,
             "first_asked": row.first_asked,
             "last_asked": row.last_asked,
             "similar_questions": json.loads(row.similar_questions or "[]"),
-        })
-    return result
+        }
+        for row in rows
+    ]
 
 
-def get_unanswered_by_id(db: Session, question_id: str) -> Optional[dict]:
-    """Retorna um único registro de pergunta não respondida como dict."""
-    uq = db.query(UnansweredQuestion).filter(UnansweredQuestion.id == question_id).first()
+def get_unanswered_by_id(db: Session, question_id: str, tenant_id: str) -> Optional[dict]:
+    uq = (
+        db.query(UnansweredQuestion)
+        .filter(UnansweredQuestion.id == question_id, UnansweredQuestion.tenant_id == tenant_id)
+        .first()
+    )
     if not uq:
         return None
     return {
@@ -258,9 +322,12 @@ def get_unanswered_by_id(db: Session, question_id: str) -> Optional[dict]:
     }
 
 
-def delete_unanswered_question(db: Session, question_id: str) -> bool:
-    """Remove permanentemente uma pergunta pendente pelo ID."""
-    uq = db.query(UnansweredQuestion).filter(UnansweredQuestion.id == question_id).first()
+def delete_unanswered_question(db: Session, question_id: str, tenant_id: str) -> bool:
+    uq = (
+        db.query(UnansweredQuestion)
+        .filter(UnansweredQuestion.id == question_id, UnansweredQuestion.tenant_id == tenant_id)
+        .first()
+    )
     if not uq:
         return False
     db.delete(uq)
@@ -268,20 +335,28 @@ def delete_unanswered_question(db: Session, question_id: str) -> bool:
     return True
 
 
-def convert_unanswered_to_faq(db: Session, question_id: str, answer: str, question: Optional[str] = None) -> Optional[Faq]:
-    uq = db.query(UnansweredQuestion).filter(UnansweredQuestion.id == question_id).first()
+def convert_unanswered_to_faq(
+    db: Session,
+    question_id: str,
+    answer: str,
+    question: Optional[str],
+    tenant_id: str,
+) -> Optional[Faq]:
+    uq = (
+        db.query(UnansweredQuestion)
+        .filter(UnansweredQuestion.id == question_id, UnansweredQuestion.tenant_id == tenant_id)
+        .first()
+    )
     if not uq:
         return None
 
-    # Cria FAQ
     faq = Faq(
+        tenant_id=tenant_id,
         question=(question or uq.canonical_question).strip(),
         answer=answer,
         show_on_totem=False,
     )
     db.add(faq)
-
-    # Marca como convertida
     uq.converted = True
     db.commit()
     db.refresh(faq)
@@ -289,8 +364,15 @@ def convert_unanswered_to_faq(db: Session, question_id: str, answer: str, questi
     return faq
 
 
-def save_feedback(db: Session, question: str, answer: str, helpful: bool) -> Interaction:
+def save_feedback(
+    db: Session,
+    question: str,
+    answer: str,
+    helpful: bool,
+    tenant_id: str,
+) -> Interaction:
     interaction = Interaction(
+        tenant_id=tenant_id,
         question=question,
         answer=answer,
         was_answered=True,
@@ -301,19 +383,19 @@ def save_feedback(db: Session, question: str, answer: str, helpful: bool) -> Int
     return interaction
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  DASHBOARD
-# ══════════════════════════════════════════════════════════════════════════════
+# Dashboard
 
-def get_dashboard_stats(db: Session) -> dict:
-    total = db.query(Interaction).count()
+def get_dashboard_stats(db: Session, tenant_id: str) -> dict:
+    total = db.query(Interaction).filter(Interaction.tenant_id == tenant_id).count()
     unanswered_count = (
         db.query(UnansweredQuestion)
-        .filter(UnansweredQuestion.converted == False)
+        .filter(
+            UnansweredQuestion.tenant_id == tenant_id,
+            UnansweredQuestion.converted == False,
+        )
         .count()
     )
 
-    # Interações dos últimos 7 dias
     today = utc_now().date()
     daily = []
     for i in range(6, -1, -1):
@@ -322,31 +404,47 @@ def get_dashboard_stats(db: Session) -> dict:
         day_end = datetime.combine(day, datetime.max.time())
         count = (
             db.query(Interaction)
-            .filter(Interaction.asked_at.between(day_start, day_end))
+            .filter(
+                Interaction.tenant_id == tenant_id,
+                Interaction.asked_at.between(day_start, day_end),
+            )
             .count()
         )
         daily.append({"date": day.strftime("%d/%m"), "count": count})
 
-    # Top FAQs por consultas diretas no cache/FAQ. Caso ainda não existam
-    # consultas registradas, mantém fallback por correspondência textual.
-    faqs = db.query(Faq).order_by(desc(Faq.total_consults), desc(Faq.created_at)).limit(5).all()
+    faqs = (
+        db.query(Faq)
+        .filter(Faq.tenant_id == tenant_id)
+        .order_by(desc(Faq.total_consults), desc(Faq.created_at))
+        .limit(5)
+        .all()
+    )
     top_faqs = []
     for faq in faqs:
         hits = faq.total_consults or 0
         if hits == 0:
             hits = (
                 db.query(Interaction)
-                .filter(func.lower(Interaction.question).contains(
-                    faq.question[:30].lower()
-                ))
+                .filter(
+                    Interaction.tenant_id == tenant_id,
+                    func.lower(Interaction.question).contains(faq.question[:30].lower()),
+                )
                 .count()
             )
         top_faqs.append({"question": faq.question[:50], "count": hits or 0})
 
     top_faqs.sort(key=lambda x: x["count"], reverse=True)
 
-    feedback_total = db.query(Interaction).filter(Interaction.feedback_helpful.isnot(None)).count()
-    feedback_positive = db.query(Interaction).filter(Interaction.feedback_helpful == True).count()
+    feedback_total = (
+        db.query(Interaction)
+        .filter(Interaction.tenant_id == tenant_id, Interaction.feedback_helpful.isnot(None))
+        .count()
+    )
+    feedback_positive = (
+        db.query(Interaction)
+        .filter(Interaction.tenant_id == tenant_id, Interaction.feedback_helpful == True)
+        .count()
+    )
     satisfaction_rate = round((feedback_positive / feedback_total) * 100, 1) if feedback_total else 0.0
 
     return {

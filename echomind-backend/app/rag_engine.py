@@ -30,6 +30,7 @@ from langchain_community.vectorstores.pgvector import PGVector
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .database import (
@@ -39,6 +40,7 @@ from .database import (
     Faq,
     SessionLocal,
     UnansweredQuestion,
+    engine,
     utc_now,
 )
 
@@ -132,8 +134,13 @@ def _get_llm() -> ChatGroq:
     )
 
 
-@lru_cache(maxsize=1)
-def _get_vector_store() -> PGVector:
+def _tenant_collection_name(tenant_id: str) -> str:
+    safe = "".join(ch if ch.isalnum() else "_" for ch in tenant_id)
+    return f"knowledge_{safe}"
+
+
+@lru_cache(maxsize=128)
+def _get_vector_store(tenant_id: str) -> PGVector:
     """
     FIX Bug 3: singleton com @lru_cache garante que TODAS as operações
     (add_documents, similarity_search, delete) usam a mesma instância
@@ -145,20 +152,35 @@ def _get_vector_store() -> PGVector:
     a instância nova não conhecia os IDs inseridos pela instância antiga —
     tornando o delete sempre ineficaz.
     """
-    logger.info("[RAG] Inicializando PGVector singleton...")
-    return PGVector(
+    logger.info("[RAG] Inicializando PGVector para tenant=%s...", tenant_id)
+    vector_store = PGVector(
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
-        collection_name="knowledge_documents",
+        collection_name=_tenant_collection_name(tenant_id),
         use_jsonb=True,
         engine_args={
             "pool_pre_ping": True,
             "connect_args": {"sslmode": "require"},
         },
     )
+    _enable_langchain_rls_if_possible()
+    return vector_store
 
 
-def _make_vector_id(source_id: str, source_type: str) -> str:
+@lru_cache(maxsize=1)
+def _enable_langchain_rls_if_possible() -> None:
+    if DATABASE_URL.startswith("sqlite"):
+        return
+
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_collection ENABLE ROW LEVEL SECURITY"))
+            conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_embedding ENABLE ROW LEVEL SECURITY"))
+    except Exception as exc:
+        logger.warning("[RAG] Nao foi possivel habilitar RLS nas tabelas LangChain: %s", exc)
+
+
+def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:
     """
     FIX Bug 1 + Bug 2: gera um UUID v5 determinístico a partir de
     (source_id, source_type).
@@ -179,7 +201,7 @@ def _make_vector_id(source_id: str, source_type: str) -> str:
     """
     import uuid
     namespace = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")  # UUID namespace DNS padrão
-    return str(uuid.uuid5(namespace, f"{source_type}:{source_id}"))
+    return str(uuid.uuid5(namespace, f"{tenant_id}:{source_type}:{source_id}"))
 
 
 def warm_up_rag_runtime() -> None:
@@ -212,52 +234,42 @@ def warm_up_rag_runtime() -> None:
     except Exception as exc:
         logger.warning("[RAG] Warm-up dos embeddings falhou: %s", exc)
 
-    try:
-        vector_store = _get_vector_store()
-        vector_store.similarity_search_with_score(
-            "aquecimento do mecanismo de busca",
-            k=1,
-        )
-    except Exception as exc:
-        logger.warning("[RAG] Warm-up do pgvector falhou: %s", exc)
-
     elapsed = time.monotonic() - started
     logger.info("[RAG] Warm-up finalizado em %.2fs.", elapsed)
 
 
 # ─── Cache de configuração (TTL 60s) ─────────────────────────────────────────
 
-_config_cache: dict = {}
-_config_cache_ts: float = 0.0
+_config_cache: dict[str, tuple[float, dict]] = {}
 _CONFIG_TTL = 60.0
 
 
-def _load_config_cached(db: Session) -> dict:
+def _load_config_cached(db: Session, tenant_id: str) -> dict:
     """Lê config da instituição com cache de 60s — evita SELECT a cada request."""
-    global _config_cache, _config_cache_ts
     now = time.monotonic()
-    if _config_cache and (now - _config_cache_ts) < _CONFIG_TTL:
-        return _config_cache
+    cached = _config_cache.get(tenant_id)
+    if cached and (now - cached[0]) < _CONFIG_TTL:
+        return cached[1]
 
-    cfg = db.query(Config).first()
-    _config_cache = {
+    cfg = db.query(Config).filter(Config.tenant_id == tenant_id).first()
+    data = {
         "company_name": cfg.company_name if cfg else "nossa instituição",
         "website":      (cfg.website if cfg else None) or "o site da instituição",
         "tone":         cfg.tone_of_voice if cfg else "profissional e cordial",
     }
-    _config_cache_ts = now
-    return _config_cache
+    _config_cache[tenant_id] = (now, data)
+    return data
 
 
 # ─── Retrieval com threshold manual ──────────────────────────────────────────
 
-async def _retrieve_docs(question: str) -> tuple[list[Document], float | None]:
+async def _retrieve_docs(question: str, tenant_id: str) -> tuple[list[Document], float | None]:
     """
     Busca os TOP_K_DOCS documentos mais próximos e filtra pela distância
     coseno bruta do pgvector — mais confiável que o score normalizado do
     LangChain, que pode vir fora de [0, 1] e descartar docs válidos.
     """
-    vs   = _get_vector_store()
+    vs   = _get_vector_store(tenant_id)
     loop = asyncio.get_running_loop()
 
     results: list[tuple[Document, float]] = await loop.run_in_executor(
@@ -284,10 +296,11 @@ async def _retrieve_docs(question: str) -> tuple[list[Document], float | None]:
 
 class RAGEngine:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
         self.db           = db
+        self.tenant_id    = tenant_id
         self._llm         = _get_llm()
-        self._config      = _load_config_cached(db)
+        self._config      = _load_config_cached(db, tenant_id)
         self.last_had_docs: bool = True  # atualizado por astream_chat; lido no main.py
 
     async def astream_chat(self, question: str) -> AsyncGenerator[str, None]:
@@ -302,7 +315,7 @@ class RAGEngine:
         2. O LLM recebeu documentos mas respondeu negativamente — significa
            que os docs eram irrelevantes (falsos positivos do retriever).
         """
-        docs, nearest_distance = await _retrieve_docs(question)
+        docs, nearest_distance = await _retrieve_docs(question, self.tenant_id)
 
         if not docs:
             # Caso 1: retriever não encontrou nada relevante
@@ -431,9 +444,9 @@ class RAGEngine:
           • Chama delete(ids=[vector_id]) com a assinatura correta.
           • Mesmo singleton (_get_vector_store()) = mesma instância que inseriu.
         """
-        vector_id = _make_vector_id(source_id, source)
+        vector_id = _make_vector_id(source_id, source, self.tenant_id)
         try:
-            _get_vector_store().delete(ids=[vector_id])
+            _get_vector_store(self.tenant_id).delete(ids=[vector_id])
             logger.info("[RAG] Vetor deletado do pgvector: %s:%s (vector_id=%s)",
                         source, source_id, vector_id)
         except Exception as exc:
@@ -452,12 +465,16 @@ class RAGEngine:
         Múltiplos upserts do mesmo documento sobrescrevem o mesmo ID —
         comportamento correto para re-indexação de FAQs editadas.
         """
-        vector_id = _make_vector_id(source_id, source_type)
+        vector_id = _make_vector_id(source_id, source_type, self.tenant_id)
         try:
-            _get_vector_store().add_documents(
+            _get_vector_store(self.tenant_id).add_documents(
                 [Document(
                     page_content=content,
-                    metadata={"source_id": source_id, "source_type": source_type},
+                    metadata={
+                        "source_id": source_id,
+                        "source_type": source_type,
+                        "tenant_id": self.tenant_id,
+                    },
                 )],
                 ids=[vector_id],
             )
@@ -469,7 +486,7 @@ class RAGEngine:
 
 # ─── Registro standalone (background task) ───────────────────────────────────
 
-def _register_unanswered_standalone(question: str) -> None:
+def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
     """
     Versão independente de _register_unanswered que cria e fecha sua própria
     Session do SQLAlchemy.
@@ -484,7 +501,10 @@ def _register_unanswered_standalone(question: str) -> None:
     try:
         existing = (
             db.query(UnansweredQuestion)
-            .filter(UnansweredQuestion.converted == False)
+            .filter(
+                UnansweredQuestion.tenant_id == tenant_id,
+                UnansweredQuestion.converted == False,
+            )
             .order_by(UnansweredQuestion.last_asked.desc())
             .limit(100)
             .all()
@@ -509,6 +529,7 @@ def _register_unanswered_standalone(question: str) -> None:
                         best_match.canonical_question[:60], best_ratio)
         else:
             db.add(UnansweredQuestion(
+                tenant_id=tenant_id,
                 canonical_question=question,
                 similar_questions="[]",
             ))
@@ -524,5 +545,5 @@ def _register_unanswered_standalone(question: str) -> None:
 
 # ─── Factory ─────────────────────────────────────────────────────────────────
 
-def get_rag_engine(db: Session) -> RAGEngine:
-    return RAGEngine(db)
+def get_rag_engine(db: Session, tenant_id: str) -> RAGEngine:
+    return RAGEngine(db, tenant_id)

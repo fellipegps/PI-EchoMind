@@ -14,6 +14,7 @@ import { Send, Bot, User, Loader2, Eraser, MessageSquareDashed } from "lucide-re
 import { toast } from "sonner";
 import { PageContainer } from "@/components/page-container";
 import { streamChat } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
 
 interface Message {
   role: "user" | "assistant";
@@ -31,6 +32,7 @@ export default function ChatbotTest() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tenantId, setTenantId] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   // Controla se o primeiro token já foi inserido como nova mensagem
   const firstTokenRef = useRef(true);
@@ -41,9 +43,15 @@ export default function ChatbotTest() {
     }
   }, [messages, loading]);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setTenantId(data.user?.id ?? "");
+    });
+  }, []);
+
   const sendMessage = async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || !tenantId) return;
 
     setInput("");
     firstTokenRef.current = true;
@@ -54,6 +62,7 @@ export default function ChatbotTest() {
 
     await streamChat(
       text,
+      tenantId,
       // onToken: ignora tokens vazios; no primeiro token real, cria a mensagem
       // do assistente; nos seguintes, acumula no último item
       (token) => {
@@ -205,7 +214,7 @@ export default function ChatbotTest() {
               />
               <Button
                 onClick={sendMessage}
-                disabled={loading || !input.trim()}
+                disabled={loading || !input.trim() || !tenantId}
                 className="h-11 px-6 shadow-md hover:shadow-lg transition-all"
               >
                 {loading ? (

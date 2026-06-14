@@ -73,9 +73,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 46px;
+  justify-content: center;
+  gap: clamp(30px, 4.5dvh, 46px);
   padding: var(--totem-screen-gutter-y) 40px var(--totem-screen-gutter-bottom);
   transition: all .4s ease;
+}
+
+.totem-main--with-faqs {
+  padding-top: clamp(36px, 5dvh, 70px);
+  padding-bottom: clamp(40px, 6dvh, 76px);
+}
+
+.totem-main--empty {
+  padding-top: var(--totem-screen-gutter-bottom);
+  padding-bottom: var(--totem-screen-gutter-bottom);
 }
 
 .hero-section {
@@ -332,7 +343,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  margin-bottom: var(--totem-screen-gutter-y);
+  margin-bottom: 0;
 }
 
 .faqs-label {
@@ -544,8 +555,12 @@
 
   .totem-main {
     gap: 34px;
-    justify-content: flex-start;
     padding: var(--totem-screen-gutter-y) 16px var(--totem-screen-gutter-bottom);
+  }
+
+  .totem-main--with-faqs,
+  .totem-main--empty {
+    justify-content: center;
   }
 
   .hero-section {
