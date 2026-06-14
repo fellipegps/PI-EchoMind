@@ -68,7 +68,6 @@ GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
 GROQ_LLM_MODEL=llama-3.3-70b-versatile
 
 EMBED_MODEL=BAAI/bge-small-en-v1.5
-EMBEDDING_DIM=384
 SIMILARITY_THRESHOLD=0.45
 TOP_K_DOCS=3
 ```
@@ -197,6 +196,17 @@ O totem mostra apenas FAQs marcadas para exibicao no totem daquele tenant.
 Como o frontend usa a FastAPI para acessar os dados do app, as tabelas principais nao precisam ser consultadas diretamente pela API publica do Supabase.
 
 Mesmo assim, em producao e recomendado habilitar RLS nas tabelas do schema `public` para bloquear acesso direto via PostgREST/Publishable Key. O backend continua sendo a camada responsavel por validar usuario e filtrar por `tenant_id`.
+
+A migration `0007` habilita RLS sem criar policies publicas e sem usar `FORCE ROW LEVEL SECURITY`. Isso bloqueia acesso direto pela API publica do Supabase, mas preserva o fluxo do backend via `DATABASE_URL`.
+
+O RAG atual usa as tabelas padrao do LangChain:
+
+```text
+langchain_pg_collection
+langchain_pg_embedding
+```
+
+A tabela antiga `knowledge_documents` foi removida porque nao participa mais do fluxo real do RAG. O codigo do RAG tambem tenta habilitar RLS nas tabelas LangChain quando elas sao criadas pelo `PGVector`, para evitar que o alerta volte caso essas tabelas ainda nao existissem no momento da migration.
 
 ## Fluxo Rapido De Teste
 

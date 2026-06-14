@@ -30,6 +30,7 @@ from langchain_community.vectorstores.pgvector import PGVector
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .database import (
@@ -39,6 +40,7 @@ from .database import (
     Faq,
     SessionLocal,
     UnansweredQuestion,
+    engine,
     utc_now,
 )
 
@@ -151,7 +153,7 @@ def _get_vector_store(tenant_id: str) -> PGVector:
     tornando o delete sempre ineficaz.
     """
     logger.info("[RAG] Inicializando PGVector para tenant=%s...", tenant_id)
-    return PGVector(
+    vector_store = PGVector(
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
         collection_name=_tenant_collection_name(tenant_id),
@@ -161,6 +163,21 @@ def _get_vector_store(tenant_id: str) -> PGVector:
             "connect_args": {"sslmode": "require"},
         },
     )
+    _enable_langchain_rls_if_possible()
+    return vector_store
+
+
+@lru_cache(maxsize=1)
+def _enable_langchain_rls_if_possible() -> None:
+    if DATABASE_URL.startswith("sqlite"):
+        return
+
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_collection ENABLE ROW LEVEL SECURITY"))
+            conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_embedding ENABLE ROW LEVEL SECURITY"))
+    except Exception as exc:
+        logger.warning("[RAG] Nao foi possivel habilitar RLS nas tabelas LangChain: %s", exc)
 
 
 def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:

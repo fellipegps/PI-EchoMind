@@ -9,11 +9,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
-    DateTime, Integer, Index,
+    DateTime, Integer,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
 from dotenv import load_dotenv
-from pgvector.sqlalchemy import Vector
 
 # ─── Conexão ─────────────────────────────────────────────────────────────────
 
@@ -37,9 +36,6 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "384"))  # 384 = BAAI/bge-small-en-v1.5
-
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -143,29 +139,4 @@ class UnansweredQuestion(Base):
     similar_questions   = Column(Text, default="[]")     # JSON array de strings
     converted           = Column(Boolean, default=False) # True após virar FAQ
 
-
-class KnowledgeDocument(Base):
-    """
-    Vetor de embedding para cada chunk de conhecimento indexado.
-    Fonte pode ser: 'faq' | 'event' | 'config'
-    """
-    __tablename__ = "knowledge_documents"
-
-    id          = Column(String, primary_key=True, default=new_uuid)
-    tenant_id   = Column(String, nullable=False, index=True)
-    source_id   = Column(String, nullable=False, index=True)   # ID do registro original
-    source_type = Column(String, nullable=False)               # faq | event | config
-    content     = Column(Text, nullable=False)                 # texto indexado
-    embedding   = Column(Vector(EMBEDDING_DIM), nullable=True) # vetor pgvector
-    created_at  = Column(DateTime, default=utc_now)
-
-    __table_args__ = (
-        Index(
-            "ix_knowledge_embedding_hnsw",
-            "embedding",
-            postgresql_using="hnsw",
-            postgresql_with={"m": 16, "ef_construction": 64},
-            postgresql_ops={"embedding": "vector_cosine_ops"},
-        ),
-    )
 
