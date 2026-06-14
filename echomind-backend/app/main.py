@@ -14,7 +14,7 @@ import asyncio
 import logging
 import os
 
-from .database import engine, Base, get_db
+from .database import get_db
 from .middleware import TimingMiddleware, RequestLogMiddleware, latency_store
 from .schemas import (
     ChatRequest,
@@ -23,7 +23,7 @@ from .schemas import (
     ConfigUpdate, ConfigResponse,
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, FeedbackRequest, FeedbackResponse,
-    TokenResponse, AdminUserResponse,
+    TokenResponse, CurrentUserResponse,
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
@@ -44,8 +44,7 @@ logger = logging.getLogger("echomind")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Iniciando EchoMind Backend...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Tabelas sincronizadas com o banco de dados.")
+    logger.info("Schema gerenciado por Alembic. Execute `alembic upgrade head` antes de subir a API.")
     warmup_timeout = float(os.getenv("RAG_WARMUP_TIMEOUT_SECONDS", "30"))
     try:
         await asyncio.wait_for(
@@ -190,7 +189,7 @@ def reset_password(payload: PasswordResetRequest):
     return {"message": "Email enviado"}
 
 
-@router_auth.get("/me", response_model=AdminUserResponse)
+@router_auth.get("/me", response_model=CurrentUserResponse)
 def get_me(
     current_user: CurrentUser = Depends(get_current_user),
     db: Session = Depends(get_db),

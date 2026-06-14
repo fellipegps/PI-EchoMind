@@ -181,8 +181,8 @@ class TokenResponse(BaseModel):
     email: str
 
 
-class AdminUserResponse(BaseModel):
-    """Dados públicos do usuário autenticado (sem hashed_password)."""
+class CurrentUserResponse(BaseModel):
+    """Dados publicos do usuario autenticado pelo Supabase Auth."""
     id: str
     email: str
     is_active: bool

@@ -64,7 +64,7 @@ export interface TokenResponse {
   email: string;
 }
 
-export interface AdminUser {
+export interface CurrentUser {
   id: string;
   email: string;
   is_active: boolean;
@@ -201,7 +201,7 @@ export const authApi = {
 
   isAuthenticated: () => !!tokenStore.get(),
 
-  me: () => request<AdminUser>("/auth/me"),
+  me: () => request<CurrentUser>("/auth/me"),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════

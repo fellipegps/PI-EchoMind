@@ -169,13 +169,3 @@ class KnowledgeDocument(Base):
         ),
     )
 
-
-class AdminUser(Base):
-    """Usuário administrador com acesso ao painel de gestão do EchoMind."""
-    __tablename__ = "admin_users"
-
-    id              = Column(String, primary_key=True, default=new_uuid)
-    email           = Column(String, unique=True, nullable=False, index=True)
-    hashed_password = Column(String, nullable=False)
-    is_active       = Column(Boolean, default=True, nullable=False)
-    created_at      = Column(DateTime, default=utc_now, nullable=False)
