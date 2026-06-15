@@ -237,9 +237,3 @@ class TestHealth:
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
 
-    def test_metrics_endpoint(self, client: TestClient):
-        resp = client.get("/metrics")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert "avg_response_time" in data
-        assert "total_requests" in data

@@ -174,13 +174,6 @@ class DashboardResponse(BaseModel):
 #  AUTH
 # ══════════════════════════════════════════════════════════════════════════════
 
-class TokenResponse(BaseModel):
-    """Resposta do POST /auth/login."""
-    access_token: str
-    token_type: str = "bearer"
-    email: str
-
-
 class CurrentUserResponse(BaseModel):
     """Dados publicos do usuario autenticado pelo Supabase Auth."""
     id: str

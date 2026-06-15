@@ -5,10 +5,9 @@ FastAPI + LangChain + Groq + pgvector
 
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, FastAPI, HTTPException, Depends, Query, status
+from fastapi import APIRouter, FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, Response
-from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 import asyncio
 import logging
@@ -23,7 +22,7 @@ from .schemas import (
     ConfigUpdate, ConfigResponse,
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, FeedbackRequest, FeedbackResponse,
-    TokenResponse, CurrentUserResponse,
+    CurrentUserResponse,
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
@@ -32,8 +31,6 @@ from .rag_engine import (
     _register_unanswered_standalone,
     warm_up_rag_runtime,
 )
-from .supabase_client import supabase
-from .voice_service import synthesize as tts_synthesize
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 
@@ -88,7 +85,6 @@ router_events = APIRouter(prefix="/events", tags=["Base de Conhecimento"])
 router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
-router_tts = APIRouter(prefix="/tts", tags=["Voz"])
 router_feedback = APIRouter(prefix="/feedback", tags=["Feedback"])
 router_system = APIRouter(tags=["Sistema"])
 
@@ -111,83 +107,9 @@ def get_rag(
     return get_rag_engine(db, tenant_id=current_user.id)
 
 
-class AuthCredentials(BaseModel):
-    email: str
-    password: str
-
-
-class RegisterCredentials(AuthCredentials):
-    full_name: str | None = None
-    company_name: str | None = None
-
-
-class PasswordResetRequest(BaseModel):
-    email: str
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  AUTH  /auth
 # ══════════════════════════════════════════════════════════════════════════════
-
-@router_auth.post("/login", response_model=TokenResponse)
-def login(payload: AuthCredentials):
-    """Autentica via Supabase Auth e retorna o access_token emitido pelo Supabase."""
-    try:
-        response = supabase.auth.sign_in_with_password(
-            {"email": payload.email, "password": payload.password}
-        )
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email ou senha incorretos.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    session = getattr(response, "session", None)
-    user = getattr(response, "user", None)
-    access_token = getattr(session, "access_token", None)
-    email = getattr(user, "email", None) or payload.email
-    if not access_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email ou senha incorretos.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    logger.info("[AUTH] Login bem-sucedido: %s", email)
-    return TokenResponse(access_token=access_token, token_type="bearer", email=email)
-
-
-@router_auth.post("/register", status_code=status.HTTP_201_CREATED)
-def register(payload: RegisterCredentials):
-    try:
-        response = supabase.auth.admin.create_user(
-            {
-                "email": payload.email,
-                "password": payload.password,
-                "email_confirm": True,
-                "user_metadata": {
-                    "full_name": payload.full_name,
-                    "company_name": payload.company_name,
-                },
-            }
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
-
-    user = getattr(response, "user", None)
-    return {"email": getattr(user, "email", None) or payload.email}
-
-
-@router_auth.post("/reset-password")
-def reset_password(payload: PasswordResetRequest):
-    try:
-        supabase.auth.reset_password_email(payload.email)
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
-
-    return {"message": "Email enviado"}
-
 
 @router_auth.get("/me", response_model=CurrentUserResponse)
 def get_me(
@@ -475,34 +397,6 @@ def convert_to_faq(
     rag.index_faq(faq)
     return faq
 
-
-@router_unanswered.post("/{question_id}/learn", status_code=204)
-def learn_from_unanswered(
-    question_id: str,
-    payload: ConvertToFaqRequest,
-    db: Session = Depends(get_db),
-    rag = Depends(get_rag),
-    current_user: CurrentUser = Depends(get_current_user),
-):
-    """
-    Fluxo de curadoria (Human-in-the-loop):
-      1. Gera embedding do par (pergunta + resposta manual).
-      2. Persiste o vetor no pgvector, expandindo a base de conhecimento.
-      3. Remove a pergunta da lista de pendentes.
-    """
-    uq = crud.get_unanswered_by_id(db, question_id, tenant_id=current_user.id)
-    if not uq:
-        raise HTTPException(status_code=404, detail="Pergunta não encontrada.")
-
-    rag.learn_from_curation(
-        question=uq["canonical_question"],
-        answer=payload.answer,
-        source_id=question_id,
-    )
-    crud.delete_unanswered_question(db, question_id, tenant_id=current_user.id)
-    logger.info("[LEARN] Curadoria aplicada para question_id=%s", question_id)
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 #  DASHBOARD  /dashboard
 # ══════════════════════════════════════════════════════════════════════════════
@@ -538,57 +432,11 @@ def save_response_feedback(
     )
     return FeedbackResponse(saved=True, helpful=payload.helpful)
 
-# ══════════════════════════════════════════════════════════════════════════════
-#  TTS  /tts
-# ══════════════════════════════════════════════════════════════════════════════
-
-@router_tts.get(
-    "",
-    summary="Síntese de voz via Microsoft Edge TTS",
-    response_class=Response,
-)
-async def tts(
-    texto: str = Query(..., min_length=1, max_length=1500, description="Texto a ser sintetizado"),
-    genero: str = Query("feminina", description="Gênero da voz: 'feminina' ou 'masculina'"),
-):
-    """
-    Recebe um texto e retorna o áudio MP3 sintetizado usando Microsoft Edge TTS.
-
-    - **texto**: texto a ser lido (máximo 1500 caracteres)
-    - **genero**: `feminina` → pt-BR-FranciscaNeural | `masculina` → pt-BR-AntonioNeural
-    """
-    if genero not in ("feminina", "masculina"):
-        raise HTTPException(status_code=400, detail="genero deve ser 'feminina' ou 'masculina'.")
-
-    try:
-        audio_bytes = await tts_synthesize(text=texto, gender=genero)
-    except RuntimeError as exc:
-        logger.error("[TTS] %s", exc)
-        raise HTTPException(status_code=502, detail=str(exc))
-
-    return Response(
-        content=audio_bytes,
-        media_type="audio/mpeg",
-        headers={
-            # Sem cache — cada texto gera áudio novo
-            "Cache-Control": "no-store",
-            "Content-Length": str(len(audio_bytes)),
-        },
-    )
-
-
 # ─── Health Check ─────────────────────────────────────────────────────────────
 
 @router_system.get("/health")
 def health():
     return {"status": "ok", "service": "EchoMind API"}
-
-
-@router_system.get("/metrics")
-def metrics():
-    """Métricas internas de latência — útil para monitoramento."""
-    return latency_store.summary()
-
 
 app.include_router(router_auth)
 app.include_router(router_chat)
@@ -598,5 +446,4 @@ app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)
 app.include_router(router_feedback)
-app.include_router(router_tts)
 app.include_router(router_system)

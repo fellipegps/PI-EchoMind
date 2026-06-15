@@ -378,27 +378,6 @@ class RAGEngine:
                 len(docs), question
             )
 
-    def learn_from_curation(self, question: str, answer: str, source_id: str) -> None:
-        """
-        Fluxo Human-in-the-loop:
-        Converte o par (pergunta + resposta manual do curador) em embedding
-        e o persiste no pgvector como um novo documento de conhecimento.
-
-        O texto indexado segue o mesmo padrão das FAQs para garantir
-        consistência no retrieval:
-          'Pergunta: <q>\\nResposta: <a>'
-
-        source_type='curated' permite distinguir no futuro documentos
-        originados de curadoria manual de FAQs e eventos.
-        """
-        content = f"Pergunta: {question}\nResposta: {answer}"
-        self._upsert_document(
-            source_id=source_id,
-            source_type="curated",
-            content=content,
-        )
-        logger.info("[RAG] Curadoria indexada: source_id=%s | pergunta='%.60s'", source_id, question)
-
     # ─── Indexação ───────────────────────────────────────────────────────────
 
     def index_faq(self, faq: Faq) -> None:

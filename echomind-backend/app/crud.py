@@ -304,24 +304,6 @@ def get_unanswered_questions(db: Session, tenant_id: str) -> list[dict]:
     ]
 
 
-def get_unanswered_by_id(db: Session, question_id: str, tenant_id: str) -> Optional[dict]:
-    uq = (
-        db.query(UnansweredQuestion)
-        .filter(UnansweredQuestion.id == question_id, UnansweredQuestion.tenant_id == tenant_id)
-        .first()
-    )
-    if not uq:
-        return None
-    return {
-        "id": uq.id,
-        "canonical_question": uq.canonical_question,
-        "count": uq.count,
-        "first_asked": uq.first_asked,
-        "last_asked": uq.last_asked,
-        "similar_questions": json.loads(uq.similar_questions or "[]"),
-    }
-
-
 def delete_unanswered_question(db: Session, question_id: str, tenant_id: str) -> bool:
     uq = (
         db.query(UnansweredQuestion)
