@@ -135,46 +135,23 @@ As rotas administrativas usam Supabase Auth.
 
 O cadastro pode ser feito pela tela `/registrar-conta`. O login e feito em `/login`.
 
-Para testar pela API:
+O backend nao possui endpoint proprio de login/cadastro/senha. Essas operacoes sao feitas diretamente pelo Supabase Auth no frontend.
 
-```json
-{
-  "email": "usuario@email.com",
-  "password": "sua-senha"
-}
-```
+Para testar rotas protegidas no Swagger:
 
-O backend retorna ou valida o `access_token` emitido pelo Supabase:
+1. Entre pelo frontend em `/login`.
+2. Use o access token da sessao Supabase.
+3. Clique em `Authorize` no Swagger.
+4. Informe o token no formato Bearer.
 
-```json
-{
-  "access_token": "...",
-  "token_type": "bearer",
-  "email": "usuario@email.com"
-}
-```
+O backend valida esse `access_token` em `/auth/me` e nas rotas administrativas.
 
 Nao existe mais tabela local `admin_users` para login. Usuarios administrativos sao usuarios do Supabase Auth.
-
-## Totem Publico
-
-O totem publico precisa receber o tenant na URL:
-
-```text
-http://localhost:3000/agente-publico?tenant=UUID_DO_USUARIO
-```
-
-Esse UUID e o `id` do usuario no Supabase Auth. O painel de configuracoes gera essa URL.
-
-O totem mostra apenas FAQs marcadas para exibicao no totem daquele tenant.
 
 ## Rotas Principais
 
 | Metodo | Rota | Descricao |
 | --- | --- | --- |
-| `POST` | `/auth/login` | Login administrativo |
-| `POST` | `/auth/register` | Cadastro via Supabase Auth |
-| `POST` | `/auth/reset-password` | Envio de email de recuperacao |
 | `GET` | `/auth/me` | Usuario autenticado e onboarding do tenant |
 | `POST` | `/chat` | Chat publico com streaming e `tenant_id` |
 | `GET/POST/PUT/DELETE` | `/faqs` | CRUD de FAQs autenticado |
@@ -184,29 +161,9 @@ O totem mostra apenas FAQs marcadas para exibicao no totem daquele tenant.
 | `GET` | `/config/public` | Configuracao publica por `tenant_id` |
 | `GET/DELETE` | `/unanswered` | Perguntas nao respondidas |
 | `POST` | `/unanswered/{id}/convert` | Converter pergunta em FAQ |
-| `POST` | `/unanswered/{id}/learn` | Ensinar resposta ao RAG |
 | `GET` | `/dashboard` | Metricas do tenant |
 | `POST` | `/feedback` | Feedback publico do totem |
-| `GET` | `/tts` | Sintese de voz |
 | `GET` | `/health` | Health check |
-| `GET` | `/metrics` | Metricas internas |
-
-## RLS No Supabase
-
-Como o frontend usa a FastAPI para acessar os dados do app, as tabelas principais nao precisam ser consultadas diretamente pela API publica do Supabase.
-
-Mesmo assim, em producao e recomendado habilitar RLS nas tabelas do schema `public` para bloquear acesso direto via PostgREST/Publishable Key. O backend continua sendo a camada responsavel por validar usuario e filtrar por `tenant_id`.
-
-A migration `0007` habilita RLS sem criar policies publicas e sem usar `FORCE ROW LEVEL SECURITY`. Isso bloqueia acesso direto pela API publica do Supabase, mas preserva o fluxo do backend via `DATABASE_URL`.
-
-O RAG atual usa as tabelas padrao do LangChain:
-
-```text
-langchain_pg_collection
-langchain_pg_embedding
-```
-
-A tabela antiga `knowledge_documents` foi removida porque nao participa mais do fluxo real do RAG. O codigo do RAG tambem tenta habilitar RLS nas tabelas LangChain quando elas sao criadas pelo `PGVector`, para evitar que o alerta volte caso essas tabelas ainda nao existissem no momento da migration.
 
 ## Fluxo Rapido De Teste
 

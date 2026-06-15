@@ -342,16 +342,6 @@ export const unansweredApi = {
   delete: (id: string) =>
     request<void>(`/unanswered/${id}`, { method: "DELETE" }),
 
-  /**
-   * Curadoria Human-in-the-loop:
-   * gera embedding do par (pergunta + resposta manual) e salva no pgvector,
-   * depois remove a pergunta dos pendentes. Não cria FAQ formal.
-   */
-  learn: (id: string, answer: string) =>
-    request<void>(`/unanswered/${id}/learn`, {
-      method: "POST",
-      body: JSON.stringify({ answer }),
-    }),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -375,23 +365,3 @@ export const feedbackApi = {
     }),
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
-//  TTS — Text-to-Speech via Google TTS (backend)
-// ══════════════════════════════════════════════════════════════════════════════
-
-/** Busca o áudio MP3 do backend e retorna uma Blob URL pronta para Audio(). */
-export async function fetchTTSAudio(
-  texto: string,
-  genero: "feminina" | "masculina" = "feminina"
-): Promise<string> {
-  const params = new URLSearchParams({ texto, genero });
-  const res = await fetch(`${BASE_URL}/tts?${params.toString()}`);
-
-  if (!res.ok) {
-    const detail = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(detail?.detail ?? `Erro TTS ${res.status}`);
-  }
-
-  const blob = await res.blob();
-  return URL.createObjectURL(blob);
-}

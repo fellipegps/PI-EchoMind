@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .supabase_client import supabase
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+bearer_scheme = HTTPBearer()
 
 
 @dataclass
@@ -23,7 +23,9 @@ class CurrentUser:
     company_name: str | None = None
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> CurrentUser:
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+) -> CurrentUser:
     """
     Valida o Bearer token emitido pelo Supabase Auth e retorna dados publicos
     suficientes para manter compatibilidade com as rotas protegidas existentes.
@@ -35,7 +37,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> CurrentUser:
     )
 
     try:
-        response = supabase.auth.get_user(token)
+        response = supabase.auth.get_user(credentials.credentials)
         user = response.user
     except Exception:
         raise credentials_exception
