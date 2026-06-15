@@ -256,12 +256,32 @@ def _load_config_cached(db: Session, tenant_id: str) -> dict:
         "company_name": cfg.company_name if cfg else "nossa instituição",
         "website":      (cfg.website if cfg else None) or "o site da instituição",
         "tone":         cfg.tone_of_voice if cfg else "profissional e cordial",
+        "description":  cfg.description if cfg else None,
+        "phone":        cfg.phone if cfg else None,
+        "address":      cfg.address if cfg else None,
+        "business_hours": cfg.business_hours if cfg else None,
     }
     _config_cache[tenant_id] = (now, data)
     return data
 
 
 # ─── Retrieval com threshold manual ──────────────────────────────────────────
+
+def _build_institution_context(config: dict) -> str:
+    """Transforma a config do tenant em contexto oficial sempre disponivel."""
+    lines = [f"Instituicao: {config['company_name']}"]
+    optional_fields = (
+        ("Descricao", config.get("description")),
+        ("Site", config.get("website")),
+        ("Telefone", config.get("phone")),
+        ("Endereco", config.get("address")),
+        ("Horario de atendimento", config.get("business_hours")),
+    )
+    for label, value in optional_fields:
+        if value:
+            lines.append(f"{label}: {value}")
+    return "\n".join(lines)
+
 
 async def _retrieve_docs(question: str, tenant_id: str) -> tuple[list[Document], float | None]:
     """
@@ -316,23 +336,16 @@ class RAGEngine:
            que os docs eram irrelevantes (falsos positivos do retriever).
         """
         docs, nearest_distance = await _retrieve_docs(question, self.tenant_id)
+        institution_context = _build_institution_context(self._config)
 
-        if not docs:
-            # Caso 1: retriever não encontrou nada relevante
-            self.last_had_docs = False
-            fallback = (
-                f"Não tenho informações suficientes para responder a isso. "
-                f"Por favor, consulte {self._config['company_name']} diretamente "
-                f"ou acesse {self._config['website']}."
-            )
-            for char in fallback:
-                yield char
-            return
-
-        # Caso 2: docs encontrados — mas o LLM pode ainda não saber responder
-        # (docs eram irrelevantes / falsos positivos do retriever).
-        # Acumulamos a resposta completa para verificar depois.
-        context_text = "\n\n---\n\n".join(d.page_content for d in docs)
+        # O LLM sempre recebe a ficha institucional; FAQs/eventos entram quando
+        # o retriever encontra documentos relevantes.
+        doc_context = "\n\n---\n\n".join(d.page_content for d in docs)
+        context_text = (
+            f"{institution_context}\n\n---\n\n{doc_context}"
+            if doc_context
+            else institution_context
+        )
         from datetime import date as _date
         _months = ["","janeiro","fevereiro","março","abril","maio","junho",
                    "julho","agosto","setembro","outubro","novembro","dezembro"]
