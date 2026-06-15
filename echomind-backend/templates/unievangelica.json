@@ -1,0 +1,165 @@
+{
+  "config": {
+    "company_name": "UniEVANGELICA",
+    "description": "Instituicao de ensino superior localizada em Anapolis, Goias, com cursos de graduacao, pos-graduacao, extensao, pesquisa e servicos academicos para estudantes, candidatos e comunidade.",
+    "tone_of_voice": "profissional, claro e cordial",
+    "totem_voice_gender": "feminina",
+    "website": "https://www.unievangelica.edu.br",
+    "phone": "(62) 3310-6600",
+    "address": "Av. Universitaria Km 3,5 - Cidade Universitaria, Anapolis - GO",
+    "business_hours": "Segunda a sexta, das 7h30 as 22h; sabados, das 7h30 as 12h"
+  },
+  "faqs": [
+    {
+      "question": "Como faco minha matricula na UniEVANGELICA?",
+      "answer": "A matricula deve ser feita conforme as orientacoes do processo seletivo ou do periodo academico vigente. Em geral, o estudante precisa acessar o portal indicado pela instituicao, preencher os dados solicitados, enviar a documentacao exigida e acompanhar a confirmacao da secretaria academica.",
+      "show_on_totem": true
+    },
+    {
+      "question": "Quais documentos sao necessarios para a matricula?",
+      "answer": "Normalmente sao solicitados documento de identidade, CPF, comprovante de residencia, historico escolar, certificado de conclusao do ensino medio, foto recente e demais documentos informados no edital ou pela secretaria academica.",
+      "show_on_totem": true
+    },
+    {
+      "question": "Qual e o horario de atendimento da secretaria academica?",
+      "answer": "A secretaria academica atende, em geral, de segunda a sexta-feira durante o horario comercial e academico da instituicao. Para confirmar horarios atualizados, consulte os canais oficiais da UniEVANGELICA ou entre em contato pelo telefone institucional.",
+      "show_on_totem": true
+    },
+    {
+      "question": "Como acessar o portal do aluno?",
+      "answer": "O acesso ao portal do aluno e feito pelo site oficial da UniEVANGELICA. O estudante deve informar seu usuario ou RA e a senha cadastrada. Em caso de primeiro acesso ou esquecimento de senha, utilize a opcao de recuperacao disponivel no portal.",
+      "show_on_totem": true
+    },
+    {
+      "question": "Como recuperar a senha do portal do aluno?",
+      "answer": "Para recuperar a senha, acesse o portal do aluno e clique na opcao de esqueci minha senha ou recuperacao de acesso. Siga as instrucoes enviadas para o e-mail cadastrado. Se nao conseguir, procure o suporte academico ou a secretaria.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Onde consulto minhas notas e frequencia?",
+      "answer": "As notas, frequencia e informacoes academicas ficam disponiveis no portal do aluno. O estudante deve acessar o sistema com suas credenciais e consultar a area de disciplinas, desempenho academico ou historico parcial.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como solicitar historico escolar?",
+      "answer": "A solicitacao de historico escolar deve ser feita pelo portal do aluno ou diretamente na secretaria academica, conforme o procedimento vigente. Pode haver prazo de emissao e eventual taxa administrativa.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como solicitar declaracao de matricula?",
+      "answer": "A declaracao de matricula pode ser solicitada pelos canais academicos oficiais, geralmente pelo portal do aluno ou pela secretaria. O documento comprova que o estudante possui vinculo ativo com a instituicao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como emitir segunda via de boleto?",
+      "answer": "A segunda via de boleto deve ser emitida pelo portal financeiro ou portal do aluno. Caso o boleto nao esteja disponivel, o estudante deve entrar em contato com o setor financeiro da instituicao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Onde resolvo assuntos financeiros?",
+      "answer": "Assuntos como boletos, mensalidades, negociacoes, comprovantes e pendencias financeiras devem ser tratados com o setor financeiro da UniEVANGELICA, pelos canais oficiais de atendimento ou presencialmente, quando disponivel.",
+      "show_on_totem": false
+    },
+    {
+      "question": "A UniEVANGELICA oferece bolsas de estudo?",
+      "answer": "A instituicao pode oferecer bolsas, descontos, programas de financiamento ou convenios conforme regras vigentes. O interessado deve consultar os editais, a central de atendimento ou o setor responsavel por beneficios estudantis.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como funciona o processo seletivo?",
+      "answer": "O processo seletivo pode ocorrer por vestibular, nota do ENEM, transferencia, portador de diploma ou outras modalidades divulgadas pela instituicao. As regras, prazos e documentos devem ser consultados no edital vigente.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como usar a nota do ENEM para ingressar?",
+      "answer": "Quando essa modalidade estiver disponivel, o candidato deve informar sua nota do ENEM no processo seletivo e seguir as orientacoes do edital. A aceitacao depende das regras e prazos definidos pela UniEVANGELICA.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como solicitar transferencia para a UniEVANGELICA?",
+      "answer": "A transferencia deve ser solicitada conforme calendario e disponibilidade de vagas. Em geral, sao analisados documentos academicos da instituicao de origem, historico, ementas e dados pessoais do candidato.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como fazer aproveitamento de disciplinas?",
+      "answer": "O aproveitamento de disciplinas deve ser solicitado pelo estudante junto a secretaria ou coordenacao, com envio de historico e ementas das disciplinas cursadas. A analise e feita pela area academica responsavel.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Onde encontro o calendario academico?",
+      "answer": "O calendario academico fica disponivel nos canais oficiais da UniEVANGELICA, como site institucional, portal do aluno ou comunicados da secretaria. Nele constam datas de aulas, provas, feriados, rematricula e prazos academicos.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como funciona a rematricula?",
+      "answer": "A rematricula ocorre dentro do periodo definido no calendario academico. O estudante deve acessar o portal, verificar pendencias academicas ou financeiras, escolher disciplinas quando aplicavel e confirmar o procedimento.",
+      "show_on_totem": false
+    },
+    {
+      "question": "O que fazer se eu perder o prazo de rematricula?",
+      "answer": "Caso perca o prazo, procure a secretaria academica o quanto antes para verificar se ainda existe possibilidade de regularizacao. A autorizacao depende do calendario, vagas e regras institucionais.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como trancar a matricula?",
+      "answer": "O trancamento de matricula deve ser solicitado formalmente pelos canais da secretaria academica, respeitando prazos e regras do regulamento institucional. O estudante deve verificar impactos academicos e financeiros antes de concluir o pedido.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como cancelar minha matricula?",
+      "answer": "O cancelamento de matricula exige solicitacao formal junto a secretaria academica ou setor responsavel. Antes de cancelar, o estudante deve verificar pendencias, regras contratuais e possiveis efeitos financeiros.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Onde fica a biblioteca?",
+      "answer": "A biblioteca da instituicao atende estudantes e professores para consulta, estudo e emprestimo de materiais conforme regras internas. Para localizacao, horarios e servicos atualizados, consulte os canais oficiais da UniEVANGELICA.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como acessar a biblioteca digital?",
+      "answer": "O acesso a biblioteca digital geralmente e feito pelo portal do aluno ou plataforma indicada pela instituicao. Use suas credenciais academicas e consulte as orientacoes da biblioteca em caso de dificuldade.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como falar com a coordenacao do meu curso?",
+      "answer": "O contato com a coordenacao pode ser feito pelos canais informados pelo curso, secretaria academica ou portal institucional. Informe seu nome, curso, periodo e uma descricao objetiva da solicitacao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como justificar faltas?",
+      "answer": "A justificativa de faltas deve seguir o regulamento academico da instituicao. O estudante deve apresentar documentacao comprobatória, quando exigida, dentro do prazo definido e pelo canal indicado pela secretaria ou coordenacao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como solicitar prova substitutiva?",
+      "answer": "A prova substitutiva deve ser solicitada conforme as regras do curso e do calendario academico. Pode ser necessario apresentar justificativa, documentos e observar prazos estabelecidos pela instituicao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como participar de atividades complementares?",
+      "answer": "As atividades complementares podem incluir palestras, cursos, eventos, projetos e acoes de extensao. O estudante deve acompanhar divulgacoes oficiais e registrar as atividades conforme as exigencias do curso.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como registrar horas complementares?",
+      "answer": "O registro de horas complementares deve ser feito conforme orientacao do curso, normalmente com envio de certificados ou comprovantes pelo portal ou setor responsavel. A validacao depende da analise academica.",
+      "show_on_totem": false
+    },
+    {
+      "question": "A instituicao oferece estagio?",
+      "answer": "A UniEVANGELICA pode divulgar oportunidades de estagio, convenios e orientacoes por meio dos cursos, nucleo de carreiras ou setores academicos. O estudante deve acompanhar os canais oficiais e falar com a coordenacao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Como obter informacoes sobre colacao de grau?",
+      "answer": "As informacoes sobre colacao de grau, prazos, documentos, ensaios e cerimonias sao divulgadas pela secretaria academica ou setor responsavel. Formandos devem acompanhar comunicados oficiais do curso e da instituicao.",
+      "show_on_totem": false
+    },
+    {
+      "question": "Onde encontro atendimento para suporte de sistemas?",
+      "answer": "Dificuldades com portal do aluno, acesso a sistemas, senha ou plataformas academicas devem ser encaminhadas ao suporte indicado pela instituicao. Informe nome completo, curso, RA e descricao do problema.",
+      "show_on_totem": false
+    }
+  ],
+  "events": []
+}

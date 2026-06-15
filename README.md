@@ -1,6 +1,6 @@
 # EchoMind - Totem de IA Institucional
 
-EchoMind e um sistema multiusuario de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, Alembic, pgvector, LangChain, Groq, FastEmbed e TTS para responder perguntas com base na base de conhecimento cadastrada por cada usuario/empresa.
+EchoMind e um sistema multiusuario de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, Alembic, pgvector, LangChain, Groq e FastEmbed para responder perguntas com base na base de conhecimento cadastrada por cada usuario/empresa.
 
 O projeto usa Supabase para:
 
@@ -128,6 +128,46 @@ O arquivo `seed.py` foi removido. Dados iniciais globais nao sao mais usados, po
 Cada usuario/empresa tem dados isolados por `tenant_id`. Quando um usuario autenticado acessa rotas administrativas, o backend executa o onboarding daquele tenant e cria uma configuracao inicial se ela ainda nao existir.
 
 As FAQs, eventos e demais dados devem ser cadastrados pelo painel administrativo ou por endpoints autenticados.
+
+## Importacao De Conhecimento Por JSON
+
+Para carregar rapidamente uma base inicial de conhecimento sem voltar ao `seed.py`, use o importador JSON:
+
+```bash
+cd echomind-backend
+python scripts/import_knowledge.py --tenant-id UUID_DO_USUARIO --file templates/unievangelica.json
+```
+
+O `tenant_id` e o `id` do usuario no Supabase Auth. Voce encontra esse valor no painel do Supabase em:
+
+```text
+Authentication > Users > selecione o usuario > User UID
+```
+
+O template de exemplo fica em:
+
+```text
+echomind-backend/templates/unievangelica.json
+```
+
+Ele contem configuracao institucional e 30 FAQs para uma instituicao de ensino superior, com ate 4 perguntas marcadas para aparecerem no totem publico.
+
+O importador:
+
+- atualiza ou cria a configuracao do tenant;
+- cria FAQs que ainda nao existem;
+- atualiza FAQs existentes quando a pergunta ja existe no mesmo tenant;
+- evita duplicacao por pergunta;
+- respeita o limite de 4 FAQs exibidas no totem;
+- reindexa FAQs e eventos no RAG automaticamente.
+
+Se quiser apenas validar a gravacao no banco sem reindexar o RAG, use:
+
+```bash
+python scripts/import_knowledge.py --tenant-id UUID_DO_USUARIO --file templates/unievangelica.json --skip-rag
+```
+
+Use `--skip-rag` somente para diagnostico. Para a IA responder com base nos dados importados, rode sem essa opcao.
 
 ## Autenticacao
 
