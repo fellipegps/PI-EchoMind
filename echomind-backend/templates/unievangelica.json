@@ -36,6 +36,11 @@
       "show_on_totem": false
     },
     {
+      "question": "O que e a UniEVANGELICA?",
+      "answer": "A UniEVANGELICA e uma instituicao de ensino superior localizada em Anapolis, Goias. A instituicao oferece cursos de graduacao, pos-graduacao, extensao, pesquisa e servicos academicos para estudantes, candidatos e comunidade. O campus fica na Av. Universitaria Km 3,5, Cidade Universitaria, em Anapolis.",
+      "show_on_totem": false
+    },
+    {
       "question": "Onde consulto minhas notas e frequencia?",
       "answer": "As notas, frequencia e informacoes academicas ficam disponiveis no portal do aluno. O estudante deve acessar o sistema com suas credenciais e consultar a area de disciplinas, desempenho academico ou historico parcial.",
       "show_on_totem": false
@@ -148,11 +153,6 @@
     {
       "question": "A instituicao oferece estagio?",
       "answer": "A UniEVANGELICA pode divulgar oportunidades de estagio, convenios e orientacoes por meio dos cursos, nucleo de carreiras ou setores academicos. O estudante deve acompanhar os canais oficiais e falar com a coordenacao.",
-      "show_on_totem": false
-    },
-    {
-      "question": "Como obter informacoes sobre colacao de grau?",
-      "answer": "As informacoes sobre colacao de grau, prazos, documentos, ensaios e cerimonias sao divulgadas pela secretaria academica ou setor responsavel. Formandos devem acompanhar comunicados oficiais do curso e da instituicao.",
       "show_on_totem": false
     },
     {
