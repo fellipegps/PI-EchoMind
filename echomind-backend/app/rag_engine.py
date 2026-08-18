@@ -1,11 +1,11 @@
 """
 rag_engine.py — Motor RAG do EchoMind
-LangChain + ChatGroq (llama-3.3-70b-versatile) + pgvector
+LangChain + ChatGroq (openai/gpt-oss-120b) + pgvector
 
 Arquitetura:
   • LLM via API Groq — latência de geração ~10× menor que modelos locais.
-    O modelo llama-3.3-70b-versatile oferece alta performance e é o substituto
-    oficial do llama-3.3-70b-specdec (descontinuado pela Groq).
+    O modelo openai/gpt-oss-120b é o substituto recomendado pela Groq para
+    llama-3.3-70b-versatile, descontinuado para contas free/developer.
   • Embeddings gerados localmente via FastEmbed — sem torch, sem DLLs do Windows,
     384 dims (compatível com pgvector).
   • Singletons via @lru_cache para LLM, Embeddings e VectorStore.
@@ -49,7 +49,7 @@ logger = logging.getLogger("echomind.rag")
 # ─── Configuração via variáveis de ambiente ───────────────────────────────────
 
 GROQ_API_KEY   = os.getenv("GROQ_API_KEY", "")
-GROQ_LLM_MODEL = os.getenv("GROQ_LLM_MODEL", "llama-3.3-70b-versatile")
+GROQ_LLM_MODEL = os.getenv("GROQ_LLM_MODEL", "openai/gpt-oss-120b")
 
 EMBED_MODEL  = os.getenv("EMBED_MODEL", "BAAI/bge-small-en-v1.5")
 
