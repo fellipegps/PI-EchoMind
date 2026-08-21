@@ -127,7 +127,7 @@ class TestChat:
 
     def test_chat_empty_message_rejected(self, client: TestClient):
         resp = client.post("/chat", json={"message": "", "tenant_id": "test-admin"})
-        assert resp.status_code == 400
+        assert resp.status_code == 422
 
     def test_chat_whitespace_message_rejected(self, client: TestClient):
         resp = client.post("/chat", json={"message": "   ", "tenant_id": "test-admin"})
@@ -157,35 +157,34 @@ class TestUnansweredQuestions:
         assert resp.status_code == 200
         assert resp.json() == []
 
-    def test_convert_to_faq(self, client: TestClient):
+    def test_convert_to_faq(self, client: TestClient, db):
         """
         Simula conversão de pergunta não respondida em FAQ.
         Primeiro cria manualmente uma UnansweredQuestion no banco via fixture.
         """
         from app.database import UnansweredQuestion
-        from tests.conftest import TestingSessionLocal
         import uuid
 
-        # Insere diretamente no banco de teste
-        with TestingSessionLocal() as session:
-            uq = UnansweredQuestion(
-                id=str(uuid.uuid4()),
-                tenant_id="test-admin",
-                canonical_question="Onde fica o bloco de odontologia?",
-                similar_questions='["como chego na odonto"]',
-                count=5,
-            )
-            session.add(uq)
-            session.commit()
-            uq_id = uq.id
+        # Usa a mesma sessão injetada no endpoint para comprovar a conversão.
+        uq = UnansweredQuestion(
+            id=str(uuid.uuid4()),
+            tenant_id="test-admin",
+            canonical_question="Onde fica o bloco de odontologia?",
+            similar_questions='["como chego na odonto"]',
+            count=5,
+        )
+        db.add(uq)
+        db.flush()
 
         resp = client.post(
-            f"/unanswered/{uq_id}/convert",
+            f"/unanswered/{uq.id}/convert",
             json={"answer": "O bloco de odontologia fica no Bloco C, 2º andar."},
         )
-        # Pode retornar 201 ou 404 dependendo do isolamento da sessão
-        # O teste principal é que o endpoint está funcional
-        assert resp.status_code in (201, 404)
+        assert resp.status_code == 201
+        assert resp.json()["question"] == uq.canonical_question
+        assert resp.json()["answer"] == "O bloco de odontologia fica no Bloco C, 2º andar."
+        db.refresh(uq)
+        assert uq.converted is True
 
     def test_convert_not_found(self, client: TestClient):
         resp = client.post(

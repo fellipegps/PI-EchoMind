@@ -215,3 +215,40 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 6. Abra configuracoes e complete os dados da empresa.
 7. Cadastre FAQs e marque ate 4 para aparecerem no totem.
 8. Copie a URL do totem em configuracoes e teste o atendimento publico.
+
+## CI Rapida E Baseline
+
+O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para
+`main` e disparos manuais. Os checks estaveis sao `Backend / unit-api` e
+`Frontend / quality-build`; execucoes anteriores da mesma branch ou PR sao
+canceladas quando uma nova comeca.
+
+A baseline do backend foi medida com Python 3.12.10, SQLite e mocks, sem Groq,
+Supabase ou banco externo:
+
+- 44 testes passando;
+- 643 de 883 statements cobertos;
+- 72,82% de cobertura real (73% no relatorio inteiro do coverage);
+- gate fixado em 72%, o piso inteiro sem arredondamento para cima.
+
+Para reproduzir o gate do backend:
+
+```bash
+cd echomind-backend
+python -m pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+```
+
+Para reproduzir o gate do frontend com Node.js 20+ e Corepack:
+
+```bash
+cd echomind-front
+corepack pnpm install --frozen-lockfile
+corepack pnpm lint
+corepack pnpm exec tsc --noEmit
+corepack pnpm build
+```
+
+O build de CI recebe somente placeholders publicos para
+`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` e
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Nenhum segredo de producao e usado.

@@ -31,8 +31,8 @@ export function useFaqs() {
         setFaqs((prev) => [created, ...prev]);
         toast.success("FAQ criada!");
       }
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao salvar FAQ.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar FAQ.");
       throw err; // re-lança para o componente manter o dialog aberto
     }
   };
@@ -43,8 +43,8 @@ export function useFaqs() {
       await faqApi.delete(id);
       setFaqs((prev) => prev.filter((f) => f.id !== id));
       toast.success("FAQ excluída!");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao excluir FAQ.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao excluir FAQ.");
     }
   };
 
@@ -53,9 +53,9 @@ export function useFaqs() {
     try {
       const updated = await faqApi.toggleTotem(id);
       setFaqs((prev) => prev.map((f) => (f.id === id ? updated : f)));
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Backend retorna 409 quando limite de 4 FAQs no totem é atingido
-      toast.error(err.message ?? "Erro ao alterar status do totem.");
+      toast.error(err instanceof Error ? err.message : "Erro ao alterar status do totem.");
     }
   };
 

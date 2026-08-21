@@ -122,10 +122,13 @@ def client(db: Session) -> Generator[TestClient, None, None]:
     )
 
     # Mock do RAGEngine para não precisar do Ollama
-    with patch("app.main.get_rag_engine") as mock_engine_factory:
+    with (
+        patch("app.main.get_rag_engine") as mock_engine_factory,
+        patch("app.crud.find_cached_faq_answer", return_value=None),
+    ):
         fake_engine = FakeRAGEngine()
         mock_engine_factory.return_value = fake_engine
-        with TestClient(app, raise_server_exceptions=False) as c:
+        with TestClient(app) as c:
             yield c
 
     app.dependency_overrides.clear()
@@ -144,12 +147,14 @@ class FakeRAGEngine:
 
     def __init__(self, has_context: bool = True, error: bool = False):
         self.has_context = has_context
+        self.last_had_docs = has_context
         self.error = error
         self.indexed_faqs: list = []
         self.indexed_events: list = []
         self.deleted: list = []
 
     async def astream_chat(self, question: str) -> AsyncGenerator[str, None]:
+        self.last_had_docs = self.has_context
         if self.error:
             raise ConnectionError("Ollama unavailable")
 
