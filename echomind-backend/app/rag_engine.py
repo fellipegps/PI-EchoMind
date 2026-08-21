@@ -51,7 +51,15 @@ logger = logging.getLogger("echomind.rag")
 GROQ_API_KEY   = os.getenv("GROQ_API_KEY", "")
 GROQ_LLM_MODEL = os.getenv("GROQ_LLM_MODEL", "openai/gpt-oss-120b")
 
-EMBED_MODEL  = os.getenv("EMBED_MODEL", "BAAI/bge-small-en-v1.5")
+DEFAULT_EMBED_MODEL = "intfloat/multilingual-e5-small"
+DEFAULT_EMBEDDING_DIM = 384
+
+EMBED_MODEL = os.getenv("EMBED_MODEL", DEFAULT_EMBED_MODEL)
+EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", str(DEFAULT_EMBEDDING_DIM)))
+if EMBEDDING_DIM != DEFAULT_EMBEDDING_DIM:
+    raise RuntimeError(
+        "EMBEDDING_DIM deve permanecer em 384 para ser compativel com o schema vetorial atual."
+    )
 
 # Garante que o cache de modelos use um caminho valido em Windows, Linux e macOS.
 _MODEL_CACHE = os.getenv(
@@ -63,12 +71,7 @@ os.environ.setdefault("TRANSFORMERS_CACHE", _MODEL_CACHE)
 os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", _MODEL_CACHE)
 
 # Threshold de DISTÂNCIA coseno (0 = idêntico, 2 = oposto).
-# O modelo BAAI/bge-small-en-v1.5 gera vetores onde:
-#   < 0.30 = muito similar (mesma pergunta reformulada)
-#   0.30–0.45 = relacionado (contexto relevante)
-#   > 0.45 = provavelmente não relacionado
-# 0.70 (valor antigo) era tolerante demais — aprovava docs irrelevantes,
-# fazendo o LLM sempre receber "contexto" e nunca registrar não respondidas.
+# Mantido temporariamente em 0.45; a calibracao pertence a PR 23.
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.45"))
 UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "0.38"))
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
@@ -98,14 +101,39 @@ Com base EXCLUSIVAMENTE nas INFORMAÇÕES OFICIAIS acima, responda de forma conc
 
 # ─── Singletons ───────────────────────────────────────────────────────────────
 
+def _register_default_embedding_model() -> None:
+    """Registra o multilingual-e5-small 384d sem carregar ou baixar o modelo."""
+    if EMBED_MODEL != DEFAULT_EMBED_MODEL:
+        return
+
+    from fastembed import TextEmbedding
+
+    supported_models = TextEmbedding.list_supported_models()
+    if any(model["model"] == DEFAULT_EMBED_MODEL for model in supported_models):
+        return
+
+    from fastembed.common.model_description import ModelSource, PoolingType
+
+    TextEmbedding.add_custom_model(
+        model=DEFAULT_EMBED_MODEL,
+        pooling=PoolingType.MEAN,
+        normalization=True,
+        sources=ModelSource(hf=DEFAULT_EMBED_MODEL),
+        dim=EMBEDDING_DIM,
+        model_file="onnx/model.onnx",
+        description="Multilingual E5 small para retrieval multilingue.",
+        license="mit",
+    )
+
 @lru_cache(maxsize=1)
 def _get_embeddings() -> FastEmbedEmbeddings:
     """
     Embeddings locais via FastEmbed (fastembed), sem torch e sem DLLs do Windows.
-    BAAI/bge-small-en-v1.5: 384 dims, compacto e rapido para CPU.
+    intfloat/multilingual-e5-small: 384 dims, multilingue e compacto para CPU.
     """
     logger.info("[RAG] Carregando modelo de embeddings via FastEmbed: %s", EMBED_MODEL)
     try:
+        _register_default_embedding_model()
         return FastEmbedEmbeddings(model_name=EMBED_MODEL, cache_dir=_MODEL_CACHE)
     except Exception as exc:
         raise RuntimeError(
@@ -165,6 +193,18 @@ def _get_vector_store(tenant_id: str) -> PGVector:
     )
     _enable_langchain_rls_if_possible()
     return vector_store
+
+
+def clear_tenant_collection(tenant_id: str) -> None:
+    """Limpa e recria exclusivamente a colecao vetorial do tenant informado."""
+    if not tenant_id.strip():
+        raise ValueError("tenant_id nao pode ser vazio.")
+
+    collection_name = _tenant_collection_name(tenant_id)
+    logger.warning("[RAG] Limpando colecao para reindexacao: %s", collection_name)
+    vector_store = _get_vector_store(tenant_id)
+    vector_store.delete_collection()
+    vector_store.create_collection()
 
 
 @lru_cache(maxsize=1)

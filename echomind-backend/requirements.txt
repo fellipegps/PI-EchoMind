@@ -20,7 +20,7 @@ langchain-core==0.2.43
 langchain-groq==0.1.9
 
 # Local embeddings without torch, safe on Windows
-fastembed==0.4.2; python_version < "3.13"
+fastembed==0.6.1; python_version < "3.13"
 fastembed==0.8.0; python_version >= "3.13"
 
 supabase>=2.15.0,<3.0.0
