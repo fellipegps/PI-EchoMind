@@ -268,9 +268,14 @@ Para reproduzir o gate do frontend com Node.js 20+ e Corepack:
 cd echomind-front
 corepack pnpm install --frozen-lockfile
 corepack pnpm lint
-corepack pnpm exec tsc --noEmit
+corepack pnpm typecheck
+corepack pnpm test:run
 corepack pnpm build
 ```
+
+Durante o desenvolvimento, `corepack pnpm test` mantem o Vitest em modo watch.
+Para gerar o relatorio de cobertura sem impor um limite bloqueante, use
+`corepack pnpm test:coverage`.
 
 O build de CI recebe somente placeholders publicos para
 `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` e
