@@ -27,12 +27,11 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgresql") and "sslmode" not in DATABASE_URL:
     DATABASE_URL += "?sslmode=require" if "?" not in DATABASE_URL else "&sslmode=require"
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-)
+engine_options = {"pool_pre_ping": True}
+if not DATABASE_URL.startswith("sqlite"):
+    engine_options.update(pool_size=10, max_overflow=20)
+
+engine = create_engine(DATABASE_URL, **engine_options)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

@@ -90,8 +90,8 @@ export default function UnansweredQuestions() {
       setEditedQuestion("");
       toast.success("FAQ criada! Redirecionando para a Base de Conhecimento…");
       router.push("/base-de-conhecimento");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao converter.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao converter.");
     } finally {
       setConverting(null);
     }
@@ -104,8 +104,8 @@ export default function UnansweredQuestions() {
       await unansweredApi.delete(id);
       removeFromList(id);
       toast.success("Pergunta removida da lista.");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao remover pergunta.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao remover pergunta.");
     } finally {
       setDeleting(null);
     }
@@ -202,7 +202,7 @@ export default function UnansweredQuestions() {
                               key={i}
                               className="text-sm text-muted-foreground italic"
                             >
-                              "{sq}"
+                              &quot;{sq}&quot;
                             </p>
                           ))}
                         </div>
@@ -263,7 +263,7 @@ export default function UnansweredQuestions() {
                           <p className="text-xs text-muted-foreground">
                             Original:{" "}
                             <span className="italic">
-                              "{q.canonical_question}"
+                              &quot;{q.canonical_question}&quot;
                             </span>
                           </p>
                         )}
@@ -339,7 +339,7 @@ export default function UnansweredQuestions() {
                         <AlertDialogDescription>
                           A pergunta{" "}
                           <span className="font-semibold text-foreground">
-                            "{q.canonical_question}"
+                            &quot;{q.canonical_question}&quot;
                           </span>{" "}
                           será removida permanentemente da lista de pendentes.
                           Esta ação não pode ser desfeita.

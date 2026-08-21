@@ -46,8 +46,8 @@ export function useEvents() {
         setEvents((prev) => [created, ...prev]);
         toast.success("Evento criado!");
       }
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao salvar evento.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar evento.");
     }
   };
 
@@ -57,8 +57,8 @@ export function useEvents() {
       await eventApi.delete(id);
       setEvents((prev) => prev.filter((e) => e.id !== id));
       toast.success("Evento excluído!");
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao excluir evento.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao excluir evento.");
     }
   };
 
