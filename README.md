@@ -252,3 +252,49 @@ corepack pnpm build
 O build de CI recebe somente placeholders publicos para
 `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` e
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Nenhum segredo de producao e usado.
+
+## CI PostgreSQL E pgvector
+
+O check `Database / migration-integration` usa o container descartavel
+`pgvector/pgvector:0.8.6-pg17`. O major PostgreSQL 17 corresponde ao projeto
+Supabase, cuja versao informada e 17.6; a tag do pgvector fica fixa para evitar
+mudancas silenciosas no ambiente de CI.
+
+As suites permanecem separadas:
+
+- `tests/quick` usa SQLite e FakeVector, sem banco ou servico externo;
+- `tests/integration` aceita somente o banco local descartavel chamado
+  `echomind_integration` e usa PostgreSQL/pgvector reais.
+
+O gate rapido continua sendo reproduzido pelo comando da secao anterior. Para
+reproduzir apenas a integracao no PowerShell, tenha Docker em execucao e rode:
+
+```powershell
+cd echomind-backend
+python -m pip install -r requirements.txt -r requirements-dev.txt
+
+docker run --name echomind-pgvector-integration --rm -d `
+  -e POSTGRES_USER=echomind_ci `
+  -e POSTGRES_PASSWORD=echomind_ci `
+  -e POSTGRES_DB=echomind_integration `
+  -p 55432:5432 `
+  --health-cmd "pg_isready -U echomind_ci -d echomind_integration" `
+  --health-interval 5s --health-timeout 5s --health-retries 10 `
+  pgvector/pgvector:0.8.6-pg17
+
+while ((docker inspect --format '{{.State.Health.Status}}' echomind-pgvector-integration) -ne 'healthy') {
+  Start-Sleep -Seconds 1
+}
+
+$env:DATABASE_URL = 'postgresql://echomind_ci:echomind_ci@127.0.0.1:55432/echomind_integration?sslmode=disable'
+docker exec echomind-pgvector-integration psql -U echomind_ci -d echomind_integration -v ON_ERROR_STOP=1 -c "CREATE EXTENSION IF NOT EXISTS vector"
+python -m alembic upgrade head
+python -m pytest -m integration
+
+docker stop echomind-pgvector-integration
+Remove-Item Env:DATABASE_URL
+```
+
+O `--rm` remove o container e o banco quando `docker stop` e executado. Essa
+infraestrutura serve somente aos testes; Docker nao e requisito para executar a
+API ou o frontend, e nenhuma URL de staging/producao deve ser usada.
