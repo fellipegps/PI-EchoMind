@@ -1,5 +1,5 @@
 """
-tests/conftest.py – Fixtures compartilhadas para todos os testes.
+tests/quick/conftest.py – Fixtures exclusivas dos testes rapidos.
 
 Estratégia de isolamento:
   • Banco: SQLite em memória (sem precisar de Postgres nem pgvector)
@@ -13,22 +13,19 @@ import asyncio
 import json
 import os
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
-from typing import AsyncGenerator, Generator
+from typing import Any, AsyncGenerator, Generator
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
-# ─── Patch pgvector ANTES de qualquer import do app ──────────────────────────
-# SQLite não tem Vector — substituímos por Text para os testes
+# SQLite não tem Vector — substituímos por Text somente ao executar a suite rapida.
 import sqlalchemy.types as types
-
-os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
-os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
-os.environ.setdefault("SUPABASE_SECRET_KEY", "test-secret-key")
 
 
 class FakeVector(types.TypeDecorator):
@@ -51,47 +48,78 @@ class FakeVector(types.TypeDecorator):
         return json.loads(value)
 
 
-# Injeta o fake antes do import dos modelos
-import pgvector.sqlalchemy as pgvec_module
-pgvec_module.Vector = FakeVector
-
-# Agora importa o app (já com o patch aplicado)
-from app.auth import CurrentUser, get_current_user
-from app.database import Base, get_db
-from app.main import app
-
-# ─── Engine SQLite em memória ─────────────────────────────────────────────────
-
 SQLITE_URL = "sqlite:///:memory:"
 
-test_engine = create_engine(
-    SQLITE_URL,
-    connect_args={"check_same_thread": False},
-)
 
-# SQLite não suporta HNSW — remove o índice antes de criar as tabelas
-@event.listens_for(Base.metadata, "before_create")
-def remove_hnsw_index(target, connection, **kwargs):
-    for table in target.tables.values():
-        indexes_to_remove = [
-            idx for idx in table.indexes
-            if "hnsw" in idx.name.lower()
-        ]
-        for idx in indexes_to_remove:
-            table.indexes.discard(idx)
+@dataclass
+class QuickTestContext:
+    app: Any
+    current_user_type: Any
+    get_current_user: Any
+    get_db: Any
+    engine: Engine
+    session_factory: Any
 
 
-Base.metadata.create_all(bind=test_engine)
+@pytest.fixture(scope="session")
+def quick_test_context() -> Generator[QuickTestContext, None, None]:
+    """Inicializa SQLite/FakeVector apenas quando um teste rapido e selecionado."""
+    os.environ.setdefault("DATABASE_URL", SQLITE_URL)
+    os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
+    os.environ.setdefault("SUPABASE_SECRET_KEY", "test-secret-key")
 
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+    import pgvector.sqlalchemy as pgvec_module
+
+    original_vector = pgvec_module.Vector
+    pgvec_module.Vector = FakeVector
+
+    from app.auth import CurrentUser, get_current_user
+    from app.database import Base, get_db
+    from app.main import app
+
+    test_engine = create_engine(
+        SQLITE_URL,
+        connect_args={"check_same_thread": False},
+    )
+
+    def remove_hnsw_index(target, connection, **kwargs):
+        for table in target.tables.values():
+            indexes_to_remove = [
+                idx for idx in table.indexes
+                if "hnsw" in idx.name.lower()
+            ]
+            for idx in indexes_to_remove:
+                table.indexes.discard(idx)
+
+    event.listen(Base.metadata, "before_create", remove_hnsw_index)
+    Base.metadata.create_all(bind=test_engine)
+    testing_session_local = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=test_engine,
+    )
+
+    try:
+        yield QuickTestContext(
+            app=app,
+            current_user_type=CurrentUser,
+            get_current_user=get_current_user,
+            get_db=get_db,
+            engine=test_engine,
+            session_factory=testing_session_local,
+        )
+    finally:
+        event.remove(Base.metadata, "before_create", remove_hnsw_index)
+        test_engine.dispose()
+        pgvec_module.Vector = original_vector
 
 
 @pytest.fixture()
-def db() -> Generator[Session, None, None]:
+def db(quick_test_context: QuickTestContext) -> Generator[Session, None, None]:
     """Sessão de banco isolada por teste (rollback ao final)."""
-    connection = test_engine.connect()
+    connection = quick_test_context.engine.connect()
     transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
+    session = quick_test_context.session_factory(bind=connection)
 
     yield session
 
@@ -101,7 +129,10 @@ def db() -> Generator[Session, None, None]:
 
 
 @pytest.fixture()
-def client(db: Session) -> Generator[TestClient, None, None]:
+def client(
+    db: Session,
+    quick_test_context: QuickTestContext,
+) -> Generator[TestClient, None, None]:
     """
     Cliente HTTP do FastAPI com injeção da sessão de teste
     e RAGEngine mocado (sem Ollama real).
@@ -112,13 +143,16 @@ def client(db: Session) -> Generator[TestClient, None, None]:
         finally:
             pass
 
-    app.dependency_overrides[get_db] = override_get_db
-    app.dependency_overrides[get_current_user] = lambda: CurrentUser(
-        id="test-admin",
-        email="admin@test.local",
-        is_active=True,
-        created_at=datetime.utcnow(),
-        company_name="Empresa Teste",
+    app = quick_test_context.app
+    app.dependency_overrides[quick_test_context.get_db] = override_get_db
+    app.dependency_overrides[quick_test_context.get_current_user] = lambda: (
+        quick_test_context.current_user_type(
+            id="test-admin",
+            email="admin@test.local",
+            is_active=True,
+            created_at=datetime.utcnow(),
+            company_name="Empresa Teste",
+        )
     )
 
     # Mock do RAGEngine para não precisar do Ollama

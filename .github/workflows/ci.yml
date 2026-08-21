@@ -53,6 +53,64 @@ jobs:
           path: echomind-backend/coverage.xml
           retention-days: 7
 
+  database-migration-integration:
+    name: Database / migration-integration
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: echomind-backend
+    env:
+      DATABASE_URL: postgresql://echomind_ci:echomind_ci@127.0.0.1:5432/echomind_integration?sslmode=disable
+
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg17
+        env:
+          POSTGRES_USER: echomind_ci
+          POSTGRES_PASSWORD: echomind_ci
+          POSTGRES_DB: echomind_integration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U echomind_ci -d echomind_integration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            echomind-backend/requirements.txt
+            echomind-backend/requirements-dev.txt
+
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Enable pgvector extension
+        run: |
+          python - <<'PY'
+          import os
+          from sqlalchemy import create_engine, text
+
+          engine = create_engine(os.environ["DATABASE_URL"], isolation_level="AUTOCOMMIT")
+          with engine.connect() as connection:
+              connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+          engine.dispose()
+          PY
+
+      - name: Migrate empty database to Alembic head
+        run: python -m alembic upgrade head
+
+      - name: Validate migration and real pgvector integration
+        run: python -m pytest -m integration
+
   frontend-quality-build:
     name: Frontend / quality-build
     runs-on: ubuntu-latest
