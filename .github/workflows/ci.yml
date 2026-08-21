@@ -143,7 +143,10 @@ jobs:
         run: corepack pnpm lint
 
       - name: Type-check frontend
-        run: corepack pnpm exec tsc --noEmit
+        run: corepack pnpm typecheck
+
+      - name: Test frontend
+        run: corepack pnpm test:run
 
       - name: Build frontend
         run: corepack pnpm build

@@ -67,7 +67,8 @@ SUPABASE_SECRET_KEY=sb_secret_...
 GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
 GROQ_LLM_MODEL=openai/gpt-oss-120b
 
-EMBED_MODEL=BAAI/bge-small-en-v1.5
+EMBED_MODEL=intfloat/multilingual-e5-small
+EMBEDDING_DIM=384
 SIMILARITY_THRESHOLD=0.45
 TOP_K_DOCS=3
 ```
@@ -169,6 +170,28 @@ python scripts/import_knowledge.py --tenant-id UUID_DO_USUARIO --file templates/
 
 Use `--skip-rag` somente para diagnostico. Para a IA responder com base nos dados importados, rode sem essa opcao.
 
+## Reindexacao Manual Do RAG
+
+O embedding padrao e `intfloat/multilingual-e5-small`, com exatamente 384
+dimensoes. Depois de implantar essa troca, execute conscientemente uma
+reindexacao para evitar misturar vetores do modelo anterior com o novo espaco
+vetorial:
+
+```bash
+cd echomind-backend
+# Confirme antes que o ambiente usa:
+# EMBED_MODEL=intfloat/multilingual-e5-small
+# EMBEDDING_DIM=384
+python scripts/reindex_all.py --confirm
+```
+
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs
+ou eventos e processa um por vez. Para cada tenant, somente a colecao
+`knowledge_<tenant>` correspondente e limpa e recriada; em seguida, as FAQs e
+os eventos desse mesmo tenant sao indexados novamente com os IDs deterministicos
+atuais. Nenhuma reindexacao e executada em startup, deploy ou importacao
+automaticamente, e o script nao processa documentos ou chunks.
+
 ## Autenticacao
 
 As rotas administrativas usam Supabase Auth.
@@ -245,9 +268,14 @@ Para reproduzir o gate do frontend com Node.js 20+ e Corepack:
 cd echomind-front
 corepack pnpm install --frozen-lockfile
 corepack pnpm lint
-corepack pnpm exec tsc --noEmit
+corepack pnpm typecheck
+corepack pnpm test:run
 corepack pnpm build
 ```
+
+Durante o desenvolvimento, `corepack pnpm test` mantem o Vitest em modo watch.
+Para gerar o relatorio de cobertura sem impor um limite bloqueante, use
+`corepack pnpm test:coverage`.
 
 O build de CI recebe somente placeholders publicos para
 `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` e
