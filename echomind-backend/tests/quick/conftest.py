@@ -82,6 +82,12 @@ def quick_test_context() -> Generator[QuickTestContext, None, None]:
         connect_args={"check_same_thread": False},
     )
 
+    @event.listens_for(test_engine, "connect")
+    def enable_sqlite_foreign_keys(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys = ON")
+        cursor.close()
+
     def remove_hnsw_index(target, connection, **kwargs):
         for table in target.tables.values():
             indexes_to_remove = [
