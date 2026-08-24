@@ -1,7 +1,7 @@
-"""Primitivas puras para a fronteira de upload documental.
+"""Primitivas puras para validacao e extracao documental.
 
-Este modulo nao extrai conteudo, persiste documentos ou conhece FastAPI. Ele
-somente valida os bytes originais que uma futura camada de transporte entregar.
+Este modulo nao persiste documentos nem conhece FastAPI, ORM, PGVector ou
+chunking. Ele recebe bytes originais e devolve metadados ou blocos de texto.
 """
 
 from __future__ import annotations
@@ -11,7 +11,14 @@ import os
 import posixpath
 import unicodedata
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, BinaryIO
+from io import BytesIO
+from typing import TYPE_CHECKING, BinaryIO, Iterator
+
+from docx import Document
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -58,6 +65,22 @@ class DocumentTooLargeError(DocumentValidationError):
     """O arquivo excede o tamanho maximo configurado."""
 
 
+class DocumentExtractionError(Exception):
+    """Erro de dominio previsivel durante a extracao de texto."""
+
+
+class InvalidDocumentContentError(DocumentExtractionError):
+    """Os bytes nao representam um documento extraivel valido."""
+
+
+class InvalidTextEncodingError(DocumentExtractionError):
+    """Os bytes TXT nao usam um encoding permitido."""
+
+
+class EmptyExtractedDocumentError(DocumentExtractionError):
+    """O documento nao contem texto utilizavel."""
+
+
 @dataclass(frozen=True, slots=True)
 class ValidatedDocument:
     """Metadados derivados de bytes originais ja validados."""
@@ -66,6 +89,27 @@ class ValidatedDocument:
     mime_type: str
     size_bytes: int
     sha256: str
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractedTextBlock:
+    """Unidade de texto ordenada, pronta para um splitter futuro."""
+
+    text: str
+    section: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractedDocument:
+    """Resultado comum de extratores, sem acoplamento a banco ou LangChain."""
+
+    blocks: tuple[ExtractedTextBlock, ...]
+
+    @property
+    def text(self) -> str:
+        """Texto completo em ordem documental, separado entre blocos."""
+
+        return "\n\n".join(block.text for block in self.blocks)
 
 
 def get_max_document_size_bytes(value: str | None = None) -> int:
@@ -253,3 +297,124 @@ def validate_document_for_tenant(
     if duplicate is not None:
         raise DuplicateDocumentError("Documento ativo com o mesmo SHA-256 neste tenant.")
     return document
+
+
+def _normalize_line_endings(text: str) -> str:
+    """Converte CRLF/CR em LF sem colapsar quebras de paragrafo internas."""
+
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _contains_disallowed_control_characters(text: str) -> bool:
+    return any(
+        ord(character) < 32 and character not in {"\t", "\n", "\r", "\f"}
+        for character in text
+    )
+
+
+def _build_extracted_document(
+    blocks: list[ExtractedTextBlock],
+) -> ExtractedDocument:
+    if not blocks:
+        raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
+    return ExtractedDocument(blocks=tuple(blocks))
+
+
+def extract_txt(content: bytes) -> ExtractedDocument:
+    """Extrai TXT com UTF-8 e fallback limitado a cp1252.
+
+    O fallback cobre arquivos Windows legados. Ele ainda rejeita NUL e controles
+    nao textuais para evitar que bytes binarios sejam aceitos silenciosamente.
+    """
+
+    if not isinstance(content, bytes):
+        raise InvalidDocumentContentError("O conteudo TXT deve ser bytes.")
+    if not content:
+        raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
+
+    try:
+        decoded = content.decode("utf-8")
+    except UnicodeDecodeError:
+        try:
+            decoded = content.decode("cp1252")
+        except UnicodeDecodeError as exc:
+            raise InvalidTextEncodingError("O TXT nao usa um encoding permitido.") from exc
+
+    if "\x00" in decoded or _contains_disallowed_control_characters(decoded):
+        raise InvalidDocumentContentError("O conteudo TXT nao e valido.")
+
+    text = _normalize_line_endings(decoded).strip()
+    if not text:
+        raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
+    return _build_extracted_document([ExtractedTextBlock(text=text)])
+
+
+def _iter_docx_body_items(document: Document) -> Iterator[Paragraph | Table]:
+    """Itera somente os elementos diretos do body, na ordem do XML DOCX."""
+
+    for child in document.element.body.iterchildren():
+        if isinstance(child, CT_P):
+            yield Paragraph(child, document)
+        elif isinstance(child, CT_Tbl):
+            yield Table(child, document)
+
+
+def _paragraph_text(paragraph: Paragraph) -> str:
+    return _normalize_line_endings(paragraph.text).strip()
+
+
+def _table_text(table: Table) -> str:
+    """Extrai celulas relevantes em ordem, sem repetir celulas mescladas."""
+
+    seen_cells: list[object] = []
+    rows: list[str] = []
+    for row in table.rows:
+        cells: list[str] = []
+        for cell in row.cells:
+            if any(existing is cell._tc for existing in seen_cells):
+                continue
+            seen_cells.append(cell._tc)
+            cell_text = _normalize_line_endings(cell.text).strip()
+            if cell_text:
+                cells.append(cell_text)
+        if cells:
+            rows.append("\t".join(cells))
+    return "\n".join(rows)
+
+
+def _is_heading(paragraph: Paragraph) -> bool:
+    style = paragraph.style
+    return bool(style and style.style_id.startswith("Heading"))
+
+
+def extract_docx(content: bytes) -> ExtractedDocument:
+    """Extrai parágrafos e tabelas DOCX em sua ordem real de documento."""
+
+    if not isinstance(content, bytes):
+        raise InvalidDocumentContentError("O conteudo DOCX deve ser bytes.")
+    if not content:
+        raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
+
+    try:
+        document = Document(BytesIO(content))
+    except Exception as exc:
+        raise InvalidDocumentContentError("O conteudo DOCX nao e valido.") from exc
+
+    blocks: list[ExtractedTextBlock] = []
+    current_section: str | None = None
+    for item in _iter_docx_body_items(document):
+        if isinstance(item, Paragraph):
+            text = _paragraph_text(item)
+            if not text:
+                continue
+            if _is_heading(item):
+                current_section = text
+                blocks.append(ExtractedTextBlock(text=text))
+            else:
+                blocks.append(ExtractedTextBlock(text=text, section=current_section))
+        else:
+            text = _table_text(item)
+            if text:
+                blocks.append(ExtractedTextBlock(text=text, section=current_section))
+
+    return _build_extracted_document(blocks)
