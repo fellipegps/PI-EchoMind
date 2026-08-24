@@ -185,12 +185,19 @@ cd echomind-backend
 python scripts/reindex_all.py --confirm
 ```
 
-O script le a configuracao normal do backend, encontra tenants que possuem FAQs
-ou eventos e processa um por vez. Para cada tenant, somente a colecao
-`knowledge_<tenant>` correspondente e limpa e recriada; em seguida, as FAQs e
-os eventos desse mesmo tenant sao indexados novamente com os IDs deterministicos
-atuais. Nenhuma reindexacao e executada em startup, deploy ou importacao
-automaticamente, e o script nao processa documentos ou chunks.
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs,
+eventos ou documentos com status `ready` e processa um por vez. Para cada tenant,
+somente a colecao `knowledge_<tenant>` correspondente e limpa e recriada; em
+seguida, as FAQs, os eventos e os `document_chunks` ja persistidos dos documentos
+`ready` desse tenant sao indexados novamente com os IDs deterministicos atuais.
+Documentos `pending`, `processing` e `error` sao ignorados. O arquivo original
+nao e reprocessado e os chunks nao sao recriados.
+
+A operacao para no primeiro tenant que falhar e informa os tenants ja concluidos.
+Como cada colecao e reconstruida de forma deterministica, corrija a causa e rode
+o mesmo comando manual novamente. Nao execute duas reindexacoes em paralelo.
+Nenhuma reindexacao e iniciada automaticamente em startup, deploy, endpoint,
+scheduler ou importacao.
 
 ## Autenticacao
 

@@ -322,6 +322,148 @@ async def test_real_pgvector_retrieval_excludes_expired_chunks_and_keeps_tenant(
     assert distance_b == pytest.approx(0.0, abs=1e-6)
 
 
+def test_manual_reindex_rebuilds_ready_sources_idempotently_per_tenant(
+    real_rag_runtime,
+) -> None:
+    from app.database import CompanyEvent, Document, Faq, SessionLocal
+    from app.document_repository import (
+        DocumentChunkData,
+        DocumentCreateData,
+        create_document,
+        replace_document_chunks,
+        transition_document_status,
+    )
+    from scripts import reindex_all as reindex_script
+
+    tenant_a = "pr18-reindex-a"
+    tenant_b = "pr18-reindex-b"
+    real_rag_runtime.make_indexer(tenant_a)
+    indexer_b = real_rag_runtime.make_indexer(tenant_b)
+    session = SessionLocal()
+    try:
+        faq = Faq(
+            id="pr18-faq-a",
+            tenant_id=tenant_a,
+            question="Pergunta sintetica da PR 18?",
+            answer="Resposta sintetica da PR 18.",
+        )
+        event = CompanyEvent(
+            id="pr18-event-a",
+            tenant_id=tenant_a,
+            title="Evento sintetico da PR 18",
+            event_date="2026-10-01",
+            event_type="palestra",
+        )
+        session.add_all([faq, event])
+
+        ready_document = create_document(
+            session,
+            tenant_id=tenant_a,
+            data=DocumentCreateData(
+                filename="ready-pr18.txt",
+                mime_type="text/plain",
+                size_bytes=128,
+                sha256=sha256(b"ready-pr18").hexdigest(),
+            ),
+        )
+        transition_document_status(
+            session,
+            tenant_id=tenant_a,
+            document_id=ready_document.id,
+            target_status="processing",
+        )
+        ready_chunks = replace_document_chunks(
+            session,
+            tenant_id=tenant_a,
+            document_id=ready_document.id,
+            chunks=(
+                DocumentChunkData(content="Primeiro chunk ready da PR 18."),
+                DocumentChunkData(content="Segundo chunk ready da PR 18."),
+            ),
+        )
+        transition_document_status(
+            session,
+            tenant_id=tenant_a,
+            document_id=ready_document.id,
+            target_status="ready",
+        )
+
+        pending_document = create_document(
+            session,
+            tenant_id=tenant_a,
+            data=DocumentCreateData(
+                filename="pending-pr18.txt",
+                mime_type="text/plain",
+                size_bytes=64,
+                sha256=sha256(b"pending-pr18").hexdigest(),
+            ),
+        )
+        pending_chunks = replace_document_chunks(
+            session,
+            tenant_id=tenant_a,
+            document_id=pending_document.id,
+            chunks=(DocumentChunkData(content="Chunk pending que deve ser ignorado."),),
+        )
+        session.commit()
+
+        tenant_b_faq = SimpleNamespace(
+            id="pr18-faq-b",
+            question="Pergunta preservada do tenant B?",
+            answer="Resposta preservada do tenant B.",
+        )
+        indexer_b.index_faq(tenant_b_faq)
+        tenant_b_before = {
+            (doc.metadata["source_type"], doc.metadata["source_id"])
+            for doc in _documents_for(real_rag_runtime, tenant_b)
+        }
+
+        first_result = reindex_script.reindex_tenant(session, tenant_a)
+        first_set = {
+            (doc.metadata["source_type"], doc.metadata["source_id"])
+            for doc in _documents_for(real_rag_runtime, tenant_a)
+        }
+        second_result = reindex_script.reindex_tenant(session, tenant_a)
+        second_set = {
+            (doc.metadata["source_type"], doc.metadata["source_id"])
+            for doc in _documents_for(real_rag_runtime, tenant_a)
+        }
+        tenant_b_after = {
+            (doc.metadata["source_type"], doc.metadata["source_id"])
+            for doc in _documents_for(real_rag_runtime, tenant_b)
+        }
+
+        expected_set = {
+            ("faq", faq.id),
+            ("event", event.id),
+            *(("document_chunk", chunk.id) for chunk in ready_chunks),
+        }
+        assert first_result == reindex_script.ReindexResult(
+            tenant_id=tenant_a,
+            faq_count=1,
+            event_count=1,
+            document_count=1,
+            document_chunk_count=2,
+        )
+        assert second_result == first_result
+        assert first_set == expected_set
+        assert second_set == expected_set
+        assert tenant_b_after == tenant_b_before == {("faq", "pr18-faq-b")}
+        assert ("document_chunk", pending_chunks[0].id) not in second_set
+    finally:
+        session.rollback()
+        session.query(Faq).filter(Faq.tenant_id == tenant_a).delete(
+            synchronize_session=False
+        )
+        session.query(CompanyEvent).filter(CompanyEvent.tenant_id == tenant_a).delete(
+            synchronize_session=False
+        )
+        session.query(Document).filter(Document.tenant_id == tenant_a).delete(
+            synchronize_session=False
+        )
+        session.commit()
+        session.close()
+
+
 def test_process_document_completes_with_real_postgres_and_pgvector(
     real_rag_runtime,
 ) -> None:

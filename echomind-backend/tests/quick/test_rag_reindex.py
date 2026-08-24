@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 from fastembed import TextEmbedding
@@ -13,7 +13,7 @@ from fastembed import TextEmbedding
 def rag_modules(quick_test_context):
     """Importa app/script somente depois que a suite rapida configurou SQLite."""
     from app import rag_engine
-    from app.database import CompanyEvent, Config, Faq
+    from app.database import CompanyEvent, Config, Document, DocumentChunk, Faq
     from scripts import reindex_all
 
     return SimpleNamespace(
@@ -21,6 +21,8 @@ def rag_modules(quick_test_context):
         reindex_all=reindex_all,
         CompanyEvent=CompanyEvent,
         Config=Config,
+        Document=Document,
+        DocumentChunk=DocumentChunk,
         Faq=Faq,
     )
 
@@ -66,10 +68,11 @@ def test_embedding_loader_uses_multilingual_default_without_network(
     )
 
 
-def test_list_tenant_ids_uses_only_faqs_and_events(db, rag_modules) -> None:
+def test_list_tenant_ids_includes_only_indexable_sources(db, rag_modules) -> None:
     CompanyEvent = rag_modules.CompanyEvent
     Config = rag_modules.Config
     Faq = rag_modules.Faq
+    Document = rag_modules.Document
     reindex_all = rag_modules.reindex_all
     db.add_all(
         [
@@ -82,11 +85,29 @@ def test_list_tenant_ids_uses_only_faqs_and_events(db, rag_modules) -> None:
                 event_type="palestra",
             ),
             Config(tenant_id="tenant-sem-conteudo", company_name="Sem conteudo"),
+            Document(
+                id="doc-ready",
+                tenant_id="tenant-c",
+                filename="ready.txt",
+                mime_type="text/plain",
+                size_bytes=10,
+                sha256="a" * 64,
+                status="ready",
+            ),
+            Document(
+                id="doc-pending",
+                tenant_id="tenant-so-pending",
+                filename="pending.txt",
+                mime_type="text/plain",
+                size_bytes=10,
+                sha256="b" * 64,
+                status="pending",
+            ),
         ]
     )
     db.flush()
 
-    assert reindex_all.list_tenant_ids(db) == ["tenant-a", "tenant-b"]
+    assert reindex_all.list_tenant_ids(db) == ["tenant-a", "tenant-b", "tenant-c"]
 
 
 def test_clear_collection_is_restricted_to_selected_tenant(monkeypatch, rag_modules) -> None:
@@ -106,13 +127,15 @@ def test_clear_collection_is_restricted_to_selected_tenant(monkeypatch, rag_modu
     stores["tenant-a"].create_collection.assert_not_called()
 
 
-def test_reindex_tenant_filters_and_indexes_faqs_and_events(
+def test_reindex_tenant_indexes_only_ready_documents_and_persisted_chunks(
     db,
     monkeypatch,
     rag_modules,
 ) -> None:
     CompanyEvent = rag_modules.CompanyEvent
     Faq = rag_modules.Faq
+    Document = rag_modules.Document
+    DocumentChunk = rag_modules.DocumentChunk
     reindex_all = rag_modules.reindex_all
     faq_a = Faq(tenant_id="tenant-a", question="Pergunta A?", answer="Resposta A.")
     faq_b = Faq(tenant_id="tenant-b", question="Pergunta B?", answer="Resposta B.")
@@ -122,20 +145,233 @@ def test_reindex_tenant_filters_and_indexes_faqs_and_events(
         event_date="2026-09-02",
         event_type="workshop",
     )
-    db.add_all([faq_a, faq_b, event_a])
+    ready_a = Document(
+        id="doc-ready-a",
+        tenant_id="tenant-a",
+        filename="ready-a.txt",
+        mime_type="text/plain",
+        size_bytes=20,
+        sha256="c" * 64,
+        status="ready",
+        chunk_count=2,
+    )
+    ignored_documents = [
+        Document(
+            id=f"doc-{status}-a",
+            tenant_id="tenant-a",
+            filename=f"{status}.txt",
+            mime_type="text/plain",
+            size_bytes=20,
+            sha256=character * 64,
+            status=status,
+            chunk_count=1,
+        )
+        for status, character in (
+            ("pending", "d"),
+            ("processing", "e"),
+            ("error", "f"),
+        )
+    ]
+    ready_b = Document(
+        id="doc-ready-b",
+        tenant_id="tenant-b",
+        filename="ready-b.txt",
+        mime_type="text/plain",
+        size_bytes=20,
+        sha256="1" * 64,
+        status="ready",
+        chunk_count=1,
+    )
+    ready_chunks = [
+        DocumentChunk(
+            id="chunk-ready-a-2",
+            tenant_id="tenant-a",
+            document_id=ready_a.id,
+            chunk_index=1,
+            content="Segundo chunk pronto.",
+        ),
+        DocumentChunk(
+            id="chunk-ready-a-1",
+            tenant_id="tenant-a",
+            document_id=ready_a.id,
+            chunk_index=0,
+            content="Primeiro chunk pronto.",
+        ),
+    ]
+    ignored_chunks = [
+        DocumentChunk(
+            id=f"chunk-{document.status}-a",
+            tenant_id="tenant-a",
+            document_id=document.id,
+            chunk_index=0,
+            content=f"Chunk {document.status} ignorado.",
+        )
+        for document in ignored_documents
+    ]
+    chunk_b = DocumentChunk(
+        id="chunk-ready-b",
+        tenant_id="tenant-b",
+        document_id=ready_b.id,
+        chunk_index=0,
+        content="Chunk de outro tenant.",
+    )
+    db.add_all(
+        [
+            faq_a,
+            faq_b,
+            event_a,
+            ready_a,
+            *ignored_documents,
+            ready_b,
+            *ready_chunks,
+            *ignored_chunks,
+            chunk_b,
+        ]
+    )
     db.flush()
 
     fake_rag = MagicMock()
     cleared_tenants: list[str] = []
-    monkeypatch.setattr(reindex_all, "get_rag_engine", lambda db, tenant_id: fake_rag)
+    monkeypatch.setattr(reindex_all, "get_rag_indexer", lambda db, tenant_id: fake_rag)
     monkeypatch.setattr(reindex_all, "clear_tenant_collection", cleared_tenants.append)
 
     result = reindex_all.reindex_tenant(db, "tenant-a")
 
-    assert result == reindex_all.ReindexResult("tenant-a", faq_count=1, event_count=1)
+    assert result == reindex_all.ReindexResult(
+        "tenant-a",
+        faq_count=1,
+        event_count=1,
+        document_count=1,
+        document_chunk_count=2,
+    )
     assert cleared_tenants == ["tenant-a"]
     fake_rag.index_faq.assert_called_once_with(faq_a)
     fake_rag.index_event.assert_called_once_with(event_a)
+    assert fake_rag.index_document_chunk.call_args_list == [
+        call(ready_a, ready_chunks[1]),
+        call(ready_a, ready_chunks[0]),
+    ]
+
+
+def test_reindex_tenant_validates_chunk_count_before_clearing(
+    db,
+    monkeypatch,
+    rag_modules,
+) -> None:
+    reindex_all = rag_modules.reindex_all
+    document = rag_modules.Document(
+        id="doc-inconsistente",
+        tenant_id="tenant-a",
+        filename="inconsistente.txt",
+        mime_type="text/plain",
+        size_bytes=20,
+        sha256="2" * 64,
+        status="ready",
+        chunk_count=2,
+    )
+    chunk = rag_modules.DocumentChunk(
+        id="chunk-unico",
+        tenant_id="tenant-a",
+        document_id=document.id,
+        chunk_index=0,
+        content="Apenas um chunk persistido.",
+    )
+    db.add_all([document, chunk])
+    db.flush()
+
+    clear_collection = MagicMock()
+    get_indexer = MagicMock()
+    monkeypatch.setattr(reindex_all, "clear_tenant_collection", clear_collection)
+    monkeypatch.setattr(reindex_all, "get_rag_indexer", get_indexer)
+
+    with pytest.raises(RuntimeError, match="Contagem de chunks inconsistente"):
+        reindex_all.reindex_tenant(db, "tenant-a")
+
+    clear_collection.assert_not_called()
+    get_indexer.assert_not_called()
+
+
+def test_reindex_tenant_second_execution_produces_same_deterministic_set(
+    db,
+    monkeypatch,
+    rag_modules,
+) -> None:
+    rag_engine = rag_modules.rag_engine
+    reindex_all = rag_modules.reindex_all
+    faq = rag_modules.Faq(
+        id="faq-idempotente",
+        tenant_id="tenant-a",
+        question="Pergunta idempotente?",
+        answer="Resposta idempotente.",
+    )
+    event = rag_modules.CompanyEvent(
+        id="evento-idempotente",
+        tenant_id="tenant-a",
+        title="Evento idempotente",
+        event_date="2026-09-10",
+        event_type="palestra",
+    )
+    document = rag_modules.Document(
+        id="doc-idempotente",
+        tenant_id="tenant-a",
+        filename="idempotente.txt",
+        mime_type="text/plain",
+        size_bytes=20,
+        sha256="3" * 64,
+        status="ready",
+        chunk_count=1,
+    )
+    chunk = rag_modules.DocumentChunk(
+        id="chunk-idempotente",
+        tenant_id="tenant-a",
+        document_id=document.id,
+        chunk_index=0,
+        content="Chunk idempotente.",
+    )
+    db.add_all([faq, event, document, chunk])
+    db.flush()
+
+    collections = {
+        "tenant-a": set(),
+        "tenant-b": {"vetor-b-preservado"},
+    }
+
+    class FakeRag:
+        tenant_id = "tenant-a"
+
+        def index_faq(self, source):
+            collections[self.tenant_id].add(
+                rag_engine._make_vector_id(source.id, "faq", self.tenant_id)
+            )
+
+        def index_event(self, source):
+            collections[self.tenant_id].add(
+                rag_engine._make_vector_id(source.id, "event", self.tenant_id)
+            )
+
+        def index_document_chunk(self, _document, source):
+            collections[self.tenant_id].add(
+                rag_engine._make_vector_id(source.id, "document_chunk", self.tenant_id)
+            )
+
+    cleared_tenants: list[str] = []
+
+    def clear_collection(tenant_id: str):
+        cleared_tenants.append(tenant_id)
+        collections[tenant_id].clear()
+
+    monkeypatch.setattr(reindex_all, "get_rag_indexer", lambda db, tenant_id: FakeRag())
+    monkeypatch.setattr(reindex_all, "clear_tenant_collection", clear_collection)
+
+    first_result = reindex_all.reindex_tenant(db, "tenant-a")
+    first_set = set(collections["tenant-a"])
+    second_result = reindex_all.reindex_tenant(db, "tenant-a")
+
+    assert first_result == second_result
+    assert collections["tenant-a"] == first_set
+    assert len(first_set) == 3
+    assert collections["tenant-b"] == {"vetor-b-preservado"}
+    assert cleared_tenants == ["tenant-a", "tenant-a"]
 
 
 def test_reindex_all_processes_each_tenant_in_order(monkeypatch, rag_modules) -> None:
@@ -179,10 +415,15 @@ def test_reindex_all_stops_before_touching_tenants_after_failure(
 
     monkeypatch.setattr(reindex_all, "reindex_tenant", failing_reindex)
 
-    with pytest.raises(RuntimeError, match="falha visivel"):
-        reindex_all.reindex_all(MagicMock())
+    db = MagicMock()
+    with pytest.raises(reindex_all.TenantReindexError, match="tenant-b") as exc_info:
+        reindex_all.reindex_all(db)
 
     assert processed == ["tenant-a", "tenant-b"]
+    assert exc_info.value.tenant_id == "tenant-b"
+    assert exc_info.value.completed_tenant_ids == ("tenant-a",)
+    assert isinstance(exc_info.value.__cause__, RuntimeError)
+    assert db.expunge_all.call_count == 2
 
 
 def test_script_requires_manual_confirmation(monkeypatch, rag_modules) -> None:
