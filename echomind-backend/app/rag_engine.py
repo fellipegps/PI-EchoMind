@@ -782,3 +782,11 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
 
 def get_rag_engine(db: Session, tenant_id: str) -> RAGEngine:
     return RAGEngine(db, tenant_id)
+
+
+def get_rag_indexer(db: Session, tenant_id: str) -> RAGEngine:
+    """Cria somente o runtime vetorial, sem inicializar LLM ou contexto de chat."""
+    indexer = object.__new__(RAGEngine)
+    indexer.db = db
+    indexer.tenant_id = tenant_id
+    return indexer

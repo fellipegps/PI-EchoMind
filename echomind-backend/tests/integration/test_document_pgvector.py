@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from datetime import date
+from hashlib import sha256
 from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 
@@ -73,6 +75,64 @@ def real_rag_runtime(
 def _documents_for(runtime, tenant_id: str):
     store = runtime.module._get_vector_store(tenant_id)
     return store.similarity_search("consulta sintetica", k=20)
+
+
+def _create_pending_processing_document(tenant_id: str) -> str:
+    from app.database import SessionLocal
+    from app.document_repository import DocumentCreateData, create_document
+
+    session = SessionLocal()
+    try:
+        document = create_document(
+            session,
+            tenant_id=tenant_id,
+            data=DocumentCreateData(
+                filename="norma.txt",
+                mime_type="text/plain",
+                size_bytes=128,
+                sha256=sha256(f"{tenant_id}:{uuid4()}".encode()).hexdigest(),
+            ),
+        )
+        document_id = document.id
+        session.commit()
+        return document_id
+    finally:
+        session.close()
+
+
+def _processing_state(tenant_id: str, document_id: str):
+    from app.database import SessionLocal
+    from app.document_repository import get_document, list_document_chunks
+
+    session = SessionLocal()
+    try:
+        document = get_document(session, tenant_id=tenant_id, document_id=document_id)
+        chunks = list_document_chunks(
+            session,
+            tenant_id=tenant_id,
+            document_id=document_id,
+        )
+        return SimpleNamespace(
+            status=document.status,
+            chunk_count=document.chunk_count,
+            processed_at=document.processed_at,
+            error_message=document.error_message,
+            chunk_contents=[chunk.content for chunk in chunks],
+        )
+    finally:
+        session.close()
+
+
+def _remove_processing_document(tenant_id: str, document_id: str) -> None:
+    from app.database import SessionLocal
+    from app.document_repository import delete_document
+
+    session = SessionLocal()
+    try:
+        delete_document(session, tenant_id=tenant_id, document_id=document_id)
+        session.commit()
+    finally:
+        session.close()
 
 
 def test_real_pgvector_index_and_reindex_are_idempotent_and_remove_orphans(
@@ -159,3 +219,76 @@ def test_real_pgvector_keeps_faq_and_event_retrievable(real_rag_runtime) -> None
     stored = _documents_for(real_rag_runtime, tenant_id)
     assert {doc.metadata["source_type"] for doc in stored} == {"faq", "event"}
     assert {doc.metadata["source_id"] for doc in stored} == {"faq-1", "event-1"}
+
+
+def test_process_document_completes_with_real_postgres_and_pgvector(
+    real_rag_runtime,
+) -> None:
+    from app.document_processing import process_document
+
+    tenant_id = "pr13-processing-success"
+    real_rag_runtime.make_indexer(tenant_id)
+    document_id = _create_pending_processing_document(tenant_id)
+
+    try:
+        result = process_document(
+            document_id=document_id,
+            tenant_id=tenant_id,
+            content=(
+                b"Politica institucional sintetica. "
+                b"O prazo oficial para resposta e de trinta dias."
+            ),
+        )
+
+        stored = _processing_state(tenant_id, document_id)
+        vectors = _documents_for(real_rag_runtime, tenant_id)
+        assert result.status == "ready"
+        assert stored.status == "ready"
+        assert stored.chunk_count == 1
+        assert stored.processed_at is not None
+        assert stored.error_message is None
+        assert len(vectors) == 1
+        assert vectors[0].metadata["document_id"] == document_id
+        assert vectors[0].metadata["tenant_id"] == tenant_id
+        assert vectors[0].metadata["source_type"] == "document_chunk"
+    finally:
+        _remove_processing_document(tenant_id, document_id)
+
+
+def test_process_document_compensates_real_partial_vector_failure(
+    monkeypatch,
+    real_rag_runtime,
+) -> None:
+    from app import rag_engine
+    from app.document_processing import process_document
+
+    tenant_id = "pr13-processing-failure"
+    real_rag_runtime.make_indexer(tenant_id)
+    document_id = _create_pending_processing_document(tenant_id)
+
+    def fail_after_first_vector(self, document, chunks, *, previous_chunks=None):
+        self.index_document_chunk(document, chunks[0])
+        raise RuntimeError("falha sintetica apos vetor parcial")
+
+    monkeypatch.setattr(
+        rag_engine.RAGEngine,
+        "reindex_document_chunks",
+        fail_after_first_vector,
+    )
+
+    try:
+        result = process_document(
+            document_id=document_id,
+            tenant_id=tenant_id,
+            content=b"Conteudo sintetico para falha vetorial controlada.",
+        )
+
+        stored = _processing_state(tenant_id, document_id)
+        assert result.status == "error"
+        assert stored.status == "error"
+        assert stored.chunk_count == 0
+        assert stored.chunk_contents == []
+        assert stored.error_message == "Falha ao indexar os chunks."
+        assert _documents_for(real_rag_runtime, tenant_id) == []
+    finally:
+        _remove_processing_document(tenant_id, document_id)
