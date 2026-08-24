@@ -4,11 +4,24 @@ FastAPI + LangChain + Groq + pgvector
 """
 
 from contextlib import asynccontextmanager
+from datetime import date
 
-from fastapi import APIRouter, FastAPI, HTTPException, Depends, Query
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from starlette.datastructures import UploadFile as StarletteUploadFile
 import asyncio
 import logging
 import os
@@ -27,8 +40,24 @@ from .schemas import (
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
+from .document_ingestion import (
+    DocumentTooLargeError,
+    DocumentValidationError,
+    EmptyDocumentError,
+    InvalidDocumentConfigurationError,
+    InvalidDocumentFilenameError,
+    InvalidDocumentMimeTypeError,
+    UnsupportedDocumentTypeError,
+    get_max_document_size_bytes,
+    read_limited_bytes,
+    validate_document_for_tenant,
+)
+from .document_processing import process_document
 from .document_repository import (
+    DocumentCreateData,
     DocumentDeletionBlockedError,
+    DuplicateDocumentError,
+    create_document,
     delete_document as delete_document_record,
     get_document,
     list_document_chunks,
@@ -123,6 +152,26 @@ def get_document_rag(
 ) -> object:
     """Retorna somente as primitivas vetoriais exigidas pela API documental."""
     return get_rag_indexer(db, tenant_id=current_user.id)
+
+
+def _optional_form_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
+
+
+def _optional_form_date(value: str | None, *, field_name: str) -> date | None:
+    normalized = _optional_form_text(value)
+    if normalized is None:
+        return None
+    try:
+        return date.fromisoformat(normalized)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=f"{field_name} deve usar o formato YYYY-MM-DD.",
+        ) from exc
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -433,6 +482,114 @@ def get_dashboard(
 # ══════════════════════════════════════════════════════════════════════════════
 #  DOCUMENTOS  /documents
 # ══════════════════════════════════════════════════════════════════════════════
+
+@router_documents.post("/upload", response_model=DocumentResponse, status_code=202)
+async def upload_document(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    document_type: str | None = Form(None),
+    document_number: str | None = Form(None),
+    department: str | None = Form(None),
+    published_at: str | None = Form(None),
+    valid_until: str | None = Form(None),
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    form = await request.form()
+    if "tenant_id" in form:
+        raise HTTPException(status_code=422, detail="tenant_id não é permitido.")
+    uploaded_files = [
+        value
+        for _, value in form.multi_items()
+        if isinstance(value, StarletteUploadFile)
+    ]
+    if len(uploaded_files) != 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Envie exatamente um arquivo por requisição.",
+        )
+
+    try:
+        content = read_limited_bytes(
+            file.file,
+            max_size_bytes=get_max_document_size_bytes(),
+        )
+        validated = validate_document_for_tenant(
+            db,
+            tenant_id=current_user.id,
+            filename=file.filename or "",
+            mime_type=file.content_type,
+            content=content,
+        )
+        document = create_document(
+            db,
+            tenant_id=current_user.id,
+            data=DocumentCreateData(
+                filename=validated.filename,
+                mime_type=validated.mime_type,
+                size_bytes=validated.size_bytes,
+                sha256=validated.sha256,
+                document_type=_optional_form_text(document_type),
+                document_number=_optional_form_text(document_number),
+                department=_optional_form_text(department),
+                published_at=_optional_form_date(
+                    published_at,
+                    field_name="published_at",
+                ),
+                valid_until=_optional_form_date(
+                    valid_until,
+                    field_name="valid_until",
+                ),
+            ),
+        )
+        db.commit()
+        db.refresh(document)
+    except HTTPException:
+        db.rollback()
+        raise
+    except DocumentTooLargeError as exc:
+        db.rollback()
+        raise HTTPException(status_code=413, detail=str(exc)) from exc
+    except (UnsupportedDocumentTypeError, InvalidDocumentMimeTypeError) as exc:
+        db.rollback()
+        raise HTTPException(status_code=415, detail=str(exc)) from exc
+    except (EmptyDocumentError, InvalidDocumentFilenameError) as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except DuplicateDocumentError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except InvalidDocumentConfigurationError as exc:
+        db.rollback()
+        logger.exception("Configuração inválida do limite de upload documental.")
+        raise HTTPException(
+            status_code=500,
+            detail="Configuração inválida do limite de upload.",
+        ) from exc
+    except DocumentValidationError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        db.rollback()
+        logger.exception(
+            "Falha interna ao criar upload documental para tenant=%s.",
+            current_user.id,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Não foi possível criar o documento.",
+        ) from exc
+
+    durable_content = bytes(content)
+    background_tasks.add_task(
+        process_document,
+        document_id=document.id,
+        tenant_id=current_user.id,
+        content=durable_content,
+    )
+    return document
+
 
 @router_documents.get("", response_model=DocumentListResponse)
 def list_stored_documents(
