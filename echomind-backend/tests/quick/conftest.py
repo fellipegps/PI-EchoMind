@@ -138,6 +138,7 @@ def db(quick_test_context: QuickTestContext) -> Generator[Session, None, None]:
 def client(
     db: Session,
     quick_test_context: QuickTestContext,
+    fake_rag_engine,
 ) -> Generator[TestClient, None, None]:
     """
     Cliente HTTP do FastAPI com injeção da sessão de teste
@@ -164,10 +165,11 @@ def client(
     # Mock do RAGEngine para não precisar do Ollama
     with (
         patch("app.main.get_rag_engine") as mock_engine_factory,
+        patch("app.main.get_rag_indexer") as mock_indexer_factory,
         patch("app.crud.find_cached_faq_answer", return_value=None),
     ):
-        fake_engine = FakeRAGEngine()
-        mock_engine_factory.return_value = fake_engine
+        mock_engine_factory.return_value = fake_rag_engine
+        mock_indexer_factory.return_value = fake_rag_engine
         with TestClient(app) as c:
             yield c
 
@@ -192,6 +194,8 @@ class FakeRAGEngine:
         self.indexed_faqs: list = []
         self.indexed_events: list = []
         self.deleted: list = []
+        self.deleted_document_chunks: list[tuple[str, tuple[str, ...]]] = []
+        self.document_chunk_delete_error = False
 
     async def astream_chat(self, question: str) -> AsyncGenerator[str, None]:
         self.last_had_docs = self.has_context
@@ -223,6 +227,18 @@ class FakeRAGEngine:
 
     def delete_document(self, source_id: str, source: str):
         self.deleted.append((source_id, source))
+
+    def delete_document_chunks(self, document, chunks):
+        if self.document_chunk_delete_error:
+            raise RuntimeError("falha vetorial sintetica")
+        self.deleted_document_chunks.append(
+            (document.id, tuple(chunk.id for chunk in chunks))
+        )
+
+
+@pytest.fixture()
+def fake_rag_engine() -> FakeRAGEngine:
+    return FakeRAGEngine()
 
 
 # ─── Helpers para criar fixtures de dados ─────────────────────────────────────

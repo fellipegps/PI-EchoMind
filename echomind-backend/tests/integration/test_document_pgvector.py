@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 from hashlib import sha256
 from types import SimpleNamespace
 from uuid import uuid4
@@ -131,6 +131,53 @@ def _remove_processing_document(tenant_id: str, document_id: str) -> None:
     try:
         delete_document(session, tenant_id=tenant_id, document_id=document_id)
         session.commit()
+    finally:
+        session.close()
+
+
+def _create_ready_document_with_vector(runtime, tenant_id: str) -> str:
+    from app.database import SessionLocal
+    from app.document_repository import (
+        DocumentChunkData,
+        DocumentCreateData,
+        create_document,
+        replace_document_chunks,
+        transition_document_status,
+    )
+
+    session = SessionLocal()
+    try:
+        document = create_document(
+            session,
+            tenant_id=tenant_id,
+            data=DocumentCreateData(
+                filename="api-delete.txt",
+                mime_type="text/plain",
+                size_bytes=96,
+                sha256=sha256(f"{tenant_id}:{uuid4()}".encode()).hexdigest(),
+            ),
+        )
+        transition_document_status(
+            session,
+            tenant_id=tenant_id,
+            document_id=document.id,
+            target_status="processing",
+        )
+        document = transition_document_status(
+            session,
+            tenant_id=tenant_id,
+            document_id=document.id,
+            target_status="ready",
+        )
+        chunks = replace_document_chunks(
+            session,
+            tenant_id=tenant_id,
+            document_id=document.id,
+            chunks=(DocumentChunkData(content="Chunk sintetico da API."),),
+        )
+        session.commit()
+        runtime.make_indexer(tenant_id).index_document_chunk(document, chunks[0])
+        return document.id
     finally:
         session.close()
 
@@ -291,4 +338,53 @@ def test_process_document_compensates_real_partial_vector_failure(
         assert stored.error_message == "Falha ao indexar os chunks."
         assert _documents_for(real_rag_runtime, tenant_id) == []
     finally:
+        _remove_processing_document(tenant_id, document_id)
+
+
+def test_delete_document_endpoint_removes_real_record_chunks_and_vectors(
+    monkeypatch,
+    real_rag_runtime,
+) -> None:
+    from fastapi.testclient import TestClient
+
+    from app import main
+    from app.auth import CurrentUser, get_current_user
+    from app.database import SessionLocal
+    from app.document_repository import get_document, list_document_chunks
+
+    tenant_id = "pr14-api-delete"
+    document_id = _create_ready_document_with_vector(real_rag_runtime, tenant_id)
+    monkeypatch.setattr(main, "warm_up_rag_runtime", lambda: None)
+    main.app.dependency_overrides[get_current_user] = lambda: CurrentUser(
+        id=tenant_id,
+        email="pr14@example.test",
+        is_active=True,
+        created_at=datetime.now(timezone.utc),
+    )
+
+    try:
+        assert len(_documents_for(real_rag_runtime, tenant_id)) == 1
+        with TestClient(main.app) as client:
+            response = client.delete(f"/documents/{document_id}")
+
+        assert response.status_code == 204
+        assert response.content == b""
+        assert _documents_for(real_rag_runtime, tenant_id) == []
+
+        session = SessionLocal()
+        try:
+            assert get_document(
+                session,
+                tenant_id=tenant_id,
+                document_id=document_id,
+            ) is None
+            assert list_document_chunks(
+                session,
+                tenant_id=tenant_id,
+                document_id=document_id,
+            ) == []
+        finally:
+            session.close()
+    finally:
+        main.app.dependency_overrides.pop(get_current_user, None)
         _remove_processing_document(tenant_id, document_id)
