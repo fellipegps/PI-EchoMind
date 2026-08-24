@@ -6,6 +6,7 @@ from io import BytesIO
 
 import pytest
 from docx import Document
+from pypdf import PdfWriter
 
 
 @pytest.fixture()
@@ -32,6 +33,66 @@ def synthetic_docx_bytes():
         output = BytesIO()
         document.save(output)
         return output.getvalue()
+
+    return build
+
+
+@pytest.fixture()
+def synthetic_pdf_bytes():
+    """Cria PDFs textuais minimos em memoria, sem arquivos ou rede."""
+
+    def build(pages: list[str | None]) -> bytes:
+        font_object_number = 3 + (2 * len(pages))
+        page_object_numbers = [3 + (2 * index) for index in range(len(pages))]
+        objects: list[bytes] = [
+            b"<< /Type /Catalog /Pages 2 0 R >>",
+            (
+                b"<< /Type /Pages /Kids ["
+                + b" ".join(f"{number} 0 R".encode() for number in page_object_numbers)
+                + f"] /Count {len(pages)} >>".encode()
+            ),
+        ]
+        for index, text in enumerate(pages):
+            page_number = page_object_numbers[index]
+            content_number = page_number + 1
+            objects.append(
+                (
+                    b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+                    + f"/Resources << /Font << /F1 {font_object_number} 0 R >> >> ".encode()
+                    + f"/Contents {content_number} 0 R >>".encode()
+                )
+            )
+            if text is None:
+                stream = b"q\nQ"
+            else:
+                escaped_text = (
+                    text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+                )
+                stream = f"BT /F1 12 Tf 72 720 Td ({escaped_text}) Tj ET".encode()
+            objects.append(
+                f"<< /Length {len(stream)} >>\nstream\n".encode()
+                + stream
+                + b"\nendstream"
+            )
+        objects.append(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
+
+        output = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
+        offsets = [0]
+        for object_number, body in enumerate(objects, start=1):
+            offsets.append(len(output))
+            output.extend(f"{object_number} 0 obj\n".encode())
+            output.extend(body)
+            output.extend(b"\nendobj\n")
+        xref_offset = len(output)
+        output.extend(f"xref\n0 {len(objects) + 1}\n".encode())
+        output.extend(b"0000000000 65535 f \n")
+        for offset in offsets[1:]:
+            output.extend(f"{offset:010d} 00000 n \n".encode())
+        output.extend(
+            f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\n"
+            f"startxref\n{xref_offset}\n%%EOF\n".encode()
+        )
+        return bytes(output)
 
     return build
 
@@ -334,3 +395,47 @@ def test_extract_docx_without_text_is_rejected(ingestion, synthetic_docx_bytes) 
 
     with pytest.raises(ingestion.EmptyExtractedDocumentError):
         ingestion.extract_docx(content)
+
+
+def test_extract_pdf_returns_textual_page_with_one_based_page_number(
+    ingestion, synthetic_pdf_bytes
+) -> None:
+    extracted = ingestion.extract_pdf(synthetic_pdf_bytes(["Pagina unica"]))
+
+    assert extracted.blocks == (
+        ingestion.ExtractedTextBlock(text="Pagina unica", page=1),
+    )
+
+
+def test_extract_pdf_preserves_multiple_page_order_and_empty_page_gap(
+    ingestion, synthetic_pdf_bytes
+) -> None:
+    extracted = ingestion.extract_pdf(synthetic_pdf_bytes(["Primeira", None, "Terceira"]))
+
+    assert [(block.page, block.text) for block in extracted.blocks] == [
+        (1, "Primeira"),
+        (3, "Terceira"),
+    ]
+
+
+def test_extract_pdf_rejects_corrupted_content(ingestion) -> None:
+    with pytest.raises(ingestion.InvalidPdfError):
+        ingestion.extract_pdf(b"%PDF-1.4\nconteudo corrompido")
+
+
+def test_extract_pdf_rejects_encrypted_pdf(ingestion) -> None:
+    writer = PdfWriter()
+    writer.add_blank_page(width=100, height=100)
+    writer.encrypt("senha-sintetica")
+    output = BytesIO()
+    writer.write(output)
+
+    with pytest.raises(ingestion.EncryptedPdfError):
+        ingestion.extract_pdf(output.getvalue())
+
+
+def test_extract_pdf_without_text_layer_reports_unsupported_ocr(
+    ingestion, synthetic_pdf_bytes
+) -> None:
+    with pytest.raises(ingestion.PdfOcrNotSupportedError, match="OCR nao suportado"):
+        ingestion.extract_pdf(synthetic_pdf_bytes([None, None]))

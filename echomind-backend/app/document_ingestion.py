@@ -19,6 +19,7 @@ from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 from docx.table import Table
 from docx.text.paragraph import Paragraph
+from pypdf import PdfReader
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -81,6 +82,18 @@ class EmptyExtractedDocumentError(DocumentExtractionError):
     """O documento nao contem texto utilizavel."""
 
 
+class InvalidPdfError(DocumentExtractionError):
+    """Os bytes nao representam um PDF que possa ser aberto."""
+
+
+class EncryptedPdfError(DocumentExtractionError):
+    """O PDF esta criptografado e nao pode ser aberto sem senha."""
+
+
+class PdfOcrNotSupportedError(DocumentExtractionError):
+    """O PDF nao possui camada textual suficiente para este MVP."""
+
+
 @dataclass(frozen=True, slots=True)
 class ValidatedDocument:
     """Metadados derivados de bytes originais ja validados."""
@@ -97,6 +110,7 @@ class ExtractedTextBlock:
 
     text: str
     section: str | None = None
+    page: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -418,3 +432,32 @@ def extract_docx(content: bytes) -> ExtractedDocument:
                 blocks.append(ExtractedTextBlock(text=text, section=current_section))
 
     return _build_extracted_document(blocks)
+
+
+def extract_pdf(content: bytes) -> ExtractedDocument:
+    """Extrai somente a camada textual de cada pagina PDF, em ordem 1-based."""
+
+    if not isinstance(content, bytes) or not content:
+        raise InvalidPdfError("O conteudo PDF nao e valido.")
+
+    try:
+        reader = PdfReader(BytesIO(content))
+        if reader.is_encrypted:
+            raise EncryptedPdfError("O PDF criptografado nao pode ser aberto.")
+
+        blocks: list[ExtractedTextBlock] = []
+        for page_number, page in enumerate(reader.pages, start=1):
+            extracted_text = page.extract_text()
+            text = _normalize_line_endings(extracted_text or "").strip()
+            if text:
+                blocks.append(ExtractedTextBlock(text=text, page=page_number))
+    except EncryptedPdfError:
+        raise
+    except Exception as exc:
+        raise InvalidPdfError("O conteudo PDF nao e valido.") from exc
+
+    if not blocks:
+        raise PdfOcrNotSupportedError(
+            "PDF sem camada textual; OCR nao suportado no MVP."
+        )
+    return ExtractedDocument(blocks=tuple(blocks))
