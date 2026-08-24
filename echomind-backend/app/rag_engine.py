@@ -23,7 +23,7 @@ import os
 import time
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, AsyncGenerator, Mapping
+from typing import Any, AsyncGenerator, Mapping, Sequence
 
 from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_community.vectorstores.pgvector import PGVector
@@ -37,6 +37,8 @@ from .database import (
     DATABASE_URL,
     CompanyEvent,
     Config,
+    Document as StoredDocument,
+    DocumentChunk,
     Faq,
     SessionLocal,
     UnansweredQuestion,
@@ -167,6 +169,14 @@ def _tenant_collection_name(tenant_id: str) -> str:
     return f"knowledge_{safe}"
 
 
+def _vector_store_engine_args() -> dict[str, Any]:
+    """Preserva SSL por padrao e respeita sslmode explicito da conexao."""
+    engine_args: dict[str, Any] = {"pool_pre_ping": True}
+    if "sslmode=" not in DATABASE_URL.casefold():
+        engine_args["connect_args"] = {"sslmode": "require"}
+    return engine_args
+
+
 @lru_cache(maxsize=128)
 def _get_vector_store(tenant_id: str) -> PGVector:
     """
@@ -186,10 +196,7 @@ def _get_vector_store(tenant_id: str) -> PGVector:
         embedding_function=_get_embeddings(),
         collection_name=_tenant_collection_name(tenant_id),
         use_jsonb=True,
-        engine_args={
-            "pool_pre_ping": True,
-            "connect_args": {"sslmode": "require"},
-        },
+        engine_args=_vector_store_engine_args(),
     )
     _enable_langchain_rls_if_possible()
     return vector_store
@@ -245,6 +252,7 @@ def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:
 
 
 _PROTECTED_METADATA_FIELDS = frozenset({"source_id", "source_type", "tenant_id"})
+_DOCUMENT_CHUNK_SOURCE_TYPE = "document_chunk"
 
 
 def _normalize_extra_metadata(
@@ -272,6 +280,66 @@ def _normalize_extra_metadata(
         normalized[normalized_key] = normalized_value
 
     return normalized
+
+
+def _metadata_date(value: Any) -> str | None:
+    """Converte datas documentais para ISO 8601 sem conhecer schemas futuros."""
+    if value is None:
+        return None
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
+def _document_chunk_metadata(
+    document: StoredDocument,
+    chunk: DocumentChunk,
+) -> dict[str, Any]:
+    return {
+        "document_id": document.id,
+        "filename": document.filename,
+        "mime_type": document.mime_type,
+        "document_type": document.document_type,
+        "document_number": document.document_number,
+        "department": document.department,
+        "published_at": _metadata_date(document.published_at),
+        "valid_until": _metadata_date(document.valid_until),
+        "chunk_index": chunk.chunk_index,
+        "page_start": chunk.page_start,
+        "page_end": chunk.page_end,
+        "section_title": chunk.section_title,
+    }
+
+
+def _document_chunk_content(document: StoredDocument, chunk: DocumentChunk) -> str:
+    """Adiciona somente metadados presentes a um cabecalho curto do embedding."""
+    if not chunk.content or not chunk.content.strip():
+        raise ValueError("Chunk documental nao pode ter conteudo vazio.")
+
+    header_fields = (
+        ("Arquivo", document.filename),
+        ("Tipo", document.document_type),
+        ("Numero", document.document_number),
+        ("Departamento", document.department),
+        ("Publicado em", _metadata_date(document.published_at)),
+        ("Valido ate", _metadata_date(document.valid_until)),
+        ("Secao", chunk.section_title),
+    )
+    header = [f"{label}: {value}" for label, value in header_fields if value]
+
+    if chunk.page_start is not None and chunk.page_end is not None:
+        page_value = (
+            str(chunk.page_start)
+            if chunk.page_start == chunk.page_end
+            else f"{chunk.page_start}-{chunk.page_end}"
+        )
+        header.append(f"Paginas: {page_value}")
+    elif chunk.page_start is not None:
+        header.append(f"Pagina inicial: {chunk.page_start}")
+    elif chunk.page_end is not None:
+        header.append(f"Pagina final: {chunk.page_end}")
+
+    return "\n".join([*header, "", chunk.content])
 
 
 def warm_up_rag_runtime() -> None:
@@ -491,6 +559,97 @@ class RAGEngine:
         self.delete_document(event.id, "event")
         self.index_event(event)
 
+    def index_document_chunk(
+        self,
+        document: StoredDocument,
+        chunk: DocumentChunk,
+    ) -> None:
+        """Indexa um chunk de forma idempotente na colecao do tenant."""
+        self._validate_document_chunks(document, (chunk,))
+        vector_id = _make_vector_id(chunk.id, _DOCUMENT_CHUNK_SOURCE_TYPE, self.tenant_id)
+        self._delete_vector_ids((vector_id,))
+        self._index_document_chunk(document, chunk)
+
+    def reindex_document_chunks(
+        self,
+        document: StoredDocument,
+        chunks: Sequence[DocumentChunk],
+        *,
+        previous_chunks: Sequence[DocumentChunk] | None = None,
+    ) -> None:
+        """Substitui o conjunto vetorial e remove IDs antigos fornecidos."""
+        current_chunks = tuple(chunks)
+        old_chunks = tuple(previous_chunks) if previous_chunks is not None else current_chunks
+        self._validate_document_chunks(document, (*old_chunks, *current_chunks))
+
+        current_ids = [chunk.id for chunk in current_chunks]
+        if len(current_ids) != len(set(current_ids)):
+            raise ValueError("Chunks documentais repetidos nao podem ser reindexados.")
+
+        cleanup_ids = tuple(
+            dict.fromkeys(
+                _make_vector_id(chunk.id, _DOCUMENT_CHUNK_SOURCE_TYPE, self.tenant_id)
+                for chunk in (*old_chunks, *current_chunks)
+            )
+        )
+        self._delete_vector_ids(cleanup_ids)
+        for chunk in current_chunks:
+            self._index_document_chunk(document, chunk)
+
+    def delete_document_chunks(
+        self,
+        document: StoredDocument,
+        chunks: Sequence[DocumentChunk],
+    ) -> None:
+        """Exclui somente IDs de chunks previamente resolvidos para o documento."""
+        resolved_chunks = tuple(chunks)
+        self._validate_document_chunks(document, resolved_chunks)
+        vector_ids = tuple(
+            dict.fromkeys(
+                _make_vector_id(chunk.id, _DOCUMENT_CHUNK_SOURCE_TYPE, self.tenant_id)
+                for chunk in resolved_chunks
+            )
+        )
+        self._delete_vector_ids(vector_ids)
+
+    def _validate_document_chunks(
+        self,
+        document: StoredDocument,
+        chunks: Sequence[DocumentChunk],
+    ) -> None:
+        if document.tenant_id != self.tenant_id:
+            raise ValueError("Documento nao pertence ao tenant do RAGEngine.")
+        for chunk in chunks:
+            if chunk.tenant_id != self.tenant_id:
+                raise ValueError("Chunk nao pertence ao tenant do RAGEngine.")
+            if chunk.document_id != document.id:
+                raise ValueError("Chunk nao pertence ao documento informado.")
+            if not chunk.content or not chunk.content.strip():
+                raise ValueError("Chunk documental nao pode ter conteudo vazio.")
+
+    def _index_document_chunk(
+        self,
+        document: StoredDocument,
+        chunk: DocumentChunk,
+    ) -> None:
+        self._upsert_document(
+            source_id=chunk.id,
+            source_type=_DOCUMENT_CHUNK_SOURCE_TYPE,
+            content=_document_chunk_content(document, chunk),
+            extra_metadata=_document_chunk_metadata(document, chunk),
+        )
+
+    def _delete_vector_ids(self, vector_ids: Sequence[str]) -> None:
+        if not vector_ids:
+            return
+        try:
+            _get_vector_store(self.tenant_id).delete(
+                ids=list(vector_ids),
+                collection_only=True,
+            )
+        except Exception as exc:
+            raise RuntimeError("Falha ao excluir vetores documentais do pgvector.") from exc
+
     def delete_document(self, source_id: str, source: str) -> None:
         """
         FIX Bug 1 + Bug 2: deleta o vetor do pgvector usando o UUID
@@ -534,8 +693,8 @@ class RAGEngine:
 
         Agora, o mesmo _make_vector_id(source_id, source_type) é usado tanto
         aqui quanto em delete_document(), garantindo correspondência exata.
-        Múltiplos upserts do mesmo documento sobrescrevem o mesmo ID —
-        comportamento correto para re-indexação de FAQs editadas.
+        Como esta versao do PGVector nao sobrescreve custom_id nativamente,
+        ciclos idempotentes removem explicitamente o ID antes desta insercao.
         """
         vector_id = _make_vector_id(source_id, source_type, self.tenant_id)
         metadata = _normalize_extra_metadata(extra_metadata)
