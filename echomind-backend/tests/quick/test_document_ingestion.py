@@ -5,6 +5,7 @@ from __future__ import annotations
 from io import BytesIO
 
 import pytest
+from docx import Document
 
 
 @pytest.fixture()
@@ -12,6 +13,27 @@ def ingestion():
     from app import document_ingestion
 
     return document_ingestion
+
+
+@pytest.fixture()
+def synthetic_docx_bytes():
+    """Cria DOCX minimo em memoria, sem dados reais ou acesso de rede."""
+
+    def build(*, paragraphs: list[tuple[str, str | None]], table_rows=None) -> bytes:
+        document = Document()
+        for text, style in paragraphs:
+            document.add_paragraph(text, style=style)
+        if table_rows is not None:
+            table = document.add_table(rows=0, cols=len(table_rows[0]))
+            for row_values in table_rows:
+                cells = table.add_row().cells
+                for cell, value in zip(cells, row_values, strict=True):
+                    cell.text = value
+        output = BytesIO()
+        document.save(output)
+        return output.getvalue()
+
+    return build
 
 
 @pytest.mark.parametrize(
@@ -207,3 +229,108 @@ def test_active_duplicate_is_rejected_only_inside_the_same_tenant(
     )
 
     assert other_tenant_document.sha256 == sha256
+
+
+def test_extract_txt_uses_utf8_and_preserves_paragraph_breaks(ingestion) -> None:
+    extracted = ingestion.extract_txt("Titulo\r\n\r\nParagrafo dois\rFim".encode())
+
+    assert extracted.blocks == (
+        ingestion.ExtractedTextBlock(text="Titulo\n\nParagrafo dois\nFim"),
+    )
+    assert extracted.text == "Titulo\n\nParagrafo dois\nFim"
+
+
+def test_extract_txt_uses_documented_cp1252_fallback(ingestion) -> None:
+    extracted = ingestion.extract_txt(b"Institui\xe7\xe3o")
+
+    assert extracted.blocks[0].text == "Instituição"
+
+
+@pytest.mark.parametrize("content", [b"", b" \r\n\t", b"texto\x00binario", b"\x81"])
+def test_extract_txt_rejects_empty_or_invalid_content(ingestion, content) -> None:
+    expected_error = (
+        ingestion.EmptyExtractedDocumentError if content in {b"", b" \r\n\t"}
+        else (ingestion.InvalidTextEncodingError if content == b"\x81" else ingestion.InvalidDocumentContentError)
+    )
+
+    with pytest.raises(expected_error):
+        ingestion.extract_txt(content)
+
+
+def test_extract_docx_paragraphs_are_ordered_and_headings_define_section(
+    ingestion, synthetic_docx_bytes
+) -> None:
+    content = synthetic_docx_bytes(
+        paragraphs=[("Regulamento", "Heading 1"), ("Artigo primeiro", None)],
+    )
+
+    extracted = ingestion.extract_docx(content)
+
+    assert extracted.blocks == (
+        ingestion.ExtractedTextBlock(text="Regulamento"),
+        ingestion.ExtractedTextBlock(text="Artigo primeiro", section="Regulamento"),
+    )
+
+
+def test_extract_docx_table_cells_are_ordered_without_evident_duplicates(
+    ingestion, synthetic_docx_bytes
+) -> None:
+    content = synthetic_docx_bytes(
+        paragraphs=[],
+        table_rows=[("Campo", "Valor"), ("Campus", "Centro")],
+    )
+
+    extracted = ingestion.extract_docx(content)
+
+    assert extracted.blocks == (
+        ingestion.ExtractedTextBlock(text="Campo\tValor\nCampus\tCentro"),
+    )
+
+
+def test_extract_docx_does_not_repeat_horizontally_merged_cells(ingestion) -> None:
+    document = Document()
+    table = document.add_table(rows=2, cols=2)
+    merged = table.cell(0, 0).merge(table.cell(0, 1))
+    merged.text = "Cabecalho unido"
+    table.cell(1, 0).text = "Esquerda"
+    table.cell(1, 1).text = "Direita"
+    output = BytesIO()
+    document.save(output)
+
+    extracted = ingestion.extract_docx(output.getvalue())
+
+    assert extracted.blocks[0].text == "Cabecalho unido\nEsquerda\tDireita"
+
+
+def test_extract_docx_preserves_order_between_paragraphs_and_table(ingestion) -> None:
+    document = Document()
+    document.add_paragraph("Antes")
+    table = document.add_table(rows=1, cols=2)
+    table.cell(0, 0).text = "Meio A"
+    table.cell(0, 1).text = "Meio B"
+    document.add_paragraph("Depois")
+    output = BytesIO()
+    document.save(output)
+
+    extracted = ingestion.extract_docx(output.getvalue())
+
+    assert [block.text for block in extracted.blocks] == [
+        "Antes",
+        "Meio A\tMeio B",
+        "Depois",
+    ]
+
+
+@pytest.mark.parametrize("content", [b"", b"nao e um docx"])
+def test_extract_docx_rejects_empty_or_invalid_content(ingestion, content) -> None:
+    with pytest.raises(
+        (ingestion.EmptyExtractedDocumentError, ingestion.InvalidDocumentContentError)
+    ):
+        ingestion.extract_docx(content)
+
+
+def test_extract_docx_without_text_is_rejected(ingestion, synthetic_docx_bytes) -> None:
+    content = synthetic_docx_bytes(paragraphs=[])
+
+    with pytest.raises(ingestion.EmptyExtractedDocumentError):
+        ingestion.extract_docx(content)
