@@ -347,6 +347,9 @@ def test_delete_document_endpoint_removes_real_record_chunks_and_vectors(
 ) -> None:
     from fastapi.testclient import TestClient
 
+    monkeypatch.setenv("SUPABASE_URL", "http://localhost:54321")
+    monkeypatch.setenv("SUPABASE_SECRET_KEY", "integration-test-secret")
+
     from app import main
     from app.auth import CurrentUser, get_current_user
     from app.database import SessionLocal
