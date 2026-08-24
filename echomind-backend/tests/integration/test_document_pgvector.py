@@ -268,6 +268,60 @@ def test_real_pgvector_keeps_faq_and_event_retrievable(real_rag_runtime) -> None
     assert {doc.metadata["source_id"] for doc in stored} == {"faq-1", "event-1"}
 
 
+@pytest.mark.asyncio
+async def test_real_pgvector_retrieval_excludes_expired_chunks_and_keeps_tenant(
+    real_rag_runtime,
+) -> None:
+    query = "regra sintetica de validade"
+    tenant_a = "pr17-validity-a"
+    tenant_b = "pr17-validity-b"
+    indexer_a = real_rag_runtime.make_indexer(tenant_a)
+    indexer_b = real_rag_runtime.make_indexer(tenant_b)
+
+    indexer_a._upsert_document(
+        source_id="expired-a",
+        source_type="document_chunk",
+        content=query,
+        extra_metadata={"valid_until": "2026-08-23"},
+    )
+    indexer_a._upsert_document(
+        source_id="current-a",
+        source_type="document_chunk",
+        content=query,
+        extra_metadata={"valid_until": "2026-08-24"},
+    )
+    indexer_a._upsert_document(
+        source_id="faq-a",
+        source_type="faq",
+        content=query,
+        extra_metadata={"valid_until": "2020-01-01"},
+    )
+    indexer_b._upsert_document(
+        source_id="current-b",
+        source_type="document_chunk",
+        content=query,
+        extra_metadata={"valid_until": "2027-01-01"},
+    )
+
+    docs_a, distance_a = await real_rag_runtime.module._retrieve_docs(
+        query,
+        tenant_a,
+        today=date(2026, 8, 24),
+    )
+    docs_b, distance_b = await real_rag_runtime.module._retrieve_docs(
+        query,
+        tenant_b,
+        today=date(2026, 8, 24),
+    )
+
+    assert {doc.metadata["source_id"] for doc in docs_a} == {"current-a", "faq-a"}
+    assert {doc.metadata["tenant_id"] for doc in docs_a} == {tenant_a}
+    assert [doc.metadata["source_id"] for doc in docs_b] == ["current-b"]
+    assert [doc.metadata["tenant_id"] for doc in docs_b] == [tenant_b]
+    assert distance_a == pytest.approx(0.0, abs=1e-6)
+    assert distance_b == pytest.approx(0.0, abs=1e-6)
+
+
 def test_process_document_completes_with_real_postgres_and_pgvector(
     real_rag_runtime,
 ) -> None:

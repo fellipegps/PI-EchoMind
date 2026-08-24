@@ -21,6 +21,7 @@ import json
 import logging
 import os
 import time
+from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, AsyncGenerator, Mapping, Sequence
@@ -77,6 +78,8 @@ os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", _MODEL_CACHE)
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.45"))
 UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "0.38"))
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
+_RETRIEVAL_OVERFETCH_MULTIPLIER = 3
+_MIN_RETRIEVAL_CANDIDATES = 10
 RAG_WARMUP_ENABLED   = os.getenv("RAG_WARMUP_ENABLED", "true").lower() not in {
     "0",
     "false",
@@ -478,32 +481,97 @@ def _format_retrieved_document(document: Document) -> str:
     return f"[Fonte: {source_label}]\n{content}"
 
 
-async def _retrieve_docs(question: str, tenant_id: str) -> tuple[list[Document], float | None]:
+def _retrieval_candidate_k() -> int:
+    """Compensa o pos-filtro sem permitir overfetch sem limite."""
+    return max(
+        TOP_K_DOCS * _RETRIEVAL_OVERFETCH_MULTIPLIER,
+        _MIN_RETRIEVAL_CANDIDATES,
+    )
+
+
+def _document_is_current(document: Document, *, today: date) -> bool:
+    """Mantem fontes comuns e chunks sem validade; falha fechado em data invalida."""
+    metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
+    if metadata.get("source_type") != _DOCUMENT_CHUNK_SOURCE_TYPE:
+        return True
+
+    raw_valid_until = metadata.get("valid_until")
+    if raw_valid_until is None:
+        return True
+    if isinstance(raw_valid_until, str):
+        raw_valid_until = raw_valid_until.strip()
+        if not raw_valid_until:
+            return True
+
+    try:
+        if isinstance(raw_valid_until, datetime):
+            valid_until = raw_valid_until.date()
+        elif isinstance(raw_valid_until, date) and not isinstance(raw_valid_until, bool):
+            valid_until = raw_valid_until
+        elif isinstance(raw_valid_until, str):
+            valid_until = date.fromisoformat(raw_valid_until)
+        else:
+            raise TypeError("valid_until deve ser uma data ISO 8601")
+    except (TypeError, ValueError):
+        logger.warning(
+            "[RAG] Excluindo document_chunk com valid_until invalido. "
+            "tenant=%s source_id=%s",
+            metadata.get("tenant_id", "desconhecido"),
+            metadata.get("source_id", "desconhecido"),
+        )
+        return False
+
+    return valid_until >= today
+
+
+async def _retrieve_docs(
+    question: str,
+    tenant_id: str,
+    *,
+    today: date | None = None,
+) -> tuple[list[Document], float | None]:
     """
-    Busca os TOP_K_DOCS documentos mais próximos e filtra pela distância
-    coseno bruta do pgvector — mais confiável que o score normalizado do
-    LangChain, que pode vir fora de [0, 1] e descartar docs válidos.
+    Busca candidatos com overfetch e aplica threshold, validade, ranking e top K.
+
+    ``today`` representa a data civil local do backend. Como ``valid_until`` e
+    uma data sem horario, o documento segue vigente durante todo o dia indicado.
+    Testes e chamadores podem injetar a data para evitar dependencia do relogio.
     """
     vs   = _get_vector_store(tenant_id)
     loop = asyncio.get_running_loop()
+    reference_date = today or date.today()
+    candidate_k = _retrieval_candidate_k()
 
     results: list[tuple[Document, float]] = await loop.run_in_executor(
         None,
-        lambda: vs.similarity_search_with_score(question, k=TOP_K_DOCS),
+        lambda: vs.similarity_search_with_score(question, k=candidate_k),
     )
 
-    approved = [(doc, dist) for doc, dist in results if dist <= SIMILARITY_THRESHOLD]
-    approved.sort(key=lambda x: x[1])
+    current_candidates = [
+        (doc, distance)
+        for doc, distance in results
+        if _document_is_current(doc, today=reference_date)
+    ]
+    current_candidates.sort(key=lambda item: item[1])
+    approved = [
+        (doc, distance)
+        for doc, distance in current_candidates
+        if distance <= SIMILARITY_THRESHOLD
+    ][:TOP_K_DOCS]
 
     if approved:
         logger.info("[RAG] %d doc(s) aprovado(s). Distâncias: %s",
                     len(approved), [f"{d:.3f}" for _, d in approved])
     else:
-        nearest = results[0][1] if results else -1
+        nearest = current_candidates[0][1] if current_candidates else -1
         logger.info("[RAG] Nenhum doc abaixo de %.2f. Menor distância: %.3f",
                     SIMILARITY_THRESHOLD, nearest)
 
-    nearest_distance = approved[0][1] if approved else (results[0][1] if results else None)
+    nearest_distance = (
+        approved[0][1]
+        if approved
+        else (current_candidates[0][1] if current_candidates else None)
+    )
     return [doc for doc, _ in approved], nearest_distance
 
 
