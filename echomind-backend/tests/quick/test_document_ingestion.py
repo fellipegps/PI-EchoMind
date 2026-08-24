@@ -439,3 +439,83 @@ def test_extract_pdf_without_text_layer_reports_unsupported_ocr(
 ) -> None:
     with pytest.raises(ingestion.PdfOcrNotSupportedError, match="OCR nao suportado"):
         ingestion.extract_pdf(synthetic_pdf_bytes([None, None]))
+
+
+@pytest.mark.parametrize("length", [1, 800])
+def test_chunk_document_keeps_text_at_or_below_default_limit(ingestion, length) -> None:
+    document = ingestion.ExtractedDocument(
+        blocks=(ingestion.ExtractedTextBlock(text="A" * length),),
+    )
+
+    chunks = ingestion.chunk_document(document)
+
+    assert [chunk.content for chunk in chunks] == ["A" * length]
+    assert [chunk.chunk_index for chunk in chunks] == [0]
+
+
+def test_chunk_document_limits_larger_text_and_preserves_overlap(ingestion) -> None:
+    document = ingestion.ExtractedDocument(
+        blocks=(ingestion.ExtractedTextBlock(text=("A" * 800) + ("B" * 800) + ("C" * 300)),),
+    )
+
+    chunks = ingestion.chunk_document(document)
+
+    assert all(0 < len(chunk.content) <= 800 for chunk in chunks)
+    assert chunks[0].content[-100:] == chunks[1].content[:100]
+    assert chunks[1].content[-100:] == chunks[2].content[:100]
+    assert len({chunk.content for chunk in chunks}) == len(chunks)
+
+
+def test_chunk_document_prioritizes_institutional_separators(ingestion) -> None:
+    assert ingestion.INSTITUTIONAL_CHUNK_SEPARATORS.index("Art. ") < (
+        ingestion.INSTITUTIONAL_CHUNK_SEPARATORS.index(". ")
+    )
+    document = ingestion.ExtractedDocument(
+        blocks=(ingestion.ExtractedTextBlock(text="Inicio Art. Segundo Terceiro"),),
+    )
+
+    chunks = ingestion.chunk_document(document, chunk_size=14, chunk_overlap=0)
+
+    assert [chunk.content for chunk in chunks] == ["Inicio Art.", "Segundo", "Terceiro"]
+
+
+def test_chunk_document_is_ordered_deterministic_and_preserves_section(ingestion) -> None:
+    document = ingestion.ExtractedDocument(
+        blocks=(
+            ingestion.ExtractedTextBlock(text="Primeiro bloco", section="Regulamento"),
+            ingestion.ExtractedTextBlock(text="Segundo bloco", section="Regulamento"),
+        ),
+    )
+
+    first_run = ingestion.chunk_document(document, chunk_size=15, chunk_overlap=0)
+    second_run = ingestion.chunk_document(document, chunk_size=15, chunk_overlap=0)
+
+    assert first_run == second_run
+    assert [chunk.chunk_index for chunk in first_run] == list(range(len(first_run)))
+    assert [chunk.content for chunk in first_run] == ["Primeiro bloco", "Segundo bloco"]
+    assert {chunk.section_title for chunk in first_run} == {"Regulamento"}
+
+
+def test_chunk_document_tracks_pdf_page_interval_when_chunk_crosses_pages(ingestion) -> None:
+    document = ingestion.ExtractedDocument(
+        blocks=(
+            ingestion.ExtractedTextBlock(text="A" * 350, page=1),
+            ingestion.ExtractedTextBlock(text="B" * 400, page=2),
+            ingestion.ExtractedTextBlock(text="C" * 100, page=3),
+        ),
+    )
+
+    chunks = ingestion.chunk_document(document)
+
+    assert [(chunk.page_start, chunk.page_end) for chunk in chunks] == [(1, 2), (3, 3)]
+    assert chunks[0].content.startswith("A" * 20)
+    assert chunks[0].content.endswith("B" * 20)
+
+
+def test_chunk_document_rejects_empty_text_without_empty_chunks(ingestion) -> None:
+    document = ingestion.ExtractedDocument(
+        blocks=(ingestion.ExtractedTextBlock(text=" \n\t "),),
+    )
+
+    with pytest.raises(ingestion.EmptyExtractedDocumentError):
+        ingestion.chunk_document(document)

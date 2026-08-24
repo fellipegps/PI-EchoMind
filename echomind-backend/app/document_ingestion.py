@@ -19,6 +19,7 @@ from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 from docx.table import Table
 from docx.text.paragraph import Paragraph
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 
 if TYPE_CHECKING:
@@ -28,6 +29,22 @@ if TYPE_CHECKING:
 DEFAULT_MAX_DOCUMENT_SIZE_MB = 10
 BYTES_PER_MEGABYTE = 1024 * 1024
 READ_CHUNK_SIZE = 64 * 1024
+DEFAULT_TEXT_CHUNK_SIZE = 800
+DEFAULT_TEXT_CHUNK_OVERLAP = 100
+INSTITUTIONAL_CHUNK_SEPARATORS = [
+    "\n\n",
+    "\n",
+    "Art. ",
+    "ART. ",
+    "§ ",
+    "Capitulo ",
+    "CAPITULO ",
+    "Secao ",
+    "SECAO ",
+    ". ",
+    " ",
+    "",
+]
 
 ALLOWED_DOCUMENT_MIME_TYPES: dict[str, frozenset[str]] = {
     ".pdf": frozenset({"application/pdf"}),
@@ -94,6 +111,10 @@ class PdfOcrNotSupportedError(DocumentExtractionError):
     """O PDF nao possui camada textual suficiente para este MVP."""
 
 
+class DocumentChunkingError(DocumentExtractionError):
+    """A entrada nao pode ser convertida em chunks textuais."""
+
+
 @dataclass(frozen=True, slots=True)
 class ValidatedDocument:
     """Metadados derivados de bytes originais ja validados."""
@@ -124,6 +145,25 @@ class ExtractedDocument:
         """Texto completo em ordem documental, separado entre blocos."""
 
         return "\n\n".join(block.text for block in self.blocks)
+
+
+@dataclass(frozen=True, slots=True)
+class ChunkedTextBlock:
+    """Chunk puro e rastreavel, sem qualquer acoplamento de persistencia."""
+
+    chunk_index: int
+    content: str
+    page_start: int | None = None
+    page_end: int | None = None
+    section_title: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class _SourceTextRange:
+    start: int
+    end: int
+    page: int | None
+    section: str | None
 
 
 def get_max_document_size_bytes(value: str | None = None) -> int:
@@ -461,3 +501,131 @@ def extract_pdf(content: bytes) -> ExtractedDocument:
             "PDF sem camada textual; OCR nao suportado no MVP."
         )
     return ExtractedDocument(blocks=tuple(blocks))
+
+
+def _assemble_chunking_source(
+    document: ExtractedDocument,
+) -> tuple[str, list[_SourceTextRange]]:
+    if not isinstance(document, ExtractedDocument):
+        raise DocumentChunkingError("A entrada de chunking deve ser um documento extraido.")
+
+    parts: list[str] = []
+    ranges: list[_SourceTextRange] = []
+    position = 0
+    for block in document.blocks:
+        text = _normalize_line_endings(block.text).strip()
+        if not text:
+            continue
+        if parts:
+            position += 2  # Separador estavel entre blocos de extracao.
+        start = position
+        position += len(text)
+        parts.append(text)
+        ranges.append(
+            _SourceTextRange(
+                start=start,
+                end=position,
+                page=block.page,
+                section=block.section,
+            )
+        )
+
+    if not parts:
+        raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
+    return "\n\n".join(parts), ranges
+
+
+def _find_chunk_start(
+    source: str,
+    chunk: str,
+    previous_start: int | None,
+    previous_end: int | None,
+    chunk_overlap: int,
+) -> int:
+    if previous_start is None or previous_end is None:
+        start = source.find(chunk)
+    else:
+        earliest_expected_start = max(previous_start + 1, previous_end - chunk_overlap)
+        start = source.find(chunk, earliest_expected_start)
+        if start == -1:
+            start = source.find(chunk, previous_start + 1)
+    if start == -1:
+        raise DocumentChunkingError("Nao foi possivel rastrear a origem de um chunk.")
+    return start
+
+
+def _chunk_metadata(
+    ranges: list[_SourceTextRange],
+    *,
+    start: int,
+    end: int,
+) -> tuple[int | None, int | None, str | None]:
+    contributors = [
+        source_range
+        for source_range in ranges
+        if source_range.start < end and start < source_range.end
+    ]
+    pages = [source_range.page for source_range in contributors if source_range.page is not None]
+    sections = {source_range.section for source_range in contributors if source_range.section}
+    return (
+        min(pages) if pages else None,
+        max(pages) if pages else None,
+        next(iter(sections)) if len(sections) == 1 else None,
+    )
+
+
+def chunk_document(
+    document: ExtractedDocument,
+    *,
+    chunk_size: int = DEFAULT_TEXT_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_TEXT_CHUNK_OVERLAP,
+) -> tuple[ChunkedTextBlock, ...]:
+    """Divide texto extraido de forma deterministica, preservando seus metadados."""
+
+    if chunk_size <= 0 or chunk_overlap < 0 or chunk_overlap >= chunk_size:
+        raise DocumentChunkingError("A configuracao de tamanho e overlap nao e valida.")
+
+    source, ranges = _assemble_chunking_source(document)
+    splitter = RecursiveCharacterTextSplitter(
+        separators=INSTITUTIONAL_CHUNK_SEPARATORS,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        length_function=len,
+        is_separator_regex=False,
+        keep_separator="end",
+    )
+
+    chunks: list[ChunkedTextBlock] = []
+    previous_start: int | None = None
+    previous_end: int | None = None
+    for content in splitter.split_text(source):
+        if not content:
+            continue
+        start = _find_chunk_start(
+            source,
+            content,
+            previous_start,
+            previous_end,
+            chunk_overlap,
+        )
+        end = start + len(content)
+        page_start, page_end, section_title = _chunk_metadata(
+            ranges,
+            start=start,
+            end=end,
+        )
+        chunks.append(
+            ChunkedTextBlock(
+                chunk_index=len(chunks),
+                content=content,
+                page_start=page_start,
+                page_end=page_end,
+                section_title=section_title,
+            )
+        )
+        previous_start = start
+        previous_end = end
+
+    if not chunks:
+        raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
+    return tuple(chunks)
