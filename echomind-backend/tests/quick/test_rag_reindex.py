@@ -249,3 +249,125 @@ def test_faq_and_event_reindex_keep_deterministic_vector_ids(
     assert store.delete.call_args_list[1].kwargs == {"ids": [event_id]}
     assert store.add_documents.call_args_list[0].kwargs == {"ids": [faq_id]}
     assert store.add_documents.call_args_list[1].kwargs == {"ids": [event_id]}
+
+
+def test_upsert_without_extra_metadata_preserves_existing_contract(
+    monkeypatch,
+    rag_modules,
+) -> None:
+    rag_engine = rag_modules.rag_engine
+    store = MagicMock()
+    requested_tenants: list[str] = []
+
+    def get_store(tenant_id: str):
+        requested_tenants.append(tenant_id)
+        return store
+
+    monkeypatch.setattr(rag_engine, "_get_vector_store", get_store)
+    indexer = object.__new__(rag_engine.RAGEngine)
+    indexer.tenant_id = "tenant-a"
+
+    indexer._upsert_document("faq-1", "faq", "Conteudo")
+
+    vector_id = rag_engine._make_vector_id("faq-1", "faq", "tenant-a")
+    document = store.add_documents.call_args.args[0][0]
+    assert requested_tenants == ["tenant-a"]
+    assert store.add_documents.call_args.kwargs == {"ids": [vector_id]}
+    assert document.page_content == "Conteudo"
+    assert document.metadata == {
+        "source_id": "faq-1",
+        "source_type": "faq",
+        "tenant_id": "tenant-a",
+    }
+
+
+def test_upsert_merges_valid_extra_metadata(monkeypatch, rag_modules) -> None:
+    rag_engine = rag_modules.rag_engine
+    store = MagicMock()
+    monkeypatch.setattr(rag_engine, "_get_vector_store", lambda tenant_id: store)
+    indexer = object.__new__(rag_engine.RAGEngine)
+    indexer.tenant_id = "tenant-a"
+
+    indexer._upsert_document(
+        "source-1",
+        "custom",
+        "Conteudo",
+        extra_metadata={
+            "title": "Regulamento",
+            "page": 3,
+            "published": False,
+            "priority": 0,
+            "tags": ("institucional", "publico"),
+        },
+    )
+
+    document = store.add_documents.call_args.args[0][0]
+    assert document.metadata == {
+        "title": "Regulamento",
+        "page": 3,
+        "published": False,
+        "priority": 0,
+        "tags": ["institucional", "publico"],
+        "source_id": "source-1",
+        "source_type": "custom",
+        "tenant_id": "tenant-a",
+    }
+
+
+def test_repeated_upsert_keeps_same_deterministic_id(monkeypatch, rag_modules) -> None:
+    rag_engine = rag_modules.rag_engine
+    store = MagicMock()
+    monkeypatch.setattr(rag_engine, "_get_vector_store", lambda tenant_id: store)
+    indexer = object.__new__(rag_engine.RAGEngine)
+    indexer.tenant_id = "tenant-a"
+
+    for _ in range(2):
+        indexer._upsert_document(
+            "source-1",
+            "custom",
+            "Conteudo",
+            extra_metadata={"title": "Regulamento"},
+        )
+
+    expected_id = rag_engine._make_vector_id("source-1", "custom", "tenant-a")
+    assert [call.kwargs for call in store.add_documents.call_args_list] == [
+        {"ids": [expected_id]},
+        {"ids": [expected_id]},
+    ]
+
+
+def test_upsert_ignores_protected_empty_and_non_serializable_metadata(
+    monkeypatch,
+    rag_modules,
+) -> None:
+    rag_engine = rag_modules.rag_engine
+    store = MagicMock()
+    monkeypatch.setattr(rag_engine, "_get_vector_store", lambda tenant_id: store)
+    indexer = object.__new__(rag_engine.RAGEngine)
+    indexer.tenant_id = "tenant-a"
+
+    indexer._upsert_document(
+        "source-1",
+        "custom",
+        "Conteudo",
+        extra_metadata={
+            "source_id": "injetado",
+            "source_type": "injetado",
+            "tenant_id": "tenant-b",
+            "none": None,
+            "blank": "  ",
+            "empty_list": [],
+            "empty_dict": {},
+            "object": object(),
+            "not_a_number": float("nan"),
+            "valid": "preservado",
+        },
+    )
+
+    document = store.add_documents.call_args.args[0][0]
+    assert document.metadata == {
+        "valid": "preservado",
+        "source_id": "source-1",
+        "source_type": "custom",
+        "tenant_id": "tenant-a",
+    }
