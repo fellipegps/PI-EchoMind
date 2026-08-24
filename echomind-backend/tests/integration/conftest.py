@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import os
 from collections.abc import Generator
+from hashlib import sha256
+from math import sqrt
 
 import pytest
+from langchain_core.embeddings import Embeddings
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.pool import NullPool
@@ -13,6 +16,30 @@ from sqlalchemy.pool import NullPool
 
 EXPECTED_DATABASE_NAME = "echomind_integration"
 LOCAL_DATABASE_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+class DeterministicFakeEmbeddings(Embeddings):
+    """Embedding 384d local e estavel, sem modelos ou chamadas externas."""
+
+    dimension = 384
+
+    @classmethod
+    def _embed(cls, text_value: str) -> list[float]:
+        digest = sha256(text_value.encode("utf-8")).digest()
+        values = [digest[index % len(digest)] / 127.5 - 1.0 for index in range(cls.dimension)]
+        norm = sqrt(sum(value * value for value in values)) or 1.0
+        return [value / norm for value in values]
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return [self._embed(text_value) for text_value in texts]
+
+    def embed_query(self, text: str) -> list[float]:
+        return self._embed(text)
+
+
+@pytest.fixture(scope="session")
+def deterministic_fake_embeddings() -> DeterministicFakeEmbeddings:
+    return DeterministicFakeEmbeddings()
 
 
 @pytest.fixture(scope="session")
