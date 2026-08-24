@@ -23,11 +23,20 @@ from .schemas import (
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, FeedbackRequest, FeedbackResponse,
     CurrentUserResponse,
+    DocumentListResponse, DocumentResponse, DocumentStatus,
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
+from .document_repository import (
+    DocumentDeletionBlockedError,
+    delete_document as delete_document_record,
+    get_document,
+    list_document_chunks,
+    list_documents,
+)
 from .rag_engine import (
     get_rag_engine,
+    get_rag_indexer,
     _register_unanswered_standalone,
     warm_up_rag_runtime,
 )
@@ -85,6 +94,7 @@ router_events = APIRouter(prefix="/events", tags=["Base de Conhecimento"])
 router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+router_documents = APIRouter(prefix="/documents", tags=["Documentos"])
 router_feedback = APIRouter(prefix="/feedback", tags=["Feedback"])
 router_system = APIRouter(tags=["Sistema"])
 
@@ -105,6 +115,14 @@ def get_rag(
 ) -> object:
     ensure_onboarding(db, current_user)
     return get_rag_engine(db, tenant_id=current_user.id)
+
+
+def get_document_rag(
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+) -> object:
+    """Retorna somente as primitivas vetoriais exigidas pela API documental."""
+    return get_rag_indexer(db, tenant_id=current_user.id)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -412,6 +430,107 @@ def get_dashboard(
     return stats
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  DOCUMENTOS  /documents
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router_documents.get("", response_model=DocumentListResponse)
+def list_stored_documents(
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    documents = list_documents(db, tenant_id=current_user.id)
+    return DocumentListResponse(documents=documents, total=len(documents))
+
+
+@router_documents.get("/{document_id}", response_model=DocumentResponse)
+def get_stored_document(
+    document_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    document = get_document(
+        db,
+        tenant_id=current_user.id,
+        document_id=document_id,
+    )
+    if document is None:
+        raise HTTPException(status_code=404, detail="Documento não encontrado.")
+    return document
+
+
+@router_documents.delete("/{document_id}", status_code=204)
+def delete_stored_document(
+    document_id: str,
+    db: Session = Depends(get_db),
+    rag = Depends(get_document_rag),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    document = get_document(
+        db,
+        tenant_id=current_user.id,
+        document_id=document_id,
+    )
+    if document is None:
+        raise HTTPException(status_code=404, detail="Documento não encontrado.")
+
+    if document.status in {
+        DocumentStatus.PENDING.value,
+        DocumentStatus.PROCESSING.value,
+    }:
+        raise HTTPException(
+            status_code=409,
+            detail="Documento pendente ou em processamento não pode ser excluído.",
+        )
+
+    chunks = list_document_chunks(
+        db,
+        tenant_id=current_user.id,
+        document_id=document_id,
+    )
+    try:
+        rag.delete_document_chunks(document, chunks)
+    except Exception as exc:
+        logger.exception(
+            "Falha vetorial ao excluir documento=%s tenant=%s.",
+            document_id,
+            current_user.id,
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Não foi possível excluir os vetores do documento.",
+        ) from exc
+
+    try:
+        deleted = delete_document_record(
+            db,
+            tenant_id=current_user.id,
+            document_id=document_id,
+        )
+        if not deleted:
+            db.rollback()
+            raise HTTPException(status_code=404, detail="Documento não encontrado.")
+        db.commit()
+    except DocumentDeletionBlockedError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Documento pendente ou em processamento não pode ser excluído.",
+        ) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        db.rollback()
+        logger.exception(
+            "Falha relacional ao excluir documento=%s tenant=%s.",
+            document_id,
+            current_user.id,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Não foi possível excluir o documento.",
+        ) from exc
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  FEEDBACK  /feedback
@@ -445,5 +564,6 @@ app.include_router(router_events)
 app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)
+app.include_router(router_documents)
 app.include_router(router_feedback)
 app.include_router(router_system)
