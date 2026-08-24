@@ -9,9 +9,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
-    DateTime, Integer,
+    CheckConstraint, Date, DateTime, ForeignKey, Index, Integer,
+    UniqueConstraint,
 )
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from dotenv import load_dotenv
 
 # ─── Conexão ─────────────────────────────────────────────────────────────────
@@ -137,5 +138,99 @@ class UnansweredQuestion(Base):
     # variações detectadas (JSON list serializado como texto)
     similar_questions   = Column(Text, default="[]")     # JSON array de strings
     converted           = Column(Boolean, default=False) # True após virar FAQ
+
+
+class Document(Base):
+    """Estado e metadados auditaveis de um documento por tenant."""
+
+    __tablename__ = "documents"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'processing', 'ready', 'error')",
+            name="ck_documents_status",
+        ),
+        CheckConstraint("size_bytes > 0", name="ck_documents_size_bytes_positive"),
+        CheckConstraint("length(sha256) = 64", name="ck_documents_sha256_length"),
+        CheckConstraint("chunk_count >= 0", name="ck_documents_chunk_count_nonnegative"),
+        Index("ix_documents_tenant_status", "tenant_id", "status"),
+        Index("ix_documents_tenant_sha256", "tenant_id", "sha256"),
+        Index("ix_documents_tenant_created_at", "tenant_id", "created_at"),
+    )
+
+    id              = Column(String, primary_key=True, default=new_uuid)
+    tenant_id       = Column(String, nullable=False, index=True)
+    filename        = Column(String, nullable=False)
+    mime_type       = Column(String, nullable=False)
+    size_bytes      = Column(Integer, nullable=False)
+    sha256          = Column(String, nullable=False)
+    status          = Column(String, default="pending", nullable=False)
+    chunk_count     = Column(Integer, default=0, nullable=False)
+    document_type   = Column(String, nullable=True)
+    document_number = Column(String, nullable=True)
+    department      = Column(String, nullable=True)
+    published_at    = Column(Date, nullable=True)
+    valid_until     = Column(Date, nullable=True)
+    error_message   = Column(Text, nullable=True)
+    created_at      = Column(DateTime, default=utc_now, nullable=False)
+    updated_at      = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+    processed_at    = Column(DateTime, nullable=True)
+
+    chunks = relationship(
+        "DocumentChunk",
+        back_populates="document",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="DocumentChunk.chunk_index",
+    )
+
+
+class DocumentChunk(Base):
+    """Trecho textual ordenado e rastreavel de um documento."""
+
+    __tablename__ = "document_chunks"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "chunk_index",
+            name="uq_document_chunks_document_id_chunk_index",
+        ),
+        CheckConstraint(
+            "chunk_index >= 0",
+            name="ck_document_chunks_chunk_index_nonnegative",
+        ),
+        CheckConstraint(
+            "page_start IS NULL OR page_start > 0",
+            name="ck_document_chunks_page_start_positive",
+        ),
+        CheckConstraint(
+            "page_end IS NULL OR page_end > 0",
+            name="ck_document_chunks_page_end_positive",
+        ),
+        CheckConstraint(
+            "page_start IS NULL OR page_end IS NULL OR page_end >= page_start",
+            name="ck_document_chunks_page_range",
+        ),
+    )
+
+    id            = Column(String, primary_key=True, default=new_uuid)
+    tenant_id     = Column(String, nullable=False, index=True)
+    document_id   = Column(
+        String,
+        ForeignKey(
+            "documents.id",
+            name="fk_document_chunks_document_id_documents",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+    chunk_index   = Column(Integer, nullable=False)
+    content       = Column(Text, nullable=False)
+    page_start    = Column(Integer, nullable=True)
+    page_end      = Column(Integer, nullable=True)
+    section_title = Column(String, nullable=True)
+    created_at    = Column(DateTime, default=utc_now, nullable=False)
+
+    document = relationship("Document", back_populates="chunks")
 
 
