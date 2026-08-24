@@ -23,7 +23,7 @@ import os
 import time
 from functools import lru_cache
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator, Mapping
 
 from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_community.vectorstores.pgvector import PGVector
@@ -242,6 +242,36 @@ def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:
     import uuid
     namespace = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")  # UUID namespace DNS padrão
     return str(uuid.uuid5(namespace, f"{tenant_id}:{source_type}:{source_id}"))
+
+
+_PROTECTED_METADATA_FIELDS = frozenset({"source_id", "source_type", "tenant_id"})
+
+
+def _normalize_extra_metadata(
+    extra_metadata: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Ignora campos protegidos/vazios e normaliza valores serializaveis em JSON."""
+    normalized: dict[str, Any] = {}
+    for key, value in (extra_metadata or {}).items():
+        if not isinstance(key, str) or not key.strip():
+            continue
+
+        normalized_key = key.strip()
+        if normalized_key in _PROTECTED_METADATA_FIELDS:
+            continue
+        if value is None or (isinstance(value, str) and not value.strip()):
+            continue
+        if isinstance(value, (list, tuple, dict, set, frozenset)) and not value:
+            continue
+
+        try:
+            normalized_value = json.loads(json.dumps(value, allow_nan=False))
+        except (TypeError, ValueError):
+            continue
+
+        normalized[normalized_key] = normalized_value
+
+    return normalized
 
 
 def warm_up_rag_runtime() -> None:
@@ -484,9 +514,19 @@ class RAGEngine:
         except Exception as exc:
             logger.error("[RAG] Falha ao deletar vetor %s: %s", vector_id, exc)
 
-    def _upsert_document(self, source_id: str, source_type: str, content: str) -> None:
+    def _upsert_document(
+        self,
+        source_id: str,
+        source_type: str,
+        content: str,
+        extra_metadata: Mapping[str, Any] | None = None,
+    ) -> None:
         """
         FIX Bug 2: passa `ids=[vector_id]` determinístico para add_documents().
+
+        ``extra_metadata`` e opcional para preservar chamadas existentes. Seus
+        valores sao normalizados para JSON; campos vazios, nao serializaveis ou
+        protegidos sao ignorados, e os campos internos sempre tem precedencia.
 
         Antes, add_documents() sem ids gerava um UUID aleatório a cada chamada.
         Isso tornava impossível deletar o vetor depois — não havia como saber
@@ -498,15 +538,19 @@ class RAGEngine:
         comportamento correto para re-indexação de FAQs editadas.
         """
         vector_id = _make_vector_id(source_id, source_type, self.tenant_id)
+        metadata = _normalize_extra_metadata(extra_metadata)
+        metadata.update(
+            {
+                "source_id": source_id,
+                "source_type": source_type,
+                "tenant_id": self.tenant_id,
+            }
+        )
         try:
             _get_vector_store(self.tenant_id).add_documents(
                 [Document(
                     page_content=content,
-                    metadata={
-                        "source_id": source_id,
-                        "source_type": source_type,
-                        "tenant_id": self.tenant_id,
-                    },
+                    metadata=metadata,
                 )],
                 ids=[vector_id],
             )
