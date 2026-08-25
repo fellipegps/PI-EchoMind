@@ -71,6 +71,40 @@ export interface CurrentUser {
   created_at: string;
 }
 
+export type DocumentStatus = "pending" | "processing" | "ready" | "error";
+
+export interface KnowledgeDocument {
+  id: string;
+  filename: string;
+  mime_type: string;
+  size_bytes: number;
+  sha256: string;
+  status: DocumentStatus;
+  chunk_count: number;
+  document_type: string | null;
+  document_number: string | null;
+  department: string | null;
+  published_at: string | null;
+  valid_until: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+  processed_at: string | null;
+}
+
+export interface DocumentListResponse {
+  documents: KnowledgeDocument[];
+  total: number;
+}
+
+export interface DocumentUploadMetadata {
+  document_type?: string;
+  document_number?: string;
+  department?: string;
+  published_at?: string;
+  valid_until?: string;
+}
+
 // ─── Gerenciamento do token JWT ───────────────────────────────────────────────
 
 const TOKEN_KEY = "echomind_token";
@@ -86,21 +120,11 @@ export const tokenStore = {
 
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = tokenStore.get();
-  const headers = new Headers(init?.headers);
-  headers.set("Content-Type", "application/json");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
+const CLIENT_ERROR_MESSAGE = "Não foi possível concluir a solicitação.";
+const SERVER_ERROR_MESSAGE = "O servidor não conseguiu concluir a solicitação.";
+const CONNECTION_ERROR_MESSAGE = "Não foi possível conectar ao servidor.";
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      ...Object.fromEntries(headers.entries()),
-    },
-  });
-
+async function handleAuthenticatedResponse<T>(res: Response): Promise<T> {
   // Token expirado ou inválido — redireciona para login
   if (res.status === 401) {
     tokenStore.clear();
@@ -109,13 +133,60 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!res.ok) {
-    const detail = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(detail?.detail ?? `Erro ${res.status}`);
+    throw new Error(res.status >= 500 ? SERVER_ERROR_MESSAGE : CLIENT_ERROR_MESSAGE);
   }
 
   // 204 No Content
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+
+  try {
+    return (await res.json()) as T;
+  } catch {
+    throw new Error(SERVER_ERROR_MESSAGE);
+  }
+}
+
+async function authenticatedFetch<T>(path: string, init: RequestInit): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, init);
+  } catch {
+    throw new Error(CONNECTION_ERROR_MESSAGE);
+  }
+
+  return handleAuthenticatedResponse<T>(res);
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = tokenStore.get();
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return authenticatedFetch<T>(path, {
+    ...init,
+    headers: {
+      ...Object.fromEntries(headers.entries()),
+    },
+  });
+}
+
+async function multipartRequest<T>(path: string, formData: FormData): Promise<T> {
+  const token = tokenStore.get();
+  const headers = new Headers();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return authenticatedFetch<T>(path, {
+    method: "POST",
+    headers: {
+      ...Object.fromEntries(headers.entries()),
+    },
+    body: formData,
+  });
 }
 
 async function publicRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -309,6 +380,42 @@ export const eventApi = {
 
   delete: (id: string) =>
     request<void>(`/events/${id}`, { method: "DELETE" }),
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  DOCUMENTOS
+// ══════════════════════════════════════════════════════════════════════════════
+
+const DOCUMENT_METADATA_FIELDS = [
+  "document_type",
+  "document_number",
+  "department",
+  "published_at",
+  "valid_until",
+] as const satisfies readonly (keyof DocumentUploadMetadata)[];
+
+export const documentApi = {
+  list: () =>
+    request<DocumentListResponse>("/documents", { method: "GET" }),
+
+  get: (id: string) =>
+    request<KnowledgeDocument>(`/documents/${encodeURIComponent(id)}`, { method: "GET" }),
+
+  upload: (file: File, metadata: DocumentUploadMetadata = {}) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    for (const field of DOCUMENT_METADATA_FIELDS) {
+      const value = metadata[field];
+      if (value !== undefined) {
+        formData.append(field, value);
+      }
+    }
+
+    return multipartRequest<KnowledgeDocument>("/documents/upload", formData);
+  },
+
+  delete: (id: string) =>
+    request<void>(`/documents/${encodeURIComponent(id)}`, { method: "DELETE" }),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
