@@ -71,6 +71,7 @@ EMBED_MODEL=intfloat/multilingual-e5-small
 EMBEDDING_DIM=384
 SIMILARITY_THRESHOLD=0.45
 TOP_K_DOCS=3
+MAX_DOCUMENT_SIZE_MB=10
 ```
 
 Nunca exponha `SUPABASE_SECRET_KEY` no frontend.
@@ -185,12 +186,23 @@ cd echomind-backend
 python scripts/reindex_all.py --confirm
 ```
 
-O script le a configuracao normal do backend, encontra tenants que possuem FAQs
-ou eventos e processa um por vez. Para cada tenant, somente a colecao
-`knowledge_<tenant>` correspondente e limpa e recriada; em seguida, as FAQs e
-os eventos desse mesmo tenant sao indexados novamente com os IDs deterministicos
-atuais. Nenhuma reindexacao e executada em startup, deploy ou importacao
-automaticamente, e o script nao processa documentos ou chunks.
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs,
+eventos ou documentos com status `ready` e processa um por vez. Para cada tenant,
+somente a colecao `knowledge_<tenant>` correspondente e limpa e recriada; em
+seguida, as FAQs, os eventos e os `document_chunks` ja persistidos dos documentos
+`ready` desse tenant sao indexados novamente com os IDs deterministicos atuais.
+Documentos `pending`, `processing` e `error` sao ignorados. O arquivo original
+nao e reprocessado e os chunks nao sao recriados.
+
+A operacao para no primeiro tenant que falhar e informa os tenants ja concluidos.
+Como cada colecao e reconstruida de forma deterministica, corrija a causa e rode
+o mesmo comando manual novamente. Nao execute duas reindexacoes em paralelo.
+Nenhuma reindexacao e iniciada automaticamente em startup, deploy, endpoint,
+scheduler ou importacao.
+
+O contrato operacional completo do MVP, incluindo formatos, estados, limites,
+OCR nao suportado, roteiro manual e branch protection recomendada, esta em
+[`docs/MVP-DOCUMENTAL.md`](docs/MVP-DOCUMENTAL.md).
 
 ## Autenticacao
 
@@ -225,6 +237,9 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `GET/DELETE` | `/unanswered` | Perguntas nao respondidas |
 | `POST` | `/unanswered/{id}/convert` | Converter pergunta em FAQ |
 | `GET` | `/dashboard` | Metricas do tenant |
+| `POST` | `/documents/upload` | Upload documental autenticado via multipart |
+| `GET` | `/documents` | Lista documentos do tenant autenticado |
+| `GET/DELETE` | `/documents/{id}` | Consulta ou exclui documento terminal do tenant |
 | `POST` | `/feedback` | Feedback publico do totem |
 | `GET` | `/health` | Health check |
 
@@ -237,22 +252,21 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 5. Entre em `/login`.
 6. Abra configuracoes e complete os dados da empresa.
 7. Cadastre FAQs e marque ate 4 para aparecerem no totem.
-8. Copie a URL do totem em configuracoes e teste o atendimento publico.
+8. Envie um TXT, PDF textual ou DOCX pela aba Documentos e aguarde `ready`.
+9. Confirme que o chat usa a fonte documental e que a exclusao remove o item.
+10. Copie a URL do totem em configuracoes e teste o atendimento publico.
 
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para
-`main` e disparos manuais. Os checks estaveis sao `Backend / unit-api` e
-`Frontend / quality-build`; execucoes anteriores da mesma branch ou PR sao
-canceladas quando uma nova comeca.
+`main` e disparos manuais. Os checks estaveis sao `Backend / unit-api`,
+`Database / migration-integration` e `Frontend / quality-build`; execucoes
+anteriores da mesma branch ou PR sao canceladas quando uma nova comeca.
 
-A baseline do backend foi medida com Python 3.12.10, SQLite e mocks, sem Groq,
-Supabase ou banco externo:
-
-- 44 testes passando;
-- 643 de 883 statements cobertos;
-- 72,82% de cobertura real (73% no relatorio inteiro do coverage);
-- gate fixado em 72%, o piso inteiro sem arredondamento para cima.
+No aceite do MVP, a suite rapida permanece baseada em SQLite e mocks, sem Groq,
+Supabase ou banco externo. O gate global continua em 72%, sem elevar ou manipular
+a baseline historica. Os modulos documentais novos devem permanecer com pelo
+menos 80% de cobertura; o relatorio `term-missing` e a fonte dos percentuais.
 
 Para reproduzir o gate do backend:
 
