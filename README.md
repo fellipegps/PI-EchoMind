@@ -327,6 +327,45 @@ python scripts/eval_hybrid_search.py \
   --output evals/hybrid_search_report.json
 ```
 
+### Reranker de candidatos
+
+O reranker é aplicado somente depois da recuperação e da fusão híbrida. Quando
+ativado, reordena até 12 candidatos (configurável entre 10 e 15), limita cada
+texto a 2.000 caracteres e entrega o `TOP_K_DOCS` existente. Conteúdo e metadata
+dos objetos recuperados não são reconstruídos; tenant, fonte e validade já
+filtrados permanecem inalterados.
+
+A implementação usa o `TextCrossEncoder` do FastEmbed, já presente nas
+dependências. O modelo operacional padrão é `BAAI/bge-reranker-base`, licença
+MIT e tamanho aproximado de 1,04 GB. A sessão ONNX e os arquivos em `HF_HOME`
+ficam em cache no processo. Como esse modelo não declara suporte amplo a PT-BR,
+`RERANKER_ENABLED=false` é o default conservador; a ativação exige avaliação
+controlada do corpus real. O modelo multilíngue listado pelo FastEmbed não foi
+adotado porque sua licença é CC-BY-NC-4.0.
+
+Timeout, erro, modelo ausente ou falha de download geram aviso com etapa,
+quantidade de candidatos e latência, e retornam exatamente o ranking híbrido da
+PR 24. Os testes usam fakes e não baixam modelo nem fazem chamadas externas.
+
+O comparativo sintético versionado referencia as métricas das PRs 22 e 24 e é
+reproduzido por:
+
+```bash
+cd echomind-backend
+python scripts/eval_reranker.py \
+  --dataset evals/reranker_eval.json \
+  --baseline-pr22 evals/baseline_report.json \
+  --baseline-pr24 evals/hybrid_search_report.json \
+  --output evals/reranker_report.json
+```
+
+Nesse conjunto controlado, Hit@3 passa de 0,833 para 1,000 e MRR@3 de
+0,556 para 1,000. A sobrecarga simulada média é 3,667 ms (p95 5 ms), levando a
+latência controlada média de 15,000 para 18,667 ms. A baseline PR 22 continua em
+recall/precision de fontes 1,000/1,000 e retrieval médio de 14,05 ms (p95 18
+ms). Esses tempos de fake não substituem um benchmark do modelo real no host de
+produção.
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para

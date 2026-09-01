@@ -1,0 +1,13 @@
+{
+  "dataset_version": "2026-09-01.1",
+  "description": "Comparação sintética e offline da ordem híbrida da PR 24 com reranking da PR 25.",
+  "top_k": 3,
+  "cases": [
+    {"id":"codigo-edital","category":"codigo","expected_source_id":"alfa-doc-edital-x17","hybrid_ranked_source_ids":["alfa-doc-edital-geral","alfa-doc-edital-x17","alfa-faq-editais"],"reranker_scores":[0.2,0.9,0.1],"hybrid_latency_ms":14,"reranker_latency_ms":3},
+    {"id":"sigla-nucleo","category":"sigla","expected_source_id":"alfa-faq-nai","hybrid_ranked_source_ids":["alfa-doc-campus","alfa-evento-inclusao","alfa-faq-nai"],"reranker_scores":[0.1,0.2,0.95],"hybrid_latency_ms":15,"reranker_latency_ms":4},
+    {"id":"nome-institucional","category":"nome","expected_source_id":"beta-evento-semana","hybrid_ranked_source_ids":["beta-evento-semana","beta-faq-calendario","beta-doc-campus"],"reranker_scores":[0.8,0.3,0.2],"hybrid_latency_ms":16,"reranker_latency_ms":3},
+    {"id":"reformulacao-matricula","category":"semantica","expected_source_id":"alfa-faq-matricula","hybrid_ranked_source_ids":["alfa-doc-calendario","alfa-faq-secretaria","alfa-doc-ingresso","alfa-faq-matricula"],"reranker_scores":[0.1,0.2,0.3,0.9],"hybrid_latency_ms":14,"reranker_latency_ms":5},
+    {"id":"reformulacao-recurso","category":"semantica","expected_source_id":"alfa-doc-recurso","hybrid_ranked_source_ids":["alfa-doc-recurso","alfa-faq-protocolo","alfa-doc-prazos"],"reranker_scores":[0.9,0.5,0.1],"hybrid_latency_ms":15,"reranker_latency_ms":4},
+    {"id":"reformulacao-pagamento","category":"semantica","expected_source_id":"beta-doc-pagamento","hybrid_ranked_source_ids":["beta-faq-financeiro","beta-doc-pagamento","beta-doc-bolsas"],"reranker_scores":[0.4,0.8,0.2],"hybrid_latency_ms":16,"reranker_latency_ms":3}
+  ]
+}

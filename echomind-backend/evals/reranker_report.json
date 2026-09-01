@@ -1,0 +1,77 @@
+{
+  "report_version": 1,
+  "dataset_version": "2026-09-01.1",
+  "mode": "offline-synthetic-reranker-comparison",
+  "references": {
+    "pr22": {
+      "source_recall": 1.0,
+      "source_precision": 1.0,
+      "retrieval_mean_ms": 14.05,
+      "retrieval_p95_ms": 18.0
+    },
+    "pr24": {
+      "vector_recall": 0.5,
+      "hybrid_recall": 1.0
+    }
+  },
+  "ranking": {
+    "hybrid_hit_rate_at_k": 0.833,
+    "reranked_hit_rate_at_k": 1.0,
+    "hybrid_mrr_at_k": 0.556,
+    "reranked_mrr_at_k": 1.0,
+    "hit_rate_gain": 0.167,
+    "mrr_gain": 0.444
+  },
+  "latency_ms": {
+    "controlled_hybrid_mean": 15.0,
+    "controlled_hybrid_p95": 16.0,
+    "controlled_reranked_mean": 18.667,
+    "controlled_reranked_p95": 19.0,
+    "reranker_overhead_mean": 3.667,
+    "reranker_overhead_p95": 5.0
+  },
+  "cases": [
+    {
+      "id": "codigo-edital",
+      "category": "codigo",
+      "expected_source_id": "alfa-doc-edital-x17",
+      "hybrid_rank": 2,
+      "reranked_rank": 1
+    },
+    {
+      "id": "sigla-nucleo",
+      "category": "sigla",
+      "expected_source_id": "alfa-faq-nai",
+      "hybrid_rank": 3,
+      "reranked_rank": 1
+    },
+    {
+      "id": "nome-institucional",
+      "category": "nome",
+      "expected_source_id": "beta-evento-semana",
+      "hybrid_rank": 1,
+      "reranked_rank": 1
+    },
+    {
+      "id": "reformulacao-matricula",
+      "category": "semantica",
+      "expected_source_id": "alfa-faq-matricula",
+      "hybrid_rank": 4,
+      "reranked_rank": 1
+    },
+    {
+      "id": "reformulacao-recurso",
+      "category": "semantica",
+      "expected_source_id": "alfa-doc-recurso",
+      "hybrid_rank": 1,
+      "reranked_rank": 1
+    },
+    {
+      "id": "reformulacao-pagamento",
+      "category": "semantica",
+      "expected_source_id": "beta-doc-pagamento",
+      "hybrid_rank": 2,
+      "reranked_rank": 1
+    }
+  ]
+}
