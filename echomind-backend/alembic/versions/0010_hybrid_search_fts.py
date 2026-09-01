@@ -22,15 +22,19 @@ def upgrade() -> None:
     )
     op.execute(
         "CREATE INDEX ix_events_fts_portuguese ON public.events USING gin "
-        "(to_tsvector('portuguese', concat_ws(' ', title, event_date, event_type, description)))"
+        "(to_tsvector('portuguese', "
+        "coalesce(title, '') || ' ' || coalesce(event_date, '') || ' ' || "
+        "coalesce(event_type, '') || ' ' || coalesce(description, '')))"
     )
     op.execute(
         "CREATE INDEX ix_documents_fts_portuguese ON public.documents USING gin "
-        "(to_tsvector('portuguese', concat_ws(' ', filename, document_type, document_number, department)))"
+        "(to_tsvector('portuguese', "
+        "coalesce(filename, '') || ' ' || coalesce(document_type, '') || ' ' || "
+        "coalesce(document_number, '') || ' ' || coalesce(department, '')))"
     )
     op.execute(
         "CREATE INDEX ix_document_chunks_fts_portuguese ON public.document_chunks USING gin "
-        "(to_tsvector('portuguese', concat_ws(' ', content, section_title)))"
+        "(to_tsvector('portuguese', coalesce(content, '') || ' ' || coalesce(section_title, '')))"
     )
 
 

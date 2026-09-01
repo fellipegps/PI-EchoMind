@@ -37,3 +37,12 @@ def test_hybrid_eval_shows_gain_for_exact_terms_without_semantic_regression() ->
     assert report["metrics_by_category"]["sigla"] == {"hybrid_recall": 1.0, "vector_recall": 0.0}
     assert report["metrics_by_category"]["semantica"] == {"hybrid_recall": 1.0, "vector_recall": 1.0}
     assert report["overall"] == {"vector_recall": 0.5, "hybrid_recall": 1.0}
+
+
+def test_fts_expression_indexes_only_use_immutable_concatenation() -> None:
+    migration = (Path(__file__).parents[2] / "alembic" / "versions" / "0010_hybrid_search_fts.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert "concat_ws" not in migration
+    assert migration.count("CREATE INDEX ix_") == 4

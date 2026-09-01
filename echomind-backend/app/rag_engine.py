@@ -630,12 +630,20 @@ def _search_lexical_documents(
                 """
                 SELECT id, tenant_id, title, event_date, event_type, description,
                        ts_rank_cd(
-                         to_tsvector('portuguese', concat_ws(' ', title, event_date, event_type, description)),
+                         to_tsvector(
+                           'portuguese',
+                           coalesce(title, '') || ' ' || coalesce(event_date, '') || ' ' ||
+                           coalesce(event_type, '') || ' ' || coalesce(description, '')
+                         ),
                          websearch_to_tsquery('portuguese', :question)
                        ) AS rank
                 FROM events
                 WHERE tenant_id = :tenant_id
-                  AND to_tsvector('portuguese', concat_ws(' ', title, event_date, event_type, description))
+                  AND to_tsvector(
+                        'portuguese',
+                        coalesce(title, '') || ' ' || coalesce(event_date, '') || ' ' ||
+                        coalesce(event_type, '') || ' ' || coalesce(description, '')
+                      )
                       @@ websearch_to_tsquery('portuguese', :question)
                 ORDER BY rank DESC, id ASC
                 LIMIT :limit
@@ -650,7 +658,11 @@ def _search_lexical_documents(
                        c.page_start, c.page_end, c.section_title, d.filename, d.mime_type,
                        d.document_type, d.document_number, d.department, d.published_at, d.valid_until,
                        ts_rank_cd(
-                         to_tsvector('portuguese', concat_ws(' ', d.filename, d.document_type, d.document_number, d.department)),
+                         to_tsvector(
+                           'portuguese',
+                           coalesce(d.filename, '') || ' ' || coalesce(d.document_type, '') || ' ' ||
+                           coalesce(d.document_number, '') || ' ' || coalesce(d.department, '')
+                         ),
                          websearch_to_tsquery('portuguese', :question)
                        ) AS rank
                 FROM documents d
@@ -658,7 +670,11 @@ def _search_lexical_documents(
                 WHERE d.tenant_id = :tenant_id AND c.tenant_id = :tenant_id
                   AND d.status = 'ready'
                   AND (d.valid_until IS NULL OR d.valid_until >= :today)
-                  AND to_tsvector('portuguese', concat_ws(' ', d.filename, d.document_type, d.document_number, d.department))
+                  AND to_tsvector(
+                        'portuguese',
+                        coalesce(d.filename, '') || ' ' || coalesce(d.document_type, '') || ' ' ||
+                        coalesce(d.document_number, '') || ' ' || coalesce(d.department, '')
+                      )
                       @@ websearch_to_tsquery('portuguese', :question)
                 ORDER BY rank DESC, c.chunk_index ASC, c.id ASC
                 LIMIT :limit
@@ -673,7 +689,10 @@ def _search_lexical_documents(
                        c.page_start, c.page_end, c.section_title, d.filename, d.mime_type,
                        d.document_type, d.document_number, d.department, d.published_at, d.valid_until,
                        ts_rank_cd(
-                         to_tsvector('portuguese', concat_ws(' ', c.content, c.section_title)),
+                         to_tsvector(
+                           'portuguese',
+                           coalesce(c.content, '') || ' ' || coalesce(c.section_title, '')
+                         ),
                          websearch_to_tsquery('portuguese', :question)
                        ) AS rank
                 FROM document_chunks c
@@ -681,7 +700,10 @@ def _search_lexical_documents(
                 WHERE c.tenant_id = :tenant_id AND d.tenant_id = :tenant_id
                   AND d.status = 'ready'
                   AND (d.valid_until IS NULL OR d.valid_until >= :today)
-                  AND to_tsvector('portuguese', concat_ws(' ', c.content, c.section_title))
+                  AND to_tsvector(
+                        'portuguese',
+                        coalesce(c.content, '') || ' ' || coalesce(c.section_title, '')
+                      )
                       @@ websearch_to_tsquery('portuguese', :question)
                 ORDER BY rank DESC, c.chunk_index ASC, c.id ASC
                 LIMIT :limit
