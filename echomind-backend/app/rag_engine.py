@@ -47,6 +47,7 @@ from .database import (
     engine,
     utc_now,
 )
+from .reranker import FastEmbedCrossEncoderReranker, Reranker, rerank_documents
 
 logger = logging.getLogger("echomind.rag")
 
@@ -82,6 +83,22 @@ TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
 _RETRIEVAL_OVERFETCH_MULTIPLIER = 3
 _MIN_RETRIEVAL_CANDIDATES = 10
 _HYBRID_RRF_K = 60
+DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-base"
+RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+RERANKER_MODEL = os.getenv("RERANKER_MODEL", DEFAULT_RERANKER_MODEL)
+RERANKER_CANDIDATE_LIMIT = min(
+    15,
+    max(10, int(os.getenv("RERANKER_CANDIDATE_LIMIT", "12"))),
+)
+RERANKER_MAX_CHARS = max(1, int(os.getenv("RERANKER_MAX_CHARS", "2000")))
+RERANKER_TIMEOUT_SECONDS = max(
+    0.01,
+    float(os.getenv("RERANKER_TIMEOUT_SECONDS", "1.5")),
+)
 RAG_WARMUP_ENABLED   = os.getenv("RAG_WARMUP_ENABLED", "true").lower() not in {
     "0",
     "false",
@@ -156,6 +173,15 @@ def _get_embeddings() -> FastEmbedEmbeddings:
         raise RuntimeError(
             "Falha ao carregar embeddings FastEmbed. Execute: pip install fastembed"
         ) from exc
+
+
+@lru_cache(maxsize=1)
+def _get_reranker() -> Reranker:
+    """Cria o adapter; modelo e sessao ONNX sao carregados no primeiro uso."""
+    return FastEmbedCrossEncoderReranker(
+        model_name=RERANKER_MODEL,
+        cache_dir=_MODEL_CACHE,
+    )
 
 
 @lru_cache(maxsize=1)
@@ -731,6 +757,7 @@ async def _retrieve_docs(
     tenant_id: str,
     *,
     today: date | None = None,
+    reranker: Reranker | None = None,
 ) -> tuple[list[Document], float | None]:
     """
     Combina candidatos vetoriais e lexicais por RRF, sem substituir PGVector.
@@ -764,22 +791,71 @@ async def _retrieve_docs(
         if _document_is_current(doc, today=reference_date)
     ]
     current_candidates.sort(key=lambda item: item[1])
-    approved = [
+    approved_candidates = [
         (doc, distance)
         for doc, distance in current_candidates
         if distance <= SIMILARITY_THRESHOLD
-    ][:TOP_K_DOCS]
+    ][:candidate_k]
 
-    vector_documents = [doc for doc, _ in approved]
-    hybrid_documents = _fuse_hybrid_results(
-        vector_documents,
+    baseline_vector_documents = [
+        doc for doc, _distance in approved_candidates[:TOP_K_DOCS]
+    ]
+    baseline_documents = _fuse_hybrid_results(
+        baseline_vector_documents,
         lexical_documents,
         limit=TOP_K_DOCS,
     )
+
+    active_reranker = reranker
+    if active_reranker is None and RERANKER_ENABLED:
+        try:
+            active_reranker = _get_reranker()
+        except Exception as exc:
+            logger.warning(
+                "[RAG] Reranker indisponivel na inicializacao; mantendo Hybrid Search. erro=%s",
+                type(exc).__name__,
+            )
+
+    hybrid_documents = baseline_documents
+    if active_reranker is not None:
+        rerank_candidates = _fuse_hybrid_results(
+            [doc for doc, _distance in approved_candidates],
+            lexical_documents,
+            limit=RERANKER_CANDIDATE_LIMIT,
+        )
+        rerank_started = time.perf_counter()
+        try:
+            hybrid_documents = await rerank_documents(
+                question,
+                rerank_candidates,
+                reranker=active_reranker,
+                candidate_limit=RERANKER_CANDIDATE_LIMIT,
+                top_k=TOP_K_DOCS,
+                max_chars=RERANKER_MAX_CHARS,
+                timeout_seconds=RERANKER_TIMEOUT_SECONDS,
+            )
+        except Exception as exc:
+            rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
+            logger.warning(
+                "[RAG] Reranker falhou; mantendo ranking Hybrid Search. "
+                "erro=%s candidatos=%d latencia_ms=%.2f",
+                type(exc).__name__,
+                len(rerank_candidates),
+                rerank_latency_ms,
+            )
+            hybrid_documents = baseline_documents
+        else:
+            rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
+            logger.info(
+                "[RAG] Reranker reordenou %d candidato(s) em %.2f ms e retornou %d.",
+                len(rerank_candidates),
+                rerank_latency_ms,
+                len(hybrid_documents),
+            )
     if hybrid_documents:
         logger.info(
             "[RAG] Hybrid Search retornou %d doc(s): %d vetorial(is), %d lexical(is).",
-            len(hybrid_documents), len(vector_documents), len(lexical_documents),
+            len(hybrid_documents), len(baseline_vector_documents), len(lexical_documents),
         )
     else:
         nearest = current_candidates[0][1] if current_candidates else -1
@@ -787,8 +863,8 @@ async def _retrieve_docs(
                     SIMILARITY_THRESHOLD, nearest)
 
     nearest_distance = (
-        approved[0][1]
-        if approved
+        approved_candidates[0][1]
+        if approved_candidates
         else (current_candidates[0][1] if current_candidates else None)
     )
     return hybrid_documents, nearest_distance
