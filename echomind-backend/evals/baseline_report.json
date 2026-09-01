@@ -1,0 +1,649 @@
+{
+  "report_version": 1,
+  "runner_version": "1.0",
+  "dataset_version": "2026-08-30.1",
+  "mode": "offline-synthetic-observations",
+  "retrieval_configuration": {
+    "strategy": "PGVector similarity_search_with_score",
+    "embedding_model": "intfloat/multilingual-e5-small",
+    "embedding_dimensions": 384,
+    "similarity_threshold": 0.45,
+    "top_k": 3,
+    "validity_filter": "document_chunk valid_until >= today"
+  },
+  "case_count": 20,
+  "metrics": {
+    "retrieval": {
+      "source_recall": 1.0,
+      "source_precision": 1.0
+    },
+    "generation": {
+      "semantic_token_f1": 0.94,
+      "correctness_by_rule": 1.0,
+      "correct_refusal": 1.0
+    },
+    "source": {
+      "citation_presence": 1.0
+    },
+    "latency_ms": {
+      "retrieval_mean": 14.05,
+      "retrieval_p95": 18.0,
+      "generation_mean": 26.35,
+      "generation_p95": 35.0
+    }
+  },
+  "cases": [
+    {
+      "id": "alfa-01",
+      "tags": [
+        "requisito",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-faq-matricula"
+        ],
+        "found_source_ids": [
+          "alfa-faq-matricula"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 12,
+        "generation": 24
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-02",
+      "tags": [
+        "data",
+        "fonte",
+        "vigente"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-doc-recurso"
+        ],
+        "found_source_ids": [
+          "alfa-doc-recurso"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.909,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 14,
+        "generation": 31
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-03",
+      "tags": [
+        "numero",
+        "requisito"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-doc-recurso"
+        ],
+        "found_source_ids": [
+          "alfa-doc-recurso"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.818,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 15,
+        "generation": 29
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-04",
+      "tags": [
+        "requisito",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-doc-bolsa"
+        ],
+        "found_source_ids": [
+          "alfa-doc-bolsa"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.867,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 17,
+        "generation": 35
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-05",
+      "tags": [
+        "excecao",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 11,
+        "generation": 20
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-06",
+      "tags": [
+        "requisito",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-doc-estagio"
+        ],
+        "found_source_ids": [
+          "alfa-doc-estagio"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.917,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 16,
+        "generation": 32
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-07",
+      "tags": [
+        "data",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-faq-biblioteca"
+        ],
+        "found_source_ids": [
+          "alfa-faq-biblioteca"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 12,
+        "generation": 26
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-08",
+      "tags": [
+        "data",
+        "evento"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "alfa-evento-semana"
+        ],
+        "found_source_ids": [
+          "alfa-evento-semana"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 13,
+        "generation": 27
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-09",
+      "tags": [
+        "vencido",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 18,
+        "generation": 21
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "alfa-10",
+      "tags": [
+        "excecao",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 10,
+        "generation": 19
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-01",
+      "tags": [
+        "data",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-faq-atendimento"
+        ],
+        "found_source_ids": [
+          "beta-faq-atendimento"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 13,
+        "generation": 25
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-02",
+      "tags": [
+        "data",
+        "evento"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-evento-feira"
+        ],
+        "found_source_ids": [
+          "beta-evento-feira"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 14,
+        "generation": 28
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-03",
+      "tags": [
+        "data",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-doc-pagamento"
+        ],
+        "found_source_ids": [
+          "beta-doc-pagamento"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.818,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 16,
+        "generation": 30
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-04",
+      "tags": [
+        "numero",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-doc-pagamento"
+        ],
+        "found_source_ids": [
+          "beta-doc-pagamento"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.778,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 15,
+        "generation": 33
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-05",
+      "tags": [
+        "vencido",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 19,
+        "generation": 22
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-06",
+      "tags": [
+        "requisito",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-doc-acessibilidade"
+        ],
+        "found_source_ids": [
+          "beta-doc-acessibilidade"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.857,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 18,
+        "generation": 37
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-07",
+      "tags": [
+        "excecao",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 12,
+        "generation": 20
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-08",
+      "tags": [
+        "requisito",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-doc-pagamento"
+        ],
+        "found_source_ids": [
+          "beta-doc-pagamento"
+        ]
+      },
+      "generation": {
+        "semantic_token_f1": 0.842,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 15,
+        "generation": 29
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-09",
+      "tags": [
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 10,
+        "generation": 18
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-10",
+      "tags": [
+        "excecao",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": []
+      },
+      "generation": {
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 11,
+        "generation": 21
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    }
+  ]
+}

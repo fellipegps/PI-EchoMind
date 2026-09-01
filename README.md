@@ -69,7 +69,7 @@ GROQ_LLM_MODEL=openai/gpt-oss-120b
 
 EMBED_MODEL=intfloat/multilingual-e5-small
 EMBEDDING_DIM=384
-SIMILARITY_THRESHOLD=0.45
+SIMILARITY_THRESHOLD=0.35
 TOP_K_DOCS=3
 MAX_DOCUMENT_SIZE_MB=10
 ```
@@ -255,6 +255,49 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 8. Envie um TXT, PDF textual ou DOCX pela aba Documentos e aguarde `ready`.
 9. Confirme que o chat usa a fonte documental e que a exclusao remove o item.
 10. Copie a URL do totem em configuracoes e teste o atendimento publico.
+
+## Avaliação RAG offline
+
+O dataset em `echomind-backend/evals/rag_baseline_dataset.json` contém 20 casos
+e um corpus inteiramente sintético, cobrindo datas, números, requisitos,
+exceções, recusa, fontes e documentos vigentes/vencidos. Cada caso mantém a
+expectativa, a observação baseline e um campo `human_review` para uma revisão
+posterior; a métrica automática não a substitui.
+
+O runner não importa o runtime de produção nem faz chamadas de rede, embedding
+ou LLM. Ele mede recuperação (recall/precision de fontes), geração (F1 lexical
+explícito, correção por regra e recusa), presença de citação e latência de cada
+etapa observada. Para regenerar o relatório versionável:
+
+```bash
+cd echomind-backend
+python scripts/eval_rag.py \
+  --dataset evals/rag_baseline_dataset.json \
+  --output evals/baseline_report.json
+```
+
+O JSON gerado lista falhas por caso e a configuração de retrieval registrada;
+ele é uma baseline de infraestrutura sintética, não uma autorização para mudar
+threshold, embeddings ou a estratégia de busca.
+
+### Calibração do threshold
+
+O default de `SIMILARITY_THRESHOLD` foi calibrado de `0.45` para `0.35` com o
+mesmo dataset sintético. O sweep de `0.30` a `0.50`, em passos de `0.05`, está
+arquivado em `echomind-backend/evals/threshold_calibration_report.json`: `0.35`
+preserva recall de fontes de 100% e recusa correta de 100%, enquanto `0.45`
+aceita contexto irrelevante em todos os casos sintéticos de recusa. O algoritmo,
+embedding, top-K e filtro de validade não foram alterados.
+
+Para reproduzir a decisão:
+
+```bash
+cd echomind-backend
+python scripts/calibrate_similarity_threshold.py \
+  --dataset evals/rag_baseline_dataset.json \
+  --candidates evals/similarity_threshold_candidates.json \
+  --output evals/threshold_calibration_report.json
+```
 
 ## CI Rapida E Baseline
 

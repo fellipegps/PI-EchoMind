@@ -32,7 +32,7 @@ def test_default_embedding_model_and_dimension(monkeypatch, rag_modules) -> None
     assert rag_engine.DEFAULT_EMBED_MODEL == "intfloat/multilingual-e5-small"
     assert rag_engine.DEFAULT_EMBEDDING_DIM == 384
     assert rag_engine.EMBEDDING_DIM == 384
-    assert rag_engine.SIMILARITY_THRESHOLD == 0.45
+    assert rag_engine.SIMILARITY_THRESHOLD == 0.35
 
     monkeypatch.setattr(rag_engine, "EMBED_MODEL", rag_engine.DEFAULT_EMBED_MODEL)
     rag_engine._register_default_embedding_model()

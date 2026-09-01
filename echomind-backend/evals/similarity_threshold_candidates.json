@@ -1,0 +1,26 @@
+{
+  "dataset_version": "2026-08-30.1",
+  "description": "Distâncias sintéticas pós-filtro de validade para calibrar somente o limiar.",
+  "cases": [
+    {"id":"alfa-01","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-faq-matricula","distance":0.24,"is_current":true}]},
+    {"id":"alfa-02","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-doc-recurso","distance":0.28,"is_current":true}]},
+    {"id":"alfa-03","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-doc-recurso","distance":0.32,"is_current":true}]},
+    {"id":"alfa-04","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-doc-bolsa","distance":0.30,"is_current":true}]},
+    {"id":"alfa-05","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-faq-matricula","distance":0.42,"is_current":true}]},
+    {"id":"alfa-06","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-doc-estagio","distance":0.34,"is_current":true}]},
+    {"id":"alfa-07","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-faq-biblioteca","distance":0.23,"is_current":true}]},
+    {"id":"alfa-08","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-evento-semana","distance":0.27,"is_current":true}]},
+    {"id":"alfa-09","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-doc-expirado","distance":0.05,"is_current":false},{"source_id":"alfa-doc-bolsa","distance":0.40,"is_current":true}]},
+    {"id":"alfa-10","tenant_id":"tenant-alfa","candidates":[{"source_id":"alfa-doc-recurso","distance":0.38,"is_current":true}]},
+    {"id":"beta-01","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-faq-atendimento","distance":0.26,"is_current":true}]},
+    {"id":"beta-02","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-evento-feira","distance":0.29,"is_current":true}]},
+    {"id":"beta-03","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-pagamento","distance":0.31,"is_current":true}]},
+    {"id":"beta-04","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-pagamento","distance":0.33,"is_current":true}]},
+    {"id":"beta-05","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-expirado","distance":0.05,"is_current":false},{"source_id":"beta-doc-pagamento","distance":0.41,"is_current":true}]},
+    {"id":"beta-06","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-acessibilidade","distance":0.30,"is_current":true}]},
+    {"id":"beta-07","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-acessibilidade","distance":0.39,"is_current":true}]},
+    {"id":"beta-08","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-pagamento","distance":0.34,"is_current":true}]},
+    {"id":"beta-09","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-doc-pagamento","distance":0.43,"is_current":true}]},
+    {"id":"beta-10","tenant_id":"tenant-beta","candidates":[{"source_id":"beta-evento-feira","distance":0.37,"is_current":true}]}
+  ]
+}

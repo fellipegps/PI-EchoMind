@@ -138,7 +138,7 @@ async def test_overfetch_filters_expired_then_restores_ranking_and_top_k(
         "terceiro",
     ]
     assert nearest_distance == 0.10
-    assert rag_engine_module.SIMILARITY_THRESHOLD == 0.45
+    assert rag_engine_module.SIMILARITY_THRESHOLD == 0.35
 
 
 @pytest.mark.asyncio
