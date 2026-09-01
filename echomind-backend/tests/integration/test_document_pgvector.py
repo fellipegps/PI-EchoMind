@@ -270,6 +270,48 @@ def test_real_pgvector_keeps_faq_and_event_retrievable(real_rag_runtime) -> None
 
 
 @pytest.mark.asyncio
+async def test_real_postgresql_hybrid_search_is_lexical_tenant_scoped_and_validity_aware(
+    real_rag_runtime,
+) -> None:
+    """Exercita FTS real, fusão híbrida, tenant e validade documental."""
+    from app.database import CompanyEvent, Document as StoredDocument, DocumentChunk, Faq, SessionLocal
+
+    tenant_a, tenant_b = "hybrid-a", "hybrid-b"
+    document_id, chunk_id = "hybrid-doc-a", "hybrid-chunk-a"
+    session = SessionLocal()
+    try:
+        faq = Faq(id="hybrid-faq-a", tenant_id=tenant_a, question="Qual é a sigla NAI?", answer="NAI é o Núcleo de Acessibilidade Institucional.")
+        event = CompanyEvent(id="hybrid-event-a", tenant_id=tenant_a, title="Semana SIGLAFEST", event_date="2026-09-14", event_type="institucional", description="Evento sintético.")
+        document = StoredDocument(id=document_id, tenant_id=tenant_a, filename="edital-xyz.pdf", mime_type="application/pdf", size_bytes=128, sha256="a" * 64, status="ready", chunk_count=1, document_number="EDITALXYZ2026")
+        chunk = DocumentChunk(id=chunk_id, tenant_id=tenant_a, document_id=document_id, chunk_index=0, content="O código EDITALXYZ2026 prevê inscrição até 14 de setembro.")
+        expired_document = StoredDocument(id="hybrid-doc-expired", tenant_id=tenant_a, filename="expirado.pdf", mime_type="application/pdf", size_bytes=128, sha256="b" * 64, status="ready", chunk_count=1, valid_until=date(2026, 8, 23))
+        expired_chunk = DocumentChunk(id="hybrid-chunk-expired", tenant_id=tenant_a, document_id=expired_document.id, chunk_index=0, content="O código EXPIRADOXYZ nunca deve ser retornado.")
+        foreign_faq = Faq(id="hybrid-faq-b", tenant_id=tenant_b, question="EDITALXYZ2026 do tenant B", answer="Conteúdo exclusivo do tenant B.")
+        session.add_all((faq, event, document, chunk, expired_document, expired_chunk, foreign_faq))
+        session.commit()
+
+        indexer = real_rag_runtime.make_indexer(tenant_a)
+        indexer.index_faq(faq)  # a rota vetorial continua ativa
+
+        lexical_code = real_rag_runtime.module._search_lexical_documents("EDITALXYZ2026", tenant_a, today=date(2026, 8, 24), limit=10)
+        assert ("document_chunk", chunk_id) in {(doc.metadata["source_type"], doc.metadata["source_id"]) for doc in lexical_code}
+        assert all(doc.metadata["tenant_id"] == tenant_a for doc in lexical_code)
+        assert ("faq", faq.id) in {(doc.metadata["source_type"], doc.metadata["source_id"]) for doc in real_rag_runtime.module._search_lexical_documents("NAI", tenant_a, today=date(2026, 8, 24), limit=10)}
+        assert ("event", event.id) in {(doc.metadata["source_type"], doc.metadata["source_id"]) for doc in real_rag_runtime.module._search_lexical_documents("SIGLAFEST", tenant_a, today=date(2026, 8, 24), limit=10)}
+        assert real_rag_runtime.module._search_lexical_documents("EXPIRADOXYZ", tenant_a, today=date(2026, 8, 24), limit=10) == []
+
+        hybrid, _distance = await real_rag_runtime.module._retrieve_docs("EDITALXYZ2026", tenant_a, today=date(2026, 8, 24))
+        assert ("document_chunk", chunk_id) in {(doc.metadata["source_type"], doc.metadata["source_id"]) for doc in hybrid}
+    finally:
+        session.query(DocumentChunk).filter(DocumentChunk.id.in_((chunk_id, "hybrid-chunk-expired"))).delete(synchronize_session=False)
+        session.query(StoredDocument).filter(StoredDocument.id.in_((document_id, "hybrid-doc-expired"))).delete(synchronize_session=False)
+        session.query(Faq).filter(Faq.id.in_(("hybrid-faq-a", "hybrid-faq-b"))).delete(synchronize_session=False)
+        session.query(CompanyEvent).filter(CompanyEvent.id == "hybrid-event-a").delete(synchronize_session=False)
+        session.commit()
+        session.close()
+
+
+@pytest.mark.asyncio
 async def test_real_pgvector_retrieval_excludes_expired_chunks_and_keeps_tenant(
     real_rag_runtime,
 ) -> None:

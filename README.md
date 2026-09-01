@@ -299,6 +299,34 @@ python scripts/calibrate_similarity_threshold.py \
   --output evals/threshold_calibration_report.json
 ```
 
+### Busca híbrida PostgreSQL + PGVector
+
+A recuperação agora preserva o PGVector e acrescenta candidatos lexicalmente
+encontrados no PostgreSQL. As quatro consultas full-text usam `tenant_id`
+explicitamente: FAQs, eventos, metadados de documentos e conteúdo dos chunks;
+chunks também exigem documento `ready` e vigente. A migration `0010` adiciona
+apenas índices GIN de expressão, sem tabela global ou cópia manual do corpus.
+
+Os canais são fundidos com Reciprocal Rank Fusion (RRF): cada ocorrência soma
+`1 / (60 + posição)`; fontes são deduplicadas por `(source_type, source_id)` e
+empates usam posição vetorial, posição lexical, tipo e ID. O threshold de 0,35
+continua valendo somente para o canal vetorial; a busca lexical permite que
+códigos e siglas exatos sejam candidatos sem alterar embeddings, top-K ou a
+estratégia semântica existente.
+
+O custo adicional é de quatro consultas FTS curtas por pergunta, cobertas pelos
+índices GIN. O rollback de aplicação é seguro porque a busca vetorial continua
+autônoma; os índices da migration podem permanecer (ou ser removidos pelo
+downgrade) sem apagar conteúdo nem vetores. A comparação sintética está em
+`echomind-backend/evals/hybrid_search_report.json` e é reproduzida por:
+
+```bash
+cd echomind-backend
+python scripts/eval_hybrid_search.py \
+  --dataset evals/hybrid_search_eval.json \
+  --output evals/hybrid_search_report.json
+```
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para

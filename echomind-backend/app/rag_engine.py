@@ -24,6 +24,7 @@ import time
 from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, AsyncGenerator, Mapping, Sequence
 
 from langchain_community.embeddings import FastEmbedEmbeddings
@@ -80,6 +81,7 @@ UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
 _RETRIEVAL_OVERFETCH_MULTIPLIER = 3
 _MIN_RETRIEVAL_CANDIDATES = 10
+_HYBRID_RRF_K = 60
 RAG_WARMUP_ENABLED   = os.getenv("RAG_WARMUP_ENABLED", "true").lower() not in {
     "0",
     "false",
@@ -524,6 +526,206 @@ def _document_is_current(document: Document, *, today: date) -> bool:
     return valid_until >= today
 
 
+def _hybrid_source_key(document: Document) -> tuple[str, str]:
+    """Identifica uma fonte sem misturar IDs iguais de tipos diferentes."""
+    metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
+    return (
+        str(metadata.get("source_type", "")),
+        str(metadata.get("source_id", "")),
+    )
+
+
+def _lexical_document_chunk(row: Mapping[str, Any]) -> Document:
+    document = SimpleNamespace(
+        id=row["document_id"],
+        filename=row["filename"],
+        mime_type=row["mime_type"],
+        document_type=row["document_type"],
+        document_number=row["document_number"],
+        department=row["department"],
+        published_at=row["published_at"],
+        valid_until=row["valid_until"],
+    )
+    chunk = SimpleNamespace(
+        id=row["id"],
+        document_id=row["document_id"],
+        tenant_id=row["tenant_id"],
+        chunk_index=row["chunk_index"],
+        content=row["content"],
+        page_start=row["page_start"],
+        page_end=row["page_end"],
+        section_title=row["section_title"],
+    )
+    return Document(
+        page_content=_document_chunk_content(document, chunk),
+        metadata={
+            "source_id": chunk.id,
+            "source_type": _DOCUMENT_CHUNK_SOURCE_TYPE,
+            "tenant_id": chunk.tenant_id,
+            **_document_chunk_metadata(document, chunk),
+        },
+    )
+
+
+def _search_lexical_documents(
+    question: str,
+    tenant_id: str,
+    *,
+    today: date,
+    limit: int,
+) -> list[Document]:
+    """Busca full-text por tenant em PostgreSQL e preserva metadata do RAG."""
+    if DATABASE_URL.startswith("sqlite"):
+        return []
+
+    query_params = {"question": question, "tenant_id": tenant_id, "today": today, "limit": limit}
+    queries = (
+        (
+            "faq",
+            text(
+                """
+                SELECT id, tenant_id, question, answer,
+                       ts_rank_cd(
+                         to_tsvector('portuguese', coalesce(question, '') || ' ' || coalesce(answer, '')),
+                         websearch_to_tsquery('portuguese', :question)
+                       ) AS rank
+                FROM faqs
+                WHERE tenant_id = :tenant_id
+                  AND to_tsvector('portuguese', coalesce(question, '') || ' ' || coalesce(answer, ''))
+                      @@ websearch_to_tsquery('portuguese', :question)
+                ORDER BY rank DESC, id ASC
+                LIMIT :limit
+                """
+            ),
+        ),
+        (
+            "event",
+            text(
+                """
+                SELECT id, tenant_id, title, event_date, event_type, description,
+                       ts_rank_cd(
+                         to_tsvector('portuguese', concat_ws(' ', title, event_date, event_type, description)),
+                         websearch_to_tsquery('portuguese', :question)
+                       ) AS rank
+                FROM events
+                WHERE tenant_id = :tenant_id
+                  AND to_tsvector('portuguese', concat_ws(' ', title, event_date, event_type, description))
+                      @@ websearch_to_tsquery('portuguese', :question)
+                ORDER BY rank DESC, id ASC
+                LIMIT :limit
+                """
+            ),
+        ),
+        (
+            "document_metadata",
+            text(
+                """
+                SELECT c.id, c.tenant_id, c.document_id, c.chunk_index, c.content,
+                       c.page_start, c.page_end, c.section_title, d.filename, d.mime_type,
+                       d.document_type, d.document_number, d.department, d.published_at, d.valid_until,
+                       ts_rank_cd(
+                         to_tsvector('portuguese', concat_ws(' ', d.filename, d.document_type, d.document_number, d.department)),
+                         websearch_to_tsquery('portuguese', :question)
+                       ) AS rank
+                FROM documents d
+                JOIN document_chunks c ON c.document_id = d.id AND c.tenant_id = d.tenant_id
+                WHERE d.tenant_id = :tenant_id AND c.tenant_id = :tenant_id
+                  AND d.status = 'ready'
+                  AND (d.valid_until IS NULL OR d.valid_until >= :today)
+                  AND to_tsvector('portuguese', concat_ws(' ', d.filename, d.document_type, d.document_number, d.department))
+                      @@ websearch_to_tsquery('portuguese', :question)
+                ORDER BY rank DESC, c.chunk_index ASC, c.id ASC
+                LIMIT :limit
+                """
+            ),
+        ),
+        (
+            "document_chunk",
+            text(
+                """
+                SELECT c.id, c.tenant_id, c.document_id, c.chunk_index, c.content,
+                       c.page_start, c.page_end, c.section_title, d.filename, d.mime_type,
+                       d.document_type, d.document_number, d.department, d.published_at, d.valid_until,
+                       ts_rank_cd(
+                         to_tsvector('portuguese', concat_ws(' ', c.content, c.section_title)),
+                         websearch_to_tsquery('portuguese', :question)
+                       ) AS rank
+                FROM document_chunks c
+                JOIN documents d ON d.id = c.document_id AND d.tenant_id = c.tenant_id
+                WHERE c.tenant_id = :tenant_id AND d.tenant_id = :tenant_id
+                  AND d.status = 'ready'
+                  AND (d.valid_until IS NULL OR d.valid_until >= :today)
+                  AND to_tsvector('portuguese', concat_ws(' ', c.content, c.section_title))
+                      @@ websearch_to_tsquery('portuguese', :question)
+                ORDER BY rank DESC, c.chunk_index ASC, c.id ASC
+                LIMIT :limit
+                """
+            ),
+        ),
+    )
+    ranked: dict[tuple[str, str], tuple[Document, float]] = {}
+    session = SessionLocal()
+    try:
+        for source_type, statement in queries:
+            for row in session.execute(statement, query_params).mappings():
+                if source_type == "faq":
+                    document = Document(
+                        page_content=f"Pergunta: {row['question']}\nResposta: {row['answer']}",
+                        metadata={"source_id": row["id"], "source_type": "faq", "tenant_id": row["tenant_id"]},
+                    )
+                elif source_type == "event":
+                    description = f"\nDescrição: {row['description']}" if row["description"] else ""
+                    document = Document(
+                        page_content=f"Evento: {row['title']}\nData: {row['event_date']}\nTipo: {row['event_type']}{description}",
+                        metadata={"source_id": row["id"], "source_type": "event", "tenant_id": row["tenant_id"]},
+                    )
+                else:
+                    document = _lexical_document_chunk(row)
+                key = _hybrid_source_key(document)
+                rank = float(row["rank"])
+                existing = ranked.get(key)
+                if existing is None or rank > existing[1]:
+                    ranked[key] = (document, rank)
+    finally:
+        session.close()
+    return [
+        document for document, _rank in sorted(
+            ranked.values(),
+            key=lambda item: (-item[1], *_hybrid_source_key(item[0])),
+        )[:limit]
+    ]
+
+
+def _fuse_hybrid_results(
+    vector_documents: Sequence[Document],
+    lexical_documents: Sequence[Document],
+    *,
+    limit: int,
+) -> list[Document]:
+    """Fusão RRF determinística: score = Σ 1 / (60 + posição), com dedupe."""
+    fused: dict[tuple[str, str], dict[str, Any]] = {}
+    for channel, documents in (("vector", vector_documents), ("lexical", lexical_documents)):
+        for position, document in enumerate(documents, start=1):
+            key = _hybrid_source_key(document)
+            candidate = fused.setdefault(key, {"document": document, "score": 0.0, "vector": None, "lexical": None})
+            candidate["score"] += 1 / (_HYBRID_RRF_K + position)
+            candidate[channel] = position
+            if channel == "vector":
+                candidate["document"] = document
+    return [
+        candidate["document"]
+        for candidate in sorted(
+            fused.values(),
+            key=lambda candidate: (
+                -candidate["score"],
+                candidate["vector"] if candidate["vector"] is not None else float("inf"),
+                candidate["lexical"] if candidate["lexical"] is not None else float("inf"),
+                *_hybrid_source_key(candidate["document"]),
+            ),
+        )[:limit]
+    ]
+
+
 async def _retrieve_docs(
     question: str,
     tenant_id: str,
@@ -531,21 +733,30 @@ async def _retrieve_docs(
     today: date | None = None,
 ) -> tuple[list[Document], float | None]:
     """
-    Busca candidatos com overfetch e aplica threshold, validade, ranking e top K.
+    Combina candidatos vetoriais e lexicais por RRF, sem substituir PGVector.
 
     ``today`` representa a data civil local do backend. Como ``valid_until`` e
     uma data sem horario, o documento segue vigente durante todo o dia indicado.
     Testes e chamadores podem injetar a data para evitar dependencia do relogio.
     """
-    vs   = _get_vector_store(tenant_id)
     loop = asyncio.get_running_loop()
     reference_date = today or date.today()
     candidate_k = _retrieval_candidate_k()
 
-    results: list[tuple[Document, float]] = await loop.run_in_executor(
+    vector_task = loop.run_in_executor(
         None,
-        lambda: vs.similarity_search_with_score(question, k=candidate_k),
+        lambda: _get_vector_store(tenant_id).similarity_search_with_score(question, k=candidate_k),
     )
+    lexical_task = loop.run_in_executor(
+        None,
+        lambda: _search_lexical_documents(
+            question,
+            tenant_id,
+            today=reference_date,
+            limit=candidate_k,
+        ),
+    )
+    results, lexical_documents = await asyncio.gather(vector_task, lexical_task)
 
     current_candidates = [
         (doc, distance)
@@ -559,9 +770,17 @@ async def _retrieve_docs(
         if distance <= SIMILARITY_THRESHOLD
     ][:TOP_K_DOCS]
 
-    if approved:
-        logger.info("[RAG] %d doc(s) aprovado(s). Distâncias: %s",
-                    len(approved), [f"{d:.3f}" for _, d in approved])
+    vector_documents = [doc for doc, _ in approved]
+    hybrid_documents = _fuse_hybrid_results(
+        vector_documents,
+        lexical_documents,
+        limit=TOP_K_DOCS,
+    )
+    if hybrid_documents:
+        logger.info(
+            "[RAG] Hybrid Search retornou %d doc(s): %d vetorial(is), %d lexical(is).",
+            len(hybrid_documents), len(vector_documents), len(lexical_documents),
+        )
     else:
         nearest = current_candidates[0][1] if current_candidates else -1
         logger.info("[RAG] Nenhum doc abaixo de %.2f. Menor distância: %.3f",
@@ -572,7 +791,7 @@ async def _retrieve_docs(
         if approved
         else (current_candidates[0][1] if current_candidates else None)
     )
-    return [doc for doc, _ in approved], nearest_distance
+    return hybrid_documents, nearest_distance
 
 
 # ─── RAGEngine ────────────────────────────────────────────────────────────────

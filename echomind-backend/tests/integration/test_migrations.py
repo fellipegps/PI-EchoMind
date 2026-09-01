@@ -125,6 +125,21 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         "ix_document_chunks_tenant_id",
         "ix_document_chunks_document_id",
     } <= chunk_indexes
+    with postgres_engine.connect() as connection:
+        fts_indexes = set(
+            connection.execute(
+                text(
+                    "SELECT indexname FROM pg_indexes WHERE schemaname = 'public' "
+                    "AND indexname LIKE '%_fts_portuguese'"
+                )
+            ).scalars()
+        )
+    assert {
+        "ix_faqs_fts_portuguese",
+        "ix_events_fts_portuguese",
+        "ix_documents_fts_portuguese",
+        "ix_document_chunks_fts_portuguese",
+    } <= fts_indexes
 
     document_checks = {
         constraint["name"] for constraint in inspector.get_check_constraints("documents")
