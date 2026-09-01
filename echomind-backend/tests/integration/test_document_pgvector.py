@@ -269,6 +269,109 @@ def test_real_pgvector_keeps_faq_and_event_retrievable(real_rag_runtime) -> None
     assert {doc.metadata["source_id"] for doc in stored} == {"faq-1", "event-1"}
 
 
+def test_real_postgresql_parent_lookup_is_tenant_scoped_deduplicated_and_cascades() -> None:
+    from langchain_core.documents import Document as RetrievedDocument
+
+    from app.database import DocumentChunkParent, SessionLocal
+    from app.document_repository import (
+        DocumentChunkData,
+        DocumentCreateData,
+        DocumentParentData,
+        create_document,
+        delete_document,
+        replace_document_chunks,
+        transition_document_status,
+    )
+    from app.rag_engine import _expand_document_parents
+
+    today = date(2026, 9, 1)
+    created: list[tuple[str, str]] = []
+    candidates: list[RetrievedDocument] = []
+    session = SessionLocal()
+    try:
+        for tenant_id in ("parent-real-a", "parent-real-b"):
+            document = create_document(
+                session,
+                tenant_id=tenant_id,
+                data=DocumentCreateData(
+                    filename=f"{tenant_id}.txt",
+                    mime_type="text/plain",
+                    size_bytes=128,
+                    sha256=sha256(f"{tenant_id}:{uuid4()}".encode()).hexdigest(),
+                    valid_until=today,
+                ),
+            )
+            transition_document_status(
+                session,
+                tenant_id=tenant_id,
+                document_id=document.id,
+                target_status="processing",
+            )
+            chunks = replace_document_chunks(
+                session,
+                tenant_id=tenant_id,
+                document_id=document.id,
+                parents=(
+                    DocumentParentData(
+                        content=f"Regra completa e excecao do {tenant_id}.",
+                        page_start=1,
+                        page_end=2,
+                    ),
+                ),
+                chunks=(
+                    DocumentChunkData(content="Regra precisa.", page_start=1, parent_index=0),
+                    DocumentChunkData(content="Excecao complementar.", page_start=2, parent_index=0),
+                ),
+            )
+            transition_document_status(
+                session,
+                tenant_id=tenant_id,
+                document_id=document.id,
+                target_status="ready",
+            )
+            created.append((tenant_id, document.id))
+            candidates.extend(
+                RetrievedDocument(
+                    page_content=chunk.content,
+                    metadata={
+                        "source_id": chunk.id,
+                        "source_type": "document_chunk",
+                        "tenant_id": tenant_id,
+                        "document_id": document.id,
+                        "parent_id": chunk.parent_id,
+                        "valid_until": today.isoformat(),
+                    },
+                )
+                for chunk in chunks
+            )
+        session.commit()
+    finally:
+        session.close()
+
+    expanded = _expand_document_parents(
+        candidates,
+        tenant_id="parent-real-a",
+        today=today,
+    )
+    assert len(expanded) == 1
+    assert expanded[0].metadata["tenant_id"] == "parent-real-a"
+    assert "Regra completa e excecao do parent-real-a" in expanded[0].page_content
+
+    session = SessionLocal()
+    try:
+        for tenant_id, document_id in created:
+            assert delete_document(session, tenant_id=tenant_id, document_id=document_id)
+        session.commit()
+        assert (
+            session.query(DocumentChunkParent)
+            .filter(DocumentChunkParent.tenant_id.in_([tenant for tenant, _ in created]))
+            .count()
+            == 0
+        )
+    finally:
+        session.close()
+
+
 @pytest.mark.asyncio
 async def test_real_postgresql_hybrid_search_is_lexical_tenant_scoped_and_validity_aware(
     real_rag_runtime,

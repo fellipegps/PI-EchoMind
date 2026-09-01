@@ -20,6 +20,7 @@ EXPECTED_TABLES = {
     "alembic_version",
     "config",
     "document_chunks",
+    "document_chunk_parents",
     "documents",
     "events",
     "faqs",
@@ -80,6 +81,9 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
     inspector = inspect(postgres_engine)
     document_columns = {column["name"] for column in inspector.get_columns("documents")}
     chunk_columns = {column["name"] for column in inspector.get_columns("document_chunks")}
+    parent_columns = {
+        column["name"] for column in inspector.get_columns("document_chunk_parents")
+    }
 
     assert document_columns == {
         "id",
@@ -104,7 +108,19 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         "id",
         "tenant_id",
         "document_id",
+        "parent_id",
         "chunk_index",
+        "content",
+        "page_start",
+        "page_end",
+        "section_title",
+        "created_at",
+    }
+    assert parent_columns == {
+        "id",
+        "tenant_id",
+        "document_id",
+        "parent_index",
         "content",
         "page_start",
         "page_end",
@@ -115,6 +131,9 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
 
     document_indexes = {index["name"] for index in inspector.get_indexes("documents")}
     chunk_indexes = {index["name"] for index in inspector.get_indexes("document_chunks")}
+    parent_indexes = {
+        index["name"] for index in inspector.get_indexes("document_chunk_parents")
+    }
     assert {
         "ix_documents_tenant_id",
         "ix_documents_tenant_status",
@@ -124,7 +143,13 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
     assert {
         "ix_document_chunks_tenant_id",
         "ix_document_chunks_document_id",
+        "ix_document_chunks_parent_id",
     } <= chunk_indexes
+    assert {
+        "ix_document_chunk_parents_tenant_id",
+        "ix_document_chunk_parents_document_id",
+        "ix_document_chunk_parents_tenant_document",
+    } <= parent_indexes
     with postgres_engine.connect() as connection:
         fts_indexes = set(
             connection.execute(
@@ -148,6 +173,10 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         constraint["name"]
         for constraint in inspector.get_check_constraints("document_chunks")
     }
+    parent_checks = {
+        constraint["name"]
+        for constraint in inspector.get_check_constraints("document_chunk_parents")
+    }
     assert {
         "ck_documents_status",
         "ck_documents_size_bytes_positive",
@@ -160,6 +189,12 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         "ck_document_chunks_page_end_positive",
         "ck_document_chunks_page_range",
     } <= chunk_checks
+    assert {
+        "ck_document_chunk_parents_parent_index_nonnegative",
+        "ck_document_chunk_parents_page_start_positive",
+        "ck_document_chunk_parents_page_end_positive",
+        "ck_document_chunk_parents_page_range",
+    } <= parent_checks
 
     unique_constraints = {
         constraint["name"]: constraint["column_names"]
@@ -170,12 +205,26 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         "chunk_index",
     ]
 
-    foreign_keys = inspector.get_foreign_keys("document_chunks")
-    assert len(foreign_keys) == 1
-    assert foreign_keys[0]["constrained_columns"] == ["document_id"]
-    assert foreign_keys[0]["referred_table"] == "documents"
-    assert foreign_keys[0]["referred_columns"] == ["id"]
-    assert foreign_keys[0]["options"]["ondelete"] == "CASCADE"
+    foreign_keys = {
+        foreign_key["name"]: foreign_key
+        for foreign_key in inspector.get_foreign_keys("document_chunks")
+    }
+    document_fk = foreign_keys["fk_document_chunks_document_id_documents"]
+    assert document_fk["constrained_columns"] == ["document_id"]
+    assert document_fk["referred_table"] == "documents"
+    assert document_fk["referred_columns"] == ["id"]
+    assert document_fk["options"]["ondelete"] == "CASCADE"
+    parent_fk = foreign_keys["fk_document_chunks_parent_id_document_chunk_parents"]
+    assert parent_fk["constrained_columns"] == ["parent_id"]
+    assert parent_fk["referred_table"] == "document_chunk_parents"
+    assert parent_fk["referred_columns"] == ["id"]
+    assert parent_fk["options"]["ondelete"] == "SET NULL"
+
+    parent_foreign_keys = inspector.get_foreign_keys("document_chunk_parents")
+    assert len(parent_foreign_keys) == 1
+    assert parent_foreign_keys[0]["constrained_columns"] == ["document_id"]
+    assert parent_foreign_keys[0]["referred_table"] == "documents"
+    assert parent_foreign_keys[0]["options"]["ondelete"] == "CASCADE"
 
 
 def test_document_defaults_constraints_uniqueness_and_cascade(postgres_engine: Engine) -> None:
@@ -304,14 +353,18 @@ def test_document_tables_follow_existing_rls_pattern(postgres_engine: Engine) ->
                   ON p.schemaname = n.nspname
                  AND p.tablename = c.relname
                 WHERE n.nspname = 'public'
-                  AND c.relname IN ('documents', 'document_chunks')
+                  AND c.relname IN ('documents', 'document_chunks', 'document_chunk_parents')
                 GROUP BY c.relname, c.relrowsecurity, c.relforcerowsecurity
                 ORDER BY c.relname
                 """
             )
         ).mappings().all()
 
-    assert [row["relname"] for row in rls_rows] == ["document_chunks", "documents"]
+    assert [row["relname"] for row in rls_rows] == [
+        "document_chunk_parents",
+        "document_chunks",
+        "documents",
+    ]
     assert all(row["relrowsecurity"] for row in rls_rows)
     assert not any(row["relforcerowsecurity"] for row in rls_rows)
     assert all(row["policy_count"] == 0 for row in rls_rows)

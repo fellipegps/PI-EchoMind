@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "description": "Casos sinteticos em que o child recuperado pela PR 25 identifica o assunto, mas omite regra ou excecao presente no parent.",
+  "cases": [
+    {
+      "id": "recurso-email-excecao",
+      "required_terms": ["protocolo eletrônico", "não é permitido por e-mail"],
+      "child_context": "O recurso deve ser apresentado pelo protocolo eletrônico.",
+      "parent_context": "Art. 8º — O recurso deve ser apresentado pelo protocolo eletrônico. Não é permitido por e-mail, salvo indisponibilidade oficialmente registrada do sistema.",
+      "pr25_latency_ms": 19.0,
+      "parent_lookup_latency_ms": 1.2
+    },
+    {
+      "id": "bolsa-manutencao",
+      "required_terms": ["renda familiar", "renovação semestral"],
+      "child_context": "A bolsa atende estudantes com renda familiar de até três salários mínimos.",
+      "parent_context": "Seção II — A bolsa atende estudantes com renda familiar de até três salários mínimos. A manutenção exige renovação semestral e comprovação atualizada da renda.",
+      "pr25_latency_ms": 18.0,
+      "parent_lookup_latency_ms": 1.0
+    },
+    {
+      "id": "estagio-prazo-excecao",
+      "required_terms": ["cinco dias úteis", "prorrogação"],
+      "child_context": "O relatório deve ser entregue em até cinco dias úteis após o encerramento.",
+      "parent_context": "Art. 12 — O relatório deve ser entregue em até cinco dias úteis após o encerramento. A coordenação pode autorizar uma única prorrogação mediante justificativa anterior ao prazo.",
+      "pr25_latency_ms": 20.0,
+      "parent_lookup_latency_ms": 1.4
+    },
+    {
+      "id": "acessibilidade-antecedencia",
+      "required_terms": ["sete dias", "situação emergencial"],
+      "child_context": "A solicitação de intérprete deve ocorrer com sete dias de antecedência.",
+      "parent_context": "Seção de Acessibilidade — A solicitação de intérprete deve ocorrer com sete dias de antecedência. Em situação emergencial, o pedido será analisado conforme disponibilidade.",
+      "pr25_latency_ms": 18.0,
+      "parent_lookup_latency_ms": 0.9
+    }
+  ]
+}

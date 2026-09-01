@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "mode": "offline-synthetic-parent-child-comparison",
+  "pr25_reference": {
+    "reranked_hit_rate_at_k": 1.0,
+    "reranked_mrr_at_k": 1.0,
+    "controlled_reranked_mean_ms": 18.667
+  },
+  "quality": {
+    "pr25_context_complete_rate": 0.0,
+    "parent_context_complete_rate": 1.0,
+    "context_complete_gain": 1.0
+  },
+  "latency_ms": {
+    "controlled_pr25_mean": 18.75,
+    "controlled_parent_child_mean": 19.875,
+    "controlled_parent_child_p95": 21.4,
+    "parent_lookup_overhead_mean": 1.125
+  },
+  "context": {
+    "mean_growth_ratio": 2.421
+  },
+  "cases": [
+    {
+      "id": "recurso-email-excecao",
+      "pr25_context_complete": false,
+      "parent_context_complete": true,
+      "context_growth_ratio": 2.719
+    },
+    {
+      "id": "bolsa-manutencao",
+      "pr25_context_complete": false,
+      "parent_context_complete": true,
+      "context_growth_ratio": 2.149
+    },
+    {
+      "id": "estagio-prazo-excecao",
+      "pr25_context_complete": false,
+      "parent_context_complete": true,
+      "context_growth_ratio": 2.392
+    },
+    {
+      "id": "acessibilidade-antecedencia",
+      "pr25_context_complete": false,
+      "parent_context_complete": true,
+      "context_growth_ratio": 2.423
+    }
+  ]
+}

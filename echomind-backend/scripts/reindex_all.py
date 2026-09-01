@@ -20,8 +20,15 @@ from app.database import (  # noqa: E402
     DATABASE_URL,
     Document,
     DocumentChunk,
+    DocumentChunkParent,
     Faq,
     SessionLocal,
+)
+from app.document_ingestion import ChunkedTextBlock, group_document_children  # noqa: E402
+from app.document_repository import (  # noqa: E402
+    DocumentChunkData,
+    DocumentParentData,
+    replace_document_chunks,
 )
 from app.rag_engine import (  # noqa: E402
     DEFAULT_EMBEDDING_DIM,
@@ -203,6 +210,93 @@ def reindex_all(db: Session) -> list[ReindexResult]:
     return results
 
 
+def rewrite_parent_child(db: Session, *, rollback: bool = False) -> int:
+    """Backfill/rollback explicito; a reindexacao vetorial ocorre em seguida."""
+    documents = (
+        db.query(Document)
+        .filter(Document.status == DocumentStatus.READY.value)
+        .order_by(Document.tenant_id.asc(), Document.id.asc())
+        .all()
+    )
+    rewritten = 0
+    for document in documents:
+        chunks = (
+            db.query(DocumentChunk)
+            .filter(
+                DocumentChunk.tenant_id == document.tenant_id,
+                DocumentChunk.document_id == document.id,
+            )
+            .order_by(DocumentChunk.chunk_index.asc(), DocumentChunk.id.asc())
+            .all()
+        )
+        parent_count = (
+            db.query(DocumentChunkParent)
+            .filter(
+                DocumentChunkParent.tenant_id == document.tenant_id,
+                DocumentChunkParent.document_id == document.id,
+            )
+            .count()
+        )
+        if not chunks or (rollback and parent_count == 0):
+            continue
+        if not rollback and parent_count and all(chunk.parent_id for chunk in chunks):
+            continue
+
+        if rollback:
+            child_data = [
+                DocumentChunkData(
+                    content=chunk.content,
+                    page_start=chunk.page_start,
+                    page_end=chunk.page_end,
+                    section_title=chunk.section_title,
+                )
+                for chunk in chunks
+            ]
+            parent_data: list[DocumentParentData] = []
+        else:
+            grouped = group_document_children(
+                tuple(
+                    ChunkedTextBlock(
+                        chunk_index=chunk.chunk_index,
+                        content=chunk.content,
+                        page_start=chunk.page_start,
+                        page_end=chunk.page_end,
+                        section_title=chunk.section_title,
+                    )
+                    for chunk in chunks
+                )
+            )
+            child_data = [
+                DocumentChunkData(
+                    content=chunk.content,
+                    page_start=chunk.page_start,
+                    page_end=chunk.page_end,
+                    section_title=chunk.section_title,
+                    parent_index=chunk.parent_index,
+                )
+                for chunk in grouped.children
+            ]
+            parent_data = [
+                DocumentParentData(
+                    content=parent.content,
+                    page_start=parent.page_start,
+                    page_end=parent.page_end,
+                    section_title=parent.section_title,
+                )
+                for parent in grouped.parents
+            ]
+        replace_document_chunks(
+            db,
+            tenant_id=document.tenant_id,
+            document_id=document.id,
+            chunks=child_data,
+            parents=parent_data,
+        )
+        rewritten += 1
+    db.commit()
+    return rewritten
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -213,6 +307,17 @@ def parse_args() -> argparse.Namespace:
         "--confirm",
         action="store_true",
         help="Confirma conscientemente a limpeza das colecoes antes da reindexacao.",
+    )
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--parent-child-backfill",
+        action="store_true",
+        help="Cria parents para chunks ready legados antes da reindexacao.",
+    )
+    mode.add_argument(
+        "--parent-child-rollback",
+        action="store_true",
+        help="Remove vinculos/parents e volta aos chunks planos antes da reindexacao.",
     )
     return parser.parse_args()
 
@@ -233,6 +338,16 @@ def main() -> None:
 
     db = SessionLocal()
     try:
+        if args.parent_child_backfill or args.parent_child_rollback:
+            rewritten = rewrite_parent_child(
+                db,
+                rollback=args.parent_child_rollback,
+            )
+            log.info(
+                "%d documento(s) regravado(s) no modo %s.",
+                rewritten,
+                "rollback" if args.parent_child_rollback else "backfill",
+            )
         results = reindex_all(db)
     except Exception:
         log.exception("Reindexacao interrompida com erro visivel.")

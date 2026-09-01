@@ -5,11 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from typing import Iterable
+import uuid
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from .database import Document, DocumentChunk, utc_now
+from .database import Document, DocumentChunk, DocumentChunkParent, utc_now
 from .schemas import DocumentStatus
 
 
@@ -64,6 +65,33 @@ class DocumentChunkData:
     page_start: int | None = None
     page_end: int | None = None
     section_title: str | None = None
+    parent_index: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentParentData:
+    content: str
+    page_start: int | None = None
+    page_end: int | None = None
+    section_title: str | None = None
+
+
+_DOCUMENT_NODE_NAMESPACE = uuid.UUID("d86b7998-13ef-4a2f-b900-a618dc96801a")
+
+
+def _document_node_id(
+    *,
+    tenant_id: str,
+    document_id: str,
+    node_type: str,
+    node_index: int,
+) -> str:
+    return str(
+        uuid.uuid5(
+            _DOCUMENT_NODE_NAMESPACE,
+            f"{tenant_id}:{document_id}:{node_type}:{node_index}",
+        )
+    )
 
 
 def get_document(
@@ -209,18 +237,43 @@ def list_document_chunks(
     )
 
 
+def list_document_parents(
+    db: Session,
+    *,
+    tenant_id: str,
+    document_id: str,
+) -> list[DocumentChunkParent]:
+    return (
+        db.query(DocumentChunkParent)
+        .filter(
+            DocumentChunkParent.document_id == document_id,
+            DocumentChunkParent.tenant_id == tenant_id,
+        )
+        .order_by(DocumentChunkParent.parent_index, DocumentChunkParent.id)
+        .all()
+    )
+
+
 def replace_document_chunks(
     db: Session,
     *,
     tenant_id: str,
     document_id: str,
     chunks: Iterable[DocumentChunkData],
+    parents: Iterable[DocumentParentData] = (),
 ) -> list[DocumentChunk]:
     document = get_document(db, tenant_id=tenant_id, document_id=document_id)
     if document is None:
         raise DocumentNotFoundError("Documento nao encontrado para o tenant informado.")
 
     ordered_chunks = list(chunks)
+    ordered_parents = list(parents)
+    if any(
+        chunk.parent_index is not None
+        and not 0 <= chunk.parent_index < len(ordered_parents)
+        for chunk in ordered_chunks
+    ):
+        raise ValueError("Chunk referencia parent_index inexistente.")
     (
         db.query(DocumentChunk)
         .filter(
@@ -229,12 +282,52 @@ def replace_document_chunks(
         )
         .delete(synchronize_session="fetch")
     )
+    (
+        db.query(DocumentChunkParent)
+        .filter(
+            DocumentChunkParent.document_id == document_id,
+            DocumentChunkParent.tenant_id == tenant_id,
+        )
+        .delete(synchronize_session="fetch")
+    )
+
+    persisted_parents = [
+        DocumentChunkParent(
+            id=_document_node_id(
+                tenant_id=tenant_id,
+                document_id=document_id,
+                node_type="parent",
+                node_index=parent_index,
+            ),
+            tenant_id=tenant_id,
+            document_id=document_id,
+            parent_index=parent_index,
+            content=parent.content,
+            page_start=parent.page_start,
+            page_end=parent.page_end,
+            section_title=parent.section_title,
+        )
+        for parent_index, parent in enumerate(ordered_parents)
+    ]
+    db.add_all(persisted_parents)
+    db.flush()
 
     db.add_all(
         [
             DocumentChunk(
+                id=_document_node_id(
+                    tenant_id=tenant_id,
+                    document_id=document_id,
+                    node_type="child",
+                    node_index=chunk_index,
+                ),
                 tenant_id=tenant_id,
                 document_id=document_id,
+                parent_id=(
+                    persisted_parents[chunk.parent_index].id
+                    if chunk.parent_index is not None
+                    else None
+                ),
                 chunk_index=chunk_index,
                 content=chunk.content,
                 page_start=chunk.page_start,

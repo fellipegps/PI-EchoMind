@@ -12,7 +12,7 @@ import posixpath
 import unicodedata
 from dataclasses import dataclass
 from io import BytesIO
-from typing import TYPE_CHECKING, BinaryIO, Iterator
+from typing import TYPE_CHECKING, BinaryIO, Iterator, Sequence
 
 from docx import Document
 from docx.oxml.table import CT_Tbl
@@ -31,6 +31,7 @@ BYTES_PER_MEGABYTE = 1024 * 1024
 READ_CHUNK_SIZE = 64 * 1024
 DEFAULT_TEXT_CHUNK_SIZE = 800
 DEFAULT_TEXT_CHUNK_OVERLAP = 100
+DEFAULT_PARENT_CHILDREN = 3
 INSTITUTIONAL_CHUNK_SEPARATORS = [
     "\n\n",
     "\n",
@@ -156,6 +157,24 @@ class ChunkedTextBlock:
     page_start: int | None = None
     page_end: int | None = None
     section_title: str | None = None
+    parent_index: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ParentTextBlock:
+    """Contexto maior composto por children contiguos e determinísticos."""
+
+    parent_index: int
+    content: str
+    page_start: int | None = None
+    page_end: int | None = None
+    section_title: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ParentChildChunkedDocument:
+    parents: tuple[ParentTextBlock, ...]
+    children: tuple[ChunkedTextBlock, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -629,3 +648,111 @@ def chunk_document(
     if not chunks:
         raise EmptyExtractedDocumentError("O documento nao contem texto utilizavel.")
     return tuple(chunks)
+
+
+def _merge_child_contents(
+    children: list[ChunkedTextBlock],
+    *,
+    chunk_overlap: int,
+) -> str:
+    merged = children[0].content
+    for child in children[1:]:
+        maximum = min(len(merged), len(child.content), max(0, chunk_overlap * 2))
+        overlap = next(
+            (
+                size
+                for size in range(maximum, 0, -1)
+                if merged[-size:] == child.content[:size]
+            ),
+            0,
+        )
+        remainder = child.content[overlap:].lstrip() if overlap else child.content
+        if remainder:
+            merged = f"{merged.rstrip()}\n\n{remainder}"
+    return merged
+
+
+def chunk_parent_child_document(
+    document: ExtractedDocument,
+    *,
+    chunk_size: int = DEFAULT_TEXT_CHUNK_SIZE,
+    chunk_overlap: int = DEFAULT_TEXT_CHUNK_OVERLAP,
+    children_per_parent: int = DEFAULT_PARENT_CHILDREN,
+) -> ParentChildChunkedDocument:
+    """Mantem children precisos e agrupa vizinhos em parents limitados."""
+
+    if children_per_parent <= 0:
+        raise DocumentChunkingError("children_per_parent deve ser positivo.")
+
+    flat_children = chunk_document(
+        document,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
+    return group_document_children(
+        flat_children,
+        chunk_overlap=chunk_overlap,
+        children_per_parent=children_per_parent,
+    )
+
+
+def group_document_children(
+    flat_children: Sequence[ChunkedTextBlock],
+    *,
+    chunk_overlap: int = DEFAULT_TEXT_CHUNK_OVERLAP,
+    children_per_parent: int = DEFAULT_PARENT_CHILDREN,
+) -> ParentChildChunkedDocument:
+    """Agrupa chunks existentes para backfill explicito sem reextracao."""
+    if not flat_children:
+        raise EmptyExtractedDocumentError("O documento nao contem chunks utilizaveis.")
+    if children_per_parent <= 0:
+        raise DocumentChunkingError("children_per_parent deve ser positivo.")
+
+    groups: list[list[ChunkedTextBlock]] = []
+    current: list[ChunkedTextBlock] = []
+    for child in flat_children:
+        section_changed = bool(
+            current
+            and current[-1].section_title
+            and child.section_title
+            and current[-1].section_title != child.section_title
+        )
+        if current and (len(current) >= children_per_parent or section_changed):
+            groups.append(current)
+            current = []
+        current.append(child)
+    if current:
+        groups.append(current)
+
+    parents: list[ParentTextBlock] = []
+    children: list[ChunkedTextBlock] = []
+    for parent_index, group in enumerate(groups):
+        pages_start = [child.page_start for child in group if child.page_start is not None]
+        pages_end = [child.page_end for child in group if child.page_end is not None]
+        sections = {child.section_title for child in group if child.section_title}
+        section_title = next(iter(sections)) if len(sections) == 1 else None
+        parents.append(
+            ParentTextBlock(
+                parent_index=parent_index,
+                content=_merge_child_contents(group, chunk_overlap=chunk_overlap),
+                page_start=min(pages_start) if pages_start else None,
+                page_end=max(pages_end) if pages_end else None,
+                section_title=section_title,
+            )
+        )
+        children.extend(
+            ChunkedTextBlock(
+                chunk_index=child.chunk_index,
+                content=child.content,
+                page_start=child.page_start,
+                page_end=child.page_end,
+                section_title=child.section_title,
+                parent_index=parent_index,
+            )
+            for child in group
+        )
+
+    return ParentChildChunkedDocument(
+        parents=tuple(parents),
+        children=tuple(children),
+    )

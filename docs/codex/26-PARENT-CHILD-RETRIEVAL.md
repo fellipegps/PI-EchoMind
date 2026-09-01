@@ -84,6 +84,19 @@ Parent-Child medido, migrável e testado sem técnicas condicionais adicionais.
 
 O retrieval mantém precisão de child e coerência normativa do parent.
 
+## Operação implementada
+
+- A migration `0011` cria `document_chunk_parents` e adiciona `parent_id`
+  opcional aos chunks; chunks legados continuam válidos sem parent.
+- Novos processamentos persistem parents compostos por até três children
+  contíguos. Somente os children são indexados no PGVector.
+- O backfill é explícito e nunca roda durante migration ou startup:
+  `python scripts/reindex_all.py --confirm --parent-child-backfill`.
+- O rollback de aplicação também é explícito e reindexa a coleção plana:
+  `python scripts/reindex_all.py --confirm --parent-child-rollback`.
+- Antes de executar `alembic downgrade 0010`, executar o rollback de aplicação
+  para manter os vetores compatíveis com chunks sem parent.
+
 ## Instrução final ao Codex
 
 Implemente somente Parent-Child se pré-requisitos/evidência existirem. Caso contrário, pare como bloqueado.

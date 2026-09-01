@@ -182,6 +182,65 @@ class Document(Base):
         passive_deletes=True,
         order_by="DocumentChunk.chunk_index",
     )
+    chunk_parents = relationship(
+        "DocumentChunkParent",
+        back_populates="document",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="DocumentChunkParent.parent_index",
+    )
+
+
+class DocumentChunkParent(Base):
+    """Contexto maior persistido; seus children continuam sendo os vetores."""
+
+    __tablename__ = "document_chunk_parents"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "parent_index",
+            name="uq_document_chunk_parents_document_id_parent_index",
+        ),
+        CheckConstraint(
+            "parent_index >= 0",
+            name="ck_document_chunk_parents_parent_index_nonnegative",
+        ),
+        CheckConstraint(
+            "page_start IS NULL OR page_start > 0",
+            name="ck_document_chunk_parents_page_start_positive",
+        ),
+        CheckConstraint(
+            "page_end IS NULL OR page_end > 0",
+            name="ck_document_chunk_parents_page_end_positive",
+        ),
+        CheckConstraint(
+            "page_start IS NULL OR page_end IS NULL OR page_end >= page_start",
+            name="ck_document_chunk_parents_page_range",
+        ),
+        Index("ix_document_chunk_parents_tenant_document", "tenant_id", "document_id"),
+    )
+
+    id            = Column(String, primary_key=True)
+    tenant_id     = Column(String, nullable=False, index=True)
+    document_id   = Column(
+        String,
+        ForeignKey(
+            "documents.id",
+            name="fk_document_chunk_parents_document_id_documents",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+    parent_index  = Column(Integer, nullable=False)
+    content       = Column(Text, nullable=False)
+    page_start    = Column(Integer, nullable=True)
+    page_end      = Column(Integer, nullable=True)
+    section_title = Column(String, nullable=True)
+    created_at    = Column(DateTime, default=utc_now, nullable=False)
+
+    document = relationship("Document", back_populates="chunk_parents")
+    children = relationship("DocumentChunk", back_populates="parent")
 
 
 class DocumentChunk(Base):
@@ -224,6 +283,16 @@ class DocumentChunk(Base):
         nullable=False,
         index=True,
     )
+    parent_id     = Column(
+        String,
+        ForeignKey(
+            "document_chunk_parents.id",
+            name="fk_document_chunks_parent_id_document_chunk_parents",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
     chunk_index   = Column(Integer, nullable=False)
     content       = Column(Text, nullable=False)
     page_start    = Column(Integer, nullable=True)
@@ -232,5 +301,5 @@ class DocumentChunk(Base):
     created_at    = Column(DateTime, default=utc_now, nullable=False)
 
     document = relationship("Document", back_populates="chunks")
-
+    parent = relationship("DocumentChunkParent", back_populates="children")
 

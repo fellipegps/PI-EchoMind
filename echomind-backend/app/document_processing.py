@@ -13,14 +13,17 @@ from .document_ingestion import (
     ChunkedTextBlock,
     DocumentExtractionError,
     ExtractedDocument,
+    ParentTextBlock,
     chunk_document,
     extract_docx,
     extract_pdf,
     extract_txt,
+    group_document_children,
 )
 from .document_repository import (
     DocumentChunkData,
     DocumentNotFoundError,
+    DocumentParentData,
     get_document,
     list_document_chunks,
     replace_document_chunks,
@@ -85,8 +88,21 @@ def _chunk_data(chunks: tuple[ChunkedTextBlock, ...]) -> list[DocumentChunkData]
             page_start=chunk.page_start,
             page_end=chunk.page_end,
             section_title=chunk.section_title,
+            parent_index=chunk.parent_index,
         )
         for chunk in chunks
+    ]
+
+
+def _parent_data(parents: tuple[ParentTextBlock, ...]) -> list[DocumentParentData]:
+    return [
+        DocumentParentData(
+            content=parent.content,
+            page_start=parent.page_start,
+            page_end=parent.page_end,
+            section_title=parent.section_title,
+        )
+        for parent in parents
     ]
 
 
@@ -220,7 +236,7 @@ def process_document(
             extracted = _extract_document(document.mime_type, content)
 
             stage = "chunking"
-            chunks = chunk_document(extracted)
+            chunked = group_document_children(chunk_document(extracted))
 
             stage = "persistence"
             previous_chunks = list_document_chunks(
@@ -232,7 +248,8 @@ def process_document(
                 db,
                 tenant_id=tenant_id,
                 document_id=document_id,
-                chunks=_chunk_data(chunks),
+                chunks=_chunk_data(chunked.children),
+                parents=_parent_data(chunked.parents),
             )
             db.commit()
 

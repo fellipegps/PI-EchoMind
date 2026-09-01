@@ -41,6 +41,7 @@ from .database import (
     Config,
     Document as StoredDocument,
     DocumentChunk,
+    DocumentChunkParent,
     Faq,
     SessionLocal,
     UnansweredQuestion,
@@ -346,6 +347,7 @@ def _document_chunk_metadata(
         "published_at": _metadata_date(document.published_at),
         "valid_until": _metadata_date(document.valid_until),
         "chunk_index": chunk.chunk_index,
+        "parent_id": getattr(chunk, "parent_id", None),
         "page_start": chunk.page_start,
         "page_end": chunk.page_end,
         "section_title": chunk.section_title,
@@ -552,6 +554,11 @@ def _document_is_current(document: Document, *, today: date) -> bool:
     return valid_until >= today
 
 
+def _document_belongs_to_tenant(document: Document, *, tenant_id: str) -> bool:
+    metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
+    return metadata.get("tenant_id") == tenant_id
+
+
 def _hybrid_source_key(document: Document) -> tuple[str, str]:
     """Identifica uma fonte sem misturar IDs iguais de tipos diferentes."""
     metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
@@ -581,6 +588,7 @@ def _lexical_document_chunk(row: Mapping[str, Any]) -> Document:
         page_start=row["page_start"],
         page_end=row["page_end"],
         section_title=row["section_title"],
+        parent_id=row["parent_id"],
     )
     return Document(
         page_content=_document_chunk_content(document, chunk),
@@ -654,7 +662,7 @@ def _search_lexical_documents(
             "document_metadata",
             text(
                 """
-                SELECT c.id, c.tenant_id, c.document_id, c.chunk_index, c.content,
+                SELECT c.id, c.tenant_id, c.document_id, c.parent_id, c.chunk_index, c.content,
                        c.page_start, c.page_end, c.section_title, d.filename, d.mime_type,
                        d.document_type, d.document_number, d.department, d.published_at, d.valid_until,
                        ts_rank_cd(
@@ -685,7 +693,7 @@ def _search_lexical_documents(
             "document_chunk",
             text(
                 """
-                SELECT c.id, c.tenant_id, c.document_id, c.chunk_index, c.content,
+                SELECT c.id, c.tenant_id, c.document_id, c.parent_id, c.chunk_index, c.content,
                        c.page_start, c.page_end, c.section_title, d.filename, d.mime_type,
                        d.document_type, d.document_number, d.department, d.published_at, d.valid_until,
                        ts_rank_cd(
@@ -774,6 +782,113 @@ def _fuse_hybrid_results(
     ]
 
 
+def _expanded_parent_document(
+    stored_document: StoredDocument,
+    parent: DocumentChunkParent,
+    child: Document,
+) -> Document:
+    child_metadata = child.metadata if isinstance(child.metadata, Mapping) else {}
+    parent_content = _document_chunk_content(stored_document, parent)
+    return Document(
+        page_content=parent_content,
+        metadata={
+            "source_id": parent.id,
+            "source_type": _DOCUMENT_CHUNK_SOURCE_TYPE,
+            "tenant_id": parent.tenant_id,
+            "document_id": stored_document.id,
+            "filename": stored_document.filename,
+            "mime_type": stored_document.mime_type,
+            "document_type": stored_document.document_type,
+            "document_number": stored_document.document_number,
+            "department": stored_document.department,
+            "published_at": _metadata_date(stored_document.published_at),
+            "valid_until": _metadata_date(stored_document.valid_until),
+            "parent_id": parent.id,
+            "parent_index": parent.parent_index,
+            "matched_child_id": child_metadata.get("source_id"),
+            "page_start": parent.page_start,
+            "page_end": parent.page_end,
+            "section_title": parent.section_title,
+            "context_expanded": True,
+        },
+    )
+
+
+def _expand_document_parents(
+    documents: Sequence[Document],
+    *,
+    tenant_id: str,
+    today: date,
+) -> list[Document]:
+    """Resolve parents em lote, por tenant/documento, e remove repeticoes."""
+    eligible_documents = [
+        document
+        for document in documents
+        if _document_belongs_to_tenant(document, tenant_id=tenant_id)
+        and _document_is_current(document, today=today)
+    ]
+    requested: list[tuple[str, str]] = []
+    for document in eligible_documents:
+        metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
+        if (
+            metadata.get("source_type") == _DOCUMENT_CHUNK_SOURCE_TYPE
+            and metadata.get("tenant_id") == tenant_id
+            and metadata.get("document_id")
+            and metadata.get("parent_id")
+        ):
+            requested.append((str(metadata["document_id"]), str(metadata["parent_id"])))
+    if not requested:
+        return eligible_documents
+
+    parent_ids = tuple(dict.fromkeys(parent_id for _document_id, parent_id in requested))
+    resolved: dict[tuple[str, str], tuple[StoredDocument, DocumentChunkParent]] = {}
+    session = SessionLocal()
+    try:
+        rows = (
+            session.query(StoredDocument, DocumentChunkParent)
+            .join(
+                DocumentChunkParent,
+                (DocumentChunkParent.document_id == StoredDocument.id)
+                & (DocumentChunkParent.tenant_id == StoredDocument.tenant_id),
+            )
+            .filter(
+                StoredDocument.tenant_id == tenant_id,
+                DocumentChunkParent.tenant_id == tenant_id,
+                StoredDocument.status == "ready",
+                (StoredDocument.valid_until.is_(None)) | (StoredDocument.valid_until >= today),
+                DocumentChunkParent.id.in_(parent_ids),
+            )
+            .all()
+        )
+        resolved = {
+            (stored_document.id, parent.id): (stored_document, parent)
+            for stored_document, parent in rows
+        }
+    except Exception as exc:
+        logger.warning(
+            "[RAG] Expansao Parent-Child indisponivel; mantendo children. erro=%s",
+            type(exc).__name__,
+        )
+        return eligible_documents
+    finally:
+        session.close()
+
+    expanded: list[Document] = []
+    emitted_parents: set[tuple[str, str]] = set()
+    for child in eligible_documents:
+        metadata = child.metadata if isinstance(child.metadata, Mapping) else {}
+        key = (str(metadata.get("document_id", "")), str(metadata.get("parent_id", "")))
+        parent_row = resolved.get(key)
+        if parent_row is None:
+            expanded.append(child)
+            continue
+        if key in emitted_parents:
+            continue
+        emitted_parents.add(key)
+        expanded.append(_expanded_parent_document(*parent_row, child))
+    return expanded
+
+
 async def _retrieve_docs(
     question: str,
     tenant_id: str,
@@ -810,7 +925,8 @@ async def _retrieve_docs(
     current_candidates = [
         (doc, distance)
         for doc, distance in results
-        if _document_is_current(doc, today=reference_date)
+        if _document_belongs_to_tenant(doc, tenant_id=tenant_id)
+        and _document_is_current(doc, today=reference_date)
     ]
     current_candidates.sort(key=lambda item: item[1])
     approved_candidates = [
@@ -874,6 +990,11 @@ async def _retrieve_docs(
                 rerank_latency_ms,
                 len(hybrid_documents),
             )
+    hybrid_documents = _expand_document_parents(
+        hybrid_documents,
+        tenant_id=tenant_id,
+        today=reference_date,
+    )
     if hybrid_documents:
         logger.info(
             "[RAG] Hybrid Search retornou %d doc(s): %d vetorial(is), %d lexical(is).",

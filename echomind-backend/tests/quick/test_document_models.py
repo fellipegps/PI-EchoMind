@@ -22,7 +22,7 @@ def document_models(quick_test_context):
 def test_document_tables_are_created_by_metadata_in_sqlite(quick_test_context) -> None:
     tables = set(inspect(quick_test_context.engine).get_table_names())
 
-    assert {"documents", "document_chunks"} <= tables
+    assert {"documents", "document_chunks", "document_chunk_parents"} <= tables
     assert "knowledge_documents" not in tables
 
 
