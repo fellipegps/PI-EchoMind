@@ -765,7 +765,11 @@ def test_integrated_upload_retrieval_source_validity_tenant_and_delete_flow(
     from app import main
     from app.auth import CurrentUser, get_current_user
     from app.database import SessionLocal
-    from app.document_repository import get_document, list_document_chunks
+    from app.document_repository import (
+        get_document,
+        list_document_chunks,
+        list_document_parents,
+    )
 
     tenant_a = f"pr21-flow-{filename}-a"
     tenant_b = f"pr21-flow-{filename}-b"
@@ -851,9 +855,16 @@ def test_integrated_upload_retrieval_source_validity_tenant_and_delete_flow(
                     today=date(2026, 8, 24),
                 )
             )
-            assert [doc.metadata["source_id"] for doc in retrieved] == [
-                live_vector.metadata["source_id"]
-            ]
+            assert len(retrieved) == 1
+            assert (
+                retrieved[0].metadata["source_id"]
+                == live_vector.metadata["parent_id"]
+            )
+            assert (
+                retrieved[0].metadata["matched_child_id"]
+                == live_vector.metadata["source_id"]
+            )
+            assert retrieved[0].metadata["context_expanded"] is True
             assert {doc.metadata["tenant_id"] for doc in retrieved} == {tenant_a}
             assert distance == pytest.approx(0.0, abs=1e-6)
             formatted_source = real_rag_runtime.module._format_retrieved_document(
@@ -872,9 +883,12 @@ def test_integrated_upload_retrieval_source_validity_tenant_and_delete_flow(
                     today=date(2026, 8, 24),
                 )
             )
-            assert expired_vector.metadata["source_id"] not in {
+            assert {
+                expired_vector.metadata["source_id"],
+                expired_vector.metadata["parent_id"],
+            }.isdisjoint({
                 doc.metadata["source_id"] for doc in expired_results
-            }
+            })
 
             tenant_b_before = {
                 doc.metadata["source_id"]
@@ -894,9 +908,12 @@ def test_integrated_upload_retrieval_source_validity_tenant_and_delete_flow(
                     today=date(2026, 8, 24),
                 )
             )
-            assert live_vector.metadata["source_id"] not in {
+            assert {
+                live_vector.metadata["source_id"],
+                live_vector.metadata["parent_id"],
+            }.isdisjoint({
                 doc.metadata["source_id"] for doc in after_delete
-            }
+            })
             assert {
                 doc.metadata["source_id"]
                 for doc in _documents_for(real_rag_runtime, tenant_b)
@@ -910,6 +927,11 @@ def test_integrated_upload_retrieval_source_validity_tenant_and_delete_flow(
                 document_id=live_id,
             ) is None
             assert list_document_chunks(
+                session,
+                tenant_id=tenant_a,
+                document_id=live_id,
+            ) == []
+            assert list_document_parents(
                 session,
                 tenant_id=tenant_a,
                 document_id=live_id,
