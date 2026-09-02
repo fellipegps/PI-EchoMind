@@ -151,6 +151,9 @@ def client(
             pass
 
     app = quick_test_context.app
+    from app.rate_limit import rate_limiter
+
+    rate_limiter.clear()
     app.dependency_overrides[quick_test_context.get_db] = override_get_db
     app.dependency_overrides[quick_test_context.get_current_user] = lambda: (
         quick_test_context.current_user_type(
@@ -173,6 +176,7 @@ def client(
         with TestClient(app) as c:
             yield c
 
+    rate_limiter.clear()
     app.dependency_overrides.clear()
 
 

@@ -66,6 +66,11 @@ SUPABASE_SECRET_KEY=sb_secret_...
 
 ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 
+CHAT_RATE_LIMIT_REQUESTS=20
+CHAT_RATE_LIMIT_WINDOW_SECONDS=60
+UPLOAD_RATE_LIMIT_REQUESTS=5
+UPLOAD_RATE_LIMIT_WINDOW_SECONDS=60
+
 GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
 GROQ_LLM_MODEL=openai/gpt-oss-120b
 
@@ -83,6 +88,19 @@ exemplo libera apenas o frontend local em `localhost` e `127.0.0.1`. Para
 staging ou producao, informe explicitamente os dominios definidos para aquele
 ambiente, sem wildcard, path, credenciais ou secrets. Se a variavel for omitida,
 o backend mantém somente essas duas origens locais como fallback restrito.
+
+O rate limiting protege `/chat` e `/documents/upload` com limites independentes.
+Os valores acima representam, respectivamente, quantidade de requisicoes e
+duracao da janela em segundos. O chat, que permanece publico, usa um hash do IP
+direto da conexao e nunca o `tenant_id` enviado no payload. O upload usa um hash
+do ID do usuario autenticado pelo backend. Ao exceder o limite, a API responde
+com HTTP `429` e `Retry-After`; `/health` nao consome quota.
+
+O store e mantido apenas na memoria do processo FastAPI. Isso corresponde ao
+ambiente atual sem topologia de deploy definida, mas nao compartilha quota entre
+workers ou replicas. Antes de operar com multiplas instancias, a equipe deve
+escolher explicitamente um store distribuido; esta PR nao adiciona Redis nem
+outra infraestrutura.
 
 Crie/atualize o schema do banco com Alembic:
 

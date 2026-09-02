@@ -63,6 +63,10 @@ from .document_repository import (
     list_document_chunks,
     list_documents,
 )
+from .rate_limit import (
+    enforce_chat_rate_limit,
+    enforce_upload_rate_limit_for_user,
+)
 from .rag_engine import (
     get_rag_engine,
     get_rag_indexer,
@@ -148,6 +152,12 @@ def get_document_rag(
     return get_rag_indexer(db, tenant_id=current_user.id)
 
 
+def enforce_upload_rate_limit(
+    current_user: CurrentUser = Depends(get_current_user),
+) -> None:
+    enforce_upload_rate_limit_for_user(current_user.id)
+
+
 def _optional_form_text(value: str | None) -> str | None:
     if value is None:
         return None
@@ -189,6 +199,7 @@ def get_me(
 @router_chat.post(
     "",
     summary="Chat com streaming da IA via RAG",
+    dependencies=[Depends(enforce_chat_rate_limit)],
 )
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     question = request.message.strip()
@@ -477,7 +488,12 @@ def get_dashboard(
 #  DOCUMENTOS  /documents
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router_documents.post("/upload", response_model=DocumentResponse, status_code=202)
+@router_documents.post(
+    "/upload",
+    response_model=DocumentResponse,
+    status_code=202,
+    dependencies=[Depends(enforce_upload_rate_limit)],
+)
 async def upload_document(
     request: Request,
     background_tasks: BackgroundTasks,
