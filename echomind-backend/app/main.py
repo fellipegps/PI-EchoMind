@@ -18,7 +18,6 @@ from fastapi import (
     Request,
     UploadFile,
 )
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from starlette.datastructures import UploadFile as StarletteUploadFile
@@ -27,6 +26,7 @@ import logging
 import os
 
 from .database import get_db
+from .cors_config import configure_cors
 from .middleware import TimingMiddleware, RequestLogMiddleware, latency_store
 from .schemas import (
     ChatRequest,
@@ -104,13 +104,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],          # Em produção, restrinja ao domínio do front
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+configure_cors(app)
 
 # Middlewares próprios (ordem importa: último registrado = primeiro executado)
 app.add_middleware(TimingMiddleware)

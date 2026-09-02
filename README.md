@@ -64,6 +64,8 @@ DATABASE_URL=postgresql://postgres:[SUA_SENHA]@db.[SEU_PROJECT_REF].supabase.co:
 SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
 SUPABASE_SECRET_KEY=sb_secret_...
 
+ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
 GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
 GROQ_LLM_MODEL=openai/gpt-oss-120b
 
@@ -75,6 +77,12 @@ MAX_DOCUMENT_SIZE_MB=10
 ```
 
 Nunca exponha `SUPABASE_SECRET_KEY` no frontend.
+
+`ALLOWED_ORIGINS` recebe uma ou mais origens exatas separadas por virgula. O
+exemplo libera apenas o frontend local em `localhost` e `127.0.0.1`. Para
+staging ou producao, informe explicitamente os dominios definidos para aquele
+ambiente, sem wildcard, path, credenciais ou secrets. Se a variavel for omitida,
+o backend mantém somente essas duas origens locais como fallback restrito.
 
 Crie/atualize o schema do banco com Alembic:
 
