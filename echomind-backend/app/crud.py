@@ -5,6 +5,7 @@ crud.py - Operacoes de banco com isolamento por tenant.
 from __future__ import annotations
 
 import json
+import unicodedata
 from datetime import datetime, timedelta
 from functools import lru_cache
 from typing import Optional
@@ -19,6 +20,7 @@ from .schemas import ConfigUpdate, EventCreate, EventUpdate, FaqCreate, FaqUpdat
 
 DEFAULT_TONE = "profissional e cordial"
 DEFAULT_VOICE = "feminina"
+FAQ_CACHE_MATCH_THRESHOLD = 1.0
 
 
 def ensure_tenant_onboarded(
@@ -156,15 +158,35 @@ def get_cached_faq_answers(tenant_id: str) -> tuple[tuple[str, str, str], ...]:
         db.close()
 
 
+def normalize_faq_cache_question(question: str) -> str:
+    """Normaliza apenas variacoes ortograficas seguras para o cache de FAQ."""
+    decomposed = unicodedata.normalize("NFKD", question.casefold())
+    without_accents = "".join(
+        char for char in decomposed if not unicodedata.combining(char)
+    )
+    alphanumeric_words = "".join(
+        char if char.isalnum() else " " for char in without_accents
+    )
+    return " ".join(alphanumeric_words.split())
+
+
+def faq_cache_match_score(question: str, faq_question: str) -> float:
+    """Retorna confianca binaria; cache exige igualdade normalizada completa."""
+    normalized_question = normalize_faq_cache_question(question)
+    normalized_faq = normalize_faq_cache_question(faq_question)
+    if not normalized_question or normalized_question != normalized_faq:
+        return 0.0
+    return 1.0
+
+
 def find_cached_faq_answer(question: str, tenant_id: str) -> Optional[tuple[str, str]]:
-    normalized = question.strip().lower()
-    if len(normalized) < 4:
-        return None
+    matched: Optional[tuple[str, str]] = None
     for faq_id, faq_question, faq_answer in get_cached_faq_answers(tenant_id):
-        fq = faq_question.strip().lower()
-        if normalized == fq or normalized in fq or fq in normalized:
-            return faq_id, faq_answer
-    return None
+        if faq_cache_match_score(question, faq_question) >= FAQ_CACHE_MATCH_THRESHOLD:
+            if matched is not None:
+                return None
+            matched = (faq_id, faq_answer)
+    return matched
 
 
 def increment_faq_consult(db: Session, faq_id: str, tenant_id: str) -> None:

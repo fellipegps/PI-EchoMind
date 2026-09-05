@@ -392,6 +392,28 @@ recall/precision de fontes 1,000/1,000 e retrieval médio de 14,05 ms (p95 18
 ms). Esses tempos de fake não substituem um benchmark do modelo real no host de
 produção.
 
+### Cache seguro de FAQs
+
+O atalho de FAQ usa igualdade exata depois de normalizar Unicode, acentos,
+caixa, pontuação e espaços. A confiança do cache é binária e exige `1.0`; não há
+fuzzy matching nem reaproveitamento do threshold vetorial. Perguntas apenas
+parecidas, extensões de uma FAQ ou coincidências por palavra são misses e seguem
+uma única vez para o pipeline RAG existente. Se duas FAQs normalizarem para a
+mesma pergunta, o resultado também é tratado como ambíguo e não usa o cache.
+
+A consulta das dez FAQs candidatas continua sempre limitada pelo `tenant_id`.
+Criação, atualização, exclusão, conversão de pergunta não respondida e incremento
+de consulta invalidam as linhas em memória. O dataset sintético versionado no
+teste `tests/quick/test_faq_cache_matching.py` contém seis hits e seis misses: o
+matching antigo preservava 2/6 hits e produzia 5/6 falsos positivos conhecidos;
+o matching seguro preserva 6/6 hits e produz 0/6 falsos positivos nesse conjunto.
+O comparativo determinístico é reproduzido por:
+
+```bash
+cd echomind-backend
+python -m pytest tests/quick/test_faq_cache_matching.py
+```
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para
