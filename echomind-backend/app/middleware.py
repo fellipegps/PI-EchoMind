@@ -1,9 +1,10 @@
 """
 middleware.py – Middlewares da aplicação EchoMind
 
-1. TimingMiddleware   → mede tempo real de cada request e salva nas métricas
-2. RequestLogMiddleware → loga method, path, status e latência
-3. Funções auxiliares para o Dashboard usar tempos reais
+1. CorrelationIdMiddleware → isola um correlation ID interno por request
+2. TimingMiddleware → mede tempo real de cada request e salva nas métricas
+3. RequestLogMiddleware → loga method, path, status e latência
+4. Funções auxiliares para o Dashboard usar tempos reais
 """
 
 from __future__ import annotations
@@ -18,7 +19,20 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
+from .observability import bind_correlation_id
+
 logger = logging.getLogger("echomind.middleware")
+
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    """Cria um identificador interno novo por request, sem confiar em headers."""
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        with bind_correlation_id() as correlation_id:
+            request.state.correlation_id = correlation_id
+            response = await call_next(request)
+            response.headers["X-Correlation-ID"] = correlation_id
+            return response
 
 
 # ──────────────────────────────────────────────────────────────────────────────

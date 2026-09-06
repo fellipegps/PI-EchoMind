@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from hashlib import sha256
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -431,3 +433,89 @@ def test_ready_document_reexecution_is_a_noop(
     extractor.assert_not_called()
     rag_factory.assert_not_called()
     sessions.close_spies[0].assert_called_once_with()
+
+
+def test_processing_success_emits_safe_counts_and_duration(
+    processing_context,
+    monkeypatch,
+    processing_modules,
+    caplog,
+) -> None:
+    processing = processing_modules.processing
+    repository = processing_modules.repository
+    document_id = _create_pending_document(processing_context, repository)
+    _successful_boundaries(
+        monkeypatch,
+        processing_modules,
+        "text/plain",
+        FakeRagIndexer(),
+    )
+
+    with caplog.at_level(logging.INFO, logger="echomind.observability"):
+        result = processing.process_document(
+            document_id=document_id,
+            tenant_id="tenant-a",
+            content=b"conteudo documental sigiloso",
+        )
+
+    events = [
+        json.loads(record.getMessage())
+        for record in caplog.records
+        if record.name == "echomind.observability"
+    ]
+    completed = next(event for event in events if event["event"] == "ingestion.completed")
+    assert result.status == "ready"
+    assert completed["status"] == "success"
+    assert completed["stage"] == "finalization"
+    assert completed["duration_ms"] >= 0
+    assert completed["counts"] == {
+        "chunks": 2,
+        "parents": 1,
+        "previous_chunks": 0,
+    }
+    assert completed["source_types"] == ["document_chunk"]
+    assert "tenant-a" not in caplog.text
+    assert "conteudo documental sigiloso" not in caplog.text
+
+
+def test_processing_failure_emits_stage_without_exception_message(
+    processing_context,
+    monkeypatch,
+    processing_modules,
+    caplog,
+) -> None:
+    processing = processing_modules.processing
+    repository = processing_modules.repository
+    document_id = _create_pending_document(processing_context, repository)
+    secret = "Authorization: Bearer segredo-do-parser"
+    monkeypatch.setitem(
+        processing._EXTRACTORS,
+        "text/plain",
+        MagicMock(side_effect=RuntimeError(secret)),
+    )
+    monkeypatch.setattr(
+        processing,
+        "get_rag_indexer",
+        lambda db, tenant_id: FakeRagIndexer(),
+    )
+
+    with caplog.at_level(logging.ERROR, logger="echomind.observability"):
+        result = processing.process_document(
+            document_id=document_id,
+            tenant_id="tenant-a",
+            content=b"bytes que nao podem ser registrados",
+        )
+
+    events = [
+        json.loads(record.getMessage())
+        for record in caplog.records
+        if record.name == "echomind.observability"
+    ]
+    failed = next(event for event in events if event["event"] == "ingestion.failed")
+    assert result.status == "error"
+    assert failed["status"] == "error"
+    assert failed["stage"] == "extraction"
+    assert failed["error_type"] == "RuntimeError"
+    assert secret not in caplog.text
+    assert "bytes que nao podem ser registrados" not in caplog.text
+    assert "tenant-a" not in caplog.text

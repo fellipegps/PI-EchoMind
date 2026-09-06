@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import logging
+import time
 from dataclasses import dataclass
 from typing import Callable
 
@@ -30,10 +30,13 @@ from .document_repository import (
     transition_document_status,
 )
 from .rag_engine import get_rag_indexer
+from .observability import (
+    current_correlation_id,
+    emit_observability_event,
+    new_correlation_id,
+)
 from .schemas import DocumentStatus
 
-
-logger = logging.getLogger("echomind.document_processing")
 
 DOCX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 _EXTRACTORS: dict[str, Callable[[bytes], ExtractedDocument]] = {
@@ -128,12 +131,18 @@ def _cleanup_partial_state(
                 document,
                 persisted_chunks,
             )
-        except Exception:
+        except Exception as exc:
             vectors_removed = False
-            logger.exception(
-                "Falha ao compensar vetores do documento=%s tenant=%s.",
-                document_id,
-                tenant_id,
+            emit_observability_event(
+                "ingestion.failed",
+                status="error",
+                stage="cleanup",
+                tenant_id=tenant_id,
+                duration_ms=0,
+                counts={"chunks": len(persisted_chunks)},
+                source_types=["document_chunk"],
+                error=exc,
+                level="error",
             )
 
     if not vectors_removed:
@@ -147,12 +156,18 @@ def _cleanup_partial_state(
             chunks=(),
         )
         db.commit()
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        logger.exception(
-            "Falha ao compensar chunks do documento=%s tenant=%s.",
-            document_id,
-            tenant_id,
+        emit_observability_event(
+            "ingestion.failed",
+            status="error",
+            stage="cleanup",
+            tenant_id=tenant_id,
+            duration_ms=0,
+            counts={"chunks": len(persisted_chunks)},
+            source_types=["document_chunk"],
+            error=exc,
+            level="error",
         )
 
 
@@ -195,6 +210,13 @@ def process_document(
     content: bytes,
 ) -> DocumentProcessingResult:
     """Processa bytes duraveis com sessao propria e compensacao tenant-scoped."""
+    started = time.monotonic()
+    correlation_id = current_correlation_id() or new_correlation_id()
+    stage = "lookup"
+    event_emitted = False
+    chunk_count = 0
+    parent_count = 0
+    previous_chunk_count = 0
     db = SessionLocal()
     try:
         if not isinstance(content, bytes):
@@ -205,7 +227,19 @@ def process_document(
             raise DocumentNotFoundError("Documento nao encontrado para o tenant informado.")
 
         if document.status == DocumentStatus.READY.value:
-            return _processing_result(document)
+            result = _processing_result(document)
+            emit_observability_event(
+                "ingestion.completed",
+                status="success",
+                stage="state",
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=(time.monotonic() - started) * 1000,
+                counts={"chunks": result.chunk_count},
+                source_types=["document_chunk"],
+            )
+            event_emitted = True
+            return result
         if document.status == DocumentStatus.ERROR.value:
             _cleanup_partial_state(
                 db,
@@ -216,7 +250,20 @@ def process_document(
             refreshed = get_document(db, tenant_id=tenant_id, document_id=document_id)
             if refreshed is None:
                 raise DocumentNotFoundError("Documento nao encontrado apos cleanup.")
-            return _processing_result(refreshed)
+            result = _processing_result(refreshed)
+            emit_observability_event(
+                "ingestion.failed",
+                status="error",
+                stage="cleanup",
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=(time.monotonic() - started) * 1000,
+                counts={"chunks": result.chunk_count},
+                source_types=["document_chunk"],
+                level="error",
+            )
+            event_emitted = True
+            return result
         if document.status == DocumentStatus.PROCESSING.value:
             raise DocumentProcessingInProgressError(
                 "Documento ja esta sendo processado."
@@ -237,6 +284,8 @@ def process_document(
 
             stage = "chunking"
             chunked = group_document_children(chunk_document(extracted))
+            chunk_count = len(chunked.children)
+            parent_count = len(chunked.parents)
 
             stage = "persistence"
             previous_chunks = list_document_chunks(
@@ -244,6 +293,7 @@ def process_document(
                 tenant_id=tenant_id,
                 document_id=document_id,
             )
+            previous_chunk_count = len(previous_chunks)
             persisted_chunks = replace_document_chunks(
                 db,
                 tenant_id=tenant_id,
@@ -272,15 +322,42 @@ def process_document(
                 target_status=DocumentStatus.READY,
             )
             db.commit()
-            return _processing_result(document)
-        except Exception:
-            error_message = _ERROR_MESSAGES[stage]
-            logger.exception(
-                "Processamento falhou na etapa=%s documento=%s tenant=%s.",
-                stage,
-                document_id,
-                tenant_id,
+            result = _processing_result(document)
+            emit_observability_event(
+                "ingestion.completed",
+                status="success",
+                stage="finalization",
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=(time.monotonic() - started) * 1000,
+                counts={
+                    "chunks": chunk_count,
+                    "parents": parent_count,
+                    "previous_chunks": previous_chunk_count,
+                },
+                source_types=["document_chunk"],
             )
+            event_emitted = True
+            return result
+        except Exception as exc:
+            error_message = _ERROR_MESSAGES[stage]
+            emit_observability_event(
+                "ingestion.failed",
+                status="error",
+                stage=stage,
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=(time.monotonic() - started) * 1000,
+                counts={
+                    "chunks": chunk_count,
+                    "parents": parent_count,
+                    "previous_chunks": previous_chunk_count,
+                },
+                source_types=["document_chunk"],
+                error=exc,
+                level="error",
+            )
+            event_emitted = True
             _cleanup_partial_state(
                 db,
                 document=document,
@@ -294,5 +371,20 @@ def process_document(
                 error_message=error_message,
             )
             return _processing_result(failed)
+    except Exception as exc:
+        if not event_emitted:
+            emit_observability_event(
+                "ingestion.failed",
+                status="error",
+                stage=stage,
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=(time.monotonic() - started) * 1000,
+                counts={"chunks": chunk_count, "parents": parent_count},
+                source_types=["document_chunk"],
+                error=exc,
+                level="error",
+            )
+        raise
     finally:
         db.close()

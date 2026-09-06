@@ -414,6 +414,36 @@ cd echomind-backend
 python -m pytest tests/quick/test_faq_cache_matching.py
 ```
 
+### Logs estruturados de RAG e ingestão
+
+O backend emite eventos JSON locais no logger `echomind.observability`, com
+`schema_version=1`. O schema contém apenas timestamp UTC, nome do evento, nível,
+status, etapa, correlation ID, tenant pseudonimizado, duração em milissegundos,
+contagens permitidas, tipos de fonte e, em falhas, somente a classe da exceção.
+Perguntas, respostas, chunks, documentos, nomes de arquivo, tokens, bytes,
+Authorization, mensagens de erro e secrets não fazem parte do payload.
+
+Cada request recebe um UUID interno novo no header `X-Correlation-ID`; valores
+enviados pelo cliente não são reutilizados. O mesmo identificador acompanha o
+stream do chat e o processamento documental em background, sem permanecer no
+request seguinte. O tenant é registrado como SHA-256 reduzido a 16 caracteres,
+com domínio de versão próprio, e nunca como ID bruto.
+
+Os eventos cobrem sucesso e falha de chat, retrieval, geração, reranker,
+expansão parent-child, perguntas não respondidas e ingestão. Durações usam relógio
+monotônico; contagens negativas ou campos não aprovados são descartados ou
+normalizados. Falhas do próprio logger são isoladas e não alteram a resposta.
+
+Não há fornecedor externo, APM, agregação nem retenção configurada nesta fase: o
+destino permanece o stdout local do processo. Antes de persistir ou exportar esses
+eventos, a equipe deve definir acesso, prazo de retenção e controle de cardinalidade.
+O schema e a política de privacidade são verificados por:
+
+```bash
+cd echomind-backend
+python -m pytest tests/quick/test_observability.py
+```
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para

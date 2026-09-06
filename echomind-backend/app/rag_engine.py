@@ -49,6 +49,13 @@ from .database import (
     utc_now,
 )
 from .reranker import FastEmbedCrossEncoderReranker, Reranker, rerank_documents
+from .observability import (
+    bind_correlation_id,
+    current_correlation_id,
+    emit_observability_event,
+    new_correlation_id,
+    pseudonymize_tenant,
+)
 
 logger = logging.getLogger("echomind.rag")
 
@@ -232,7 +239,10 @@ def _get_vector_store(tenant_id: str) -> PGVector:
     a instância nova não conhecia os IDs inseridos pela instância antiga —
     tornando o delete sempre ineficaz.
     """
-    logger.info("[RAG] Inicializando PGVector para tenant=%s...", tenant_id)
+    logger.info(
+        "[RAG] Inicializando PGVector para tenant_ref=%s...",
+        pseudonymize_tenant(tenant_id),
+    )
     vector_store = PGVector(
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
@@ -249,8 +259,10 @@ def clear_tenant_collection(tenant_id: str) -> None:
     if not tenant_id.strip():
         raise ValueError("tenant_id nao pode ser vazio.")
 
-    collection_name = _tenant_collection_name(tenant_id)
-    logger.warning("[RAG] Limpando colecao para reindexacao: %s", collection_name)
+    logger.warning(
+        "[RAG] Limpando colecao para reindexacao. tenant_ref=%s",
+        pseudonymize_tenant(tenant_id),
+    )
     vector_store = _get_vector_store(tenant_id)
     vector_store.delete_collection()
     vector_store.create_collection()
@@ -266,7 +278,10 @@ def _enable_langchain_rls_if_possible() -> None:
             conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_collection ENABLE ROW LEVEL SECURITY"))
             conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_embedding ENABLE ROW LEVEL SECURITY"))
     except Exception as exc:
-        logger.warning("[RAG] Nao foi possivel habilitar RLS nas tabelas LangChain: %s", exc)
+        logger.warning(
+            "[RAG] Nao foi possivel habilitar RLS nas tabelas LangChain. erro=%s",
+            type(exc).__name__,
+        )
 
 
 def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:
@@ -407,13 +422,16 @@ def warm_up_rag_runtime() -> None:
     try:
         _get_llm()
     except Exception as exc:
-        logger.warning("[RAG] Warm-up do LLM falhou: %s", exc)
+        logger.warning("[RAG] Warm-up do LLM falhou. erro=%s", type(exc).__name__)
 
     try:
         embeddings = _get_embeddings()
         embeddings.embed_query("aquecimento do mecanismo de busca")
     except Exception as exc:
-        logger.warning("[RAG] Warm-up dos embeddings falhou: %s", exc)
+        logger.warning(
+            "[RAG] Warm-up dos embeddings falhou. erro=%s",
+            type(exc).__name__,
+        )
 
     elapsed = time.monotonic() - started
     logger.info("[RAG] Warm-up finalizado em %.2fs.", elapsed)
@@ -545,8 +563,8 @@ def _document_is_current(document: Document, *, today: date) -> bool:
     except (TypeError, ValueError):
         logger.warning(
             "[RAG] Excluindo document_chunk com valid_until invalido. "
-            "tenant=%s source_id=%s",
-            metadata.get("tenant_id", "desconhecido"),
+            "tenant_ref=%s source_id=%s",
+            pseudonymize_tenant(str(metadata.get("tenant_id", "desconhecido"))),
             metadata.get("source_id", "desconhecido"),
         )
         return False
@@ -865,9 +883,16 @@ def _expand_document_parents(
             for stored_document, parent in rows
         }
     except Exception as exc:
-        logger.warning(
-            "[RAG] Expansao Parent-Child indisponivel; mantendo children. erro=%s",
-            type(exc).__name__,
+        emit_observability_event(
+            "rag.parent_expansion.failed",
+            status="fallback",
+            stage="parent_expansion",
+            tenant_id=tenant_id,
+            duration_ms=0,
+            counts={"retrieved_documents": len(eligible_documents)},
+            source_types=["document_chunk"],
+            error=exc,
+            level="warning",
         )
         return eligible_documents
     finally:
@@ -903,6 +928,8 @@ async def _retrieve_docs(
     uma data sem horario, o documento segue vigente durante todo o dia indicado.
     Testes e chamadores podem injetar a data para evitar dependencia do relogio.
     """
+    retrieval_started = time.monotonic()
+    correlation_id = current_correlation_id() or new_correlation_id()
     loop = asyncio.get_running_loop()
     reference_date = today or date.today()
     candidate_k = _retrieval_candidate_k()
@@ -920,7 +947,20 @@ async def _retrieve_docs(
             limit=candidate_k,
         ),
     )
-    results, lexical_documents = await asyncio.gather(vector_task, lexical_task)
+    try:
+        results, lexical_documents = await asyncio.gather(vector_task, lexical_task)
+    except Exception as exc:
+        emit_observability_event(
+            "rag.retrieval.failed",
+            status="error",
+            stage="retrieval",
+            tenant_id=tenant_id,
+            correlation_id=correlation_id,
+            duration_ms=(time.monotonic() - retrieval_started) * 1000,
+            error=exc,
+            level="error",
+        )
+        raise
 
     current_candidates = [
         (doc, distance)
@@ -949,9 +989,15 @@ async def _retrieve_docs(
         try:
             active_reranker = _get_reranker()
         except Exception as exc:
-            logger.warning(
-                "[RAG] Reranker indisponivel na inicializacao; mantendo Hybrid Search. erro=%s",
-                type(exc).__name__,
+            emit_observability_event(
+                "rag.reranker.failed",
+                status="fallback",
+                stage="initialization",
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=0,
+                error=exc,
+                level="warning",
             )
 
     hybrid_documents = baseline_documents
@@ -974,41 +1020,66 @@ async def _retrieve_docs(
             )
         except Exception as exc:
             rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
-            logger.warning(
-                "[RAG] Reranker falhou; mantendo ranking Hybrid Search. "
-                "erro=%s candidatos=%d latencia_ms=%.2f",
-                type(exc).__name__,
-                len(rerank_candidates),
-                rerank_latency_ms,
+            emit_observability_event(
+                "rag.reranker.failed",
+                status="fallback",
+                stage="reranking",
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=rerank_latency_ms,
+                counts={"rerank_candidates": len(rerank_candidates)},
+                source_types=[
+                    str(document.metadata.get("source_type", ""))
+                    for document in rerank_candidates
+                ],
+                error=exc,
+                level="warning",
             )
             hybrid_documents = baseline_documents
         else:
             rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
-            logger.info(
-                "[RAG] Reranker reordenou %d candidato(s) em %.2f ms e retornou %d.",
-                len(rerank_candidates),
-                rerank_latency_ms,
-                len(hybrid_documents),
+            emit_observability_event(
+                "rag.reranker.completed",
+                status="success",
+                stage="reranking",
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=rerank_latency_ms,
+                counts={
+                    "rerank_candidates": len(rerank_candidates),
+                    "retrieved_documents": len(hybrid_documents),
+                },
+                source_types=[
+                    str(document.metadata.get("source_type", ""))
+                    for document in hybrid_documents
+                ],
             )
     hybrid_documents = _expand_document_parents(
         hybrid_documents,
         tenant_id=tenant_id,
         today=reference_date,
     )
-    if hybrid_documents:
-        logger.info(
-            "[RAG] Hybrid Search retornou %d doc(s): %d vetorial(is), %d lexical(is).",
-            len(hybrid_documents), len(baseline_vector_documents), len(lexical_documents),
-        )
-    else:
-        nearest = current_candidates[0][1] if current_candidates else -1
-        logger.info("[RAG] Nenhum doc abaixo de %.2f. Menor distância: %.3f",
-                    SIMILARITY_THRESHOLD, nearest)
-
     nearest_distance = (
         approved_candidates[0][1]
         if approved_candidates
         else (current_candidates[0][1] if current_candidates else None)
+    )
+    emit_observability_event(
+        "rag.retrieval.completed",
+        status="success",
+        stage="retrieval",
+        tenant_id=tenant_id,
+        correlation_id=correlation_id,
+        duration_ms=(time.monotonic() - retrieval_started) * 1000,
+        counts={
+            "vector_candidates": len(approved_candidates),
+            "lexical_candidates": len(lexical_documents),
+            "retrieved_documents": len(hybrid_documents),
+        },
+        source_types=[
+            str(document.metadata.get("source_type", ""))
+            for document in hybrid_documents
+        ],
     )
     return hybrid_documents, nearest_distance
 
@@ -1036,7 +1107,9 @@ class RAGEngine:
         2. O LLM recebeu documentos mas respondeu negativamente — significa
            que os docs eram irrelevantes (falsos positivos do retriever).
         """
-        docs, nearest_distance = await _retrieve_docs(question, self.tenant_id)
+        correlation_id = current_correlation_id() or new_correlation_id()
+        with bind_correlation_id(correlation_id):
+            docs, nearest_distance = await _retrieve_docs(question, self.tenant_id)
         institution_context = _build_institution_context(self._config)
 
         # O LLM sempre recebe a ficha institucional; FAQs/eventos entram quando
@@ -1067,14 +1140,33 @@ class RAGEngine:
             full_answer += prefix
             yield prefix
 
-        async for chunk in self._llm.astream([
-            SystemMessage(content=system_msg),
-            HumanMessage(content=question),
-        ]):
-            token = chunk.content if hasattr(chunk, "content") else str(chunk)
-            if token:
-                full_answer += token
-                yield token
+        generation_started = time.monotonic()
+        try:
+            async for chunk in self._llm.astream([
+                SystemMessage(content=system_msg),
+                HumanMessage(content=question),
+            ]):
+                token = chunk.content if hasattr(chunk, "content") else str(chunk)
+                if token:
+                    full_answer += token
+                    yield token
+        except Exception as exc:
+            emit_observability_event(
+                "rag.generation.failed",
+                status="error",
+                stage="generation",
+                tenant_id=self.tenant_id,
+                correlation_id=correlation_id,
+                duration_ms=(time.monotonic() - generation_started) * 1000,
+                counts={"retrieved_documents": len(docs)},
+                source_types=[
+                    str(document.metadata.get("source_type", ""))
+                    for document in docs
+                ],
+                error=exc,
+                level="error",
+            )
+            raise
 
         # Detecta se o LLM confessou não saber — mesmo com docs disponíveis
         _negative_markers = (
@@ -1085,12 +1177,22 @@ class RAGEngine:
         )
         answered = not any(m in full_answer.lower() for m in _negative_markers)
         self.last_had_docs = answered
-        if not answered:
-            logger.info(
-                "[RAG] LLM respondeu negativamente mesmo com %d doc(s) — "
-                "registrando como não respondida. Pergunta: '%.60s'",
-                len(docs), question
-            )
+        emit_observability_event(
+            "rag.generation.completed",
+            status="success",
+            stage="generation",
+            tenant_id=self.tenant_id,
+            correlation_id=correlation_id,
+            duration_ms=(time.monotonic() - generation_started) * 1000,
+            counts={
+                "retrieved_documents": len(docs),
+                "answered": int(answered),
+            },
+            source_types=[
+                str(document.metadata.get("source_type", ""))
+                for document in docs
+            ],
+        )
 
     # ─── Indexação ───────────────────────────────────────────────────────────
 
@@ -1234,7 +1336,20 @@ class RAGEngine:
             logger.info("[RAG] Vetor deletado do pgvector: %s:%s (vector_id=%s)",
                         source, source_id, vector_id)
         except Exception as exc:
-            logger.error("[RAG] Falha ao deletar vetor %s: %s", vector_id, exc)
+            emit_observability_event(
+                "ingestion.failed",
+                status="error",
+                stage="cleanup",
+                tenant_id=self.tenant_id,
+                duration_ms=0,
+                source_types=(
+                    [source]
+                    if source in {"faq", "event"}
+                    else ["document_chunk"]
+                ),
+                error=exc,
+                level="error",
+            )
 
     def _upsert_document(
         self,
@@ -1284,7 +1399,11 @@ class RAGEngine:
 
 # ─── Registro standalone (background task) ───────────────────────────────────
 
-def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
+def _register_unanswered_standalone(
+    question: str,
+    tenant_id: str,
+    correlation_id: str | None = None,
+) -> None:
     """
     Versão independente de _register_unanswered que cria e fecha sua própria
     Session do SQLAlchemy.
@@ -1295,6 +1414,8 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
     erros silenciosos de 'Session already closed', impedindo o registro.
     """
     import difflib
+    started = time.monotonic()
+    observed_correlation_id = correlation_id or current_correlation_id() or new_correlation_id()
     db = SessionLocal()
     try:
         existing = (
@@ -1323,20 +1444,37 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
             best_match.similar_questions = json.dumps(similar, ensure_ascii=False)
             best_match.count += 1
             best_match.last_asked = utc_now()
-            logger.info("[RAG] Não respondida agrupada em '%s' (ratio=%.2f)",
-                        best_match.canonical_question[:60], best_ratio)
+            grouped = 1
         else:
             db.add(UnansweredQuestion(
                 tenant_id=tenant_id,
                 canonical_question=question,
                 similar_questions="[]",
             ))
-            logger.info("[RAG] Nova não respondida registrada: '%s'", question[:60])
+            grouped = 0
 
         db.commit()
+        emit_observability_event(
+            "rag.unanswered.completed",
+            status="success",
+            stage="unanswered",
+            tenant_id=tenant_id,
+            correlation_id=observed_correlation_id,
+            duration_ms=(time.monotonic() - started) * 1000,
+            counts={"grouped": grouped},
+        )
     except Exception as exc:
         db.rollback()
-        logger.error("[RAG] Erro ao salvar não respondida standalone: %s", exc)
+        emit_observability_event(
+            "rag.unanswered.failed",
+            status="error",
+            stage="unanswered",
+            tenant_id=tenant_id,
+            correlation_id=observed_correlation_id,
+            duration_ms=(time.monotonic() - started) * 1000,
+            error=exc,
+            level="error",
+        )
     finally:
         db.close()
 
