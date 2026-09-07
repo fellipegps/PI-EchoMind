@@ -69,6 +69,12 @@ from .rag_engine import (
     _register_unanswered_standalone,
     warm_up_rag_runtime,
 )
+from .structured_logging import (
+    bind_log_context,
+    emit_event,
+    new_correlation_id,
+    safe_error_code,
+)
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 
@@ -87,12 +93,22 @@ async def lifespan(app: FastAPI):
             timeout=warmup_timeout,
         )
     except asyncio.TimeoutError:
-        logger.warning(
-            "[RAG] Warm-up excedeu %.0fs; o backend continuara subindo.",
-            warmup_timeout,
+        emit_event(
+            event="rag.warmup",
+            status="error",
+            stage="timeout",
+            duration_ms=warmup_timeout * 1000,
+            error_code="timeout-error",
+            level=logging.WARNING,
         )
     except Exception as exc:
-        logger.warning("[RAG] Warm-up falhou; o backend continuara subindo: %s", exc)
+        emit_event(
+            event="rag.warmup",
+            status="error",
+            stage="startup",
+            error_code=safe_error_code(exc),
+            level=logging.WARNING,
+        )
     yield
 
 # ─── App & CORS ──────────────────────────────────────────────────────────────
@@ -199,6 +215,7 @@ def get_me(
 async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     question = request.message.strip()
     tenant_id = request.tenant_id.strip()
+    correlation_id = new_correlation_id()
     if not question:
         raise HTTPException(status_code=400, detail="Mensagem vazia.")
     if not tenant_id:
@@ -210,9 +227,18 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         crud.increment_faq_consult(db, faq_id, tenant_id=tenant_id)
 
         async def cached_stream_generator():
-            for char in cached_answer:
-                yield char
-            crud.save_interaction(db, question=question, answer=cached_answer, tenant_id=tenant_id)
+            with bind_log_context(tenant_id, correlation_id=correlation_id) as log_context:
+                for char in cached_answer:
+                    yield char
+                crud.save_interaction(db, question=question, answer=cached_answer, tenant_id=tenant_id)
+                emit_event(
+                    event="rag.chat",
+                    status="success",
+                    stage="faq-cache",
+                    context=log_context,
+                    counts={"retrieved_results": 1},
+                    source_types={"faq": 1},
+                )
 
         return StreamingResponse(cached_stream_generator(), media_type="text/plain")
 
@@ -222,7 +248,14 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
     try:
         rag = get_rag_engine(db, tenant_id=tenant_id)
     except Exception as exc:
-        logger.error("[CHAT] Falha ao inicializar RAGEngine: %s", exc, exc_info=True)
+        with bind_log_context(tenant_id, correlation_id=correlation_id) as log_context:
+            emit_event(
+                event="rag.chat",
+                status="error",
+                stage="initialization",
+                context=log_context,
+                error_code=safe_error_code(exc),
+            )
         raise HTTPException(
             status_code=503,
             detail=str(exc),
@@ -230,31 +263,39 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
 
     async def stream_generator():
         full_response = ""
-        try:
-            async for token in rag.astream_chat(question):
-                if not token:
-                    continue
-                full_response += token
-                yield token
-        except Exception as exc:
-            logger.error("[CHAT] Erro durante streaming: %s", exc, exc_info=True)
-        finally:
-            # Persiste a interação (sempre)
-            crud.save_interaction(db, question=question, answer=full_response, tenant_id=tenant_id)
+        with bind_log_context(tenant_id, correlation_id=correlation_id) as log_context:
+            try:
+                async for token in rag.astream_chat(question):
+                    if not token:
+                        continue
+                    full_response += token
+                    yield token
+            except Exception:
+                # O RAG registra somente o código técnico seguro com a mesma correlação.
+                pass
+            finally:
+                # Persiste a interação (sempre)
+                crud.save_interaction(db, question=question, answer=full_response, tenant_id=tenant_id)
 
-            # Se o RAG não encontrou documentos relevantes, registra a pergunta
-            # como não respondida. Feito aqui com await run_in_executor — garante
-            # execução no event loop correto, ainda dentro do ciclo de vida do
-            # request, evitando o problema de create_task() que disparava após
-            # o context do request ser destruído.
-            if not rag.last_had_docs:
-                try:
-                    loop = asyncio.get_event_loop()
-                    await loop.run_in_executor(
-                        None, _register_unanswered_standalone, question, tenant_id
-                    )
-                except Exception as exc:
-                    logger.error("[CHAT] Falha ao registrar pergunta não respondida: %s", exc)
+                # Se o RAG não encontrou documentos relevantes, registra a pergunta
+                # como não respondida. Feito aqui com await run_in_executor — garante
+                # execução no event loop correto, ainda dentro do ciclo de vida do
+                # request, evitando o problema de create_task() que disparava após
+                # o context do request ser destruído.
+                if not rag.last_had_docs:
+                    try:
+                        loop = asyncio.get_event_loop()
+                        await loop.run_in_executor(
+                            None, _register_unanswered_standalone, question, tenant_id
+                        )
+                    except Exception as exc:
+                        emit_event(
+                            event="rag.unanswered",
+                            status="error",
+                            stage="scheduling",
+                            context=log_context,
+                            error_code=safe_error_code(exc),
+                        )
 
     return StreamingResponse(stream_generator(), media_type="text/plain")
 
@@ -562,7 +603,13 @@ async def upload_document(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except InvalidDocumentConfigurationError as exc:
         db.rollback()
-        logger.exception("Configuração inválida do limite de upload documental.")
+        emit_event(
+            event="rag.ingestion-api",
+            status="error",
+            stage="configuration",
+            tenant_id=current_user.id,
+            error_code=safe_error_code(exc),
+        )
         raise HTTPException(
             status_code=500,
             detail="Configuração inválida do limite de upload.",
@@ -572,9 +619,12 @@ async def upload_document(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         db.rollback()
-        logger.exception(
-            "Falha interna ao criar upload documental para tenant=%s.",
-            current_user.id,
+        emit_event(
+            event="rag.ingestion-api",
+            status="error",
+            stage="persistence",
+            tenant_id=current_user.id,
+            error_code=safe_error_code(exc),
         )
         raise HTTPException(
             status_code=500,
@@ -648,10 +698,13 @@ def delete_stored_document(
     try:
         rag.delete_document_chunks(document, chunks)
     except Exception as exc:
-        logger.exception(
-            "Falha vetorial ao excluir documento=%s tenant=%s.",
-            document_id,
-            current_user.id,
+        emit_event(
+            event="rag.document-delete",
+            status="error",
+            stage="vector-delete",
+            tenant_id=current_user.id,
+            counts={"persisted_chunks": len(chunks)},
+            error_code=safe_error_code(exc),
         )
         raise HTTPException(
             status_code=503,
@@ -678,10 +731,13 @@ def delete_stored_document(
         raise
     except Exception as exc:
         db.rollback()
-        logger.exception(
-            "Falha relacional ao excluir documento=%s tenant=%s.",
-            document_id,
-            current_user.id,
+        emit_event(
+            event="rag.document-delete",
+            status="error",
+            stage="relational-delete",
+            tenant_id=current_user.id,
+            counts={"persisted_chunks": len(chunks)},
+            error_code=safe_error_code(exc),
         )
         raise HTTPException(
             status_code=500,
