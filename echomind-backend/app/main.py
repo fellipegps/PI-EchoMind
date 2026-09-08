@@ -34,7 +34,7 @@ from .schemas import (
     EventCreate, EventUpdate, EventResponse,
     ConfigUpdate, ConfigResponse,
     UnansweredQuestionResponse, ConvertToFaqRequest,
-    DashboardResponse, FeedbackRequest, FeedbackResponse,
+    DashboardResponse, RagMetricsResponse, FeedbackRequest, FeedbackResponse,
     CurrentUserResponse,
     DocumentListResponse, DocumentResponse, DocumentStatus,
 )
@@ -71,10 +71,14 @@ from .rag_engine import (
 )
 from .structured_logging import (
     bind_log_context,
+    configure_metric_sink,
     emit_event,
     new_correlation_id,
     safe_error_code,
 )
+from .rag_metrics import get_rag_metrics, persist_metric_event
+
+configure_metric_sink(persist_metric_event)
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 
@@ -518,6 +522,19 @@ def get_dashboard(
     real_avg = latency_store.summary()["avg_response_time"]
     stats["avg_response_time"] = real_avg
     return stats
+
+
+@router_dashboard.get("/rag-metrics", response_model=RagMetricsResponse)
+def get_dashboard_rag_metrics(
+    days: int = Query(default=30, ge=1, le=90),
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    return get_rag_metrics(
+        db,
+        tenant_id=current_user.id,
+        days=days,
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -388,6 +388,24 @@ do ambiente que captura `stdout`/`stderr`; como o projeto ainda não definiu ess
 destino, nenhuma retenção adicional é criada pela aplicação. Falhas do sink de
 logging são isoladas e não mudam a resposta do chat nem o processamento.
 
+## Métricas operacionais do RAG
+
+O dashboard administrativo consulta agregados diários da tabela
+`rag_metric_daily`. Cada linha representa somente um tenant e um dia, com
+contagens fixas de chat, retrieval, ingestão, falhas, perguntas sem resposta e
+tipos de fonte, além das somas necessárias para calcular médias de latência e
+resultados recuperados. Perguntas, respostas, documentos, nomes, tokens,
+mensagens de erro e IDs de fontes nunca são persistidos nessa tabela.
+
+Os eventos sanitizados da seção anterior são a única origem dos agregados. A
+retenção é de 90 dias corridos e o descarte de linhas vencidas ocorre durante a
+gravação de novos eventos. O endpoint autenticado
+`GET /dashboard/rag-metrics?days=30` aceita janelas de 1 a 90 dias e sempre usa
+o tenant derivado da sessão administrativa; não recebe `tenant_id` do cliente.
+A tabela possui chave por tenant/data, índice de retenção e RLS seguindo o
+padrão atual do projeto. Falhas de persistência das métricas não alteram o
+chat, o retrieval nem a ingestão principal.
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para

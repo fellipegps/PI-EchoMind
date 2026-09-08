@@ -58,6 +58,40 @@ export interface DashboardData {
   top_faqs: { question: string; count: number }[];
 }
 
+export interface RagOperationMetrics {
+  total: number;
+  success: number;
+  error: number;
+  average_latency_ms: number;
+}
+
+export interface RagMetricsData {
+  period_days: number;
+  start_date: string;
+  end_date: string;
+  has_data: boolean;
+  query_count: number;
+  query_error_count: number;
+  failure_count: number;
+  average_retrieved_results: number;
+  unanswered_rate: number;
+  retrieval: RagOperationMetrics;
+  ingestion: RagOperationMetrics;
+  source_types: {
+    faq: number;
+    event: number;
+    document_chunk: number;
+    document_parent: number;
+    other: number;
+  };
+  daily: {
+    date: string;
+    queries: number;
+    failures: number;
+    unanswered: number;
+  }[];
+}
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;
@@ -457,6 +491,8 @@ export const unansweredApi = {
 
 export const dashboardApi = {
   get: () => request<DashboardData>("/dashboard"),
+  getRagMetrics: (days = 30) =>
+    request<RagMetricsData>(`/dashboard/rag-metrics?days=${days}`),
 };
 
 

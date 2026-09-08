@@ -9,8 +9,8 @@ import re
 import uuid
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass
-from typing import Iterator, Mapping
+from dataclasses import dataclass, field
+from typing import Callable, Iterator, Mapping
 
 
 SCHEMA_VERSION = 1
@@ -31,12 +31,15 @@ _KNOWN_COUNT_FIELDS = {
     "vector_candidates",
 }
 _logger = logging.getLogger("echomind.observability")
+MetricSink = Callable[[str, Mapping[str, object]], None]
+_metric_sink: MetricSink | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class LogContext:
     correlation_id: str
     tenant_ref: str
+    tenant_id: str | None = field(repr=False, compare=False)
 
 
 _current_context: ContextVar[LogContext | None] = ContextVar(
@@ -71,7 +74,14 @@ def _context_for(
     return LogContext(
         correlation_id=correlation_id or new_correlation_id(),
         tenant_ref=tenant_ref,
+        tenant_id=tenant_id,
     )
+
+
+def configure_metric_sink(sink: MetricSink | None) -> None:
+    """Configura persistencia local sem acoplar o schema de log ao banco."""
+    global _metric_sink
+    _metric_sink = sink
 
 
 def create_log_context(
@@ -180,5 +190,11 @@ def emit_event(
         )
     except Exception:
         # Observabilidade nunca pode alterar a resposta ou o processamento principal.
+        pass
+    try:
+        if _metric_sink is not None and log_context.tenant_id:
+            _metric_sink(log_context.tenant_id, payload)
+    except Exception:
+        # A agregacao operacional tambem nunca pode afetar o fluxo principal.
         pass
     return payload

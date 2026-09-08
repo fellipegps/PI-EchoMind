@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer } from "@/components/page-container";
 import { dashboardApi } from "@/lib/api";
 import type { DashboardData } from "@/lib/api";
+import { RagMetricsSection } from "./rag-metrics-section";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -165,6 +166,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <RagMetricsSection />
     </PageContainer>
   );
 }
