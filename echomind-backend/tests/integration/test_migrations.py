@@ -25,6 +25,7 @@ EXPECTED_TABLES = {
     "events",
     "faqs",
     "interactions",
+    "rag_metric_daily",
     "unanswered_questions",
 }
 
@@ -368,3 +369,52 @@ def test_document_tables_follow_existing_rls_pattern(postgres_engine: Engine) ->
     assert all(row["relrowsecurity"] for row in rls_rows)
     assert not any(row["relforcerowsecurity"] for row in rls_rows)
     assert all(row["policy_count"] == 0 for row in rls_rows)
+
+
+def test_rag_metric_daily_is_bounded_indexed_and_rls_enabled(
+    postgres_engine: Engine,
+) -> None:
+    inspector = inspect(postgres_engine)
+    columns = {column["name"] for column in inspector.get_columns("rag_metric_daily")}
+    assert columns == {
+        "tenant_id",
+        "metric_date",
+        "chat_success",
+        "chat_error",
+        "retrieval_success",
+        "retrieval_error",
+        "retrieval_duration_ms",
+        "retrieved_results",
+        "unanswered",
+        "ingestion_success",
+        "ingestion_error",
+        "ingestion_duration_ms",
+        "source_faq",
+        "source_event",
+        "source_document_chunk",
+        "source_document_parent",
+        "source_other",
+        "created_at",
+        "updated_at",
+    }
+    assert {index["name"] for index in inspector.get_indexes("rag_metric_daily")} == {
+        "ix_rag_metric_daily_metric_date"
+    }
+    assert {
+        constraint["name"]
+        for constraint in inspector.get_check_constraints("rag_metric_daily")
+    } == {
+        "ck_rag_metric_daily_counts_nonnegative",
+        "ck_rag_metric_daily_durations_nonnegative",
+    }
+
+    with postgres_engine.connect() as connection:
+        rls = connection.execute(
+            text(
+                "SELECT relrowsecurity, relforcerowsecurity "
+                "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE n.nspname = 'public' AND c.relname = 'rag_metric_daily'"
+            )
+        ).mappings().one()
+    assert rls["relrowsecurity"] is True
+    assert rls["relforcerowsecurity"] is False

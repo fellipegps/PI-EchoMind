@@ -21,6 +21,7 @@ import json
 import logging
 import os
 import time
+from collections import Counter
 from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
@@ -49,8 +50,12 @@ from .database import (
     utc_now,
 )
 from .reranker import FastEmbedCrossEncoderReranker, Reranker, rerank_documents
-
-logger = logging.getLogger("echomind.rag")
+from .structured_logging import (
+    bind_log_context,
+    create_log_context,
+    emit_event,
+    safe_error_code,
+)
 
 # ─── Configuração via variáveis de ambiente ───────────────────────────────────
 
@@ -166,7 +171,7 @@ def _get_embeddings() -> FastEmbedEmbeddings:
     Embeddings locais via FastEmbed (fastembed), sem torch e sem DLLs do Windows.
     intfloat/multilingual-e5-small: 384 dims, multilingue e compacto para CPU.
     """
-    logger.info("[RAG] Carregando modelo de embeddings via FastEmbed: %s", EMBED_MODEL)
+    emit_event(event="rag.runtime", status="started", stage="embedding-model")
     try:
         _register_default_embedding_model()
         return FastEmbedEmbeddings(model_name=EMBED_MODEL, cache_dir=_MODEL_CACHE)
@@ -191,7 +196,7 @@ def _get_llm() -> ChatGroq:
     ChatGroq otimizado para totem: temperature=0 (determinístico),
     max_tokens=400 (respostas concisas), streaming ativado.
     """
-    logger.info("[RAG] Inicializando ChatGroq: %s", GROQ_LLM_MODEL)
+    emit_event(event="rag.runtime", status="started", stage="llm")
     if not GROQ_API_KEY:
         raise RuntimeError(
             "GROQ_API_KEY não definida. "
@@ -232,7 +237,12 @@ def _get_vector_store(tenant_id: str) -> PGVector:
     a instância nova não conhecia os IDs inseridos pela instância antiga —
     tornando o delete sempre ineficaz.
     """
-    logger.info("[RAG] Inicializando PGVector para tenant=%s...", tenant_id)
+    emit_event(
+        event="rag.vector-store",
+        status="started",
+        stage="initialization",
+        tenant_id=tenant_id,
+    )
     vector_store = PGVector(
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
@@ -250,7 +260,13 @@ def clear_tenant_collection(tenant_id: str) -> None:
         raise ValueError("tenant_id nao pode ser vazio.")
 
     collection_name = _tenant_collection_name(tenant_id)
-    logger.warning("[RAG] Limpando colecao para reindexacao: %s", collection_name)
+    emit_event(
+        event="rag.vector-store",
+        status="started",
+        stage="collection-rebuild",
+        tenant_id=tenant_id,
+        level=logging.WARNING,
+    )
     vector_store = _get_vector_store(tenant_id)
     vector_store.delete_collection()
     vector_store.create_collection()
@@ -266,7 +282,13 @@ def _enable_langchain_rls_if_possible() -> None:
             conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_collection ENABLE ROW LEVEL SECURITY"))
             conn.execute(text("ALTER TABLE IF EXISTS public.langchain_pg_embedding ENABLE ROW LEVEL SECURITY"))
     except Exception as exc:
-        logger.warning("[RAG] Nao foi possivel habilitar RLS nas tabelas LangChain: %s", exc)
+        emit_event(
+            event="rag.vector-store",
+            status="error",
+            stage="rls-configuration",
+            error_code=safe_error_code(exc),
+            level=logging.WARNING,
+        )
 
 
 def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:
@@ -295,6 +317,10 @@ def _make_vector_id(source_id: str, source_type: str, tenant_id: str) -> str:
 
 _PROTECTED_METADATA_FIELDS = frozenset({"source_id", "source_type", "tenant_id"})
 _DOCUMENT_CHUNK_SOURCE_TYPE = "document_chunk"
+_DOCUMENT_PARENT_SOURCE_TYPE = "document_parent"
+_DOCUMENT_SOURCE_TYPES = frozenset(
+    {_DOCUMENT_CHUNK_SOURCE_TYPE, _DOCUMENT_PARENT_SOURCE_TYPE}
+)
 
 
 def _normalize_extra_metadata(
@@ -394,29 +420,46 @@ def warm_up_rag_runtime() -> None:
     /chat preserva o tratamento de erro existente.
     """
     if not RAG_WARMUP_ENABLED:
-        logger.info("[RAG] Warm-up desativado por RAG_WARMUP_ENABLED.")
+        emit_event(event="rag.warmup", status="success", stage="disabled")
         return
 
     if DATABASE_URL.startswith("sqlite"):
-        logger.info("[RAG] Warm-up ignorado em banco SQLite/testes.")
+        emit_event(event="rag.warmup", status="success", stage="test-skip")
         return
 
     started = time.monotonic()
-    logger.info("[RAG] Iniciando warm-up do motor RAG...")
+    emit_event(event="rag.warmup", status="started", stage="initialization")
 
     try:
         _get_llm()
     except Exception as exc:
-        logger.warning("[RAG] Warm-up do LLM falhou: %s", exc)
+        emit_event(
+            event="rag.warmup",
+            status="error",
+            stage="llm",
+            error_code=safe_error_code(exc),
+            level=logging.WARNING,
+        )
 
     try:
         embeddings = _get_embeddings()
         embeddings.embed_query("aquecimento do mecanismo de busca")
     except Exception as exc:
-        logger.warning("[RAG] Warm-up dos embeddings falhou: %s", exc)
+        emit_event(
+            event="rag.warmup",
+            status="error",
+            stage="embedding-model",
+            error_code=safe_error_code(exc),
+            level=logging.WARNING,
+        )
 
     elapsed = time.monotonic() - started
-    logger.info("[RAG] Warm-up finalizado em %.2fs.", elapsed)
+    emit_event(
+        event="rag.warmup",
+        status="success",
+        stage="completed",
+        duration_ms=elapsed * 1000,
+    )
 
 
 # ─── Cache de configuração (TTL 60s) ─────────────────────────────────────────
@@ -478,7 +521,7 @@ def _format_retrieved_document(document: Document) -> str:
     source_type = _source_metadata_value(metadata.get("source_type"))
     content = document.page_content.strip()
 
-    if source_type == _DOCUMENT_CHUNK_SOURCE_TYPE:
+    if source_type in _DOCUMENT_SOURCE_TYPES:
         source_parts: list[str] = []
         for label, key in (
             ("Nome", "filename"),
@@ -522,7 +565,7 @@ def _retrieval_candidate_k() -> int:
 def _document_is_current(document: Document, *, today: date) -> bool:
     """Mantem fontes comuns e chunks sem validade; falha fechado em data invalida."""
     metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
-    if metadata.get("source_type") != _DOCUMENT_CHUNK_SOURCE_TYPE:
+    if metadata.get("source_type") not in _DOCUMENT_SOURCE_TYPES:
         return True
 
     raw_valid_until = metadata.get("valid_until")
@@ -542,12 +585,15 @@ def _document_is_current(document: Document, *, today: date) -> bool:
             valid_until = date.fromisoformat(raw_valid_until)
         else:
             raise TypeError("valid_until deve ser uma data ISO 8601")
-    except (TypeError, ValueError):
-        logger.warning(
-            "[RAG] Excluindo document_chunk com valid_until invalido. "
-            "tenant=%s source_id=%s",
-            metadata.get("tenant_id", "desconhecido"),
-            metadata.get("source_id", "desconhecido"),
+    except (TypeError, ValueError) as exc:
+        emit_event(
+            event="rag.retrieval-filter",
+            status="error",
+            stage="validity",
+            tenant_id=str(metadata.get("tenant_id") or ""),
+            counts={"excluded_results": 1},
+            error_code=safe_error_code(exc),
+            level=logging.WARNING,
         )
         return False
 
@@ -793,7 +839,7 @@ def _expanded_parent_document(
         page_content=parent_content,
         metadata={
             "source_id": parent.id,
-            "source_type": _DOCUMENT_CHUNK_SOURCE_TYPE,
+            "source_type": _DOCUMENT_PARENT_SOURCE_TYPE,
             "tenant_id": parent.tenant_id,
             "document_id": stored_document.id,
             "filename": stored_document.filename,
@@ -865,9 +911,14 @@ def _expand_document_parents(
             for stored_document, parent in rows
         }
     except Exception as exc:
-        logger.warning(
-            "[RAG] Expansao Parent-Child indisponivel; mantendo children. erro=%s",
-            type(exc).__name__,
+        emit_event(
+            event="rag.parent-expansion",
+            status="error",
+            stage="lookup",
+            tenant_id=tenant_id,
+            counts={"child_candidates": len(eligible_documents)},
+            error_code=safe_error_code(exc),
+            level=logging.WARNING,
         )
         return eligible_documents
     finally:
@@ -904,6 +955,8 @@ async def _retrieve_docs(
     Testes e chamadores podem injetar a data para evitar dependencia do relogio.
     """
     loop = asyncio.get_running_loop()
+    retrieval_started = time.perf_counter()
+    log_context = create_log_context(tenant_id)
     reference_date = today or date.today()
     candidate_k = _retrieval_candidate_k()
 
@@ -920,7 +973,18 @@ async def _retrieve_docs(
             limit=candidate_k,
         ),
     )
-    results, lexical_documents = await asyncio.gather(vector_task, lexical_task)
+    try:
+        results, lexical_documents = await asyncio.gather(vector_task, lexical_task)
+    except Exception as exc:
+        emit_event(
+            event="rag.retrieval",
+            status="error",
+            stage="candidate-retrieval",
+            context=log_context,
+            duration_ms=(time.perf_counter() - retrieval_started) * 1000,
+            error_code=safe_error_code(exc),
+        )
+        raise
 
     current_candidates = [
         (doc, distance)
@@ -949,9 +1013,13 @@ async def _retrieve_docs(
         try:
             active_reranker = _get_reranker()
         except Exception as exc:
-            logger.warning(
-                "[RAG] Reranker indisponivel na inicializacao; mantendo Hybrid Search. erro=%s",
-                type(exc).__name__,
+            emit_event(
+                event="rag.reranker",
+                status="error",
+                stage="initialization",
+                context=log_context,
+                error_code=safe_error_code(exc),
+                level=logging.WARNING,
             )
 
     hybrid_documents = baseline_documents
@@ -974,41 +1042,57 @@ async def _retrieve_docs(
             )
         except Exception as exc:
             rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
-            logger.warning(
-                "[RAG] Reranker falhou; mantendo ranking Hybrid Search. "
-                "erro=%s candidatos=%d latencia_ms=%.2f",
-                type(exc).__name__,
-                len(rerank_candidates),
-                rerank_latency_ms,
+            emit_event(
+                event="rag.reranker",
+                status="error",
+                stage="ranking",
+                context=log_context,
+                duration_ms=rerank_latency_ms,
+                counts={"input_candidates": len(rerank_candidates)},
+                error_code=safe_error_code(exc),
+                level=logging.WARNING,
             )
             hybrid_documents = baseline_documents
         else:
             rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
-            logger.info(
-                "[RAG] Reranker reordenou %d candidato(s) em %.2f ms e retornou %d.",
-                len(rerank_candidates),
-                rerank_latency_ms,
-                len(hybrid_documents),
+            emit_event(
+                event="rag.reranker",
+                status="success",
+                stage="ranking",
+                context=log_context,
+                duration_ms=rerank_latency_ms,
+                counts={
+                    "input_candidates": len(rerank_candidates),
+                    "returned_results": len(hybrid_documents),
+                },
             )
     hybrid_documents = _expand_document_parents(
         hybrid_documents,
         tenant_id=tenant_id,
         today=reference_date,
     )
-    if hybrid_documents:
-        logger.info(
-            "[RAG] Hybrid Search retornou %d doc(s): %d vetorial(is), %d lexical(is).",
-            len(hybrid_documents), len(baseline_vector_documents), len(lexical_documents),
-        )
-    else:
-        nearest = current_candidates[0][1] if current_candidates else -1
-        logger.info("[RAG] Nenhum doc abaixo de %.2f. Menor distância: %.3f",
-                    SIMILARITY_THRESHOLD, nearest)
-
     nearest_distance = (
         approved_candidates[0][1]
         if approved_candidates
         else (current_candidates[0][1] if current_candidates else None)
+    )
+    emit_event(
+        event="rag.retrieval",
+        status="success",
+        stage="completed",
+        context=log_context,
+        duration_ms=(time.perf_counter() - retrieval_started) * 1000,
+        counts={
+            "vector_candidates": len(results),
+            "current_candidates": len(current_candidates),
+            "approved_candidates": len(approved_candidates),
+            "lexical_candidates": len(lexical_documents),
+            "returned_results": len(hybrid_documents),
+        },
+        source_types=Counter(
+            str(document.metadata.get("source_type", "other"))
+            for document in hybrid_documents
+        ),
     )
     return hybrid_documents, nearest_distance
 
@@ -1025,6 +1109,34 @@ class RAGEngine:
         self.last_had_docs: bool = True  # atualizado por astream_chat; lido no main.py
 
     async def astream_chat(self, question: str) -> AsyncGenerator[str, None]:
+        """Adiciona observabilidade segura sem alterar o streaming funcional."""
+        with bind_log_context(self.tenant_id) as log_context:
+            started = time.perf_counter()
+            try:
+                async for token in self._astream_chat_impl(question):
+                    yield token
+            except Exception as exc:
+                emit_event(
+                    event="rag.chat",
+                    status="error",
+                    stage="generation",
+                    context=log_context,
+                    duration_ms=(time.perf_counter() - started) * 1000,
+                    counts={"retrieved_results": getattr(self, "_last_retrieved_count", 0)},
+                    error_code=safe_error_code(exc),
+                )
+                raise
+            else:
+                emit_event(
+                    event="rag.chat",
+                    status="success",
+                    stage="generation",
+                    context=log_context,
+                    duration_ms=(time.perf_counter() - started) * 1000,
+                    counts={"retrieved_results": getattr(self, "_last_retrieved_count", 0)},
+                )
+
+    async def _astream_chat_impl(self, question: str) -> AsyncGenerator[str, None]:
         """
         Retorna tokens da resposta via streaming.
         Após o streaming, `self.last_had_docs` indica se a pergunta foi
@@ -1037,6 +1149,7 @@ class RAGEngine:
            que os docs eram irrelevantes (falsos positivos do retriever).
         """
         docs, nearest_distance = await _retrieve_docs(question, self.tenant_id)
+        self._last_retrieved_count = len(docs)
         institution_context = _build_institution_context(self._config)
 
         # O LLM sempre recebe a ficha institucional; FAQs/eventos entram quando
@@ -1086,10 +1199,12 @@ class RAGEngine:
         answered = not any(m in full_answer.lower() for m in _negative_markers)
         self.last_had_docs = answered
         if not answered:
-            logger.info(
-                "[RAG] LLM respondeu negativamente mesmo com %d doc(s) — "
-                "registrando como não respondida. Pergunta: '%.60s'",
-                len(docs), question
+            emit_event(
+                event="rag.answer-classification",
+                status="success",
+                stage="unanswered",
+                tenant_id=self.tenant_id,
+                counts={"retrieved_results": len(docs)},
             )
 
     # ─── Indexação ───────────────────────────────────────────────────────────
@@ -1231,10 +1346,22 @@ class RAGEngine:
         vector_id = _make_vector_id(source_id, source, self.tenant_id)
         try:
             _get_vector_store(self.tenant_id).delete(ids=[vector_id])
-            logger.info("[RAG] Vetor deletado do pgvector: %s:%s (vector_id=%s)",
-                        source, source_id, vector_id)
+            emit_event(
+                event="rag.index",
+                status="success",
+                stage="delete",
+                tenant_id=self.tenant_id,
+                source_types={source: 1},
+            )
         except Exception as exc:
-            logger.error("[RAG] Falha ao deletar vetor %s: %s", vector_id, exc)
+            emit_event(
+                event="rag.index",
+                status="error",
+                stage="delete",
+                tenant_id=self.tenant_id,
+                source_types={source: 1},
+                error_code=safe_error_code(exc),
+            )
 
     def _upsert_document(
         self,
@@ -1280,7 +1407,13 @@ class RAGEngine:
             raise RuntimeError(
                 f"Falha ao indexar documento {source_type}:{source_id} no pgvector."
             ) from exc
-        logger.info("[RAG] Indexado: %s:%s (vector_id=%s)", source_type, source_id, vector_id)
+        emit_event(
+            event="rag.index",
+            status="success",
+            stage="upsert",
+            tenant_id=self.tenant_id,
+            source_types={source_type: 1},
+        )
 
 # ─── Registro standalone (background task) ───────────────────────────────────
 
@@ -1323,20 +1456,37 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
             best_match.similar_questions = json.dumps(similar, ensure_ascii=False)
             best_match.count += 1
             best_match.last_asked = utc_now()
-            logger.info("[RAG] Não respondida agrupada em '%s' (ratio=%.2f)",
-                        best_match.canonical_question[:60], best_ratio)
+            emit_event(
+                event="rag.unanswered",
+                status="success",
+                stage="grouped",
+                tenant_id=tenant_id,
+                counts={"matched_existing": 1},
+            )
         else:
             db.add(UnansweredQuestion(
                 tenant_id=tenant_id,
                 canonical_question=question,
                 similar_questions="[]",
             ))
-            logger.info("[RAG] Nova não respondida registrada: '%s'", question[:60])
+            emit_event(
+                event="rag.unanswered",
+                status="success",
+                stage="created",
+                tenant_id=tenant_id,
+                counts={"matched_existing": 0},
+            )
 
         db.commit()
     except Exception as exc:
         db.rollback()
-        logger.error("[RAG] Erro ao salvar não respondida standalone: %s", exc)
+        emit_event(
+            event="rag.unanswered",
+            status="error",
+            stage="persistence",
+            tenant_id=tenant_id,
+            error_code=safe_error_code(exc),
+        )
     finally:
         db.close()
 

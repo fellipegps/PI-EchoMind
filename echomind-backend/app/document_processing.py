@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import logging
+import time
 from dataclasses import dataclass
 from typing import Callable
 
@@ -31,9 +31,8 @@ from .document_repository import (
 )
 from .rag_engine import get_rag_indexer
 from .schemas import DocumentStatus
+from .structured_logging import create_log_context, emit_event, safe_error_code
 
-
-logger = logging.getLogger("echomind.document_processing")
 
 DOCX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 _EXTRACTORS: dict[str, Callable[[bytes], ExtractedDocument]] = {
@@ -128,12 +127,14 @@ def _cleanup_partial_state(
                 document,
                 persisted_chunks,
             )
-        except Exception:
+        except Exception as exc:
             vectors_removed = False
-            logger.exception(
-                "Falha ao compensar vetores do documento=%s tenant=%s.",
-                document_id,
-                tenant_id,
+            emit_event(
+                event="rag.ingestion-cleanup",
+                status="error",
+                stage="vector-cleanup",
+                tenant_id=tenant_id,
+                error_code=safe_error_code(exc),
             )
 
     if not vectors_removed:
@@ -147,12 +148,14 @@ def _cleanup_partial_state(
             chunks=(),
         )
         db.commit()
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        logger.exception(
-            "Falha ao compensar chunks do documento=%s tenant=%s.",
-            document_id,
-            tenant_id,
+        emit_event(
+            event="rag.ingestion-cleanup",
+            status="error",
+            stage="chunk-cleanup",
+            tenant_id=tenant_id,
+            error_code=safe_error_code(exc),
         )
 
 
@@ -195,6 +198,10 @@ def process_document(
     content: bytes,
 ) -> DocumentProcessingResult:
     """Processa bytes duraveis com sessao propria e compensacao tenant-scoped."""
+    processing_started = time.perf_counter()
+    log_context = create_log_context(tenant_id)
+    event_emitted = False
+    stage = "validation"
     db = SessionLocal()
     try:
         if not isinstance(content, bytes):
@@ -205,6 +212,15 @@ def process_document(
             raise DocumentNotFoundError("Documento nao encontrado para o tenant informado.")
 
         if document.status == DocumentStatus.READY.value:
+            emit_event(
+                event="rag.ingestion",
+                status="success",
+                stage="already-ready",
+                context=log_context,
+                duration_ms=(time.perf_counter() - processing_started) * 1000,
+                counts={"persisted_chunks": document.chunk_count},
+            )
+            event_emitted = True
             return _processing_result(document)
         if document.status == DocumentStatus.ERROR.value:
             _cleanup_partial_state(
@@ -216,6 +232,15 @@ def process_document(
             refreshed = get_document(db, tenant_id=tenant_id, document_id=document_id)
             if refreshed is None:
                 raise DocumentNotFoundError("Documento nao encontrado apos cleanup.")
+            emit_event(
+                event="rag.ingestion",
+                status="success",
+                stage="cleanup-completed",
+                context=log_context,
+                duration_ms=(time.perf_counter() - processing_started) * 1000,
+                counts={"persisted_chunks": refreshed.chunk_count},
+            )
+            event_emitted = True
             return _processing_result(refreshed)
         if document.status == DocumentStatus.PROCESSING.value:
             raise DocumentProcessingInProgressError(
@@ -272,15 +297,31 @@ def process_document(
                 target_status=DocumentStatus.READY,
             )
             db.commit()
-            return _processing_result(document)
-        except Exception:
-            error_message = _ERROR_MESSAGES[stage]
-            logger.exception(
-                "Processamento falhou na etapa=%s documento=%s tenant=%s.",
-                stage,
-                document_id,
-                tenant_id,
+            emit_event(
+                event="rag.ingestion",
+                status="success",
+                stage="completed",
+                context=log_context,
+                duration_ms=(time.perf_counter() - processing_started) * 1000,
+                counts={
+                    "persisted_chunks": len(persisted_chunks),
+                    "persisted_parents": len(chunked.parents),
+                },
+                source_types={"document_chunk": len(persisted_chunks)},
             )
+            event_emitted = True
+            return _processing_result(document)
+        except Exception as exc:
+            error_message = _ERROR_MESSAGES[stage]
+            emit_event(
+                event="rag.ingestion",
+                status="error",
+                stage=stage,
+                context=log_context,
+                duration_ms=(time.perf_counter() - processing_started) * 1000,
+                error_code=safe_error_code(exc),
+            )
+            event_emitted = True
             _cleanup_partial_state(
                 db,
                 document=document,
@@ -294,5 +335,16 @@ def process_document(
                 error_message=error_message,
             )
             return _processing_result(failed)
+    except Exception as exc:
+        if not event_emitted:
+            emit_event(
+                event="rag.ingestion",
+                status="error",
+                stage=stage,
+                context=log_context,
+                duration_ms=(time.perf_counter() - processing_started) * 1000,
+                error_code=safe_error_code(exc),
+            )
+        raise
     finally:
         db.close()

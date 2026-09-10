@@ -50,6 +50,12 @@ class FakeVector(types.TypeDecorator):
 
 SQLITE_URL = "sqlite:///:memory:"
 
+# Pytest importa os modulos de teste antes de criar fixtures. Configurar o banco
+# sintetico na carga deste conftest evita que imports de app.* falhem na coleta.
+os.environ.setdefault("DATABASE_URL", SQLITE_URL)
+os.environ.setdefault("SUPABASE_URL", "http://localhost:54321")
+os.environ.setdefault("SUPABASE_SECRET_KEY", "test-secret-key")
+
 
 @dataclass
 class QuickTestContext:

@@ -414,6 +414,46 @@ cd echomind-backend
 python -m pytest tests/quick/test_faq_cache_matching.py
 ```
 
+## Logs estruturados do RAG
+
+Retrieval, geração do chat, ingestão e operações vetoriais emitem eventos JSON
+locais pelo logger `echomind.observability`. O schema está na versão 1 e mantém
+os campos `event`, `status`, `stage`, `correlation_id` e `tenant_ref`; eventos
+aplicáveis também incluem `duration_ms`, contagens, tipos de fonte e um código
+de erro técnico. A correlação é criada pelo servidor e isolada por operação.
+
+O `tenant_ref` contém somente os primeiros 16 caracteres de um SHA-256 com
+namespace próprio; o `tenant_id` original não é registrado. Perguntas,
+respostas, texto ou bytes de documentos, nomes de arquivo, IDs de fonte,
+mensagens de exceção, tokens, headers de autorização, senhas e secrets não fazem
+parte do schema. Tipos de fonte desconhecidos são agrupados como `other`, e os
+logs não devem ser usados diretamente como dimensões de métricas de alta
+cardinalidade.
+
+Nesta etapa, a saída usa apenas o logging padrão do processo e não envia dados a
+APM, collector ou serviço externo. Retenção, acesso e descarte seguem a política
+do ambiente que captura `stdout`/`stderr`; como o projeto ainda não definiu esse
+destino, nenhuma retenção adicional é criada pela aplicação. Falhas do sink de
+logging são isoladas e não mudam a resposta do chat nem o processamento.
+
+## Métricas operacionais do RAG
+
+O dashboard administrativo consulta agregados diários da tabela
+`rag_metric_daily`. Cada linha representa somente um tenant e um dia, com
+contagens fixas de chat, retrieval, ingestão, falhas, perguntas sem resposta e
+tipos de fonte, além das somas necessárias para calcular médias de latência e
+resultados recuperados. Perguntas, respostas, documentos, nomes, tokens,
+mensagens de erro e IDs de fontes nunca são persistidos nessa tabela.
+
+Os eventos sanitizados da seção anterior são a única origem dos agregados. A
+retenção é de 90 dias corridos e o descarte de linhas vencidas ocorre durante a
+gravação de novos eventos. O endpoint autenticado
+`GET /dashboard/rag-metrics?days=30` aceita janelas de 1 a 90 dias e sempre usa
+o tenant derivado da sessão administrativa; não recebe `tenant_id` do cliente.
+A tabela possui chave por tenant/data, índice de retenção e RLS seguindo o
+padrão atual do projeto. Falhas de persistência das métricas não alteram o
+chat, o retrieval nem a ingestão principal.
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para

@@ -171,6 +171,44 @@ class DashboardResponse(BaseModel):
     top_faqs: list[TopFaq]
 
 
+class RagOperationMetrics(BaseModel):
+    total: int
+    success: int
+    error: int
+    average_latency_ms: float
+
+
+class RagSourceTypeMetrics(BaseModel):
+    faq: int
+    event: int
+    document_chunk: int
+    document_parent: int
+    other: int
+
+
+class RagDailyMetrics(BaseModel):
+    date: date
+    queries: int
+    failures: int
+    unanswered: int
+
+
+class RagMetricsResponse(BaseModel):
+    period_days: int
+    start_date: date
+    end_date: date
+    has_data: bool
+    query_count: int
+    query_error_count: int
+    failure_count: int
+    average_retrieved_results: float
+    unanswered_rate: float
+    retrieval: RagOperationMetrics
+    ingestion: RagOperationMetrics
+    source_types: RagSourceTypeMetrics
+    daily: list[RagDailyMetrics]
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  AUTH
 # ══════════════════════════════════════════════════════════════════════════════

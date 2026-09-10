@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from hashlib import sha256
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -431,3 +433,75 @@ def test_ready_document_reexecution_is_a_noop(
     extractor.assert_not_called()
     rag_factory.assert_not_called()
     sessions.close_spies[0].assert_called_once_with()
+
+
+def test_processing_emits_safe_success_event_with_duration_and_counts(
+    processing_context,
+    monkeypatch,
+    processing_modules,
+    caplog,
+) -> None:
+    processing = processing_modules.processing
+    repository = processing_modules.repository
+    document_id = _create_pending_document(processing_context, repository)
+    fake_rag = FakeRagIndexer()
+    _successful_boundaries(monkeypatch, processing_modules, "text/plain", fake_rag)
+
+    with caplog.at_level(logging.INFO, logger="echomind.observability"):
+        result = processing.process_document(
+            document_id=document_id,
+            tenant_id="tenant-a",
+            content=b"bytes confidenciais do documento",
+        )
+
+    events = [
+        json.loads(record.getMessage())
+        for record in caplog.records
+        if record.name == "echomind.observability"
+    ]
+    completed = next(event for event in events if event["event"] == "rag.ingestion")
+    assert result.status == "ready"
+    assert completed["status"] == "success"
+    assert completed["stage"] == "completed"
+    assert completed["duration_ms"] >= 0
+    assert completed["counts"] == {"persisted_chunks": 2, "persisted_parents": 1}
+    serialized = json.dumps(completed)
+    assert "tenant-a" not in serialized
+    assert document_id not in serialized
+    assert "bytes confidenciais" not in serialized
+
+
+def test_processing_failure_logs_stage_without_exception_message_or_document(
+    processing_context,
+    monkeypatch,
+    processing_modules,
+    caplog,
+) -> None:
+    processing = processing_modules.processing
+    repository = processing_modules.repository
+    document_id = _create_pending_document(processing_context, repository)
+    fake_rag = FakeRagIndexer(fail_index=True)
+    _successful_boundaries(monkeypatch, processing_modules, "text/plain", fake_rag)
+
+    with caplog.at_level(logging.ERROR, logger="echomind.observability"):
+        result = processing.process_document(
+            document_id=document_id,
+            tenant_id="tenant-a",
+            content=b"documento que nao deve aparecer",
+        )
+
+    events = [
+        json.loads(record.getMessage())
+        for record in caplog.records
+        if record.name == "echomind.observability"
+    ]
+    failed = next(event for event in events if event["event"] == "rag.ingestion")
+    assert result.status == "error"
+    assert failed["status"] == "error"
+    assert failed["stage"] == "indexing"
+    assert failed["error_code"] == "runtimeerror"
+    serialized = json.dumps(failed)
+    assert "vector stack trace secreto" not in serialized
+    assert "tenant-a" not in serialized
+    assert document_id not in serialized
+    assert "documento que nao deve aparecer" not in serialized

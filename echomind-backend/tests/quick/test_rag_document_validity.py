@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import date, datetime, timezone
 
 import pytest
@@ -188,7 +189,7 @@ async def test_invalid_nonempty_validity_is_logged_and_excluded(
         (_retrieved("vigente"), 0.10),
     ]
 
-    with caplog.at_level("WARNING", logger="echomind.rag"):
+    with caplog.at_level("WARNING", logger="echomind.observability"):
         docs, nearest_distance, _store, _tenants = await _retrieve(
             monkeypatch,
             rag_engine_module,
@@ -197,8 +198,16 @@ async def test_invalid_nonempty_validity_is_logged_and_excluded(
 
     assert [doc.metadata["source_id"] for doc in docs] == ["vigente"]
     assert nearest_distance == 0.10
-    assert "valid_until invalido" in caplog.text
-    assert "source_id=corrompido" in caplog.text
+    event = next(
+        json.loads(record.getMessage())
+        for record in caplog.records
+        if record.name == "echomind.observability"
+        and json.loads(record.getMessage())["event"] == "rag.retrieval-filter"
+    )
+    assert event["status"] == "error"
+    assert event["stage"] == "validity"
+    assert event["counts"] == {"excluded_results": 1}
+    assert "corrompido" not in caplog.text
 
 
 @pytest.mark.asyncio

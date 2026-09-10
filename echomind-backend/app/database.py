@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
-    CheckConstraint, Date, DateTime, ForeignKey, Index, Integer,
+    CheckConstraint, Date, DateTime, Float, ForeignKey, Index, Integer,
     UniqueConstraint,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -302,4 +302,52 @@ class DocumentChunk(Base):
 
     document = relationship("Document", back_populates="chunks")
     parent = relationship("DocumentChunkParent", back_populates="children")
+
+
+class RagMetricDaily(Base):
+    """Agregados operacionais diarios do RAG, sem conteudo livre."""
+
+    __tablename__ = "rag_metric_daily"
+    __table_args__ = (
+        CheckConstraint(
+            "chat_success >= 0 AND chat_error >= 0 "
+            "AND retrieval_success >= 0 AND retrieval_error >= 0 "
+            "AND retrieved_results >= 0 AND unanswered >= 0 "
+            "AND ingestion_success >= 0 AND ingestion_error >= 0 "
+            "AND source_faq >= 0 AND source_event >= 0 "
+            "AND source_document_chunk >= 0 "
+            "AND source_document_parent >= 0 AND source_other >= 0",
+            name="ck_rag_metric_daily_counts_nonnegative",
+        ),
+        CheckConstraint(
+            "retrieval_duration_ms >= 0 AND ingestion_duration_ms >= 0",
+            name="ck_rag_metric_daily_durations_nonnegative",
+        ),
+        Index("ix_rag_metric_daily_metric_date", "metric_date"),
+    )
+
+    tenant_id                 = Column(String, primary_key=True)
+    metric_date               = Column(Date, primary_key=True)
+    chat_success              = Column(Integer, default=0, nullable=False)
+    chat_error                = Column(Integer, default=0, nullable=False)
+    retrieval_success         = Column(Integer, default=0, nullable=False)
+    retrieval_error           = Column(Integer, default=0, nullable=False)
+    retrieval_duration_ms     = Column(Float, default=0.0, nullable=False)
+    retrieved_results         = Column(Integer, default=0, nullable=False)
+    unanswered                = Column(Integer, default=0, nullable=False)
+    ingestion_success         = Column(Integer, default=0, nullable=False)
+    ingestion_error           = Column(Integer, default=0, nullable=False)
+    ingestion_duration_ms     = Column(Float, default=0.0, nullable=False)
+    source_faq                = Column(Integer, default=0, nullable=False)
+    source_event              = Column(Integer, default=0, nullable=False)
+    source_document_chunk     = Column(Integer, default=0, nullable=False)
+    source_document_parent    = Column(Integer, default=0, nullable=False)
+    source_other              = Column(Integer, default=0, nullable=False)
+    created_at                = Column(DateTime, default=utc_now, nullable=False)
+    updated_at                = Column(
+        DateTime,
+        default=utc_now,
+        onupdate=utc_now,
+        nullable=False,
+    )
 

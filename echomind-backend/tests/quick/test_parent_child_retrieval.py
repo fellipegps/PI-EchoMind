@@ -185,6 +185,7 @@ def test_child_retrieval_expands_parent_deduplicates_and_preserves_tenant_validi
         )
 
     assert [item.metadata["source_id"] for item in expanded] == [parent.id, "faq-a"]
+    assert expanded[0].metadata["source_type"] == "document_parent"
     assert "Regra principal" in expanded[0].page_content
     assert "Exceção obrigatória" in expanded[0].page_content
     assert expanded[0].metadata["matched_child_id"] == children[0].id
