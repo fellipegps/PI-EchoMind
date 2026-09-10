@@ -220,17 +220,18 @@ async def test_retrieval_falls_back_to_pr24_on_error_or_timeout(
 
 def test_offline_eval_reports_ranking_gain_latency_and_pr22_reference() -> None:
     evals = Path(__file__).parents[2] / "evals"
+    baseline_pr22 = json.loads((evals / "baseline_report.json").read_text(encoding="utf-8"))
     report = evaluate_reranker(
         json.loads((evals / "reranker_eval.json").read_text(encoding="utf-8")),
-        baseline_pr22=json.loads((evals / "baseline_report.json").read_text(encoding="utf-8")),
+        baseline_pr22=baseline_pr22,
         baseline_pr24=json.loads((evals / "hybrid_search_report.json").read_text(encoding="utf-8")),
     )
 
     assert report["references"]["pr22"] == {
-        "source_recall": 1.0,
-        "source_precision": 1.0,
-        "retrieval_mean_ms": 14.05,
-        "retrieval_p95_ms": 18.0,
+        "source_recall": baseline_pr22["metrics"]["retrieval"]["source_recall"],
+        "source_precision": baseline_pr22["metrics"]["retrieval"]["source_precision"],
+        "retrieval_mean_ms": baseline_pr22["metrics"]["latency_ms"]["retrieval_mean"],
+        "retrieval_p95_ms": baseline_pr22["metrics"]["latency_ms"]["retrieval_p95"],
     }
     assert report["references"]["pr24"] == {
         "vector_recall": 0.5,

@@ -1,8 +1,11 @@
 {
-  "report_version": 1,
-  "runner_version": "1.0",
+  "report_version": 2,
+  "runner_version": "2.0",
   "dataset_version": "2026-08-30.1",
-  "mode": "offline-synthetic-observations",
+  "dataset_sha256": "6ec6a86696d75c9b035a96ec13c2188a2405bcf787ba6c92037e9840997859de",
+  "corpus_sha256": "bd6b5ea76ae9bb45e2c0def316803fe9cdfa0ebf22393bfb5e230260751399a8",
+  "mode": "offline-executable-deterministic-pipeline",
+  "evaluation_date": "2026-08-30",
   "retrieval_configuration": {
     "strategy": "PGVector similarity_search_with_score",
     "embedding_model": "intfloat/multilingual-e5-small",
@@ -11,6 +14,12 @@
     "top_k": 3,
     "validity_filter": "document_chunk valid_until >= today"
   },
+  "evaluation_adapter": {
+    "name": "deterministic-token-cosine-v1",
+    "description": "Adaptador local substituto de embeddings e LLM; não representa qualidade do modelo de produção.",
+    "similarity_threshold": 0.8,
+    "top_k": 3
+  },
   "case_count": 20,
   "metrics": {
     "retrieval": {
@@ -18,7 +27,7 @@
       "source_precision": 1.0
     },
     "generation": {
-      "semantic_token_f1": 0.94,
+      "semantic_token_f1": 0.947,
       "correctness_by_rule": 1.0,
       "correct_refusal": 1.0
     },
@@ -26,15 +35,17 @@
       "citation_presence": 1.0
     },
     "latency_ms": {
-      "retrieval_mean": 14.05,
-      "retrieval_p95": 18.0,
-      "generation_mean": 26.35,
-      "generation_p95": 35.0
+      "retrieval_mean": 0.167,
+      "retrieval_p95": 0.363,
+      "generation_mean": 0.023,
+      "generation_p95": 0.046
     }
   },
   "cases": [
     {
       "id": "alfa-01",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "requisito",
         "fonte"
@@ -47,9 +58,16 @@
         ],
         "found_source_ids": [
           "alfa-faq-matricula"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-faq-matricula",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "A matrícula exige documento de identidade e comprovante de conclusão.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -59,14 +77,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 12,
-        "generation": 24
+        "retrieval": 0.271,
+        "generation": 0.027
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-02",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "data",
         "fonte",
@@ -80,9 +100,16 @@
         ],
         "found_source_ids": [
           "alfa-doc-recurso"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-doc-recurso",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "O recurso pode ser protocolado até 12 de março de 2026, conforme Regulamento de Recurso 2026.",
         "semantic_token_f1": 0.909,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -92,14 +119,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 14,
-        "generation": 31
+        "retrieval": 0.137,
+        "generation": 0.044
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-03",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "numero",
         "requisito"
@@ -112,9 +141,16 @@
         ],
         "found_source_ids": [
           "alfa-doc-recurso"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-doc-recurso",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "O prazo para recorrer é de cinco dias úteis, conforme Regulamento de Recurso 2026.",
         "semantic_token_f1": 0.818,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -124,14 +160,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 15,
-        "generation": 29
+        "retrieval": 0.142,
+        "generation": 0.042
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-04",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "requisito",
         "fonte"
@@ -144,9 +182,16 @@
         ],
         "found_source_ids": [
           "alfa-doc-bolsa"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-doc-bolsa",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "Pode pedir bolsa o aluno com renda familiar de até três salários mínimos, conforme Edital de Bolsas 2026.",
         "semantic_token_f1": 0.867,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -156,14 +201,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 17,
-        "generation": 35
+        "retrieval": 0.123,
+        "generation": 0.023
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-05",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "excecao",
         "recusa"
@@ -172,9 +219,11 @@
         "recall": 1.0,
         "precision": 1.0,
         "expected_source_ids": [],
-        "found_source_ids": []
+        "found_source_ids": [],
+        "scores": []
       },
       "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": true
@@ -184,14 +233,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 11,
-        "generation": 20
+        "retrieval": 0.145,
+        "generation": 0.0
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-06",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "requisito",
         "fonte"
@@ -204,9 +255,16 @@
         ],
         "found_source_ids": [
           "alfa-doc-estagio"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-doc-estagio",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "O relatório de estágio deve ser entregue na coordenação do curso, conforme Manual de Estágio.",
         "semantic_token_f1": 0.917,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -216,14 +274,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 16,
-        "generation": 32
+        "retrieval": 0.155,
+        "generation": 0.025
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-07",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "data",
         "fonte"
@@ -236,9 +296,16 @@
         ],
         "found_source_ids": [
           "alfa-faq-biblioteca"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-faq-biblioteca",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "A biblioteca atende de segunda a sexta das oito às vinte e duas horas.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -248,14 +315,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 12,
-        "generation": 26
+        "retrieval": 0.37,
+        "generation": 0.046
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-08",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "data",
         "evento"
@@ -268,9 +337,16 @@
         ],
         "found_source_ids": [
           "alfa-evento-semana"
+        ],
+        "scores": [
+          {
+            "source_id": "alfa-evento-semana",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "A Semana Acadêmica acontece em 20 de agosto de 2026.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -280,14 +356,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 13,
-        "generation": 27
+        "retrieval": 0.205,
+        "generation": 0.028
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-09",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "vencido",
         "recusa"
@@ -296,9 +374,11 @@
         "recall": 1.0,
         "precision": 1.0,
         "expected_source_ids": [],
-        "found_source_ids": []
+        "found_source_ids": [],
+        "scores": []
       },
       "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": true
@@ -308,14 +388,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 18,
-        "generation": 21
+        "retrieval": 0.363,
+        "generation": 0.002
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "alfa-10",
+      "tenant_id": "tenant-alfa",
+      "fixture_corpus": "alfa",
       "tags": [
         "excecao",
         "recusa"
@@ -324,9 +406,11 @@
         "recall": 1.0,
         "precision": 1.0,
         "expected_source_ids": [],
-        "found_source_ids": []
+        "found_source_ids": [],
+        "scores": []
       },
       "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": true
@@ -336,14 +420,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 10,
-        "generation": 19
+        "retrieval": 0.176,
+        "generation": 0.0
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-01",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "data",
         "fonte"
@@ -356,9 +442,16 @@
         ],
         "found_source_ids": [
           "beta-faq-atendimento"
+        ],
+        "scores": [
+          {
+            "source_id": "beta-faq-atendimento",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "O atendimento funciona das nove às dezessete horas.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -368,14 +461,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 13,
-        "generation": 25
+        "retrieval": 0.137,
+        "generation": 0.022
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-02",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "data",
         "evento"
@@ -388,9 +483,16 @@
         ],
         "found_source_ids": [
           "beta-evento-feira"
+        ],
+        "scores": [
+          {
+            "source_id": "beta-evento-feira",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "A Feira de Ciências será em 14 de setembro de 2026.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -400,14 +502,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 14,
-        "generation": 28
+        "retrieval": 0.115,
+        "generation": 0.024
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-03",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "data",
         "fonte"
@@ -420,10 +524,17 @@
         ],
         "found_source_ids": [
           "beta-doc-pagamento"
+        ],
+        "scores": [
+          {
+            "source_id": "beta-doc-pagamento",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
-        "semantic_token_f1": 0.818,
+        "answer": "A mensalidade vence no dia dez de cada mês, conforme Calendário Financeiro.",
+        "semantic_token_f1": 0.857,
         "correct_by_rule": true,
         "refusal_correct": null
       },
@@ -432,14 +543,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 16,
-        "generation": 30
+        "retrieval": 0.128,
+        "generation": 0.061
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-04",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "numero",
         "fonte"
@@ -452,10 +565,17 @@
         ],
         "found_source_ids": [
           "beta-doc-pagamento"
+        ],
+        "scores": [
+          {
+            "source_id": "beta-doc-pagamento",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
-        "semantic_token_f1": 0.778,
+        "answer": "Há multa de dois por cento por atraso, conforme Calendário Financeiro.",
+        "semantic_token_f1": 0.824,
         "correct_by_rule": true,
         "refusal_correct": null
       },
@@ -464,14 +584,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 15,
-        "generation": 33
+        "retrieval": 0.095,
+        "generation": 0.046
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-05",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "vencido",
         "recusa"
@@ -480,9 +602,11 @@
         "recall": 1.0,
         "precision": 1.0,
         "expected_source_ids": [],
-        "found_source_ids": []
+        "found_source_ids": [],
+        "scores": []
       },
       "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": true
@@ -492,14 +616,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 19,
-        "generation": 22
+        "retrieval": 0.202,
+        "generation": 0.0
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-06",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "requisito",
         "fonte"
@@ -512,9 +638,89 @@
         ],
         "found_source_ids": [
           "beta-doc-acessibilidade"
+        ],
+        "scores": [
+          {
+            "source_id": "beta-doc-acessibilidade",
+            "similarity": 1.0
+          }
         ]
       },
       "generation": {
+        "answer": "A solicitação de intérprete de Libras deve ser feita com sete dias de antecedência, conforme Guia de Acessibilidade.",
+        "semantic_token_f1": 0.889,
+        "correct_by_rule": true,
+        "refusal_correct": null
+      },
+      "source": {
+        "citation_expected": true,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 0.122,
+        "generation": 0.034
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-07",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
+      "tags": [
+        "excecao",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": [],
+        "scores": []
+      },
+      "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 0.131,
+        "generation": 0.0
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-08",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
+      "tags": [
+        "requisito",
+        "fonte"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [
+          "beta-doc-pagamento"
+        ],
+        "found_source_ids": [
+          "beta-doc-pagamento"
+        ],
+        "scores": [
+          {
+            "source_id": "beta-doc-pagamento",
+            "similarity": 1.0
+          }
+        ]
+      },
+      "generation": {
+        "answer": "O pagamento da mensalidade pode ser feito por boleto, conforme Calendário Financeiro.",
         "semantic_token_f1": 0.857,
         "correct_by_rule": true,
         "refusal_correct": null
@@ -524,101 +730,16 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 18,
-        "generation": 37
-      },
-      "human_review": "pending",
-      "failure_reasons": []
-    },
-    {
-      "id": "beta-07",
-      "tags": [
-        "excecao",
-        "recusa"
-      ],
-      "retrieval": {
-        "recall": 1.0,
-        "precision": 1.0,
-        "expected_source_ids": [],
-        "found_source_ids": []
-      },
-      "generation": {
-        "semantic_token_f1": 1.0,
-        "correct_by_rule": true,
-        "refusal_correct": true
-      },
-      "source": {
-        "citation_expected": false,
-        "citation_present": true
-      },
-      "latency_ms": {
-        "retrieval": 12,
-        "generation": 20
-      },
-      "human_review": "pending",
-      "failure_reasons": []
-    },
-    {
-      "id": "beta-08",
-      "tags": [
-        "requisito",
-        "fonte"
-      ],
-      "retrieval": {
-        "recall": 1.0,
-        "precision": 1.0,
-        "expected_source_ids": [
-          "beta-doc-pagamento"
-        ],
-        "found_source_ids": [
-          "beta-doc-pagamento"
-        ]
-      },
-      "generation": {
-        "semantic_token_f1": 0.842,
-        "correct_by_rule": true,
-        "refusal_correct": null
-      },
-      "source": {
-        "citation_expected": true,
-        "citation_present": true
-      },
-      "latency_ms": {
-        "retrieval": 15,
-        "generation": 29
+        "retrieval": 0.094,
+        "generation": 0.045
       },
       "human_review": "pending",
       "failure_reasons": []
     },
     {
       "id": "beta-09",
-      "tags": [
-        "recusa"
-      ],
-      "retrieval": {
-        "recall": 1.0,
-        "precision": 1.0,
-        "expected_source_ids": [],
-        "found_source_ids": []
-      },
-      "generation": {
-        "semantic_token_f1": 1.0,
-        "correct_by_rule": true,
-        "refusal_correct": true
-      },
-      "source": {
-        "citation_expected": false,
-        "citation_present": true
-      },
-      "latency_ms": {
-        "retrieval": 10,
-        "generation": 18
-      },
-      "human_review": "pending",
-      "failure_reasons": []
-    },
-    {
-      "id": "beta-10",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
       "tags": [
         "excecao",
         "recusa"
@@ -627,9 +748,11 @@
         "recall": 1.0,
         "precision": 1.0,
         "expected_source_ids": [],
-        "found_source_ids": []
+        "found_source_ids": [],
+        "scores": []
       },
       "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
         "semantic_token_f1": 1.0,
         "correct_by_rule": true,
         "refusal_correct": true
@@ -639,8 +762,41 @@
         "citation_present": true
       },
       "latency_ms": {
-        "retrieval": 11,
-        "generation": 21
+        "retrieval": 0.104,
+        "generation": 0.0
+      },
+      "human_review": "pending",
+      "failure_reasons": []
+    },
+    {
+      "id": "beta-10",
+      "tenant_id": "tenant-beta",
+      "fixture_corpus": "beta",
+      "tags": [
+        "evento",
+        "excecao",
+        "recusa"
+      ],
+      "retrieval": {
+        "recall": 1.0,
+        "precision": 1.0,
+        "expected_source_ids": [],
+        "found_source_ids": [],
+        "scores": []
+      },
+      "generation": {
+        "answer": "Não tenho essa informação. Consulte a instituição.",
+        "semantic_token_f1": 1.0,
+        "correct_by_rule": true,
+        "refusal_correct": true
+      },
+      "source": {
+        "citation_expected": false,
+        "citation_present": true
+      },
+      "latency_ms": {
+        "retrieval": 0.127,
+        "generation": 0.0
       },
       "human_review": "pending",
       "failure_reasons": []

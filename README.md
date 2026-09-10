@@ -286,14 +286,17 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 
 O dataset em `echomind-backend/evals/rag_baseline_dataset.json` contém 20 casos
 e um corpus inteiramente sintético, cobrindo datas, números, requisitos,
-exceções, recusa, fontes e documentos vigentes/vencidos. Cada caso mantém a
-expectativa, a observação baseline e um campo `human_review` para uma revisão
-posterior; a métrica automática não a substitui.
+exceções, recusa, fontes e documentos vigentes/vencidos. Cada caso contém a
+pergunta e a expectativa, enquanto as fontes guardam conteúdo e consultas de
+recuperação sintéticos. O campo `human_review` permanece para revisão posterior;
+a métrica automática não a substitui.
 
-O runner não importa o runtime de produção nem faz chamadas de rede, embedding
-ou LLM. Ele mede recuperação (recall/precision de fontes), geração (F1 lexical
-explícito, correção por regra e recusa), presença de citação e latência de cada
-etapa observada. Para regenerar o relatório versionável:
+O runner executa recuperação, filtro de tenant/validade e geração extrativa com
+adaptadores locais determinísticos. Ele não importa o runtime de produção nem
+faz chamadas de rede, PGVector, embedding remoto ou LLM. As observações não são
+lidas das expectativas: fontes, respostas e latências são produzidas durante a
+execução. O relatório mede recall/precision de fontes, F1 lexical, correção por
+regra, recusa, presença de citação e latência de cada etapa. Para regenerá-lo:
 
 ```bash
 cd echomind-backend
@@ -302,9 +305,10 @@ python scripts/eval_rag.py \
   --output evals/baseline_report.json
 ```
 
-O JSON gerado lista falhas por caso e a configuração de retrieval registrada;
-ele é uma baseline de infraestrutura sintética, não uma autorização para mudar
-threshold, embeddings ou a estratégia de busca.
+O JSON gerado lista saída, scores e falhas por caso, registra separadamente a
+configuração de produção e o adaptador de avaliação e inclui hashes do dataset
+e corpus. Ele é uma baseline executável de infraestrutura sintética, não mede a
+qualidade do modelo real nem autoriza mudar threshold, embeddings ou estratégia.
 
 ### Calibração do threshold
 
