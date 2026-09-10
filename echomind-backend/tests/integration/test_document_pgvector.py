@@ -269,6 +269,91 @@ def test_real_pgvector_keeps_faq_and_event_retrievable(real_rag_runtime) -> None
     assert {doc.metadata["source_id"] for doc in stored} == {"faq-1", "event-1"}
 
 
+def test_parent_child_backfill_preserves_child_ids_and_reconciles_real_vectors(
+    real_rag_runtime,
+) -> None:
+    from app.database import SessionLocal
+    from app.document_repository import (
+        DocumentChunkData,
+        DocumentCreateData,
+        create_document,
+        list_document_chunks,
+        list_document_parents,
+        replace_document_chunks,
+        transition_document_status,
+    )
+    from scripts import reindex_all
+
+    tenant_id = "pr26-safe-backfill"
+    indexer = real_rag_runtime.make_indexer(tenant_id)
+    session = SessionLocal()
+    document_id: str | None = None
+    try:
+        document = create_document(
+            session,
+            tenant_id=tenant_id,
+            data=DocumentCreateData(
+                filename="legacy-flat.txt",
+                mime_type="text/plain",
+                size_bytes=128,
+                sha256=sha256(f"{tenant_id}:{uuid4()}".encode()).hexdigest(),
+            ),
+        )
+        document_id = document.id
+        transition_document_status(
+            session,
+            tenant_id=tenant_id,
+            document_id=document_id,
+            target_status="processing",
+        )
+        chunks = replace_document_chunks(
+            session,
+            tenant_id=tenant_id,
+            document_id=document_id,
+            chunks=tuple(
+                DocumentChunkData(
+                    content=f"Trecho legado {index}.",
+                    page_start=index + 1,
+                )
+                for index in range(4)
+            ),
+        )
+        transition_document_status(
+            session,
+            tenant_id=tenant_id,
+            document_id=document_id,
+            target_status="ready",
+        )
+        session.commit()
+        original_ids = [chunk.id for chunk in chunks]
+        for chunk in chunks:
+            indexer.index_document_chunk(document, chunk)
+
+        rewritten, results = reindex_all.rewrite_parent_child_and_reindex(session)
+
+        persisted = list_document_chunks(
+            session,
+            tenant_id=tenant_id,
+            document_id=document_id,
+        )
+        vectors = _documents_for(real_rag_runtime, tenant_id)
+        assert rewritten == 1
+        assert [result.tenant_id for result in results] == [tenant_id]
+        assert [chunk.id for chunk in persisted] == original_ids
+        assert all(chunk.parent_id for chunk in persisted)
+        assert len(
+            list_document_parents(
+                session,
+                tenant_id=tenant_id,
+                document_id=document_id,
+            )
+        ) == 2
+        assert {doc.metadata["source_id"] for doc in vectors} == set(original_ids)
+        assert all(doc.metadata.get("parent_id") for doc in vectors)
+    finally:
+        session.close()
+        if document_id is not None:
+            _remove_processing_document(tenant_id, document_id)
 def test_real_postgresql_parent_lookup_is_tenant_scoped_deduplicated_and_cascades() -> None:
     from langchain_core.documents import Document as RetrievedDocument
 

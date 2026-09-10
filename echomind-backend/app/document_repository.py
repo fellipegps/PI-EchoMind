@@ -254,6 +254,76 @@ def list_document_parents(
     )
 
 
+def replace_document_parent_links(
+    db: Session,
+    *,
+    tenant_id: str,
+    document_id: str,
+    parents: Iterable[DocumentParentData],
+    chunk_parent_indexes: Iterable[int | None],
+) -> list[DocumentChunk]:
+    """Atualiza apenas parents/vinculos, preservando IDs e conteudo dos chunks."""
+    document = get_document(db, tenant_id=tenant_id, document_id=document_id)
+    if document is None:
+        raise DocumentNotFoundError("Documento nao encontrado para o tenant informado.")
+
+    chunks = list_document_chunks(db, tenant_id=tenant_id, document_id=document_id)
+    ordered_parents = list(parents)
+    ordered_parent_indexes = list(chunk_parent_indexes)
+    if len(ordered_parent_indexes) != len(chunks):
+        raise ValueError("Cada chunk persistido deve receber um parent_index.")
+    if any(
+        parent_index is not None
+        and not 0 <= parent_index < len(ordered_parents)
+        for parent_index in ordered_parent_indexes
+    ):
+        raise ValueError("Chunk referencia parent_index inexistente.")
+
+    # Desvincular antes de remover parents mantem a operacao compativel com a FK.
+    for chunk in chunks:
+        chunk.parent_id = None
+    db.flush()
+    (
+        db.query(DocumentChunkParent)
+        .filter(
+            DocumentChunkParent.document_id == document_id,
+            DocumentChunkParent.tenant_id == tenant_id,
+        )
+        .delete(synchronize_session="fetch")
+    )
+
+    persisted_parents = [
+        DocumentChunkParent(
+            id=_document_node_id(
+                tenant_id=tenant_id,
+                document_id=document_id,
+                node_type="parent",
+                node_index=parent_index,
+            ),
+            tenant_id=tenant_id,
+            document_id=document_id,
+            parent_index=parent_index,
+            content=parent.content,
+            page_start=parent.page_start,
+            page_end=parent.page_end,
+            section_title=parent.section_title,
+        )
+        for parent_index, parent in enumerate(ordered_parents)
+    ]
+    db.add_all(persisted_parents)
+    db.flush()
+
+    for chunk, parent_index in zip(chunks, ordered_parent_indexes, strict=True):
+        chunk.parent_id = (
+            persisted_parents[parent_index].id
+            if parent_index is not None
+            else None
+        )
+    document.updated_at = utc_now()
+    db.flush()
+    return chunks
+
+
 def replace_document_chunks(
     db: Session,
     *,

@@ -92,6 +92,10 @@ O retrieval mantém precisão de child e coerência normativa do parent.
   contíguos. Somente os children são indexados no PGVector.
 - O backfill é explícito e nunca roda durante migration ou startup:
   `python scripts/reindex_all.py --confirm --parent-child-backfill`.
+- Backfill e rollback preservam os IDs dos children existentes e processam um
+  tenant por vez. O estado relacional é confirmado antes da reconstrução da
+  coleção daquele tenant; uma falha interrompe os tenants seguintes e uma nova
+  execução reconcilia a coleção sem criar IDs vetoriais órfãos.
 - O rollback de aplicação também é explícito e reindexa a coleção plana:
   `python scripts/reindex_all.py --confirm --parent-child-rollback`.
 - Antes de executar `alembic downgrade 0010`, executar o rollback de aplicação

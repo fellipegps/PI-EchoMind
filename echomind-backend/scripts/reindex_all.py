@@ -26,9 +26,8 @@ from app.database import (  # noqa: E402
 )
 from app.document_ingestion import ChunkedTextBlock, group_document_children  # noqa: E402
 from app.document_repository import (  # noqa: E402
-    DocumentChunkData,
     DocumentParentData,
-    replace_document_chunks,
+    replace_document_parent_links,
 )
 from app.rag_engine import (  # noqa: E402
     DEFAULT_EMBEDDING_DIM,
@@ -210,12 +209,20 @@ def reindex_all(db: Session) -> list[ReindexResult]:
     return results
 
 
-def rewrite_parent_child(db: Session, *, rollback: bool = False) -> int:
-    """Backfill/rollback explicito; a reindexacao vetorial ocorre em seguida."""
+def _rewrite_parent_child_tenant(
+    db: Session,
+    tenant_id: str,
+    *,
+    rollback: bool = False,
+) -> int:
+    """Regrava parents/vinculos de um tenant sem trocar IDs de chunks."""
     documents = (
         db.query(Document)
-        .filter(Document.status == DocumentStatus.READY.value)
-        .order_by(Document.tenant_id.asc(), Document.id.asc())
+        .filter(
+            Document.tenant_id == tenant_id,
+            Document.status == DocumentStatus.READY.value,
+        )
+        .order_by(Document.id.asc())
         .all()
     )
     rewritten = 0
@@ -243,16 +250,8 @@ def rewrite_parent_child(db: Session, *, rollback: bool = False) -> int:
             continue
 
         if rollback:
-            child_data = [
-                DocumentChunkData(
-                    content=chunk.content,
-                    page_start=chunk.page_start,
-                    page_end=chunk.page_end,
-                    section_title=chunk.section_title,
-                )
-                for chunk in chunks
-            ]
             parent_data: list[DocumentParentData] = []
+            chunk_parent_indexes: list[int | None] = [None] * len(chunks)
         else:
             grouped = group_document_children(
                 tuple(
@@ -266,16 +265,7 @@ def rewrite_parent_child(db: Session, *, rollback: bool = False) -> int:
                     for chunk in chunks
                 )
             )
-            child_data = [
-                DocumentChunkData(
-                    content=chunk.content,
-                    page_start=chunk.page_start,
-                    page_end=chunk.page_end,
-                    section_title=chunk.section_title,
-                    parent_index=chunk.parent_index,
-                )
-                for chunk in grouped.children
-            ]
+            chunk_parent_indexes = [chunk.parent_index for chunk in grouped.children]
             parent_data = [
                 DocumentParentData(
                     content=parent.content,
@@ -285,16 +275,79 @@ def rewrite_parent_child(db: Session, *, rollback: bool = False) -> int:
                 )
                 for parent in grouped.parents
             ]
-        replace_document_chunks(
+        replace_document_parent_links(
             db,
             tenant_id=document.tenant_id,
             document_id=document.id,
-            chunks=child_data,
             parents=parent_data,
+            chunk_parent_indexes=chunk_parent_indexes,
         )
         rewritten += 1
-    db.commit()
     return rewritten
+
+
+def rewrite_parent_child(
+    db: Session,
+    *,
+    rollback: bool = False,
+    tenant_id: str | None = None,
+) -> int:
+    """Backfill relacional retomavel por tenant, preservando IDs vetoriais."""
+    tenant_ids = [tenant_id] if tenant_id is not None else list_tenant_ids(db)
+    rewritten = 0
+    for selected_tenant_id in tenant_ids:
+        try:
+            rewritten += _rewrite_parent_child_tenant(
+                db,
+                selected_tenant_id,
+                rollback=rollback,
+            )
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+        finally:
+            db.expunge_all()
+    return rewritten
+
+
+def rewrite_parent_child_and_reindex(
+    db: Session,
+    *,
+    rollback: bool = False,
+) -> tuple[int, list[ReindexResult]]:
+    """Confirma e reconcilia cada tenant antes de avancar ao proximo."""
+    rewritten = 0
+    results: list[ReindexResult] = []
+    for tenant_id in list_tenant_ids(db):
+        log.info(
+            "%s Parent-Child do tenant %s...",
+            "Revertendo" if rollback else "Aplicando",
+            tenant_id,
+        )
+        try:
+            rewritten += _rewrite_parent_child_tenant(
+                db,
+                tenant_id,
+                rollback=rollback,
+            )
+            # O estado relacional do tenant funciona como checkpoint. Como os
+            # IDs dos chunks nao mudam, uma interrupcao aqui mantem os vetores
+            # antigos validos e uma nova execucao pode reconcilia-los.
+            db.commit()
+            results.append(reindex_tenant(db, tenant_id))
+        except Exception as exc:
+            db.rollback()
+            completed_tenant_ids = tuple(result.tenant_id for result in results)
+            log.exception(
+                "Tenant %s falhou; Parent-Child interrompido apos: %s.",
+                tenant_id,
+                ", ".join(completed_tenant_ids) or "nenhum tenant",
+            )
+            raise TenantReindexError(tenant_id, completed_tenant_ids) from exc
+        finally:
+            db.expunge_all()
+    return rewritten, results
 
 
 def parse_args() -> argparse.Namespace:
@@ -339,7 +392,7 @@ def main() -> None:
     db = SessionLocal()
     try:
         if args.parent_child_backfill or args.parent_child_rollback:
-            rewritten = rewrite_parent_child(
+            rewritten, results = rewrite_parent_child_and_reindex(
                 db,
                 rollback=args.parent_child_rollback,
             )
@@ -348,7 +401,8 @@ def main() -> None:
                 rewritten,
                 "rollback" if args.parent_child_rollback else "backfill",
             )
-        results = reindex_all(db)
+        else:
+            results = reindex_all(db)
     except Exception:
         log.exception("Reindexacao interrompida com erro visivel.")
         raise SystemExit(1)

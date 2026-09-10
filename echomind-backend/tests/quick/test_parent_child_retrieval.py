@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from langchain_core.documents import Document as RetrievedDocument
 
 from scripts.eval_parent_child import evaluate_parent_child
@@ -236,23 +237,108 @@ def test_explicit_backfill_and_rollback_preserve_children(db, monkeypatch) -> No
     from scripts.reindex_all import rewrite_parent_child
 
     document = _stored_document(db, document_id="doc-parent-d", tenant_id="tenant-a")
-    replace_document_chunks(
+    original = replace_document_chunks(
         db,
         tenant_id="tenant-a",
         document_id=document.id,
         chunks=[DocumentChunkData(content=f"Trecho {index}") for index in range(4)],
     )
+    original_ids = [chunk.id for chunk in original]
     monkeypatch.setattr(db, "commit", db.flush)
+    monkeypatch.setattr(db, "expunge_all", lambda: None)
 
     assert rewrite_parent_child(db) == 1
     backfilled = list_document_chunks(db, tenant_id="tenant-a", document_id=document.id)
+    assert [chunk.id for chunk in backfilled] == original_ids
     assert all(chunk.parent_id for chunk in backfilled)
     assert len(list_document_parents(db, tenant_id="tenant-a", document_id=document.id)) == 2
 
     assert rewrite_parent_child(db, rollback=True) == 1
     rolled_back = list_document_chunks(db, tenant_id="tenant-a", document_id=document.id)
+    assert [chunk.id for chunk in rolled_back] == original_ids
     assert all(chunk.parent_id is None for chunk in rolled_back)
     assert list_document_parents(db, tenant_id="tenant-a", document_id=document.id) == []
+
+
+def test_interrupted_backfill_stops_by_tenant_and_resumes_without_orphan_ids(
+    db,
+    monkeypatch,
+) -> None:
+    from app.document_repository import (
+        DocumentChunkData,
+        list_document_chunks,
+        list_document_parents,
+        replace_document_chunks,
+    )
+    from scripts import reindex_all
+
+    original_ids: dict[str, list[str]] = {}
+    for suffix in ("a", "b", "c"):
+        tenant_id = f"tenant-{suffix}"
+        document = _stored_document(
+            db,
+            document_id=f"doc-resume-{suffix}",
+            tenant_id=tenant_id,
+        )
+        chunks = replace_document_chunks(
+            db,
+            tenant_id=tenant_id,
+            document_id=document.id,
+            chunks=[
+                DocumentChunkData(content=f"Trecho {suffix}-{index}")
+                for index in range(4)
+            ],
+        )
+        original_ids[tenant_id] = [chunk.id for chunk in chunks]
+
+    monkeypatch.setattr(db, "commit", db.flush)
+    monkeypatch.setattr(db, "rollback", lambda: None)
+    monkeypatch.setattr(db, "expunge_all", lambda: None)
+    processed: list[str] = []
+    fail_tenant_b = True
+
+    def fake_reindex(_db, tenant_id: str) -> reindex_all.ReindexResult:
+        processed.append(tenant_id)
+        if tenant_id == "tenant-b" and fail_tenant_b:
+            raise RuntimeError("falha vetorial sintetica")
+        return reindex_all.ReindexResult(tenant_id, faq_count=0, event_count=0)
+
+    monkeypatch.setattr(reindex_all, "reindex_tenant", fake_reindex)
+
+    with pytest.raises(reindex_all.TenantReindexError) as exc_info:
+        reindex_all.rewrite_parent_child_and_reindex(db)
+
+    assert processed == ["tenant-a", "tenant-b"]
+    assert exc_info.value.completed_tenant_ids == ("tenant-a",)
+    assert list_document_parents(
+        db,
+        tenant_id="tenant-c",
+        document_id="doc-resume-c",
+    ) == []
+    for suffix in ("a", "b", "c"):
+        tenant_id = f"tenant-{suffix}"
+        assert [
+            chunk.id
+            for chunk in list_document_chunks(
+                db,
+                tenant_id=tenant_id,
+                document_id=f"doc-resume-{suffix}",
+            )
+        ] == original_ids[tenant_id]
+
+    fail_tenant_b = False
+    processed.clear()
+    rewritten, results = reindex_all.rewrite_parent_child_and_reindex(db)
+
+    assert rewritten == 1
+    assert processed == ["tenant-a", "tenant-b", "tenant-c"]
+    assert [result.tenant_id for result in results] == processed
+    for suffix in ("a", "b", "c"):
+        assert list_document_parents(
+            db,
+            tenant_id=f"tenant-{suffix}",
+            document_id=f"doc-resume-{suffix}",
+        )
 
 
 def test_parent_child_eval_proves_context_gain_with_bounded_cost() -> None:
