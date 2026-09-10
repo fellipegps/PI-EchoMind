@@ -76,7 +76,7 @@ GROQ_LLM_MODEL=openai/gpt-oss-120b
 
 EMBED_MODEL=intfloat/multilingual-e5-small
 EMBEDDING_DIM=384
-SIMILARITY_THRESHOLD=0.35
+SIMILARITY_THRESHOLD=0.45
 TOP_K_DOCS=3
 MAX_DOCUMENT_SIZE_MB=10
 ```
@@ -312,12 +312,14 @@ qualidade do modelo real nem autoriza mudar threshold, embeddings ou estratégia
 
 ### Calibração do threshold
 
-O default de `SIMILARITY_THRESHOLD` foi calibrado de `0.45` para `0.35` com o
-mesmo dataset sintético. O sweep de `0.30` a `0.50`, em passos de `0.05`, está
-arquivado em `echomind-backend/evals/threshold_calibration_report.json`: `0.35`
-preserva recall de fontes de 100% e recusa correta de 100%, enquanto `0.45`
-aceita contexto irrelevante em todos os casos sintéticos de recusa. O algoritmo,
-embedding, top-K e filtro de validade não foram alterados.
+O default de `SIMILARITY_THRESHOLD` permanece em `0.45`. A calibração executa
+o modelo local `intfloat/multilingual-e5-small` sobre o corpus sintético e usa
+14 casos para calibração e 6 como holdout. O sweep de `0.05` a `0.50`, em passos
+de `0.01`, não encontrou um limiar que preserve simultaneamente recall mínimo e
+recusa correta; portanto, a alteração anterior para `0.35` não foi confirmada.
+O relatório completo está em
+`echomind-backend/evals/threshold_calibration_report.json`. O algoritmo, modelo,
+top-K e filtro de validade permanecem fixos durante a comparação.
 
 Para reproduzir a decisão:
 
@@ -325,9 +327,13 @@ Para reproduzir a decisão:
 cd echomind-backend
 python scripts/calibrate_similarity_threshold.py \
   --dataset evals/rag_baseline_dataset.json \
-  --candidates evals/similarity_threshold_candidates.json \
+  --split evals/similarity_threshold_split.json \
   --output evals/threshold_calibration_report.json
 ```
+
+Por padrão, o comando exige que o modelo já esteja no cache local e não acessa
+a rede. Em uma preparação explícita do ambiente, use `--allow-model-download`
+caso seja necessário baixar o modelo pela primeira vez. Nenhuma LLM é chamada.
 
 ### Busca híbrida PostgreSQL + PGVector
 
@@ -339,7 +345,7 @@ apenas índices GIN de expressão, sem tabela global ou cópia manual do corpus.
 
 Os canais são fundidos com Reciprocal Rank Fusion (RRF): cada ocorrência soma
 `1 / (60 + posição)`; fontes são deduplicadas por `(source_type, source_id)` e
-empates usam posição vetorial, posição lexical, tipo e ID. O threshold de 0,35
+empates usam posição vetorial, posição lexical, tipo e ID. O threshold de 0,45
 continua valendo somente para o canal vetorial; a busca lexical permite que
 códigos e siglas exatos sejam candidatos sem alterar embeddings, top-K ou a
 estratégia semântica existente.

@@ -82,8 +82,8 @@ os.environ.setdefault("TRANSFORMERS_CACHE", _MODEL_CACHE)
 os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", _MODEL_CACHE)
 
 # Threshold de DISTÂNCIA coseno (0 = idêntico, 2 = oposto).
-# Mantido temporariamente em 0.45; a calibracao pertence a PR 23.
-SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.35"))
+# A PR 23 manteve 0.45 porque nenhum candidato passou calibracao + holdout.
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.45"))
 UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "0.38"))
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
 _RETRIEVAL_OVERFETCH_MULTIPLIER = 3

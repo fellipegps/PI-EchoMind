@@ -1,54 +1,1858 @@
 {
-  "report_version": 1,
+  "report_version": 2,
   "dataset_version": "2026-08-30.1",
+  "dataset_sha256": "6ec6a86696d75c9b035a96ec13c2188a2405bcf787ba6c92037e9840997859de",
+  "split_sha256": "3aa46df79c47553faab6f0a65a2d9738adf8ba90aff047ca3414df4b9bd7ea10",
+  "mode": "offline-production-embedding",
+  "embedding_execution": {
+    "backend": "fastembed",
+    "backend_version": "0.6.1",
+    "model": "intfloat/multilingual-e5-small",
+    "dimensions": 384,
+    "external_llm": false
+  },
   "fixed_retrieval_configuration": {
     "strategy": "PGVector similarity_search_with_score",
     "embedding_model": "intfloat/multilingual-e5-small",
     "embedding_dimensions": 384,
     "similarity_threshold": 0.45,
     "top_k": 3,
-    "validity_filter": "document_chunk valid_until >= today"
+    "validity_filter": "document_chunk valid_until >= today",
+    "candidate_k": 10
   },
-  "thresholds": [
+  "split": {
+    "calibration": [
+      "alfa-01",
+      "alfa-02",
+      "alfa-04",
+      "alfa-05",
+      "alfa-06",
+      "alfa-07",
+      "alfa-09",
+      "beta-01",
+      "beta-02",
+      "beta-03",
+      "beta-04",
+      "beta-06",
+      "beta-07",
+      "beta-09"
+    ],
+    "holdout": [
+      "alfa-03",
+      "alfa-08",
+      "alfa-10",
+      "beta-05",
+      "beta-08",
+      "beta-10"
+    ]
+  },
+  "calibration_thresholds": [
     {
-      "threshold": 0.3,
-      "source_recall": 0.615,
+      "threshold": 0.05,
+      "case_count": 14,
+      "source_recall": 0.0,
       "source_precision": 1.0,
       "false_positive_rate": 0.0,
-      "correct_refusal": 1.0
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 0
+    },
+    {
+      "threshold": 0.06,
+      "case_count": 14,
+      "source_recall": 0.2,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 0
+    },
+    {
+      "threshold": 0.07,
+      "case_count": 14,
+      "source_recall": 0.2,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 0
+    },
+    {
+      "threshold": 0.08,
+      "case_count": 14,
+      "source_recall": 0.4,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.09,
+      "case_count": 14,
+      "source_recall": 0.4,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.1,
+      "case_count": 14,
+      "source_recall": 0.7,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.11,
+      "case_count": 14,
+      "source_recall": 0.8,
+      "source_precision": 0.889,
+      "false_positive_rate": 0.25,
+      "correct_refusal": 0.75,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.12,
+      "case_count": 14,
+      "source_recall": 0.9,
+      "source_precision": 0.9,
+      "false_positive_rate": 0.25,
+      "correct_refusal": 0.75,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.13,
+      "case_count": 14,
+      "source_recall": 0.9,
+      "source_precision": 0.818,
+      "false_positive_rate": 0.25,
+      "correct_refusal": 0.75,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.14,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.667,
+      "false_positive_rate": 0.5,
+      "correct_refusal": 0.5,
+      "validity_filter_exercised_cases": 3
+    },
+    {
+      "threshold": 0.15,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.5,
+      "false_positive_rate": 0.75,
+      "correct_refusal": 0.25,
+      "validity_filter_exercised_cases": 3
+    },
+    {
+      "threshold": 0.16,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.312,
+      "false_positive_rate": 0.75,
+      "correct_refusal": 0.25,
+      "validity_filter_exercised_cases": 4
+    },
+    {
+      "threshold": 0.17,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.278,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.18,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.25,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 10
+    },
+    {
+      "threshold": 0.19,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.25,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 11
+    },
+    {
+      "threshold": 0.2,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.244,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 12
+    },
+    {
+      "threshold": 0.21,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 13
+    },
+    {
+      "threshold": 0.22,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.23,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.24,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.25,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.26,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.27,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.28,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.29,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.3,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.31,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.32,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.33,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.34,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
     },
     {
       "threshold": 0.35,
+      "case_count": 14,
       "source_recall": 1.0,
-      "source_precision": 1.0,
-      "false_positive_rate": 0.0,
-      "correct_refusal": 1.0
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.36,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.37,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.38,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.39,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
     },
     {
       "threshold": 0.4,
+      "case_count": 14,
       "source_recall": 1.0,
-      "source_precision": 0.765,
-      "false_positive_rate": 0.571,
-      "correct_refusal": 0.429
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.41,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.42,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.43,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.44,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
     },
     {
       "threshold": 0.45,
+      "case_count": 14,
       "source_recall": 1.0,
-      "source_precision": 0.65,
+      "source_precision": 0.238,
       "false_positive_rate": 1.0,
-      "correct_refusal": 0.0
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.46,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.47,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.48,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    },
+    {
+      "threshold": 0.49,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
     },
     {
       "threshold": 0.5,
+      "case_count": 14,
       "source_recall": 1.0,
-      "source_precision": 0.65,
+      "source_precision": 0.238,
       "false_positive_rate": 1.0,
-      "correct_refusal": 0.0
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14
+    }
+  ],
+  "holdout_thresholds": [
+    {
+      "threshold": 0.05,
+      "case_count": 6,
+      "source_recall": 0.0,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 0
+    },
+    {
+      "threshold": 0.06,
+      "case_count": 6,
+      "source_recall": 0.0,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 0
+    },
+    {
+      "threshold": 0.07,
+      "case_count": 6,
+      "source_recall": 0.0,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.08,
+      "case_count": 6,
+      "source_recall": 0.333,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.09,
+      "case_count": 6,
+      "source_recall": 0.333,
+      "source_precision": 1.0,
+      "false_positive_rate": 0.0,
+      "correct_refusal": 1.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.1,
+      "case_count": 6,
+      "source_recall": 0.333,
+      "source_precision": 0.5,
+      "false_positive_rate": 0.333,
+      "correct_refusal": 0.667,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.11,
+      "case_count": 6,
+      "source_recall": 0.667,
+      "source_precision": 0.667,
+      "false_positive_rate": 0.333,
+      "correct_refusal": 0.667,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.12,
+      "case_count": 6,
+      "source_recall": 0.667,
+      "source_precision": 0.5,
+      "false_positive_rate": 0.667,
+      "correct_refusal": 0.333,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.13,
+      "case_count": 6,
+      "source_recall": 0.667,
+      "source_precision": 0.4,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.14,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.375,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.15,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.333,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.16,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.231,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.17,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.188,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 1
+    },
+    {
+      "threshold": 0.18,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 5
+    },
+    {
+      "threshold": 0.19,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.2,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.21,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.22,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.23,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.24,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.25,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.26,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.27,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.28,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.29,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.3,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.31,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.32,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.33,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.34,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.35,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.36,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.37,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.38,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.39,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.4,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.41,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.42,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.43,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.44,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.45,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.46,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.47,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.48,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.49,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
+    },
+    {
+      "threshold": 0.5,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6
     }
   ],
   "selection": {
     "previous_threshold": 0.45,
-    "selected_threshold": 0.35,
-    "rule": "Menor limiar com recall de fontes ≥ 0,95, recusa correta de 100% e menor falso positivo."
-  }
+    "calibration_candidate": 0.45,
+    "selected_threshold": 0.45,
+    "calibration_rule": "Nenhum candidato preservou recall, precisao e recusa nos minimos; mantido o default anterior.",
+    "holdout_decision": "Nenhum candidato chegou elegivel ao holdout; o default anterior tambem e reportado como insuficiente, mas foi mantido por seguranca.",
+    "selected_calibration_metrics": {
+      "threshold": 0.45,
+      "case_count": 14,
+      "source_recall": 1.0,
+      "source_precision": 0.238,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 14,
+      "cases": [
+        {
+          "id": "alfa-01",
+          "expected_source_ids": [
+            "alfa-faq-matricula"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-bolsa",
+            "alfa-doc-estagio",
+            "alfa-faq-matricula"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-02",
+          "expected_source_ids": [
+            "alfa-doc-recurso"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-estagio",
+            "alfa-doc-recurso",
+            "alfa-faq-biblioteca"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-04",
+          "expected_source_ids": [
+            "alfa-doc-bolsa"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-bolsa",
+            "alfa-doc-estagio",
+            "alfa-faq-matricula"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-05",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "alfa-doc-bolsa",
+            "alfa-doc-estagio",
+            "alfa-evento-semana"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-06",
+          "expected_source_ids": [
+            "alfa-doc-estagio"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-estagio",
+            "alfa-evento-semana",
+            "alfa-faq-matricula"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-07",
+          "expected_source_ids": [
+            "alfa-faq-biblioteca"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-bolsa",
+            "alfa-evento-semana",
+            "alfa-faq-biblioteca"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-09",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "alfa-doc-bolsa",
+            "alfa-doc-estagio",
+            "alfa-evento-semana"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-01",
+          "expected_source_ids": [
+            "beta-faq-atendimento"
+          ],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-evento-feira",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-02",
+          "expected_source_ids": [
+            "beta-evento-feira"
+          ],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-evento-feira",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-03",
+          "expected_source_ids": [
+            "beta-doc-pagamento"
+          ],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-doc-pagamento",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-04",
+          "expected_source_ids": [
+            "beta-doc-pagamento"
+          ],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-doc-pagamento",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-06",
+          "expected_source_ids": [
+            "beta-doc-acessibilidade"
+          ],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-evento-feira",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-07",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-evento-feira",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-09",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-evento-feira",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        }
+      ]
+    },
+    "selected_holdout_metrics": {
+      "threshold": 0.45,
+      "case_count": 6,
+      "source_recall": 1.0,
+      "source_precision": 0.167,
+      "false_positive_rate": 1.0,
+      "correct_refusal": 0.0,
+      "validity_filter_exercised_cases": 6,
+      "cases": [
+        {
+          "id": "alfa-03",
+          "expected_source_ids": [
+            "alfa-doc-recurso"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-estagio",
+            "alfa-doc-recurso",
+            "alfa-evento-semana"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-08",
+          "expected_source_ids": [
+            "alfa-evento-semana"
+          ],
+          "selected_source_ids": [
+            "alfa-doc-bolsa",
+            "alfa-evento-semana",
+            "alfa-faq-biblioteca"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "alfa-10",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "alfa-doc-estagio",
+            "alfa-doc-recurso",
+            "alfa-faq-matricula"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-05",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-doc-pagamento",
+            "beta-evento-feira"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-08",
+          "expected_source_ids": [
+            "beta-doc-pagamento"
+          ],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-doc-pagamento",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        },
+        {
+          "id": "beta-10",
+          "expected_source_ids": [],
+          "selected_source_ids": [
+            "beta-doc-acessibilidade",
+            "beta-evento-feira",
+            "beta-faq-atendimento"
+          ],
+          "expired_candidates_filtered": 1
+        }
+      ]
+    }
+  },
+  "generated_candidates": [
+    {
+      "id": "alfa-01",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.073007,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.156857,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.159759,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.166803,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.170142,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.184123,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.193538,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-02",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.093104,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.15069,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.154817,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.162327,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.163568,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.166055,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.167397,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "alfa-03",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.107966,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.152803,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.154536,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.156171,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.156636,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.163388,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.172367,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "alfa-04",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.115232,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.134759,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.148476,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.166374,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.171134,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.171415,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.179706,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-05",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.136734,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.138457,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.146567,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.151854,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.155343,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.181322,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.185264,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-06",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.101861,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.133959,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.161163,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.161188,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.164362,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.166813,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.17444,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-07",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.055042,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.169591,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.175987,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.179629,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.179645,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.184639,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.191638,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-08",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.079647,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.152667,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.168126,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.172153,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.173738,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.174662,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.188122,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-09",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.073684,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.101736,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.124643,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.135038,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.14479,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.148468,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.191266,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "alfa-10",
+      "tenant_id": "tenant-alfa",
+      "candidates": [
+        {
+          "source_id": "alfa-doc-recurso",
+          "distance": 0.129042,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-estagio",
+          "distance": 0.16127,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-matricula",
+          "distance": 0.161872,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-bolsa",
+          "distance": 0.170675,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-doc-expirado",
+          "distance": 0.176917,
+          "is_current": false
+        },
+        {
+          "source_id": "alfa-evento-semana",
+          "distance": 0.193161,
+          "is_current": true
+        },
+        {
+          "source_id": "alfa-faq-biblioteca",
+          "distance": 0.198159,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "beta-01",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.059377,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.143572,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.159888,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.16441,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.178143,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "beta-02",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.072656,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.150773,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.159533,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.162445,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.171453,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "beta-03",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.093096,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.151764,
+          "is_current": false
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.154987,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.156099,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.169287,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "beta-04",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.138535,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.152528,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.156648,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.170734,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.192981,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "beta-05",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.060616,
+          "is_current": false
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.118754,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.130795,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.133315,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.163012,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "beta-06",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.092165,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.148831,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.174077,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.185952,
+          "is_current": false
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.191322,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "beta-07",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.140943,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.171295,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.178196,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.202219,
+          "is_current": false
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.203613,
+          "is_current": true
+        }
+      ]
+    },
+    {
+      "id": "beta-08",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.137413,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.17061,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.175251,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.178966,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.184039,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "beta-09",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.167883,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.190084,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.201462,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.215682,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.218643,
+          "is_current": false
+        }
+      ]
+    },
+    {
+      "id": "beta-10",
+      "tenant_id": "tenant-beta",
+      "candidates": [
+        {
+          "source_id": "beta-evento-feira",
+          "distance": 0.09443,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-acessibilidade",
+          "distance": 0.143069,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-faq-atendimento",
+          "distance": 0.152614,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-pagamento",
+          "distance": 0.175544,
+          "is_current": true
+        },
+        {
+          "source_id": "beta-doc-expirado",
+          "distance": 0.179942,
+          "is_current": false
+        }
+      ]
+    }
+  ]
 }
