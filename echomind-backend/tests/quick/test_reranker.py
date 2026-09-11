@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import threading
 import time
 from datetime import date
 from pathlib import Path
@@ -10,7 +12,7 @@ from pathlib import Path
 import pytest
 from langchain_core.documents import Document
 
-from app.reranker import rerank_documents
+from app.reranker import RerankerBusyError, RerankerExecutionGate, rerank_documents
 from scripts.eval_reranker import evaluate_reranker
 
 
@@ -41,6 +43,34 @@ class FixedReranker:
         assert query == "pergunta sintetica"
         self.received = list(documents)
         return self.scores[: len(documents)]
+
+
+def test_fastembed_runtime_uses_local_cache_only_and_reports_missing_model(monkeypatch) -> None:
+    from app import reranker as reranker_module
+
+    received = []
+
+    class Model:
+        def rerank(self, query: str, documents: list[str]) -> list[float]:
+            return [0.5] * len(documents)
+
+    def load(model_name: str, cache_dir: str, allow_model_download: bool):
+        received.append((model_name, cache_dir, allow_model_download))
+        return Model()
+
+    monkeypatch.setattr(reranker_module, "_load_cross_encoder", load)
+    local = reranker_module.FastEmbedCrossEncoderReranker("modelo", "cache")
+
+    assert local.score("consulta", ["documento"]) == [0.5]
+    assert received == [("modelo", "cache", False)]
+
+    monkeypatch.setattr(
+        reranker_module,
+        "_load_cross_encoder",
+        lambda *_args: (_ for _ in ()).throw(ValueError("ausente")),
+    )
+    with pytest.raises(RuntimeError, match="ausente ou indisponivel"):
+        local.score("consulta", ["documento"])
 
 
 @pytest.mark.asyncio
@@ -114,6 +144,77 @@ class SlowReranker:
     def score(self, query: str, documents: list[str]) -> list[float]:
         time.sleep(0.05)
         return [1.0] * len(documents)
+
+
+@pytest.mark.asyncio
+async def test_timeout_keeps_capacity_bounded_until_abandoned_inference_finishes() -> None:
+    started = threading.Event()
+    release = threading.Event()
+
+    class BlockingReranker:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def score(self, query: str, documents: list[str]) -> list[float]:
+            self.calls += 1
+            started.set()
+            release.wait(timeout=1)
+            return [1.0] * len(documents)
+
+    fake = BlockingReranker()
+    gate = RerankerExecutionGate()
+    try:
+        with pytest.raises(asyncio.TimeoutError):
+            await rerank_documents(
+                "pergunta sintetica",
+                [_document("a")],
+                reranker=fake,
+                candidate_limit=10,
+                top_k=1,
+                max_chars=100,
+                timeout_seconds=0.01,
+                execution_gate=gate,
+            )
+        assert started.is_set()
+
+        with pytest.raises(RerankerBusyError):
+            await rerank_documents(
+                "pergunta sintetica",
+                [_document("b")],
+                reranker=fake,
+                candidate_limit=10,
+                top_k=1,
+                max_chars=100,
+                timeout_seconds=0.01,
+                execution_gate=gate,
+            )
+        assert fake.calls == 1
+
+        release.set()
+        for _attempt in range(20):
+            await asyncio.sleep(0.01)
+            if fake.calls == 1:
+                try:
+                    result = await rerank_documents(
+                        "pergunta sintetica",
+                        [_document("c")],
+                        reranker=fake,
+                        candidate_limit=10,
+                        top_k=1,
+                        max_chars=100,
+                        timeout_seconds=1,
+                        execution_gate=gate,
+                    )
+                except RerankerBusyError:
+                    continue
+                assert result[0].metadata["source_id"] == "c"
+                break
+        else:
+            pytest.fail("Gate nao liberou a capacidade apos a inferencia terminar.")
+        assert fake.calls == 2
+    finally:
+        release.set()
+        gate.shutdown()
 
 
 @pytest.mark.asyncio
@@ -218,15 +319,67 @@ async def test_retrieval_falls_back_to_pr24_on_error_or_timeout(
     assert all(document.metadata["filename"].endswith(".pdf") for document in documents)
 
 
-def test_offline_eval_reports_ranking_gain_latency_and_pr22_reference() -> None:
+class ControlledEmbeddings:
+    """Produz candidatos em execucao, sem rede ou rankings no dataset."""
+
+    def __init__(self, dataset: dict) -> None:
+        corpus = dataset["corpus"]
+        self._source_index = {source["id"]: index for index, source in enumerate(corpus)}
+        self._dimension = len(corpus)
+        self._question_case = {case["question"]: case["id"] for case in dataset["cases"]}
+        self._query_target = {
+            "codigo-edital": "alfa-doc-edital-x18",
+            "sigla-nucleo": "alfa-faq-nae",
+            "nome-institucional": "beta-evento-forum",
+            "reformulacao-matricula": "alfa-faq-matricula",
+            "reformulacao-recurso": "alfa-doc-recurso",
+            "reformulacao-pagamento": "beta-doc-pagamento",
+        }
+
+    def _vector(self, source_id: str) -> list[float]:
+        vector = [0.0] * self._dimension
+        vector[self._source_index[source_id]] = 1.0
+        return vector
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        assert len(texts) == len(self._source_index)
+        return [self._vector(source_id) for source_id in self._source_index]
+
+    def embed_query(self, text: str) -> list[float]:
+        return self._vector(self._query_target[self._question_case[text]])
+
+
+class ContentLengthReranker:
+    def score(self, query: str, documents: list[str]) -> list[float]:
+        return [float(len(document)) for document in documents]
+
+
+class StepClock:
+    def __init__(self) -> None:
+        self.value = 0.0
+
+    def __call__(self) -> float:
+        current = self.value
+        self.value += 0.001
+        return current
+
+
+def test_offline_eval_executes_retrieval_scores_and_measured_latency() -> None:
     evals = Path(__file__).parents[2] / "evals"
     baseline_pr22 = json.loads((evals / "baseline_report.json").read_text(encoding="utf-8"))
+    dataset = json.loads((evals / "hybrid_search_eval.json").read_text(encoding="utf-8"))
+    configuration = json.loads((evals / "reranker_eval.json").read_text(encoding="utf-8"))
     report = evaluate_reranker(
-        json.loads((evals / "reranker_eval.json").read_text(encoding="utf-8")),
+        dataset,
+        configuration,
+        ControlledEmbeddings(dataset),
+        ContentLengthReranker(),
         baseline_pr22=baseline_pr22,
         baseline_pr24=json.loads((evals / "hybrid_search_report.json").read_text(encoding="utf-8")),
+        clock=StepClock(),
     )
 
+    assert report["mode"] == "offline-executed-reranker-benchmark"
     assert report["references"]["pr22"] == {
         "source_recall": baseline_pr22["metrics"]["retrieval"]["source_recall"],
         "source_precision": baseline_pr22["metrics"]["retrieval"]["source_precision"],
@@ -237,19 +390,53 @@ def test_offline_eval_reports_ranking_gain_latency_and_pr22_reference() -> None:
         "vector_recall": 0.5,
         "hybrid_recall": 1.0,
     }
-    assert report["ranking"] == {
-        "hybrid_hit_rate_at_k": 0.833,
-        "reranked_hit_rate_at_k": 1.0,
-        "hybrid_mrr_at_k": 0.556,
-        "reranked_mrr_at_k": 1.0,
-        "hit_rate_gain": 0.167,
-        "mrr_gain": 0.444,
-    }
     assert report["latency_ms"] == {
-        "controlled_hybrid_mean": 15.0,
-        "controlled_hybrid_p95": 16.0,
-        "controlled_reranked_mean": 18.667,
-        "controlled_reranked_p95": 19.0,
-        "reranker_overhead_mean": 3.667,
-        "reranker_overhead_p95": 5.0,
+        "model_warmup": 1.0,
+        "hybrid_retrieval_total": 1.0,
+        "hybrid_retrieval_mean_per_case": 0.167,
+        "reranker_mean": 1.0,
+        "reranker_p95": 1.0,
+        "retrieval_plus_reranker_mean": 1.167,
+        "controlled_reranked_mean": 1.167,
     }
+    corpus = {source["id"]: source for source in dataset["corpus"]}
+
+    def runtime_text(source: dict) -> str:
+        if source["type"] == "faq":
+            return f"Pergunta: {source['label']}\nResposta: {source['content']}"
+        if source["type"] == "event":
+            return f"Evento: {source['label']}\n{source['content']}"
+        return f"Fonte: {source['label']}\n{source['content']}"
+
+    assert all(
+        detail["reranker_scores"] == [
+            float(len(runtime_text(corpus[source_id])[: configuration["reranker_configuration"]["max_chars"]]))
+            for source_id in detail["hybrid_source_ids"]
+        ]
+        for detail in report["cases"]
+    )
+    assert all(
+        all(corpus[source_id]["tenant_id"] == detail["tenant_id"] for source_id in detail["hybrid_source_ids"])
+        for detail in report["cases"]
+    )
+
+
+def test_versioned_real_benchmark_rejects_activation_without_prefilled_outputs() -> None:
+    evals = Path(__file__).parents[2] / "evals"
+    configuration = json.loads((evals / "reranker_eval.json").read_text(encoding="utf-8"))
+    report = json.loads((evals / "reranker_report.json").read_text(encoding="utf-8"))
+
+    assert "cases" not in configuration
+    assert report["mode"] == "offline-executed-reranker-benchmark"
+    assert report["execution"]["reranker_backend"] == "fastembed-text-cross-encoder"
+    assert report["ranking"] == {
+        "hybrid_hit_rate_at_k": 1.0,
+        "reranked_hit_rate_at_k": 1.0,
+        "hybrid_mrr_at_k": 1.0,
+        "reranked_mrr_at_k": 0.889,
+        "hit_rate_gain": 0.0,
+        "mrr_gain": -0.111,
+    }
+    assert report["activation_assessment"]["configured_default_enabled"] is False
+    assert report["activation_assessment"]["benchmark_supports_activation"] is False
+    assert all(case["reranker_scores"] for case in report["cases"])
