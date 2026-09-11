@@ -353,15 +353,35 @@ estratégia semântica existente.
 O custo adicional é de quatro consultas FTS curtas por pergunta, cobertas pelos
 índices GIN. O rollback de aplicação é seguro porque a busca vetorial continua
 autônoma; os índices da migration podem permanecer (ou ser removidos pelo
-downgrade) sem apagar conteúdo nem vetores. A comparação sintética está em
-`echomind-backend/evals/hybrid_search_report.json` e é reproduzida por:
+downgrade) sem apagar conteúdo nem vetores. Se o canal lexical falhar ou estiver
+indisponível, a recuperação usa os candidatos vetoriais já obtidos; uma falha no
+canal vetorial continua sendo erro porque ele permanece o componente central.
+
+A comparação executável está em
+`echomind-backend/evals/hybrid_search_report.json`. Ela calcula embeddings com o
+mesmo modelo FastEmbed do runtime, aplica tenant, validade, threshold, top-K e a
+mesma implementação RRF da aplicação. O runner não aceita rankings preenchidos
+no dataset e, por padrão, exige o modelo no cache local, sem rede ou LLM. A
+consulta lexical offline usa um proxy determinístico por tokens; as consultas
+PostgreSQL FTS reais, seus índices e filtros são exercitados pela suíte de
+integração. Para reproduzir:
 
 ```bash
 cd echomind-backend
 python scripts/eval_hybrid_search.py \
   --dataset evals/hybrid_search_eval.json \
+  --baseline-pr22 evals/baseline_report.json \
   --output evals/hybrid_search_report.json
 ```
+
+Nos seis casos dedicados, o canal vetorial obteve recall/MRR@3 de 0,500/0,500
+e o híbrido 1,000/1,000, ganho de 0,500 nas duas métricas. Códigos, siglas e
+nomes exatos melhoraram sem regressão nos três casos semânticos. A baseline da
+PR 23 é o próprio canal vetorial executado com a configuração fixa anterior. A
+baseline da PR 22 permanece registrada lado a lado em recall/precision de fontes
+1,000/1,000; como os datasets são diferentes, esses números não são tratados
+como um delta direto. O relatório registra hashes, versões e toda a configuração
+fixa para permitir repetição da medição.
 
 ### Reranker de candidatos
 
