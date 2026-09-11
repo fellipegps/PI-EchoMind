@@ -1,12 +1,243 @@
 {
-  "dataset_version": "2026-08-30.1",
-  "description": "Comparação sintética PR 23 vs Hybrid Search para consultas exatas e semânticas.",
+  "dataset_version": "2026-09-11.1",
+  "evaluation_date": "2026-08-30",
+  "description": "Comparacao executavel entre recuperacao vetorial e busca hibrida da PR 24.",
+  "retrieval_configuration": {
+    "embedding_model": "intfloat/multilingual-e5-small",
+    "embedding_dimensions": 384,
+    "similarity_threshold": 0.45,
+    "top_k": 3,
+    "candidate_k": 10,
+    "rrf_k": 60
+  },
+  "corpus": [
+    {
+      "id": "alfa-doc-edital-x17",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "999999999999999991",
+      "content": "O edital 999999999999999991 termina em 30 de setembro de 2026. O regulamento institucional detalha processos administrativos, secretaria, coordenacao, universidade, estudantes, documentos, atendimento, calendario e financeiro. O regulamento institucional detalha processos administrativos, secretaria, coordenacao, universidade, estudantes, documentos, atendimento, calendario e financeiro. O regulamento institucional detalha processos administrativos, secretaria, coordenacao, universidade, estudantes, documentos, atendimento, calendario e financeiro. O regulamento institucional detalha processos administrativos, secretaria, coordenacao, universidade, estudantes, documentos, atendimento, calendario e financeiro.",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "alfa-doc-edital-x18",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "999999999999999992",
+      "content": "999999999999999992",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "alfa-doc-edital-x19",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "999999999999999993",
+      "content": "999999999999999993",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "alfa-doc-edital-x20",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "999999999999999994",
+      "content": "999999999999999994",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "alfa-doc-edital-x21",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "999999999999999995",
+      "content": "999999999999999995",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "alfa-faq-nai",
+      "tenant_id": "tenant-alfa",
+      "type": "faq",
+      "label": "NAI",
+      "content": "Nucleo de Acessibilidade e Inclusao. O nucleo integra a politica institucional e orienta estudantes, professores e coordenadores. Tambem acompanha documentos, organiza atendimentos, articula processos administrativos, participa do calendario academico e apoia iniciativas da universidade. As equipes de secretaria e coordenacao registram cada atividade para garantir continuidade, comunicacao e acompanhamento institucional. O trabalho inclui planejamento, reunioes, encaminhamentos, relatorios, capacitacoes e cooperacao com diferentes setores. A comunidade recebe orientacoes sobre procedimentos, agenda, formularios, responsabilidades e canais de atendimento. Professores e estudantes podem solicitar apoio durante o periodo letivo, conforme as regras e os prazos divulgados. A coordenacao acompanha os resultados e atualiza os processos internos quando necessario.",
+      "valid_until": null
+    },
+    {
+      "id": "alfa-faq-nae",
+      "tenant_id": "tenant-alfa",
+      "type": "faq",
+      "label": "NAE",
+      "content": "NAE significa Nucleo de Apoio ao Estudante.",
+      "valid_until": null
+    },
+    {
+      "id": "alfa-faq-nam",
+      "tenant_id": "tenant-alfa",
+      "type": "faq",
+      "label": "NAM",
+      "content": "NAM significa Nucleo de Apoio a Matricula.",
+      "valid_until": null
+    },
+    {
+      "id": "alfa-faq-nax",
+      "tenant_id": "tenant-alfa",
+      "type": "faq",
+      "label": "NAX",
+      "content": "NAX significa Nucleo de Atividades de Extensao.",
+      "valid_until": null
+    },
+    {
+      "id": "alfa-faq-nab",
+      "tenant_id": "tenant-alfa",
+      "type": "faq",
+      "label": "NAB",
+      "content": "NAB significa Nucleo de Apoio a Bolsas.",
+      "valid_until": null
+    },
+    {
+      "id": "alfa-faq-matricula",
+      "tenant_id": "tenant-alfa",
+      "type": "faq",
+      "label": "Documentos de matricula",
+      "content": "Para fazer a matricula, apresente documento de identidade e comprovante escolar.",
+      "valid_until": null
+    },
+    {
+      "id": "alfa-doc-recurso",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "Recurso academico",
+      "content": "O recurso academico permite solicitar revisao do resultado pela coordenacao.",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "alfa-doc-expirado-x17",
+      "tenant_id": "tenant-alfa",
+      "type": "document_chunk",
+      "label": "Edital X17 antigo",
+      "content": "O prazo antigo do EDITAL-X17 terminava em 10 de agosto de 2024.",
+      "valid_until": "2024-12-31"
+    },
+    {
+      "id": "beta-evento-semana",
+      "tenant_id": "tenant-beta",
+      "type": "event",
+      "label": "SIGLAFEST",
+      "content": "A SIGLAFEST acontece de 14 a 18 de setembro de 2026. A programacao institucional inclui oficinas, palestras, professores, estudantes, coordenacao, cultura, ciencia, tecnologia, comunidade, inscricoes e certificados. A programacao institucional inclui oficinas, palestras, professores, estudantes, coordenacao, cultura, ciencia, tecnologia, comunidade, inscricoes e certificados. A programacao institucional inclui oficinas, palestras, professores, estudantes, coordenacao, cultura, ciencia, tecnologia, comunidade, inscricoes e certificados.",
+      "valid_until": null
+    },
+    {
+      "id": "beta-evento-forum",
+      "tenant_id": "tenant-beta",
+      "type": "event",
+      "label": "SIGLAFESU",
+      "content": "SIGLAFESU",
+      "valid_until": null
+    },
+    {
+      "id": "beta-evento-tec",
+      "tenant_id": "tenant-beta",
+      "type": "event",
+      "label": "SIGLAFESV",
+      "content": "SIGLAFESV",
+      "valid_until": null
+    },
+    {
+      "id": "beta-evento-siglafesw",
+      "tenant_id": "tenant-beta",
+      "type": "event",
+      "label": "SIGLAFESW",
+      "content": "SIGLAFESW",
+      "valid_until": null
+    },
+    {
+      "id": "beta-evento-siglafesx",
+      "tenant_id": "tenant-beta",
+      "type": "event",
+      "label": "SIGLAFESX",
+      "content": "SIGLAFESX",
+      "valid_until": null
+    },
+    {
+      "id": "beta-doc-pagamento",
+      "tenant_id": "tenant-beta",
+      "type": "document_chunk",
+      "label": "Pagamento da mensalidade",
+      "content": "A mensalidade deve ser quitada ate o dia 10 de cada mes.",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "beta-doc-bolsa",
+      "tenant_id": "tenant-beta",
+      "type": "document_chunk",
+      "label": "Bolsa estudantil",
+      "content": "A bolsa estudantil exige renovacao semestral.",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "beta-faq-atendimento",
+      "tenant_id": "tenant-beta",
+      "type": "faq",
+      "label": "Horario de atendimento",
+      "content": "O atendimento funciona de segunda a sexta, das 8h as 18h.",
+      "valid_until": null
+    },
+    {
+      "id": "beta-doc-calendario",
+      "tenant_id": "tenant-beta",
+      "type": "document_chunk",
+      "label": "Calendario academico",
+      "content": "O calendario academico informa datas de aulas e avaliacoes.",
+      "valid_until": "2026-12-31"
+    },
+    {
+      "id": "beta-doc-financeiro-expirado",
+      "tenant_id": "tenant-beta",
+      "type": "document_chunk",
+      "label": "Regra financeira antiga",
+      "content": "A mensalidade antiga podia ser quitada ate o dia 20.",
+      "valid_until": "2025-12-31"
+    }
+  ],
   "cases": [
-    {"id": "codigo-edital", "category": "codigo", "expected_source_id": "alfa-doc-edital-x17", "vector_source_ids": [], "lexical_source_ids": ["alfa-doc-edital-x17"]},
-    {"id": "sigla-nucleo", "category": "sigla", "expected_source_id": "alfa-faq-nai", "vector_source_ids": [], "lexical_source_ids": ["alfa-faq-nai"]},
-    {"id": "nome-institucional", "category": "nome", "expected_source_id": "beta-evento-semana", "vector_source_ids": [], "lexical_source_ids": ["beta-evento-semana"]},
-    {"id": "reformulacao-matricula", "category": "semantica", "expected_source_id": "alfa-faq-matricula", "vector_source_ids": ["alfa-faq-matricula"], "lexical_source_ids": []},
-    {"id": "reformulacao-recurso", "category": "semantica", "expected_source_id": "alfa-doc-recurso", "vector_source_ids": ["alfa-doc-recurso"], "lexical_source_ids": []},
-    {"id": "reformulacao-pagamento", "category": "semantica", "expected_source_id": "beta-doc-pagamento", "vector_source_ids": ["beta-doc-pagamento"], "lexical_source_ids": []}
+    {
+      "id": "codigo-edital",
+      "category": "codigo",
+      "tenant_id": "tenant-alfa",
+      "question": "999999999999999991",
+      "expected_source_id": "alfa-doc-edital-x17"
+    },
+    {
+      "id": "sigla-nucleo",
+      "category": "sigla",
+      "tenant_id": "tenant-alfa",
+      "question": "NAI",
+      "expected_source_id": "alfa-faq-nai"
+    },
+    {
+      "id": "nome-institucional",
+      "category": "nome",
+      "tenant_id": "tenant-beta",
+      "question": "SIGLAFEST",
+      "expected_source_id": "beta-evento-semana"
+    },
+    {
+      "id": "reformulacao-matricula",
+      "category": "semantica",
+      "tenant_id": "tenant-alfa",
+      "question": "O que preciso apresentar para me matricular?",
+      "expected_source_id": "alfa-faq-matricula"
+    },
+    {
+      "id": "reformulacao-recurso",
+      "category": "semantica",
+      "tenant_id": "tenant-alfa",
+      "question": "Como contestar uma decisao academica?",
+      "expected_source_id": "alfa-doc-recurso"
+    },
+    {
+      "id": "reformulacao-pagamento",
+      "category": "semantica",
+      "tenant_id": "tenant-beta",
+      "question": "Em que dia devo quitar a mensalidade?",
+      "expected_source_id": "beta-doc-pagamento"
+    }
   ]
 }

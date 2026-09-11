@@ -50,6 +50,10 @@ from .database import (
     utc_now,
 )
 from .reranker import FastEmbedCrossEncoderReranker, Reranker, rerank_documents
+from .hybrid_search import (
+    fuse_hybrid_results as _fuse_hybrid_results,
+    hybrid_source_key as _hybrid_source_key,
+)
 from .structured_logging import (
     bind_log_context,
     create_log_context,
@@ -88,7 +92,6 @@ UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
 _RETRIEVAL_OVERFETCH_MULTIPLIER = 3
 _MIN_RETRIEVAL_CANDIDATES = 10
-_HYBRID_RRF_K = 60
 DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-base"
 RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "false").lower() in {
     "1",
@@ -605,15 +608,6 @@ def _document_belongs_to_tenant(document: Document, *, tenant_id: str) -> bool:
     return metadata.get("tenant_id") == tenant_id
 
 
-def _hybrid_source_key(document: Document) -> tuple[str, str]:
-    """Identifica uma fonte sem misturar IDs iguais de tipos diferentes."""
-    metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
-    return (
-        str(metadata.get("source_type", "")),
-        str(metadata.get("source_id", "")),
-    )
-
-
 def _lexical_document_chunk(row: Mapping[str, Any]) -> Document:
     document = SimpleNamespace(
         id=row["document_id"],
@@ -798,36 +792,6 @@ def _search_lexical_documents(
     ]
 
 
-def _fuse_hybrid_results(
-    vector_documents: Sequence[Document],
-    lexical_documents: Sequence[Document],
-    *,
-    limit: int,
-) -> list[Document]:
-    """Fusão RRF determinística: score = Σ 1 / (60 + posição), com dedupe."""
-    fused: dict[tuple[str, str], dict[str, Any]] = {}
-    for channel, documents in (("vector", vector_documents), ("lexical", lexical_documents)):
-        for position, document in enumerate(documents, start=1):
-            key = _hybrid_source_key(document)
-            candidate = fused.setdefault(key, {"document": document, "score": 0.0, "vector": None, "lexical": None})
-            candidate["score"] += 1 / (_HYBRID_RRF_K + position)
-            candidate[channel] = position
-            if channel == "vector":
-                candidate["document"] = document
-    return [
-        candidate["document"]
-        for candidate in sorted(
-            fused.values(),
-            key=lambda candidate: (
-                -candidate["score"],
-                candidate["vector"] if candidate["vector"] is not None else float("inf"),
-                candidate["lexical"] if candidate["lexical"] is not None else float("inf"),
-                *_hybrid_source_key(candidate["document"]),
-            ),
-        )[:limit]
-    ]
-
-
 def _expanded_parent_document(
     stored_document: StoredDocument,
     parent: DocumentChunkParent,
@@ -973,18 +937,40 @@ async def _retrieve_docs(
             limit=candidate_k,
         ),
     )
-    try:
-        results, lexical_documents = await asyncio.gather(vector_task, lexical_task)
-    except Exception as exc:
+    vector_outcome, lexical_outcome = await asyncio.gather(
+        vector_task,
+        lexical_task,
+        return_exceptions=True,
+    )
+    if isinstance(vector_outcome, BaseException):
+        if not isinstance(vector_outcome, Exception):
+            raise vector_outcome
         emit_event(
             event="rag.retrieval",
             status="error",
             stage="candidate-retrieval",
             context=log_context,
             duration_ms=(time.perf_counter() - retrieval_started) * 1000,
-            error_code=safe_error_code(exc),
+            error_code=safe_error_code(vector_outcome),
         )
-        raise
+        raise vector_outcome
+    results = vector_outcome
+
+    if isinstance(lexical_outcome, BaseException):
+        if not isinstance(lexical_outcome, Exception):
+            raise lexical_outcome
+        emit_event(
+            event="rag.lexical-retrieval",
+            status="error",
+            stage="fallback-vector",
+            context=log_context,
+            duration_ms=(time.perf_counter() - retrieval_started) * 1000,
+            error_code=safe_error_code(lexical_outcome),
+            level=logging.WARNING,
+        )
+        lexical_documents: list[Document] = []
+    else:
+        lexical_documents = lexical_outcome
 
     current_candidates = [
         (doc, distance)
