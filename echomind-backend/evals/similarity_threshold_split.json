@@ -1,0 +1,28 @@
+{
+  "dataset_version": "2026-08-30.1",
+  "description": "Split fixo e estratificado; o holdout não participa da escolha inicial do threshold.",
+  "calibration": [
+    "alfa-01",
+    "alfa-02",
+    "alfa-04",
+    "alfa-05",
+    "alfa-06",
+    "alfa-07",
+    "alfa-09",
+    "beta-01",
+    "beta-02",
+    "beta-03",
+    "beta-04",
+    "beta-06",
+    "beta-07",
+    "beta-09"
+  ],
+  "holdout": [
+    "alfa-03",
+    "alfa-08",
+    "alfa-10",
+    "beta-05",
+    "beta-08",
+    "beta-10"
+  ]
+}
