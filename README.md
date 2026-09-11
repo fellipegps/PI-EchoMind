@@ -399,28 +399,42 @@ ficam em cache no processo. Como esse modelo não declara suporte amplo a PT-BR,
 controlada do corpus real. O modelo multilíngue listado pelo FastEmbed não foi
 adotado porque sua licença é CC-BY-NC-4.0.
 
-Timeout, erro, modelo ausente ou falha de download geram aviso com etapa,
-quantidade de candidatos e latência, e retornam exatamente o ranking híbrido da
-PR 24. Os testes usam fakes e não baixam modelo nem fazem chamadas externas.
+O runtime nunca baixa o modelo automaticamente. Quando o recurso é habilitado,
+ele usa apenas os arquivos previamente preparados no cache; ausência ou falha
+de carga aciona o fallback híbrido. O download consciente para avaliação pode
+ser feito pelo runner com `--allow-model-download`.
 
-O comparativo sintético versionado referencia as métricas das PRs 22 e 24 e é
-reproduzido por:
+Timeout, erro, modelo ausente ou reranker ocupado geram aviso com etapa,
+quantidade de candidatos e latência, e retornam exatamente o ranking híbrido da
+PR 24. As inferências usam um executor com capacidade um. Se uma chamada excede
+o timeout, ela pode terminar na thread nativa, mas nenhuma outra inferência é
+enfileirada enquanto essa chamada estiver ativa; isso limita o consumo e evita
+acúmulo de trabalhos abandonados. Os testes usam fakes e não baixam modelo nem
+fazem chamadas externas.
+
+O benchmark versionado gera os candidatos com o embedding da PR 24, executa o
+cross-encoder real sobre perguntas PT-BR e mede os tempos no host. Scores,
+rankings e latências não ficam preenchidos no dataset. Para reproduzir sem rede,
+o modelo deve estar no cache local:
 
 ```bash
 cd echomind-backend
 python scripts/eval_reranker.py \
-  --dataset evals/reranker_eval.json \
+  --config evals/reranker_eval.json \
+  --dataset evals/hybrid_search_eval.json \
   --baseline-pr22 evals/baseline_report.json \
   --baseline-pr24 evals/hybrid_search_report.json \
   --output evals/reranker_report.json
 ```
 
-Nesse conjunto controlado, Hit@3 passa de 0,833 para 1,000 e MRR@3 de
-0,556 para 1,000. A sobrecarga simulada média é 3,667 ms (p95 5 ms), levando a
-latência controlada média de 15,000 para 18,667 ms. A baseline PR 22 continua em
-recall/precision de fontes 1,000/1,000 e retrieval médio de 14,05 ms (p95 18
-ms). Esses tempos de fake não substituem um benchmark do modelo real no host de
-produção.
+No benchmark local de seis casos, o ranking híbrido obteve Hit@3/MRR@3 de
+1,000/1,000 e o reranker `BAAI/bge-reranker-base` obteve 1,000/0,889: Hit@3 foi
+preservado, mas MRR@3 regrediu 0,111. O aquecimento medido foi de aproximadamente
+3,17 s; a inferência teve média de 1,77 s e p95 de 2,13 s, acima do timeout
+operacional de 1,5 s.
+Esses resultados não justificam ativar o modelo: `RERANKER_ENABLED` permanece
+`false`. O relatório registra ambiente e resultados por caso; tempos devem ser
+reavaliados no hardware de destino antes de considerar outro modelo aprovado.
 
 ### Cache seguro de FAQs
 
