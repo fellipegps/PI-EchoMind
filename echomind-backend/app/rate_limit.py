@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import heapq
 import math
 import os
 import time
@@ -17,6 +18,7 @@ DEFAULT_CHAT_RATE_LIMIT_REQUESTS = 20
 DEFAULT_CHAT_RATE_LIMIT_WINDOW_SECONDS = 60
 DEFAULT_UPLOAD_RATE_LIMIT_REQUESTS = 5
 DEFAULT_UPLOAD_RATE_LIMIT_WINDOW_SECONDS = 60
+DEFAULT_RATE_LIMIT_MAX_BUCKETS = 10_000
 
 
 class InvalidRateLimitConfigurationError(ValueError):
@@ -33,6 +35,8 @@ class RateLimitPolicy:
 class RateLimitConfig:
     chat: RateLimitPolicy
     upload: RateLimitPolicy
+    max_buckets: int = DEFAULT_RATE_LIMIT_MAX_BUCKETS
+    instance_count: int = 1
 
 
 @dataclass(frozen=True)
@@ -67,6 +71,18 @@ def _positive_environment_integer(name: str, default: int) -> int:
 
 def load_rate_limit_config() -> RateLimitConfig:
     """Carrega limites independentes e falha cedo para valores invalidos."""
+    instance_count = _positive_environment_integer("RATE_LIMIT_INSTANCE_COUNT", 1)
+    worker_count = _positive_environment_integer(
+        "UVICORN_WORKERS",
+        _positive_environment_integer("WEB_CONCURRENCY", 1),
+    )
+    if instance_count != 1 or worker_count != 1:
+        raise InvalidRateLimitConfigurationError(
+            "O rate limiter em memoria exige exatamente uma instancia e um worker. "
+            "Defina um store compartilhado antes de aumentar RATE_LIMIT_INSTANCE_COUNT, "
+            "UVICORN_WORKERS ou WEB_CONCURRENCY."
+        )
+
     return RateLimitConfig(
         chat=RateLimitPolicy(
             max_requests=_positive_environment_integer(
@@ -88,15 +104,31 @@ def load_rate_limit_config() -> RateLimitConfig:
                 DEFAULT_UPLOAD_RATE_LIMIT_WINDOW_SECONDS,
             ),
         ),
+        max_buckets=_positive_environment_integer(
+            "RATE_LIMIT_MAX_BUCKETS",
+            DEFAULT_RATE_LIMIT_MAX_BUCKETS,
+        ),
+        instance_count=instance_count,
     )
 
 
 class InMemoryFixedWindowRateLimiter:
     """Store thread-safe por processo, sem prometer coordenacao entre replicas."""
 
-    def __init__(self, *, clock: Callable[[], float] = time.monotonic) -> None:
+    def __init__(
+        self,
+        *,
+        clock: Callable[[], float] = time.monotonic,
+        max_buckets: int = DEFAULT_RATE_LIMIT_MAX_BUCKETS,
+    ) -> None:
+        if max_buckets <= 0:
+            raise InvalidRateLimitConfigurationError(
+                "RATE_LIMIT_MAX_BUCKETS deve ser um numero inteiro positivo."
+            )
         self._clock = clock
+        self._max_buckets = max_buckets
         self._windows: dict[tuple[str, str], _FixedWindow] = {}
+        self._expirations: list[tuple[float, tuple[str, str]]] = []
         self._lock = Lock()
 
     def consume(
@@ -113,11 +145,19 @@ class InMemoryFixedWindowRateLimiter:
             self._discard_expired(now)
             window = self._windows.get(bucket_key)
             if window is None:
+                if len(self._windows) >= self._max_buckets:
+                    next_reset = self._expirations[0][0] if self._expirations else now + 1
+                    return RateLimitDecision(
+                        allowed=False,
+                        remaining=0,
+                        retry_after_seconds=max(1, math.ceil(next_reset - now)),
+                    )
                 reset_at = now + policy.window_seconds
                 self._windows[bucket_key] = _FixedWindow(
                     count=1,
                     reset_at=reset_at,
                 )
+                heapq.heappush(self._expirations, (reset_at, bucket_key))
                 return RateLimitDecision(
                     allowed=True,
                     remaining=policy.max_requests - 1,
@@ -142,15 +182,19 @@ class InMemoryFixedWindowRateLimiter:
     def clear(self) -> None:
         with self._lock:
             self._windows.clear()
+            self._expirations.clear()
+
+    @property
+    def bucket_count(self) -> int:
+        with self._lock:
+            return len(self._windows)
 
     def _discard_expired(self, now: float) -> None:
-        expired_keys = [
-            key
-            for key, window in self._windows.items()
-            if window.reset_at <= now
-        ]
-        for key in expired_keys:
-            del self._windows[key]
+        while self._expirations and self._expirations[0][0] <= now:
+            reset_at, key = heapq.heappop(self._expirations)
+            window = self._windows.get(key)
+            if window is not None and window.reset_at == reset_at:
+                del self._windows[key]
 
 
 def _opaque_key(namespace: str, identifier: str) -> str:
@@ -171,7 +215,9 @@ def _reject_if_limited(decision: RateLimitDecision) -> None:
 
 
 RATE_LIMIT_CONFIG = load_rate_limit_config()
-rate_limiter = InMemoryFixedWindowRateLimiter()
+rate_limiter = InMemoryFixedWindowRateLimiter(
+    max_buckets=RATE_LIMIT_CONFIG.max_buckets,
+)
 
 
 def enforce_chat_rate_limit(request: Request) -> None:

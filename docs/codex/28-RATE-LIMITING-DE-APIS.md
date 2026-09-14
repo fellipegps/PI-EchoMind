@@ -83,6 +83,15 @@ IP atrás de proxy pode ser forjado se headers não forem confiáveis. Store em 
 
 Abuso simples não dispara processamento ilimitado de chat/upload.
 
+## Topologia implementada
+
+- O store local aceita somente uma instância e um worker; configurações conhecidas
+  de múltiplos processos falham antes do startup para não simular proteção global.
+- A quantidade de buckets é limitada e, sob saturação, novas chaves falham com
+  429 até uma janela expirar; a limpeza usa uma fila de expiração ordenada.
+- O chat confia somente no IP direto. Headers encaminhados continuam ignorados
+  enquanto a cadeia de proxies confiáveis não for definida operacionalmente.
+
 ## Instrução final ao Codex
 
 Implemente somente rate limiting após confirmar topologia; se faltar decisão, pare bloqueado.

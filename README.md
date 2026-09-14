@@ -70,6 +70,9 @@ CHAT_RATE_LIMIT_REQUESTS=20
 CHAT_RATE_LIMIT_WINDOW_SECONDS=60
 UPLOAD_RATE_LIMIT_REQUESTS=5
 UPLOAD_RATE_LIMIT_WINDOW_SECONDS=60
+RATE_LIMIT_INSTANCE_COUNT=1
+UVICORN_WORKERS=1
+RATE_LIMIT_MAX_BUCKETS=10000
 
 GROQ_API_KEY=gsk_SUBSTITUA_PELA_SUA_CHAVE
 GROQ_LLM_MODEL=openai/gpt-oss-120b
@@ -100,7 +103,15 @@ O store e mantido apenas na memoria do processo FastAPI. Isso corresponde ao
 ambiente atual sem topologia de deploy definida, mas nao compartilha quota entre
 workers ou replicas. Antes de operar com multiplas instancias, a equipe deve
 escolher explicitamente um store distribuido; esta PR nao adiciona Redis nem
-outra infraestrutura.
+outra infraestrutura. Para evitar uma falsa protecao, a configuracao falha cedo
+quando `RATE_LIMIT_INSTANCE_COUNT`, `UVICORN_WORKERS` ou `WEB_CONCURRENCY`
+indicam mais de um processo. O store aceita no maximo `RATE_LIMIT_MAX_BUCKETS`;
+ao atingir o teto, novas chaves recebem 429 ate a primeira janela expirar. A
+expiracao usa uma fila ordenada, sem varrer todos os buckets em cada requisicao.
+
+O chat usa o IP da conexao TCP e ignora `X-Forwarded-For` por seguranca. Em uma
+implantacao atras de proxy, a equipe deve definir o proxy confiavel antes de usar
+o IP encaminhado; sem essa decisao, varios clientes podem compartilhar a quota.
 
 Crie/atualize o schema do banco com Alembic:
 

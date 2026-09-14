@@ -115,6 +115,32 @@ def test_scopes_and_opaque_keys_have_independent_quotas() -> None:
     assert len(opaque_key) == 64
 
 
+def test_store_is_bounded_fails_closed_and_reuses_capacity_after_expiration() -> None:
+    clock = FakeClock()
+    limiter = InMemoryFixedWindowRateLimiter(clock=clock, max_buckets=2)
+    policy = RateLimitPolicy(max_requests=2, window_seconds=10)
+
+    assert limiter.consume(scope="chat", key="a", policy=policy).allowed
+    assert limiter.consume(scope="chat", key="b", policy=policy).allowed
+    rejected = limiter.consume(scope="chat", key="c", policy=policy)
+
+    assert rejected.allowed is False
+    assert rejected.retry_after_seconds == 10
+    assert limiter.bucket_count == 2
+
+    clock.advance(10)
+    assert limiter.consume(scope="chat", key="c", policy=policy).allowed
+    assert limiter.bucket_count == 1
+
+
+def test_store_rejects_invalid_bucket_capacity() -> None:
+    with pytest.raises(
+        InvalidRateLimitConfigurationError,
+        match="RATE_LIMIT_MAX_BUCKETS",
+    ):
+        InMemoryFixedWindowRateLimiter(max_buckets=0)
+
+
 def test_public_chat_uses_direct_client_ip_and_ignores_forwarded_header(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -153,12 +179,19 @@ def test_configuration_loads_independent_limits(
     monkeypatch.setenv("CHAT_RATE_LIMIT_WINDOW_SECONDS", "11")
     monkeypatch.setenv("UPLOAD_RATE_LIMIT_REQUESTS", "3")
     monkeypatch.setenv("UPLOAD_RATE_LIMIT_WINDOW_SECONDS", "120")
+    monkeypatch.setenv("RATE_LIMIT_MAX_BUCKETS", "321")
 
-    assert load_rate_limit_config() == _config(
+    expected = _config(
         chat_requests=7,
         chat_window=11,
         upload_requests=3,
         upload_window=120,
+    )
+    assert load_rate_limit_config() == RateLimitConfig(
+        chat=expected.chat,
+        upload=expected.upload,
+        max_buckets=321,
+        instance_count=1,
     )
 
 
@@ -172,6 +205,32 @@ def test_invalid_configuration_fails_clearly(
     with pytest.raises(
         InvalidRateLimitConfigurationError,
         match="CHAT_RATE_LIMIT_REQUESTS",
+    ):
+        load_rate_limit_config()
+
+
+@pytest.mark.parametrize("variable", ("WEB_CONCURRENCY", "UVICORN_WORKERS"))
+def test_multiple_workers_fail_before_startup(
+    monkeypatch: pytest.MonkeyPatch,
+    variable: str,
+) -> None:
+    monkeypatch.setenv(variable, "2")
+
+    with pytest.raises(
+        InvalidRateLimitConfigurationError,
+        match="exatamente uma instancia e um worker",
+    ):
+        load_rate_limit_config()
+
+
+def test_multiple_instances_fail_before_startup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RATE_LIMIT_INSTANCE_COUNT", "2")
+
+    with pytest.raises(
+        InvalidRateLimitConfigurationError,
+        match="store compartilhado",
     ):
         load_rate_limit_config()
 
