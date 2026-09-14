@@ -1,0 +1,1069 @@
+.portalRoot {
+  --portal-primary: #0b57d0;
+  --portal-primary-dark: #083e98;
+  --portal-primary-soft: #e8f0fe;
+  --portal-ink: #172033;
+  --portal-muted: #687086;
+  --portal-line: #dfe4ec;
+  --portal-surface: #ffffff;
+  --portal-background: #f4f7fb;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 88% 2%, rgba(11, 87, 208, 0.09), transparent 24rem),
+    var(--portal-background);
+  color: var(--portal-ink);
+}
+
+.navigation {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  display: flex;
+  width: 228px;
+  flex-direction: column;
+  border-right: 1px solid var(--portal-line);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 8px 0 28px rgba(31, 42, 68, 0.04);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--portal-line);
+  padding: 20px 24px;
+  color: var(--portal-primary-dark);
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.brandMark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--portal-primary), #397ce2);
+  color: white;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 8px 18px rgba(11, 87, 208, 0.2);
+}
+
+.navItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 14px;
+}
+
+.navButton {
+  position: relative;
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  padding: 0 14px;
+  color: var(--portal-muted);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.navButton svg {
+  width: 19px;
+  height: 19px;
+}
+
+.navButton:hover {
+  background: #f1f5fb;
+  color: var(--portal-primary);
+  transform: translateX(2px);
+}
+
+.navButtonActive {
+  background: var(--portal-primary-soft);
+  color: var(--portal-primary-dark);
+}
+
+.mainWrapper {
+  min-height: 100dvh;
+  margin-left: 228px;
+}
+
+.header {
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid rgba(223, 228, 236, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 15px clamp(24px, 5vw, 64px);
+  backdrop-filter: blur(18px);
+}
+
+.headerEyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--portal-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #cce8d7;
+  border-radius: 999px;
+  background: #f0fbf4;
+  padding: 7px 11px;
+  color: #287347;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.statusPill > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #36a766;
+  box-shadow: 0 0 0 4px rgba(54, 167, 102, 0.12);
+}
+
+.content {
+  width: min(100%, 1040px);
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 48px);
+}
+
+.panel {
+  animation: panelIn 220ms ease-out;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.sectionIcon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--portal-primary-soft);
+  color: var(--portal-primary);
+}
+
+.sectionIcon svg {
+  width: 22px;
+}
+
+.sectionHeading p,
+.pageIntro > p {
+  margin: 0 0 3px;
+  color: var(--portal-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sectionHeading h2,
+.pageIntro h2 {
+  margin: 0;
+  font-size: clamp(25px, 4vw, 34px);
+  font-weight: 780;
+  letter-spacing: -0.045em;
+}
+
+.pageIntro {
+  margin-bottom: 24px;
+}
+
+.pageIntro > span {
+  display: block;
+  margin-top: 7px;
+  color: var(--portal-muted);
+  font-size: 14px;
+}
+
+.alert,
+.chatError {
+  border: 1px solid #f4c7c3;
+  border-radius: 12px;
+  background: #fff6f5;
+  color: #a93b32;
+  font-size: 13px;
+}
+
+.alert {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+}
+
+.chatCard {
+  display: flex;
+  min-height: min(620px, calc(100dvh - 240px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--portal-line);
+  border-radius: 22px;
+  background: var(--portal-surface);
+  box-shadow: 0 20px 55px rgba(31, 42, 68, 0.08);
+}
+
+.messages {
+  display: flex;
+  min-height: 300px;
+  flex: 1;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  padding: clamp(18px, 3vw, 30px);
+  scroll-behavior: smooth;
+}
+
+.messageRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+}
+
+.messageRowUser {
+  justify-content: flex-end;
+}
+
+.avatar {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #cfdcf3;
+  border-radius: 10px;
+  background: var(--portal-primary-soft);
+  color: var(--portal-primary);
+}
+
+.avatar svg {
+  width: 16px;
+}
+
+.message {
+  max-width: min(78%, 620px);
+  margin: 0;
+  border-radius: 17px;
+  padding: 11px 14px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.assistantMessage {
+  border: 1px solid #e1e7f0;
+  border-bottom-left-radius: 5px;
+  background: #f6f8fb;
+  color: #273247;
+}
+
+.userMessage {
+  border-bottom-right-radius: 5px;
+  background: linear-gradient(145deg, var(--portal-primary), #185fc9);
+  color: white;
+  box-shadow: 0 7px 18px rgba(11, 87, 208, 0.16);
+}
+
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--portal-muted);
+  font-size: 12px;
+}
+
+.typing svg,
+.spin {
+  width: 16px;
+  height: 16px;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.suggestions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  border-top: 1px solid #edf0f5;
+  padding: 11px 16px;
+  scrollbar-width: thin;
+}
+
+.suggestions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #cfdbed;
+  border-radius: 999px;
+  background: white;
+  padding: 8px 11px;
+  color: #33415a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.suggestions button:hover {
+  border-color: #8fb1e6;
+  background: var(--portal-primary-soft);
+  color: var(--portal-primary-dark);
+}
+
+.suggestions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.suggestions svg {
+  width: 14px;
+}
+
+.chatError {
+  margin: 0 16px 10px;
+  padding: 9px 11px;
+}
+
+.chatForm {
+  display: flex;
+  gap: 9px;
+  border-top: 1px solid var(--portal-line);
+  background: #fbfcfe;
+  padding: 14px 16px;
+}
+
+.chatForm input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #cfd6e2;
+  border-radius: 14px;
+  background: white;
+  padding: 12px 14px;
+  color: var(--portal-ink);
+  font-size: 14px;
+  outline: none;
+}
+
+.chatForm input:focus {
+  border-color: var(--portal-primary);
+  box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.12);
+}
+
+.chatForm input:disabled {
+  background: #f1f3f6;
+}
+
+.chatForm button,
+.routeControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 13px;
+  background: var(--portal-primary);
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.chatForm button {
+  width: 46px;
+  height: 46px;
+}
+
+.chatForm button svg {
+  width: 19px;
+}
+
+.chatForm button:hover,
+.routeControls button:hover {
+  background: var(--portal-primary-dark);
+}
+
+.chatForm button:disabled,
+.routeControls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.infoCard,
+.eventCard {
+  border: 1px solid var(--portal-line);
+  border-radius: 18px;
+  background: var(--portal-surface);
+  box-shadow: 0 12px 34px rgba(31, 42, 68, 0.055);
+}
+
+.infoCard {
+  padding: 22px;
+}
+
+.infoCard::before {
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin-bottom: 17px;
+  border-radius: 99px;
+  background: var(--portal-primary);
+  content: "";
+}
+
+.cardBadge {
+  display: inline-block;
+  margin-bottom: 9px;
+  border-radius: 999px;
+  background: var(--portal-primary-soft);
+  padding: 5px 8px;
+  color: var(--portal-primary-dark);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.infoCard h3,
+.eventCard h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  letter-spacing: -0.025em;
+}
+
+.infoCard > p:last-child,
+.eventCard > div > p:last-child {
+  margin: 14px 0 0;
+  color: #4e586d;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 5px 0;
+  color: var(--portal-muted);
+  font-size: 12px;
+}
+
+.meta svg {
+  width: 14px;
+  height: 14px;
+}
+
+.eventCard {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+}
+
+.eventDate {
+  display: flex;
+  width: 58px;
+  height: 66px;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background: linear-gradient(155deg, var(--portal-primary), #397ce2);
+  color: white;
+}
+
+.eventDate strong {
+  font-size: 23px;
+  line-height: 1;
+}
+
+.eventDate span {
+  margin-top: 5px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.locationToolbar {
+  display: grid;
+  grid-template-columns: minmax(230px, 1.6fr) minmax(190px, 1fr) auto;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #cfd6e2;
+  border-radius: 12px;
+  background: white;
+  padding: 0 12px;
+  color: var(--portal-muted);
+}
+
+.searchField svg {
+  width: 17px;
+}
+
+.searchField input,
+.locationToolbar select {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--portal-ink);
+  font-size: 13px;
+  outline: none;
+}
+
+.locationToolbar > label:not(.searchField) {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cfd6e2;
+  border-radius: 12px;
+  background: white;
+  padding: 0 10px;
+}
+
+.gpsButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #bcdcc7;
+  border-radius: 12px;
+  background: #effaf3;
+  padding: 0 14px;
+  color: #247345;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.gpsButton svg {
+  width: 17px;
+}
+
+.campusMap {
+  position: relative;
+  height: 380px;
+  overflow: hidden;
+  border: 1px solid #cbd8cb;
+  border-radius: 20px;
+  background:
+    linear-gradient(90deg, rgba(68, 120, 77, 0.075) 1px, transparent 1px),
+    linear-gradient(rgba(68, 120, 77, 0.075) 1px, transparent 1px),
+    #eaf3e8;
+  background-size: 28px 28px;
+  box-shadow: inset 0 0 40px rgba(48, 88, 58, 0.07);
+}
+
+.campusMap::before,
+.campusMap::after {
+  position: absolute;
+  border: 18px solid rgba(255, 255, 255, 0.72);
+  border-radius: 45%;
+  content: "";
+  transform: rotate(-15deg);
+}
+
+.campusMap::before {
+  inset: 18% -5% 24% 5%;
+}
+
+.campusMap::after {
+  inset: 42% 22% -28% -12%;
+  transform: rotate(28deg);
+}
+
+.mapLabel {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(61, 93, 66, 0.16);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 7px 9px;
+  color: #45634a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mapLabel svg {
+  width: 14px;
+}
+
+.mapPathOne,
+.mapPathTwo {
+  position: absolute;
+  z-index: 1;
+  height: 9px;
+  border: 2px solid rgba(142, 128, 97, 0.22);
+  border-radius: 99px;
+  background: #e8ddc6;
+  transform-origin: left center;
+}
+
+.mapPathOne {
+  top: 68%;
+  left: 12%;
+  width: 74%;
+  transform: rotate(-31deg);
+}
+
+.mapPathTwo {
+  top: 20%;
+  left: 28%;
+  width: 62%;
+  transform: rotate(68deg);
+}
+
+.routeLine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.routeLine line {
+  stroke: var(--portal-primary);
+  stroke-width: 1.4%;
+  stroke-linecap: round;
+  stroke-dasharray: 2% 1.2%;
+}
+
+.mapMarker {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #b5c5b7;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 7px 9px;
+  color: #314839;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 750;
+  box-shadow: 0 7px 16px rgba(51, 76, 56, 0.12);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.mapMarker svg {
+  width: 14px;
+  height: 14px;
+  color: var(--portal-primary);
+}
+
+.mapMarker:hover,
+.mapMarkerActive {
+  border-color: var(--portal-primary);
+  background: var(--portal-primary);
+  color: white;
+}
+
+.mapMarker:hover svg,
+.mapMarkerActive svg {
+  color: white;
+}
+
+.routeControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.routeControls p {
+  margin: 0;
+  color: var(--portal-muted);
+  font-size: 12px;
+}
+
+.routeControls button {
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 13px;
+  font-size: 12px;
+}
+
+.routeControls svg,
+.routeSummary > svg {
+  width: 16px;
+}
+
+.routeSummary {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 14px;
+  border: 1px solid #c9dafa;
+  border-radius: 14px;
+  background: var(--portal-primary-soft);
+  padding: 14px;
+  color: var(--portal-primary-dark);
+}
+
+.routeSummary > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.routeSummary div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.routeSummary strong {
+  font-size: 13px;
+}
+
+.routeSummary span,
+.routeSummary small {
+  font-size: 11px;
+}
+
+.routeSummary small {
+  color: #60708c;
+}
+
+.locationList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.locationList > button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--portal-line);
+  border-radius: 13px;
+  background: white;
+  padding: 11px;
+  color: var(--portal-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.locationList > button:hover {
+  border-color: #9db8e3;
+  background: #f9fbff;
+}
+
+.locationList > button > svg {
+  width: 16px;
+  color: var(--portal-muted);
+}
+
+.locationPin {
+  display: grid;
+  width: 33px;
+  height: 33px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--portal-primary-soft);
+  color: var(--portal-primary);
+}
+
+.locationPin svg {
+  width: 16px;
+}
+
+.locationList strong,
+.locationList small {
+  display: block;
+}
+
+.locationList strong {
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.locationList small {
+  overflow: hidden;
+  color: var(--portal-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  border: 1px dashed #cfd6e2;
+  border-radius: 13px;
+  padding: 24px;
+  color: var(--portal-muted);
+  text-align: center;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .portalRoot {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
+  .navigation {
+    inset: auto 0 0;
+    width: 100%;
+    height: calc(68px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--portal-line);
+    border-right: 0;
+    box-shadow: 0 -8px 30px rgba(31, 42, 68, 0.08);
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .navItems {
+    height: 68px;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
+    padding: 4px max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left));
+  }
+
+  .navButton {
+    min-height: 56px;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    border-radius: 10px;
+    padding: 4px;
+    font-size: 10px;
+  }
+
+  .navButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .navButton:hover {
+    transform: none;
+  }
+
+  .navButtonActive {
+    background: transparent;
+    color: var(--portal-primary);
+  }
+
+  .navButtonActive::after {
+    position: absolute;
+    top: 2px;
+    width: 25px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--portal-primary);
+    content: "";
+  }
+
+  .mainWrapper {
+    margin-left: 0;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    min-height: 68px;
+    padding: 10px 16px;
+  }
+
+  .header h1 {
+    max-width: 62vw;
+    overflow: hidden;
+    font-size: 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .headerEyebrow {
+    font-size: 8px;
+  }
+
+  .statusPill {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .content {
+    padding: 20px 13px;
+  }
+
+  .sectionHeading {
+    margin-bottom: 14px;
+  }
+
+  .sectionIcon {
+    width: 41px;
+    height: 41px;
+    border-radius: 13px;
+  }
+
+  .sectionHeading h2,
+  .pageIntro h2 {
+    font-size: 25px;
+  }
+
+  .chatCard {
+    min-height: calc(100dvh - 196px);
+    border-radius: 18px;
+  }
+
+  .messages {
+    min-height: 260px;
+    padding: 16px 13px;
+  }
+
+  .message {
+    max-width: 84%;
+    font-size: 13px;
+  }
+
+  .suggestions {
+    padding-inline: 12px;
+  }
+
+  .chatForm {
+    padding: 11px;
+  }
+
+  .cardGrid,
+  .locationList {
+    grid-template-columns: 1fr;
+  }
+
+  .locationToolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .campusMap {
+    height: 340px;
+  }
+
+  .mapMarker span {
+    display: none;
+  }
+
+  .mapMarker {
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .mapMarker svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .routeControls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .routeControls button {
+    min-height: 43px;
+  }
+}
+
+@media (max-width: 390px) {
+  .statusPill {
+    width: 9px;
+    height: 9px;
+    overflow: hidden;
+    border: 0;
+    background: #36a766;
+    padding: 0;
+    color: transparent;
+    box-shadow: 0 0 0 5px rgba(54, 167, 102, 0.12);
+  }
+
+  .statusPill > span {
+    display: none;
+  }
+
+  .eventCard {
+    gap: 12px;
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .typing svg,
+  .spin {
+    animation: none;
+  }
+
+  .navButton {
+    transition: none;
+  }
+}
