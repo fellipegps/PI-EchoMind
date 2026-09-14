@@ -193,6 +193,26 @@ def test_child_retrieval_expands_parent_deduplicates_and_preserves_tenant_validi
     assert expanded[0].metadata["page_start"] == 1
     assert expanded[0].metadata["page_end"] == 2
 
+    from app.rag_metrics import metric_deltas
+
+    source_counts = {
+        source_type: sum(
+            item.metadata["source_type"] == source_type for item in expanded
+        )
+        for source_type in {item.metadata["source_type"] for item in expanded}
+    }
+    deltas = metric_deltas(
+        {
+            "event": "rag.retrieval",
+            "status": "success",
+            "stage": "completed",
+            "source_types": source_counts,
+        }
+    )
+    assert deltas is not None
+    assert deltas["source_document_parent"] == 1
+    assert deltas["source_document_chunk"] == 0
+
 
 def test_parent_lookup_never_uses_id_without_tenant_and_document(db) -> None:
     from app import rag_engine

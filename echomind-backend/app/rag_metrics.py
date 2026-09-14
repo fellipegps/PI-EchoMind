@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
-from typing import Mapping
+from queue import Empty, Full, Queue
+from threading import Event, Lock, Thread
+from time import monotonic
+from typing import Callable, Mapping, Sequence
 
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert as postgresql_insert
@@ -16,6 +21,11 @@ from .database import RagMetricDaily, SessionLocal
 RAG_METRIC_RETENTION_DAYS = 90
 RAG_METRIC_DEFAULT_PERIOD_DAYS = 30
 RAG_METRIC_MAX_PERIOD_DAYS = 90
+RAG_METRIC_QUEUE_MAXSIZE = 2048
+RAG_METRIC_BATCH_SIZE = 64
+RAG_METRIC_FLUSH_INTERVAL_SECONDS = 0.25
+
+_logger = logging.getLogger("echomind.rag_metrics")
 
 _AGGREGATE_FIELDS = (
     "chat_success",
@@ -41,6 +51,125 @@ _SOURCE_COLUMNS = {
     "document_parent": "source_document_parent",
     "other": "source_other",
 }
+
+
+@dataclass(frozen=True, slots=True)
+class MetricEvent:
+    tenant_id: str
+    payload: Mapping[str, object]
+
+
+MetricBatchSink = Callable[[Sequence[MetricEvent]], None]
+
+
+class MetricEventWriter:
+    """Fila local limitada que retira persistencia do caminho critico da API."""
+
+    def __init__(
+        self,
+        persist_batch: MetricBatchSink,
+        *,
+        max_queue_size: int = RAG_METRIC_QUEUE_MAXSIZE,
+        batch_size: int = RAG_METRIC_BATCH_SIZE,
+        flush_interval_seconds: float = RAG_METRIC_FLUSH_INTERVAL_SECONDS,
+    ) -> None:
+        if max_queue_size < 1 or batch_size < 1 or flush_interval_seconds <= 0:
+            raise ValueError("Configuracao invalida do gravador de metricas.")
+        self._persist_batch = persist_batch
+        self._batch_size = batch_size
+        self._flush_interval_seconds = flush_interval_seconds
+        self._queue: Queue[MetricEvent] = Queue(maxsize=max_queue_size)
+        self._stop = Event()
+        self._lifecycle_lock = Lock()
+        self._thread: Thread | None = None
+        self._dropped_events = 0
+
+    @property
+    def dropped_events(self) -> int:
+        with self._lifecycle_lock:
+            return self._dropped_events
+
+    def start(self) -> None:
+        """Inicia um unico worker daemon; pode ser chamado novamente apos stop."""
+        with self._lifecycle_lock:
+            if self._thread is not None and self._thread.is_alive():
+                return
+            self._stop.clear()
+            self._thread = Thread(
+                target=self._run,
+                name="echomind-rag-metrics",
+                daemon=True,
+            )
+            self._thread.start()
+
+    def enqueue(self, tenant_id: str, payload: Mapping[str, object]) -> bool:
+        """Aceita apenas eventos agregaveis e nunca bloqueia o chamador."""
+        normalized_tenant = tenant_id.strip()
+        if not normalized_tenant or metric_deltas(payload) is None:
+            return False
+        self.start()
+        try:
+            self._queue.put_nowait(
+                MetricEvent(
+                    tenant_id=normalized_tenant,
+                    payload=dict(payload),
+                )
+            )
+        except Full:
+            with self._lifecycle_lock:
+                self._dropped_events += 1
+            return False
+        return True
+
+    def stop(self, *, timeout_seconds: float = 5.0) -> bool:
+        """Solicita encerramento, drenando a fila dentro do limite informado."""
+        with self._lifecycle_lock:
+            thread = self._thread
+            if thread is None:
+                return True
+            self._stop.set()
+        thread.join(timeout=max(0.0, timeout_seconds))
+        stopped = not thread.is_alive()
+        if stopped:
+            with self._lifecycle_lock:
+                if self._thread is thread:
+                    self._thread = None
+        return stopped
+
+    def _next_batch(self) -> list[MetricEvent]:
+        try:
+            first = self._queue.get(timeout=self._flush_interval_seconds)
+        except Empty:
+            return []
+
+        batch = [first]
+        deadline = monotonic() + self._flush_interval_seconds
+        while len(batch) < self._batch_size:
+            if self._stop.is_set():
+                timeout = 0.0
+            else:
+                timeout = max(0.0, deadline - monotonic())
+            if timeout == 0.0 and not self._stop.is_set():
+                break
+            try:
+                batch.append(self._queue.get(timeout=timeout))
+            except Empty:
+                break
+        return batch
+
+    def _run(self) -> None:
+        while not self._stop.is_set() or not self._queue.empty():
+            batch = self._next_batch()
+            if not batch:
+                continue
+            try:
+                self._persist_batch(batch)
+            except Exception:
+                # Perder uma amostra operacional e preferivel a afetar chat/ingestao.
+                _logger.warning("rag_metric_batch_failed", exc_info=False)
+            finally:
+                for _event in batch:
+                    self._queue.task_done()
 
 
 def _nonnegative_number(value: object) -> float:
@@ -181,11 +310,41 @@ def purge_expired_metrics(
 
 
 def persist_metric_event(tenant_id: str, payload: Mapping[str, object]) -> None:
-    """Sink local: falhas sao isoladas pelo emissor de logs estruturados."""
+    """Persiste um evento diretamente; util para manutencao e compatibilidade."""
+    persist_metric_batch([MetricEvent(tenant_id=tenant_id, payload=payload)])
+
+
+def persist_metric_batch(events: Sequence[MetricEvent]) -> None:
+    """Persiste um lote em uma transacao e aplica retencao uma vez por tenant."""
+    if not events:
+        return
     with SessionLocal() as db:
-        record_metric_event(db, tenant_id=tenant_id, payload=payload)
-        purge_expired_metrics(db, tenant_id=tenant_id)
+        affected_tenants: set[str] = set()
+        for event in events:
+            if record_metric_event(
+                db,
+                tenant_id=event.tenant_id,
+                payload=event.payload,
+            ):
+                affected_tenants.add(event.tenant_id)
+        for tenant_id in sorted(affected_tenants):
+            purge_expired_metrics(db, tenant_id=tenant_id)
         db.commit()
+
+
+metric_event_writer = MetricEventWriter(persist_metric_batch)
+
+
+def start_metric_writer() -> None:
+    metric_event_writer.start()
+
+
+def enqueue_metric_event(tenant_id: str, payload: Mapping[str, object]) -> bool:
+    return metric_event_writer.enqueue(tenant_id, payload)
+
+
+def stop_metric_writer(*, timeout_seconds: float = 5.0) -> bool:
+    return metric_event_writer.stop(timeout_seconds=timeout_seconds)
 
 
 def _average(total: int | float, count: int) -> float:

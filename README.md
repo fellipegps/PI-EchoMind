@@ -509,6 +509,13 @@ A tabela possui chave por tenant/data, índice de retenção e RLS seguindo o
 padrão atual do projeto. Falhas de persistência das métricas não alteram o
 chat, o retrieval nem a ingestão principal.
 
+A gravação não ocorre no caminho crítico da requisição: somente eventos
+agregáveis entram em uma fila local limitada e um worker único os persiste em
+lotes. Cada lote usa uma transação e executa a retenção uma vez por tenant. Se
+o banco estiver indisponível ou a fila atingir o limite, a operação principal
+continua normalmente; métricas operacionais podem ser descartadas até a
+capacidade local se recuperar.
+
 ## CI Rapida E Baseline
 
 O workflow `.github/workflows/ci.yml` executa em pull requests, pushes para

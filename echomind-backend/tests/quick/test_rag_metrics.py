@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from threading import Event, get_ident
 from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
@@ -250,6 +251,124 @@ def test_metric_sink_failure_never_changes_primary_event(monkeypatch) -> None:
 
     assert payload["status"] == "success"
     assert payload["counts"] == {"retrieved_results": 2}
+
+
+def test_metric_writer_persists_outside_the_caller_thread() -> None:
+    from app.rag_metrics import MetricEventWriter
+
+    persist_started = Event()
+    release_persist = Event()
+    persist_thread_ids: list[int] = []
+
+    def persist_batch(_events) -> None:
+        persist_thread_ids.append(get_ident())
+        persist_started.set()
+        assert release_persist.wait(timeout=1)
+
+    writer = MetricEventWriter(
+        persist_batch,
+        flush_interval_seconds=0.01,
+    )
+    caller_thread_id = get_ident()
+
+    assert writer.enqueue(
+        "tenant-async",
+        {"event": "rag.chat", "status": "success", "stage": "generation"},
+    )
+    assert persist_started.wait(timeout=1)
+    assert persist_thread_ids == [persist_thread_ids[0]]
+    assert persist_thread_ids[0] != caller_thread_id
+
+    release_persist.set()
+    assert writer.stop(timeout_seconds=1)
+
+
+def test_metric_writer_has_bounded_nonblocking_backpressure() -> None:
+    from app.rag_metrics import MetricEventWriter
+
+    persist_started = Event()
+    release_persist = Event()
+
+    def blocked_persist(_events) -> None:
+        persist_started.set()
+        assert release_persist.wait(timeout=1)
+
+    writer = MetricEventWriter(
+        blocked_persist,
+        max_queue_size=1,
+        batch_size=1,
+        flush_interval_seconds=0.01,
+    )
+    payload = {"event": "rag.chat", "status": "success", "stage": "generation"}
+
+    assert writer.enqueue("tenant-a", payload)
+    assert persist_started.wait(timeout=1)
+    assert writer.enqueue("tenant-a", payload)
+    assert writer.enqueue("tenant-a", payload) is False
+    assert writer.dropped_events == 1
+
+    release_persist.set()
+    assert writer.stop(timeout_seconds=1)
+
+
+def test_metric_writer_ignores_events_that_are_not_dashboard_aggregates() -> None:
+    from app.rag_metrics import MetricEventWriter
+
+    batches: list[object] = []
+    writer = MetricEventWriter(batches.append, flush_interval_seconds=0.01)
+
+    assert writer.enqueue(
+        "tenant-a",
+        {"event": "rag.reranker", "status": "success", "stage": "ranking"},
+    ) is False
+    assert writer.stop(timeout_seconds=1)
+    assert batches == []
+
+
+def test_metric_batch_uses_one_transaction_and_one_retention_per_tenant(
+    monkeypatch,
+) -> None:
+    from app import rag_metrics
+
+    committed: list[bool] = []
+    recorded: list[str] = []
+    purged: list[str] = []
+
+    class FakeSession:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def commit(self) -> None:
+            committed.append(True)
+
+    monkeypatch.setattr(rag_metrics, "SessionLocal", FakeSession)
+    monkeypatch.setattr(
+        rag_metrics,
+        "record_metric_event",
+        lambda _db, *, tenant_id, payload: recorded.append(tenant_id) or True,
+    )
+    monkeypatch.setattr(
+        rag_metrics,
+        "purge_expired_metrics",
+        lambda _db, *, tenant_id: purged.append(tenant_id),
+    )
+
+    payload = {"event": "rag.chat", "status": "success", "stage": "generation"}
+    rag_metrics.persist_metric_batch(
+        [
+            rag_metrics.MetricEvent("tenant-a", payload),
+            rag_metrics.MetricEvent("tenant-a", payload),
+            rag_metrics.MetricEvent("tenant-b", payload),
+        ]
+    )
+
+    assert recorded == ["tenant-a", "tenant-a", "tenant-b"]
+    assert set(purged) == {"tenant-a", "tenant-b"}
+    assert len(purged) == 2
+    assert committed == [True]
 
 
 def test_rag_metrics_endpoint_is_authenticated_and_tenant_scoped(

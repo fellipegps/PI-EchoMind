@@ -80,9 +80,12 @@ from .structured_logging import (
     new_correlation_id,
     safe_error_code,
 )
-from .rag_metrics import get_rag_metrics, persist_metric_event
-
-configure_metric_sink(persist_metric_event)
+from .rag_metrics import (
+    enqueue_metric_event,
+    get_rag_metrics,
+    start_metric_writer,
+    stop_metric_writer,
+)
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 
@@ -94,30 +97,36 @@ logger = logging.getLogger("echomind")
 async def lifespan(app: FastAPI):
     logger.info("Iniciando EchoMind Backend...")
     logger.info("Schema gerenciado por Alembic. Execute `alembic upgrade head` antes de subir a API.")
-    warmup_timeout = float(os.getenv("RAG_WARMUP_TIMEOUT_SECONDS", "30"))
+    configure_metric_sink(enqueue_metric_event)
+    start_metric_writer()
     try:
-        await asyncio.wait_for(
-            asyncio.to_thread(warm_up_rag_runtime),
-            timeout=warmup_timeout,
-        )
-    except asyncio.TimeoutError:
-        emit_event(
-            event="rag.warmup",
-            status="error",
-            stage="timeout",
-            duration_ms=warmup_timeout * 1000,
-            error_code="timeout-error",
-            level=logging.WARNING,
-        )
-    except Exception as exc:
-        emit_event(
-            event="rag.warmup",
-            status="error",
-            stage="startup",
-            error_code=safe_error_code(exc),
-            level=logging.WARNING,
-        )
-    yield
+        warmup_timeout = float(os.getenv("RAG_WARMUP_TIMEOUT_SECONDS", "30"))
+        try:
+            await asyncio.wait_for(
+                asyncio.to_thread(warm_up_rag_runtime),
+                timeout=warmup_timeout,
+            )
+        except asyncio.TimeoutError:
+            emit_event(
+                event="rag.warmup",
+                status="error",
+                stage="timeout",
+                duration_ms=warmup_timeout * 1000,
+                error_code="timeout-error",
+                level=logging.WARNING,
+            )
+        except Exception as exc:
+            emit_event(
+                event="rag.warmup",
+                status="error",
+                stage="startup",
+                error_code=safe_error_code(exc),
+                level=logging.WARNING,
+            )
+        yield
+    finally:
+        configure_metric_sink(None)
+        await asyncio.to_thread(stop_metric_writer)
 
 # ─── App & CORS ──────────────────────────────────────────────────────────────
 
