@@ -343,15 +343,56 @@ def test_interrupted_backfill_stops_by_tenant_and_resumes_without_orphan_ids(
 
 def test_parent_child_eval_proves_context_gain_with_bounded_cost() -> None:
     evals = Path(__file__).parents[2] / "evals"
+
+    class StepClock:
+        def __init__(self) -> None:
+            self.value = 0.0
+
+        def __call__(self) -> float:
+            current = self.value
+            self.value += 0.001
+            return current
+
     report = evaluate_parent_child(
         json.loads((evals / "parent_child_eval.json").read_text(encoding="utf-8")),
         json.loads((evals / "reranker_report.json").read_text(encoding="utf-8")),
+        clock=StepClock(),
     )
 
+    assert report["mode"] == "offline-executed-parent-expansion-benchmark"
+    assert report["execution"]["external_calls"] is False
     assert report["quality"] == {
         "pr25_context_complete_rate": 0.0,
         "parent_context_complete_rate": 1.0,
         "context_complete_gain": 1.0,
     }
-    assert report["latency_ms"]["parent_lookup_overhead_mean"] == 1.125
-    assert report["context"]["mean_growth_ratio"] == 2.421
+    assert report["latency_ms"]["parent_lookup_mean"] == pytest.approx(1.0)
+    assert report["latency_ms"]["retrieval_reranker_parent_mean"] == pytest.approx(
+        report["latency_ms"]["pr25_retrieval_plus_reranker_mean"] + 1.0
+    )
+    assert report["safety"] == {
+        "tenant_isolated": True,
+        "parents_deduplicated": True,
+    }
+    assert report["activation_assessment"]["evidence_supports_parent_child"] is True
+    assert report["context"]["mean_growth_ratio"] <= report["context"][
+        "max_mean_growth_ratio"
+    ]
+    assert report["cases"][0]["child_candidates"] == 2
+    assert report["cases"][0]["expanded_results"] == 1
+
+
+def test_parent_child_eval_fixture_has_no_prefilled_outputs() -> None:
+    dataset = json.loads(
+        (Path(__file__).parents[2] / "evals" / "parent_child_eval.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    forbidden = {
+        "child_context",
+        "parent_context",
+        "pr25_latency_ms",
+        "parent_lookup_latency_ms",
+    }
+    assert all(forbidden.isdisjoint(case) for case in dataset["cases"])

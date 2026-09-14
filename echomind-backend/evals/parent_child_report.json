@@ -1,10 +1,18 @@
 {
-  "version": 1,
-  "mode": "offline-synthetic-parent-child-comparison",
+  "report_version": 2,
+  "dataset_version": "2026-09-11.1",
+  "mode": "offline-executed-parent-expansion-benchmark",
+  "execution": {
+    "database": "sqlite-memory",
+    "parent_grouping": "production-group_document_children",
+    "parent_lookup": "production-_expand_document_parents",
+    "external_calls": false,
+    "children_per_parent": 3
+  },
   "pr25_reference": {
     "reranked_hit_rate_at_k": 1.0,
-    "reranked_mrr_at_k": 1.0,
-    "controlled_reranked_mean_ms": 18.667
+    "reranked_mrr_at_k": 0.889,
+    "retrieval_plus_reranker_mean_ms": 1987.639
   },
   "quality": {
     "pr25_context_complete_rate": 0.0,
@@ -12,38 +20,75 @@
     "context_complete_gain": 1.0
   },
   "latency_ms": {
-    "controlled_pr25_mean": 18.75,
-    "controlled_parent_child_mean": 19.875,
-    "controlled_parent_child_p95": 21.4,
-    "parent_lookup_overhead_mean": 1.125
+    "pr25_retrieval_plus_reranker_mean": 1987.639,
+    "parent_lookup_mean": 2.897,
+    "parent_lookup_p95": 8.616,
+    "retrieval_reranker_parent_mean": 1990.536
   },
   "context": {
-    "mean_growth_ratio": 2.421
+    "mean_growth_ratio": 2.241,
+    "max_mean_growth_ratio": 2.5
+  },
+  "safety": {
+    "tenant_isolated": true,
+    "parents_deduplicated": true
+  },
+  "activation_assessment": {
+    "evidence_supports_parent_child": true,
+    "max_parent_lookup_mean_ms": 50.0
   },
   "cases": [
     {
       "id": "recurso-email-excecao",
       "pr25_context_complete": false,
       "parent_context_complete": true,
-      "context_growth_ratio": 2.719
+      "context_growth_ratio": 2.549,
+      "child_candidates": 2,
+      "expanded_results": 1,
+      "parent_ids": [
+        "93203db9-c8d4-59e1-a614-1cfda066857a"
+      ],
+      "tenant_isolated": true,
+      "lookup_latency_ms": 8.616
     },
     {
       "id": "bolsa-manutencao",
       "pr25_context_complete": false,
       "parent_context_complete": true,
-      "context_growth_ratio": 2.149
+      "context_growth_ratio": 2.129,
+      "child_candidates": 2,
+      "expanded_results": 1,
+      "parent_ids": [
+        "52883c58-0c60-5ff5-8f47-223acc06a334"
+      ],
+      "tenant_isolated": true,
+      "lookup_latency_ms": 1.206
     },
     {
       "id": "estagio-prazo-excecao",
       "pr25_context_complete": false,
       "parent_context_complete": true,
-      "context_growth_ratio": 2.392
+      "context_growth_ratio": 2.128,
+      "child_candidates": 2,
+      "expanded_results": 1,
+      "parent_ids": [
+        "883050b4-6812-5eb8-af82-38d40f6f65b9"
+      ],
+      "tenant_isolated": true,
+      "lookup_latency_ms": 0.884
     },
     {
       "id": "acessibilidade-antecedencia",
       "pr25_context_complete": false,
       "parent_context_complete": true,
-      "context_growth_ratio": 2.423
+      "context_growth_ratio": 2.159,
+      "child_candidates": 2,
+      "expanded_results": 1,
+      "parent_ids": [
+        "690191a9-b62a-5cb1-b13e-09d517bdee6f"
+      ],
+      "tenant_isolated": true,
+      "lookup_latency_ms": 0.88
     }
   ]
 }

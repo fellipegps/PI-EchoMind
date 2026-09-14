@@ -88,6 +88,9 @@ O retrieval mantém precisão de child e coerência normativa do parent.
 
 - A migration `0011` cria `document_chunk_parents` e adiciona `parent_id`
   opcional aos chunks; chunks legados continuam válidos sem parent.
+- A migration aditiva `0013` reforça no PostgreSQL que documento, parent e child
+  pertencem ao mesmo tenant e ao mesmo documento, mantendo a compatibilidade
+  transitória da `0011`.
 - Novos processamentos persistem parents compostos por até três children
   contíguos. Somente os children são indexados no PGVector.
 - O backfill é explícito e nunca roda durante migration ou startup:
@@ -100,6 +103,8 @@ O retrieval mantém precisão de child e coerência normativa do parent.
   `python scripts/reindex_all.py --confirm --parent-child-rollback`.
 - Antes de executar `alembic downgrade 0010`, executar o rollback de aplicação
   para manter os vetores compatíveis com chunks sem parent.
+- A avaliação executa o agrupamento, a persistência SQLite e o lookup de produção
+  sem rede; contexts e latências não são aceitos como valores pré-preenchidos.
 
 ## Instrução final ao Codex
 

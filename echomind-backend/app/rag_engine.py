@@ -26,7 +26,7 @@ from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, AsyncGenerator, Mapping, Sequence
+from typing import Any, AsyncGenerator, Callable, Mapping, Sequence
 
 from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_community.vectorstores.pgvector import PGVector
@@ -829,6 +829,7 @@ def _expand_document_parents(
     *,
     tenant_id: str,
     today: date,
+    session_factory: Callable[[], Session] | None = None,
 ) -> list[Document]:
     """Resolve parents em lote, por tenant/documento, e remove repeticoes."""
     eligible_documents = [
@@ -852,7 +853,7 @@ def _expand_document_parents(
 
     parent_ids = tuple(dict.fromkeys(parent_id for _document_id, parent_id in requested))
     resolved: dict[tuple[str, str], tuple[StoredDocument, DocumentChunkParent]] = {}
-    session = SessionLocal()
+    session = (session_factory or SessionLocal)()
     try:
         rows = (
             session.query(StoredDocument, DocumentChunkParent)

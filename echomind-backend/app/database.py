@@ -145,6 +145,11 @@ class Document(Base):
 
     __tablename__ = "documents"
     __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "tenant_id",
+            name="uq_documents_id_tenant_id",
+        ),
         CheckConstraint(
             "status IN ('pending', 'processing', 'ready', 'error')",
             name="ck_documents_status",
@@ -196,6 +201,12 @@ class DocumentChunkParent(Base):
 
     __tablename__ = "document_chunk_parents"
     __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "tenant_id",
+            "document_id",
+            name="uq_document_chunk_parents_id_tenant_document",
+        ),
         UniqueConstraint(
             "document_id",
             "parent_index",

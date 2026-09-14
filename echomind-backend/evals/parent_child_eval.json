@@ -1,38 +1,66 @@
 {
-  "version": 1,
-  "description": "Casos sinteticos em que o child recuperado pela PR 25 identifica o assunto, mas omite regra ou excecao presente no parent.",
+  "dataset_version": "2026-09-11.1",
+  "evaluation_date": "2026-09-11",
+  "description": "Casos PT-BR executados pela persistencia, agrupamento e expansao Parent-Child de producao.",
+  "children_per_parent": 3,
+  "max_parent_lookup_mean_ms": 50.0,
+  "max_mean_context_growth_ratio": 2.5,
   "cases": [
     {
       "id": "recurso-email-excecao",
+      "tenant_id": "tenant-alfa",
+      "document_id": "doc-recurso-eletronico",
+      "filename": "regulamento-recursos.txt",
+      "valid_until": "2026-12-31",
       "required_terms": ["protocolo eletrônico", "não é permitido por e-mail"],
-      "child_context": "O recurso deve ser apresentado pelo protocolo eletrônico.",
-      "parent_context": "Art. 8º — O recurso deve ser apresentado pelo protocolo eletrônico. Não é permitido por e-mail, salvo indisponibilidade oficialmente registrada do sistema.",
-      "pr25_latency_ms": 19.0,
-      "parent_lookup_latency_ms": 1.2
+      "matched_child_indexes": [0, 2],
+      "children": [
+        {"content": "O recurso deve ser apresentado pelo protocolo eletrônico.", "page_start": 1, "page_end": 1, "section_title": "Art. 8º"},
+        {"content": "Não é permitido por e-mail, salvo indisponibilidade oficialmente registrada do sistema.", "page_start": 2, "page_end": 2, "section_title": "Art. 8º"},
+        {"content": "A secretaria publica a confirmação no mesmo protocolo.", "page_start": 2, "page_end": 2, "section_title": "Art. 8º"}
+      ]
     },
     {
       "id": "bolsa-manutencao",
+      "tenant_id": "tenant-beta",
+      "document_id": "doc-bolsa-estudantil",
+      "filename": "politica-bolsas.txt",
+      "valid_until": "2027-01-31",
       "required_terms": ["renda familiar", "renovação semestral"],
-      "child_context": "A bolsa atende estudantes com renda familiar de até três salários mínimos.",
-      "parent_context": "Seção II — A bolsa atende estudantes com renda familiar de até três salários mínimos. A manutenção exige renovação semestral e comprovação atualizada da renda.",
-      "pr25_latency_ms": 18.0,
-      "parent_lookup_latency_ms": 1.0
+      "matched_child_indexes": [0, 2],
+      "children": [
+        {"content": "A bolsa atende estudantes com renda familiar de até três salários mínimos.", "page_start": 3, "page_end": 3, "section_title": "Seção II"},
+        {"content": "A manutenção exige renovação semestral e comprovação atualizada da renda.", "page_start": 3, "page_end": 4, "section_title": "Seção II"},
+        {"content": "A análise documental ocorre após o encerramento das inscrições.", "page_start": 4, "page_end": 4, "section_title": "Seção II"}
+      ]
     },
     {
       "id": "estagio-prazo-excecao",
+      "tenant_id": "tenant-alfa",
+      "document_id": "doc-estagio-relatorio",
+      "filename": "norma-estagio.txt",
+      "valid_until": null,
       "required_terms": ["cinco dias úteis", "prorrogação"],
-      "child_context": "O relatório deve ser entregue em até cinco dias úteis após o encerramento.",
-      "parent_context": "Art. 12 — O relatório deve ser entregue em até cinco dias úteis após o encerramento. A coordenação pode autorizar uma única prorrogação mediante justificativa anterior ao prazo.",
-      "pr25_latency_ms": 20.0,
-      "parent_lookup_latency_ms": 1.4
+      "matched_child_indexes": [0, 2],
+      "children": [
+        {"content": "O relatório deve ser entregue em até cinco dias úteis após o encerramento.", "page_start": 5, "page_end": 5, "section_title": "Art. 12"},
+        {"content": "A coordenação pode autorizar uma única prorrogação mediante justificativa anterior ao prazo.", "page_start": 6, "page_end": 6, "section_title": "Art. 12"},
+        {"content": "O resultado da análise é registrado no sistema acadêmico.", "page_start": 6, "page_end": 6, "section_title": "Art. 12"}
+      ]
     },
     {
       "id": "acessibilidade-antecedencia",
+      "tenant_id": "tenant-gama",
+      "document_id": "doc-acessibilidade",
+      "filename": "guia-acessibilidade.txt",
+      "valid_until": "2026-11-30",
       "required_terms": ["sete dias", "situação emergencial"],
-      "child_context": "A solicitação de intérprete deve ocorrer com sete dias de antecedência.",
-      "parent_context": "Seção de Acessibilidade — A solicitação de intérprete deve ocorrer com sete dias de antecedência. Em situação emergencial, o pedido será analisado conforme disponibilidade.",
-      "pr25_latency_ms": 18.0,
-      "parent_lookup_latency_ms": 0.9
+      "matched_child_indexes": [0, 2],
+      "children": [
+        {"content": "A solicitação de intérprete deve ocorrer com sete dias de antecedência.", "page_start": 7, "page_end": 7, "section_title": "Acessibilidade"},
+        {"content": "Em situação emergencial, o pedido será analisado conforme disponibilidade.", "page_start": 8, "page_end": 8, "section_title": "Acessibilidade"},
+        {"content": "A resposta é encaminhada pelo canal institucional informado no cadastro.", "page_start": 8, "page_end": 8, "section_title": "Acessibilidade"}
+      ]
     }
   ]
 }

@@ -206,6 +206,22 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         "chunk_index",
     ]
 
+    document_unique_constraints = {
+        constraint["name"]: constraint["column_names"]
+        for constraint in inspector.get_unique_constraints("documents")
+    }
+    parent_unique_constraints = {
+        constraint["name"]: constraint["column_names"]
+        for constraint in inspector.get_unique_constraints("document_chunk_parents")
+    }
+    assert document_unique_constraints["uq_documents_id_tenant_id"] == [
+        "id",
+        "tenant_id",
+    ]
+    assert parent_unique_constraints[
+        "uq_document_chunk_parents_id_tenant_document"
+    ] == ["id", "tenant_id", "document_id"]
+
     foreign_keys = {
         foreign_key["name"]: foreign_key
         for foreign_key in inspector.get_foreign_keys("document_chunks")
@@ -221,11 +237,98 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
     assert parent_fk["referred_columns"] == ["id"]
     assert parent_fk["options"]["ondelete"] == "SET NULL"
 
-    parent_foreign_keys = inspector.get_foreign_keys("document_chunk_parents")
-    assert len(parent_foreign_keys) == 1
-    assert parent_foreign_keys[0]["constrained_columns"] == ["document_id"]
-    assert parent_foreign_keys[0]["referred_table"] == "documents"
-    assert parent_foreign_keys[0]["options"]["ondelete"] == "CASCADE"
+    tenant_document_fk = foreign_keys[
+        "fk_document_chunks_document_tenant_documents"
+    ]
+    assert tenant_document_fk["constrained_columns"] == ["document_id", "tenant_id"]
+    assert tenant_document_fk["referred_columns"] == ["id", "tenant_id"]
+    assert tenant_document_fk["options"]["ondelete"] == "CASCADE"
+    tenant_parent_fk = foreign_keys["fk_document_chunks_parent_tenant_document"]
+    assert tenant_parent_fk["constrained_columns"] == [
+        "parent_id",
+        "tenant_id",
+        "document_id",
+    ]
+    assert tenant_parent_fk["referred_columns"] == [
+        "id",
+        "tenant_id",
+        "document_id",
+    ]
+
+    parent_foreign_keys = {
+        foreign_key["name"]: foreign_key
+        for foreign_key in inspector.get_foreign_keys("document_chunk_parents")
+    }
+    assert parent_foreign_keys[
+        "fk_document_chunk_parents_document_id_documents"
+    ]["constrained_columns"] == ["document_id"]
+    parent_tenant_fk = parent_foreign_keys[
+        "fk_document_chunk_parents_document_tenant_documents"
+    ]
+    assert parent_tenant_fk["constrained_columns"] == ["document_id", "tenant_id"]
+    assert parent_tenant_fk["referred_columns"] == ["id", "tenant_id"]
+    assert parent_tenant_fk["options"]["ondelete"] == "CASCADE"
+
+
+def test_parent_child_database_rejects_cross_tenant_links(postgres_engine: Engine) -> None:
+    with postgres_engine.begin() as connection:
+        connection.execute(
+            text(
+                """
+                INSERT INTO documents (
+                    id, tenant_id, filename, mime_type, size_bytes, sha256
+                ) VALUES
+                    ('doc-integrity-a', 'tenant-a', 'a.txt', 'text/plain', 1, :sha_a),
+                    ('doc-integrity-b', 'tenant-b', 'b.txt', 'text/plain', 1, :sha_b)
+                """
+            ),
+            {"sha_a": "c" * 64, "sha_b": "d" * 64},
+        )
+        connection.execute(
+            text(
+                """
+                INSERT INTO document_chunk_parents (
+                    id, tenant_id, document_id, parent_index, content
+                ) VALUES (
+                    'parent-integrity-a', 'tenant-a', 'doc-integrity-a', 0, 'parent a'
+                )
+                """
+            )
+        )
+
+    with pytest.raises(IntegrityError):
+        with postgres_engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO document_chunk_parents (
+                        id, tenant_id, document_id, parent_index, content
+                    ) VALUES (
+                        'parent-cross-tenant', 'tenant-a', 'doc-integrity-b', 0, 'invalido'
+                    )
+                    """
+                )
+            )
+
+    with pytest.raises(IntegrityError):
+        with postgres_engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO document_chunks (
+                        id, tenant_id, document_id, parent_id, chunk_index, content
+                    ) VALUES (
+                        'chunk-cross-parent', 'tenant-b', 'doc-integrity-b',
+                        'parent-integrity-a', 0, 'invalido'
+                    )
+                    """
+                )
+            )
+
+    with postgres_engine.begin() as connection:
+        connection.execute(
+            text("DELETE FROM documents WHERE id IN ('doc-integrity-a', 'doc-integrity-b')")
+        )
 
 
 def test_document_defaults_constraints_uniqueness_and_cascade(postgres_engine: Engine) -> None:
