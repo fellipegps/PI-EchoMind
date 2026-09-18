@@ -23,6 +23,8 @@ class TestCreateEvent:
         assert data["title"] == sample_event_data["title"]
         assert data["event_date"] == sample_event_data["event_date"]
         assert data["event_type"] == sample_event_data["event_type"]
+        assert data["location"] == sample_event_data["location"]
+        assert data["published"] is True
         assert "id" in data
 
     def test_create_event_invalid_date(self, client: TestClient, sample_event_data: dict):
@@ -64,6 +66,38 @@ class TestUpdateEvent:
     def test_update_event_not_found(self, client: TestClient):
         resp = client.put("/events/nao-existe", json={"title": "Título Qualquer"})
         assert resp.status_code == 404
+
+    def test_unpublishing_event_removes_it_from_rag(
+        self,
+        client: TestClient,
+        sample_event_data: dict,
+        fake_rag_engine,
+    ):
+        created = client.post("/events", json=sample_event_data).json()
+
+        response = client.put(
+            f"/events/{created['id']}",
+            json={"published": False},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["published"] is False
+        assert created["id"] in fake_rag_engine.indexed_events
+        assert (created["id"], "event") in fake_rag_engine.deleted
+
+    def test_update_event_rejects_invalid_type(
+        self,
+        client: TestClient,
+        sample_event_data: dict,
+    ):
+        created = client.post("/events", json=sample_event_data).json()
+
+        response = client.put(
+            f"/events/{created['id']}",
+            json={"event_type": "tipo_invalido"},
+        )
+
+        assert response.status_code == 422
 
 
 class TestDeleteEvent:

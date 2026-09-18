@@ -9,16 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Loader2, Copy, ExternalLink, LinkIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { PageContainer } from "@/components/page-container";
 import { configApi } from "@/lib/api";
-import { supabase } from "@/lib/supabase";
 import type { Config } from "@/lib/api";
+import { PublicPortalCard } from "./public-portal-card";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [chatbotUrl, setChatbotUrl] = useState("");
 
   const [form, setForm] = useState<Partial<Config>>({
     company_name: "",
@@ -42,13 +41,6 @@ export default function SettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user || typeof window === "undefined") return;
-      setChatbotUrl(`${window.location.origin}/agente-publico?tenant=${data.user.id}`);
-    });
-  }, []);
-
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -60,15 +52,6 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const copyUrl = () => {
-    navigator.clipboard.writeText(chatbotUrl);
-    toast.success("URL copiada!");
-  };
-
-  const openTotem = () => {
-    window.open(chatbotUrl, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -196,33 +179,7 @@ export default function SettingsPage() {
           </CardFooter>
         </Card>
 
-        <Card className="bg-card">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2 text-primary">
-              <LinkIcon className="h-5 w-5" />
-              <CardTitle className="text-lg">Link do Totem</CardTitle>
-            </div>
-            <CardDescription>URL pública para acesso à interface do assistente.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Input
-                value={chatbotUrl}
-                readOnly
-                className="font-mono text-sm bg-background border-primary/20 sm:flex-1"
-              />
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={copyUrl} className="shrink-0">
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button onClick={openTotem} className="gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  Abrir Totem
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <PublicPortalCard publicSlug={form.public_slug ?? ""} />
       </div>
     </PageContainer>
   );

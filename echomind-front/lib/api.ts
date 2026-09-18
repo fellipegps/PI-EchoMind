@@ -24,11 +24,47 @@ export interface CompanyEvent {
   event_date: string;
   event_type: string;
   description: string | null;
+  location: string;
+  published: boolean;
   created_at: string;
 }
 
+export interface PublicEvent {
+  id: string;
+  title: string;
+  event_date: string;
+  event_type: string;
+  description: string | null;
+  location: string;
+}
+
+export interface CampusLocation {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  floor: string | null;
+  building: string | null;
+  x: number;
+  y: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PublicCampusLocation = Omit<
+  CampusLocation,
+  "active" | "created_at" | "updated_at"
+>;
+
+export type CampusLocationInput = Omit<
+  CampusLocation,
+  "id" | "created_at" | "updated_at"
+>;
+
 export interface Config {
   id: string;
+  public_slug: string;
   company_name: string;
   description: string | null;
   tone_of_voice: string;
@@ -38,6 +74,22 @@ export interface Config {
   address: string | null;
   business_hours: string | null;
   updated_at: string | null;
+}
+
+export interface PublicInstitution {
+  public_slug: string;
+  company_name: string;
+  description: string | null;
+  website: string | null;
+  phone: string | null;
+  address: string | null;
+  business_hours: string | null;
+}
+
+export interface PublicFaq {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 export interface UnansweredQuestion {
@@ -319,9 +371,9 @@ export const authApi = {
  * @param onToken  Callback chamado a cada token recebido
  * @param onDone   Callback chamado quando o stream termina
  */
-export async function streamChat(
-  message: string,
-  tenantId: string,
+async function streamResponse(
+  path: string,
+  payload: Record<string, string>,
   onToken: (token: string) => void,
   onDone: () => void,
   onError: (err: Error) => void
@@ -329,10 +381,10 @@ export async function streamChat(
   // 1. Tenta conectar ao backend
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}/chat`, {
+    res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, tenant_id: tenantId }),
+      body: JSON.stringify(payload),
     });
   } catch {
     onError(new Error("Não foi possível conectar ao servidor. Verifique se o backend está rodando."));
@@ -376,6 +428,38 @@ export async function streamChat(
   }
 }
 
+export function streamChat(
+  message: string,
+  tenantId: string,
+  onToken: (token: string) => void,
+  onDone: () => void,
+  onError: (err: Error) => void
+): Promise<void> {
+  return streamResponse(
+    "/chat",
+    { message, tenant_id: tenantId },
+    onToken,
+    onDone,
+    onError
+  );
+}
+
+export function streamPublicChat(
+  message: string,
+  publicSlug: string,
+  onToken: (token: string) => void,
+  onDone: () => void,
+  onError: (err: Error) => void
+): Promise<void> {
+  return streamResponse(
+    `/public/${encodeURIComponent(publicSlug)}/chat`,
+    { message },
+    onToken,
+    onDone,
+    onError
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 //  FAQs
 // ══════════════════════════════════════════════════════════════════════════════
@@ -406,10 +490,10 @@ export const faqApi = {
 export const eventApi = {
   list: () => request<CompanyEvent[]>("/events"),
 
-  create: (data: { title: string; event_date: string; event_type: string; description?: string }) =>
+  create: (data: { title: string; event_date: string; event_type: string; description?: string; location: string; published: boolean }) =>
     request<CompanyEvent>("/events", { method: "POST", body: JSON.stringify(data) }),
 
-  update: (id: string, data: Partial<{ title: string; event_date: string; event_type: string; description: string }>) =>
+  update: (id: string, data: Partial<{ title: string; event_date: string; event_type: string; description: string; location: string; published: boolean }>) =>
     request<CompanyEvent>(`/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
   delete: (id: string) =>
@@ -464,6 +548,51 @@ export const configApi = {
 
   save: (data: Partial<Config>) =>
     request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  LOCAIS DO CAMPUS
+// ══════════════════════════════════════════════════════════════════════════════
+
+export const locationApi = {
+  list: () => request<CampusLocation[]>("/locations"),
+
+  create: (data: CampusLocationInput) =>
+    request<CampusLocation>("/locations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: Partial<CampusLocationInput>) =>
+    request<CampusLocation>(`/locations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request<void>(`/locations/${id}`, { method: "DELETE" }),
+};
+
+export const publicPortalApi = {
+  getInstitution: (publicSlug: string) =>
+    publicRequest<PublicInstitution>(
+      `/public/${encodeURIComponent(publicSlug)}`
+    ),
+
+  listFaqs: (publicSlug: string) =>
+    publicRequest<PublicFaq[]>(
+      `/public/${encodeURIComponent(publicSlug)}/faqs`
+    ),
+
+  listEvents: (publicSlug: string) =>
+    publicRequest<PublicEvent[]>(
+      `/public/${encodeURIComponent(publicSlug)}/events`
+    ),
+
+  listLocations: (publicSlug: string) =>
+    publicRequest<PublicCampusLocation[]>(
+      `/public/${encodeURIComponent(publicSlug)}/locations`
+    ),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════

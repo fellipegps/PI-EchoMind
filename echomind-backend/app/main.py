@@ -29,10 +29,12 @@ from .database import get_db
 from .cors_config import configure_cors
 from .middleware import TimingMiddleware, RequestLogMiddleware, latency_store
 from .schemas import (
-    ChatRequest,
-    FaqCreate, FaqUpdate, FaqResponse,
-    EventCreate, EventUpdate, EventResponse,
-    ConfigUpdate, ConfigResponse,
+    ChatRequest, PublicChatRequest,
+    FaqCreate, FaqUpdate, FaqResponse, PublicFaqResponse,
+    EventCreate, EventUpdate, EventResponse, PublicEventResponse,
+    CampusLocationCreate, CampusLocationUpdate, CampusLocationResponse,
+    PublicCampusLocationResponse,
+    ConfigUpdate, ConfigResponse, PublicInstitutionResponse,
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, RagMetricsResponse, FeedbackRequest, FeedbackResponse,
     CurrentUserResponse,
@@ -147,11 +149,13 @@ router_auth = APIRouter(prefix="/auth", tags=["Autenticação"])
 router_chat = APIRouter(prefix="/chat", tags=["Chat"])
 router_faqs = APIRouter(prefix="/faqs", tags=["Base de Conhecimento"])
 router_events = APIRouter(prefix="/events", tags=["Base de Conhecimento"])
+router_locations = APIRouter(prefix="/locations", tags=["Locais do Campus"])
 router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 router_documents = APIRouter(prefix="/documents", tags=["Documentos"])
 router_feedback = APIRouter(prefix="/feedback", tags=["Feedback"])
+router_public = APIRouter(prefix="/public", tags=["Portal público"])
 router_system = APIRouter(tags=["Sistema"])
 
 
@@ -225,19 +229,16 @@ def get_me(
 #  CHAT  /chat  (núcleo do sistema)
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router_chat.post(
-    "",
-    summary="Chat com streaming da IA via RAG",
-    dependencies=[Depends(enforce_chat_rate_limit)],
-)
-async def chat(request: ChatRequest, db: Session = Depends(get_db)):
-    question = request.message.strip()
-    tenant_id = request.tenant_id.strip()
+async def _stream_chat_for_tenant(
+    *,
+    message: str,
+    tenant_id: str,
+    db: Session,
+):
+    question = message.strip()
     correlation_id = new_correlation_id()
     if not question:
         raise HTTPException(status_code=400, detail="Mensagem vazia.")
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="tenant_id obrigatorio.")
 
     cached = crud.find_cached_faq_answer(question, tenant_id=tenant_id)
     if cached:
@@ -316,6 +317,93 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
                         )
 
     return StreamingResponse(stream_generator(), media_type="text/plain")
+
+
+@router_chat.post(
+    "",
+    summary="Chat legado com streaming da IA via RAG",
+    dependencies=[Depends(enforce_chat_rate_limit)],
+    deprecated=True,
+)
+async def chat(request: ChatRequest, db: Session = Depends(get_db)):
+    tenant_id = request.tenant_id.strip()
+    if not tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id obrigatorio.")
+    return await _stream_chat_for_tenant(
+        message=request.message,
+        tenant_id=tenant_id,
+        db=db,
+    )
+
+
+def _public_config_or_404(db: Session, public_slug: str):
+    config = crud.get_config_by_public_slug(db, public_slug.strip())
+    if config is None:
+        raise HTTPException(status_code=404, detail="Instituição não encontrada.")
+    return config
+
+
+@router_public.get("/{public_slug}", response_model=PublicInstitutionResponse)
+def get_public_institution(
+    public_slug: str,
+    db: Session = Depends(get_db),
+):
+    """Expõe somente os dados institucionais destinados ao portal público."""
+    return _public_config_or_404(db, public_slug)
+
+
+@router_public.get(
+    "/{public_slug}/faqs",
+    response_model=list[PublicFaqResponse],
+)
+def get_public_faqs(
+    public_slug: str,
+    db: Session = Depends(get_db),
+):
+    config = _public_config_or_404(db, public_slug)
+    return crud.get_totem_faqs(db, tenant_id=config.tenant_id)
+
+
+@router_public.get(
+    "/{public_slug}/events",
+    response_model=list[PublicEventResponse],
+)
+def get_public_events(
+    public_slug: str,
+    db: Session = Depends(get_db),
+):
+    config = _public_config_or_404(db, public_slug)
+    return crud.get_public_events(db, tenant_id=config.tenant_id)
+
+
+@router_public.get(
+    "/{public_slug}/locations",
+    response_model=list[PublicCampusLocationResponse],
+)
+def get_public_campus_locations(
+    public_slug: str,
+    db: Session = Depends(get_db),
+):
+    config = _public_config_or_404(db, public_slug)
+    return crud.get_public_campus_locations(db, tenant_id=config.tenant_id)
+
+
+@router_public.post(
+    "/{public_slug}/chat",
+    summary="Chat público institucional com streaming",
+    dependencies=[Depends(enforce_chat_rate_limit)],
+)
+async def public_chat(
+    public_slug: str,
+    request: PublicChatRequest,
+    db: Session = Depends(get_db),
+):
+    config = _public_config_or_404(db, public_slug)
+    return await _stream_chat_for_tenant(
+        message=request.message,
+        tenant_id=config.tenant_id,
+        db=db,
+    )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -415,7 +503,8 @@ def create_event(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     event = crud.create_event(db, payload, tenant_id=current_user.id)
-    rag.index_event(event)
+    if event.published:
+        rag.index_event(event)
     return event
 
 
@@ -430,7 +519,10 @@ def update_event(
     event = crud.update_event(db, event_id, payload, tenant_id=current_user.id)
     if not event:
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
-    rag.reindex_event(event)
+    if event.published:
+        rag.reindex_event(event)
+    else:
+        rag.delete_document(event.id, source="event")
     return event
 
 
@@ -444,6 +536,73 @@ def delete_event(
     if not crud.delete_event(db, event_id, tenant_id=current_user.id):
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
     rag.delete_document(event_id, source="event")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  LOCAIS DO CAMPUS  /locations
+# ══════════════════════════════════════════════════════════════════════════════
+
+@router_locations.get("", response_model=list[CampusLocationResponse])
+def list_campus_locations(
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    ensure_onboarding(db, current_user)
+    return crud.get_campus_locations(db, tenant_id=current_user.id)
+
+
+@router_locations.post("", response_model=CampusLocationResponse, status_code=201)
+def create_campus_location(
+    payload: CampusLocationCreate,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    ensure_onboarding(db, current_user)
+    try:
+        return crud.create_campus_location(db, payload, tenant_id=current_user.id)
+    except crud.CampusLocationNameConflictError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="Já existe um local com esse nome.",
+        ) from exc
+
+
+@router_locations.put("/{location_id}", response_model=CampusLocationResponse)
+def update_campus_location(
+    location_id: str,
+    payload: CampusLocationUpdate,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    try:
+        location = crud.update_campus_location(
+            db,
+            location_id,
+            payload,
+            tenant_id=current_user.id,
+        )
+    except crud.CampusLocationNameConflictError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="Já existe um local com esse nome.",
+        ) from exc
+    if location is None:
+        raise HTTPException(status_code=404, detail="Local não encontrado.")
+    return location
+
+
+@router_locations.delete("/{location_id}", status_code=204)
+def delete_campus_location(
+    location_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    if not crud.delete_campus_location(
+        db,
+        location_id,
+        tenant_id=current_user.id,
+    ):
+        raise HTTPException(status_code=404, detail="Local não encontrado.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -810,9 +969,11 @@ app.include_router(router_auth)
 app.include_router(router_chat)
 app.include_router(router_faqs)
 app.include_router(router_events)
+app.include_router(router_locations)
 app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)
 app.include_router(router_documents)
 app.include_router(router_feedback)
+app.include_router(router_public)
 app.include_router(router_system)

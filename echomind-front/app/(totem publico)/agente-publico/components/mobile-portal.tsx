@@ -8,22 +8,19 @@ import {
   ChevronRight,
   Clock3,
   Loader2,
-  LocateFixed,
   MapPin,
-  Megaphone,
   Navigation,
   Search,
   Send,
   Sparkles,
 } from "lucide-react";
 
-import { configApi, faqApi, streamChat } from "@/lib/api";
-import type { Faq } from "@/lib/api";
+import { publicPortalApi, streamPublicChat } from "@/lib/api";
+import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
 
 import styles from "./mobile-portal.module.css";
 
-type TabId = "chat" | "avisos" | "eventos" | "locais";
-type Coordinates = readonly [number, number];
+type TabId = "chat" | "eventos" | "locais";
 
 type ChatMessage = {
   id: number;
@@ -31,104 +28,11 @@ type ChatMessage = {
   content: string;
 };
 
-type CampusLocation = {
-  id: string;
-  name: string;
-  type: string;
-  details: string;
-  coordinates: Coordinates;
-  position: { x: number; y: number };
-};
-
 const NAV_ITEMS = [
   { id: "chat", label: "Chat", icon: Bot },
-  { id: "avisos", label: "Avisos", icon: Megaphone },
   { id: "eventos", label: "Eventos", icon: CalendarDays },
   { id: "locais", label: "Locais", icon: MapPin },
 ] as const;
-
-const ANNOUNCEMENTS = [
-  {
-    id: "rematricula",
-    category: "Acadêmico",
-    title: "Prazo para rematrícula",
-    date: "Publicado em 10 de julho",
-    description:
-      "O período de rematrícula para o próximo semestre estará aberto até 30 de julho.",
-  },
-  {
-    id: "biblioteca",
-    category: "Atendimento",
-    title: "Horário ampliado da biblioteca",
-    date: "Publicado em 8 de julho",
-    description:
-      "A Biblioteca Central funciona de segunda a sexta, das 7h30 às 22h.",
-  },
-];
-
-const EVENTS = [
-  {
-    id: "semana-tecnologia",
-    day: "15",
-    month: "AGO",
-    title: "Semana da Tecnologia",
-    period: "15 a 19 de agosto",
-    place: "Auditório do Bloco F",
-    description: "Palestras, oficinas e encontros com profissionais de tecnologia.",
-  },
-  {
-    id: "boas-vindas",
-    day: "22",
-    month: "AGO",
-    title: "Encontro de boas-vindas",
-    period: "22 de agosto, às 18h30",
-    place: "Praça central",
-    description: "Integração para estudantes, professores e comunidade acadêmica.",
-  },
-];
-
-const CAMPUS_LOCATIONS: CampusLocation[] = [
-  {
-    id: "portaria-principal",
-    name: "Portaria Principal",
-    type: "Acesso",
-    details: "Entrada principal de estudantes e visitantes.",
-    coordinates: [-16.2945, -48.9452],
-    position: { x: 18, y: 74 },
-  },
-  {
-    id: "bloco-f",
-    name: "Bloco F",
-    type: "Computação e Engenharias",
-    details: "Laboratórios de redes e desenvolvimento de software.",
-    coordinates: [-16.2932, -48.9438],
-    position: { x: 70, y: 30 },
-  },
-  {
-    id: "bloco-a",
-    name: "Bloco A",
-    type: "Atendimento",
-    details: "Secretaria Geral, Financeiro e Atendimento ao Aluno.",
-    coordinates: [-16.2941, -48.9441],
-    position: { x: 54, y: 70 },
-  },
-  {
-    id: "biblioteca",
-    name: "Biblioteca Central",
-    type: "Estudo",
-    details: "Acervo, salas de estudo individual e em grupo.",
-    coordinates: [-16.2938, -48.9445],
-    position: { x: 38, y: 42 },
-  },
-  {
-    id: "bloco-b",
-    name: "Bloco B",
-    type: "Saúde e Odontologia",
-    details: "Clínicas de Odontologia e laboratórios de Anatomia.",
-    coordinates: [-16.2929, -48.9448],
-    position: { x: 28, y: 18 },
-  },
-];
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: 1,
@@ -136,31 +40,53 @@ const INITIAL_MESSAGE: ChatMessage = {
   content: "Olá! Sou o assistente acadêmico. Como posso ajudar você hoje?",
 };
 
-function tenantFromUrl() {
-  if (typeof window === "undefined") return "";
-  return new URLSearchParams(window.location.search).get("tenant")?.trim() ?? "";
+function eventDateParts(eventDate: string) {
+  const [year, month, day] = eventDate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return {
+    day: new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      timeZone: "UTC",
+    }).format(date),
+    month: new Intl.DateTimeFormat("pt-BR", {
+      month: "short",
+      timeZone: "UTC",
+    }).format(date).replace(".", "").toUpperCase(),
+    full: new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(date),
+  };
 }
 
-function distanceInMeters(from: Coordinates, to: Coordinates) {
-  const toRadians = (value: number) => (value * Math.PI) / 180;
-  const earthRadius = 6_371_000;
-  const latitudeDelta = toRadians(to[0] - from[0]);
-  const longitudeDelta = toRadians(to[1] - from[1]);
-  const fromLatitude = toRadians(from[0]);
-  const toLatitude = toRadians(to[0]);
-  const haversine =
-    Math.sin(latitudeDelta / 2) ** 2 +
-    Math.cos(fromLatitude) *
-      Math.cos(toLatitude) *
-      Math.sin(longitudeDelta / 2) ** 2;
-  return earthRadius * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+function schematicDistanceInMeters(
+  from: PublicCampusLocation,
+  to: PublicCampusLocation
+) {
+  return Math.max(25, Math.round(Math.hypot(to.x - from.x, to.y - from.y) * 12));
 }
 
-export function MobilePortal() {
+type MobilePortalProps = {
+  publicSlug?: string;
+};
+
+export function MobilePortal({ publicSlug = "" }: MobilePortalProps) {
   const [activeTab, setActiveTab] = useState<TabId>("chat");
-  const [tenantId] = useState(tenantFromUrl);
+  const normalizedSlug = publicSlug.trim();
   const [companyName, setCompanyName] = useState("Portal Acadêmico");
-  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [faqs, setFaqs] = useState<PublicFaq[]>([]);
+  const [events, setEvents] = useState<PublicEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(Boolean(normalizedSlug));
+  const [eventsError, setEventsError] = useState("");
+  const [locations, setLocations] = useState<PublicCampusLocation[]>([]);
+  const [locationsLoading, setLocationsLoading] = useState(Boolean(normalizedSlug));
+  const [locationsError, setLocationsError] = useState("");
+  const [portalLoading, setPortalLoading] = useState(Boolean(normalizedSlug));
+  const [portalError, setPortalError] = useState(
+    normalizedSlug ? "" : "Link inválido. Solicite à instituição o endereço correto do portal."
+  );
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [chatError, setChatError] = useState("");
@@ -169,11 +95,10 @@ export function MobilePortal() {
   const [locationSearch, setLocationSearch] = useState("");
   const [originId, setOriginId] = useState("");
   const [destinationId, setDestinationId] = useState("");
-  const [gpsCoordinates, setGpsCoordinates] = useState<Coordinates | null>(null);
   const [locationStatus, setLocationStatus] = useState("");
   const [route, setRoute] = useState<{
     originName: string;
-    destination: CampusLocation;
+    destination: PublicCampusLocation;
     distance: number;
     minutes: number;
   } | null>(null);
@@ -182,16 +107,38 @@ export function MobilePortal() {
   const chatScroll = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!tenantId) return;
-    faqApi
-      .listTotem(tenantId)
+    if (!normalizedSlug) return;
+    publicPortalApi
+      .listFaqs(normalizedSlug)
       .then((items) => setFaqs(items.slice(0, 4)))
       .catch(() => setFaqs([]));
-    configApi
-      .getPublic(tenantId)
-      .then((config) => setCompanyName(config.company_name || "Portal Acadêmico"))
-      .catch(() => setCompanyName("Portal Acadêmico"));
-  }, [tenantId]);
+    publicPortalApi
+      .listEvents(normalizedSlug)
+      .then(setEvents)
+      .catch(() => {
+        setEvents([]);
+        setEventsError("Não foi possível carregar os eventos agora.");
+      })
+      .finally(() => setEventsLoading(false));
+    publicPortalApi
+      .listLocations(normalizedSlug)
+      .then(setLocations)
+      .catch(() => {
+        setLocations([]);
+        setLocationsError("Não foi possível carregar os locais agora.");
+      })
+      .finally(() => setLocationsLoading(false));
+    publicPortalApi
+      .getInstitution(normalizedSlug)
+      .then((institution) => {
+        setCompanyName(institution.company_name || "Portal Acadêmico");
+      })
+      .catch(() => {
+        setCompanyName("Portal Acadêmico");
+        setPortalError("Instituição não encontrada. Verifique o endereço e tente novamente.");
+      })
+      .finally(() => setPortalLoading(false));
+  }, [normalizedSlug]);
 
   useEffect(() => {
     if (chatScroll.current) {
@@ -207,7 +154,7 @@ export function MobilePortal() {
   const sendQuestion = async (suggestedQuestion?: string) => {
     const question = (suggestedQuestion ?? input).trim();
     if (!question || sending) return;
-    if (!tenantId) {
+    if (!normalizedSlug || portalError) {
       setChatError("Link inválido. Solicite à instituição o endereço correto do portal.");
       return;
     }
@@ -219,9 +166,9 @@ export function MobilePortal() {
     firstToken.current = true;
     appendMessage("user", question);
 
-    await streamChat(
+    await streamPublicChat(
       question,
-      tenantId,
+      normalizedSlug,
       (token) => {
         if (!token) return;
         if (firstToken.current) {
@@ -256,51 +203,32 @@ export function MobilePortal() {
     void sendQuestion();
   };
 
-  const filteredLocations = CAMPUS_LOCATIONS.filter((location) => {
+  const filteredLocations = locations.filter((location) => {
     const normalizedSearch = locationSearch.trim().toLocaleLowerCase("pt-BR");
     return (
       !normalizedSearch ||
-      `${location.name} ${location.type} ${location.details}`
+      `${location.name} ${location.category} ${location.building ?? ""} ${location.floor ?? ""} ${location.description ?? ""}`
         .toLocaleLowerCase("pt-BR")
         .includes(normalizedSearch)
     );
   });
 
-  const selectDestination = (location: CampusLocation) => {
+  const selectDestination = (location: PublicCampusLocation) => {
     setDestinationId(location.id);
     setRoute(null);
     setLocationStatus(`${location.name} selecionado como destino.`);
   };
 
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationStatus("Geolocalização não disponível neste navegador.");
-      return;
-    }
-    setLocationStatus("Obtendo sua localização...");
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setGpsCoordinates([coords.latitude, coords.longitude]);
-        setOriginId("gps");
-        setRoute(null);
-        setLocationStatus("Localização atual definida como origem.");
-      },
-      () => setLocationStatus("Não foi possível acessar o GPS. Verifique a permissão do navegador."),
-      { enableHighAccuracy: true, timeout: 10_000 }
-    );
-  };
-
   const traceRoute = () => {
-    const destination = CAMPUS_LOCATIONS.find((location) => location.id === destinationId);
-    const storedOrigin = CAMPUS_LOCATIONS.find((location) => location.id === originId);
-    const originCoordinates = originId === "gps" ? gpsCoordinates : storedOrigin?.coordinates;
-    const originName = originId === "gps" ? "Sua localização" : storedOrigin?.name;
+    const destination = locations.find((location) => location.id === destinationId);
+    const storedOrigin = locations.find((location) => location.id === originId);
+    const originName = storedOrigin?.name;
 
-    if (!destination || !originCoordinates || !originName) {
+    if (!destination || !storedOrigin || !originName) {
       setLocationStatus("Selecione a origem e o destino para calcular o trajeto.");
       return;
     }
-    const distance = Math.max(25, Math.round(distanceInMeters(originCoordinates, destination.coordinates) * 1.2));
+    const distance = schematicDistanceInMeters(storedOrigin, destination);
     setRoute({
       originName,
       destination,
@@ -310,8 +238,8 @@ export function MobilePortal() {
     setLocationStatus("Trajeto aproximado calculado.");
   };
 
-  const originLocation = CAMPUS_LOCATIONS.find((location) => location.id === originId);
-  const destinationLocation = CAMPUS_LOCATIONS.find(
+  const originLocation = locations.find((location) => location.id === originId);
+  const destinationLocation = locations.find(
     (location) => location.id === destinationId
   );
 
@@ -360,9 +288,15 @@ export function MobilePortal() {
                 </div>
               </div>
 
-              {!tenantId && (
+              {portalLoading && (
+                <div className={styles.alert} role="status">
+                  Carregando portal da instituição...
+                </div>
+              )}
+
+              {portalError && (
                 <div className={styles.alert} role="alert">
-                  Link inválido. Solicite à instituição o endereço correto do portal.
+                  {portalError}
                 </div>
               )}
 
@@ -415,37 +349,22 @@ export function MobilePortal() {
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
                     placeholder="Digite sua dúvida..."
-                    disabled={sending || !tenantId}
+                    disabled={sending || portalLoading || Boolean(portalError)}
                     autoComplete="off"
                   />
                   <button
                     type="submit"
                     aria-label="Enviar pergunta"
-                    disabled={sending || !input.trim() || !tenantId}
+                    disabled={
+                      sending ||
+                      portalLoading ||
+                      Boolean(portalError) ||
+                      !input.trim()
+                    }
                   >
                     {sending ? <Loader2 className={styles.spin} aria-hidden="true" /> : <Send aria-hidden="true" />}
                   </button>
                 </form>
-              </div>
-            </section>
-          )}
-
-          {activeTab === "avisos" && (
-            <section className={styles.panel} role="tabpanel" aria-labelledby="notices-title">
-              <div className={styles.pageIntro}>
-                <p>Fique por dentro</p>
-                <h2 id="notices-title">Avisos gerais</h2>
-                <span>Informações importantes para sua rotina acadêmica.</span>
-              </div>
-              <div className={styles.cardGrid}>
-                {ANNOUNCEMENTS.map((announcement) => (
-                  <article className={styles.infoCard} key={announcement.id}>
-                    <span className={styles.cardBadge}>{announcement.category}</span>
-                    <h3>{announcement.title}</h3>
-                    <p className={styles.meta}><Clock3 aria-hidden="true" />{announcement.date}</p>
-                    <p>{announcement.description}</p>
-                  </article>
-                ))}
               </div>
             </section>
           )}
@@ -457,18 +376,37 @@ export function MobilePortal() {
                 <h2 id="events-title">Próximos eventos</h2>
                 <span>Atividades para aprender, conectar e participar.</span>
               </div>
+              {eventsLoading && (
+                <div className={styles.alert} role="status">Carregando eventos...</div>
+              )}
+              {eventsError && (
+                <div className={styles.alert} role="alert">{eventsError}</div>
+              )}
+              {!eventsLoading && !eventsError && events.length === 0 && (
+                <p className={styles.emptyState}>Nenhum evento publicado no momento.</p>
+              )}
               <div className={styles.cardGrid}>
-                {EVENTS.map((event) => (
-                  <article className={styles.eventCard} key={event.id}>
-                    <div className={styles.eventDate}><strong>{event.day}</strong><span>{event.month}</span></div>
-                    <div>
-                      <h3>{event.title}</h3>
-                      <p className={styles.meta}><Clock3 aria-hidden="true" />{event.period}</p>
-                      <p className={styles.meta}><MapPin aria-hidden="true" />{event.place}</p>
-                      <p>{event.description}</p>
-                    </div>
-                  </article>
-                ))}
+                {events.map((event) => {
+                  const formattedDate = eventDateParts(event.event_date);
+                  return (
+                    <article className={styles.eventCard} key={event.id}>
+                      <div className={styles.eventDate}>
+                        <strong>{formattedDate.day}</strong>
+                        <span>{formattedDate.month}</span>
+                      </div>
+                      <div>
+                        <h3>{event.title}</h3>
+                        <p className={styles.meta}>
+                          <Clock3 aria-hidden="true" />{formattedDate.full}
+                        </p>
+                        <p className={styles.meta}>
+                          <MapPin aria-hidden="true" />{event.location}
+                        </p>
+                        {event.description && <p>{event.description}</p>}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -478,8 +416,18 @@ export function MobilePortal() {
               <div className={styles.pageIntro}>
                 <p>Encontre seu caminho</p>
                 <h2 id="places-title">Locais do campus</h2>
-                <span>Pesquise um bloco e obtenha uma estimativa de caminhada.</span>
+                <span>Pesquise os espaços cadastrados pela instituição.</span>
               </div>
+
+              {locationsLoading && (
+                <div className={styles.alert} role="status">Carregando locais...</div>
+              )}
+              {locationsError && (
+                <div className={styles.alert} role="alert">{locationsError}</div>
+              )}
+              {!locationsLoading && !locationsError && locations.length === 0 && (
+                <p className={styles.emptyState}>Nenhum local disponível no momento.</p>
+              )}
 
               <div className={styles.locationToolbar}>
                 <label className={styles.searchField}>
@@ -502,15 +450,11 @@ export function MobilePortal() {
                     }}
                   >
                     <option value="">Selecione a origem</option>
-                    {CAMPUS_LOCATIONS.map((location) => (
+                    {locations.map((location) => (
                       <option key={location.id} value={location.id}>{location.name}</option>
                     ))}
-                    {gpsCoordinates && <option value="gps">Minha localização</option>}
                   </select>
                 </label>
-                <button className={styles.gpsButton} type="button" onClick={useCurrentLocation}>
-                  <LocateFixed aria-hidden="true" /> Usar GPS
-                </button>
               </div>
 
               <div className={styles.campusMap} aria-label="Mapa esquemático do campus">
@@ -520,10 +464,10 @@ export function MobilePortal() {
                 {originLocation && destinationLocation && route && (
                   <svg className={styles.routeLine} aria-hidden="true">
                     <line
-                      x1={`${originLocation.position.x}%`}
-                      y1={`${originLocation.position.y}%`}
-                      x2={`${destinationLocation.position.x}%`}
-                      y2={`${destinationLocation.position.y}%`}
+                      x1={`${originLocation.x}%`}
+                      y1={`${originLocation.y}%`}
+                      x2={`${destinationLocation.x}%`}
+                      y2={`${destinationLocation.y}%`}
                     />
                   </svg>
                 )}
@@ -534,7 +478,7 @@ export function MobilePortal() {
                     className={`${styles.mapMarker} ${
                       destinationId === location.id ? styles.mapMarkerActive : ""
                     }`}
-                    style={{ left: `${location.position.x}%`, top: `${location.position.y}%` }}
+                    style={{ left: `${location.x}%`, top: `${location.y}%` }}
                     onClick={() => selectDestination(location)}
                     aria-label={`Selecionar ${location.name} como destino`}
                   >
@@ -556,7 +500,7 @@ export function MobilePortal() {
                   <div>
                     <strong>{route.originName} → {route.destination.name}</strong>
                     <span>Aproximadamente {route.distance} m · {route.minutes} min a pé</span>
-                    <small>Estimativa em linha reta ajustada para caminhada dentro do campus.</small>
+                    <small>Estimativa temporária baseada no mapa esquemático.</small>
                   </div>
                 </div>
               )}
@@ -565,7 +509,14 @@ export function MobilePortal() {
                 {filteredLocations.map((location) => (
                   <button type="button" key={location.id} onClick={() => selectDestination(location)}>
                     <span className={styles.locationPin}><MapPin aria-hidden="true" /></span>
-                    <span><strong>{location.name}</strong><small>{location.type} · {location.details}</small></span>
+                    <span>
+                      <strong>{location.name}</strong>
+                      <small>
+                        {[location.category, location.building, location.floor]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </small>
+                    </span>
                     <ChevronRight aria-hidden="true" />
                   </button>
                 ))}

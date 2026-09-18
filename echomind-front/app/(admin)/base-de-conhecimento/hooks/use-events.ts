@@ -9,11 +9,14 @@ export interface EventFormState {
   event_date: Date | undefined;
   event_type: string;
   description: string;
+  location: string;
+  published: boolean;
 }
 
 export function useEvents() {
   const [events, setEvents] = useState<CompanyEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // ─── Carrega Eventos do backend ──────────────────────────────────────────
   useEffect(() => {
@@ -26,7 +29,7 @@ export function useEvents() {
 
   // ─── Criar / Editar ──────────────────────────────────────────────────────
   const saveEvent = async (form: EventFormState, editingId: string | null) => {
-    if (!form.event_date) return;
+    if (!form.event_date) return false;
 
     const formattedDate = format(form.event_date, "yyyy-MM-dd");
     const payload = {
@@ -34,8 +37,11 @@ export function useEvents() {
       event_date: formattedDate,
       event_type: form.event_type,
       description: form.description || undefined,
+      location: form.location,
+      published: form.published,
     };
 
+    setSaving(true);
     try {
       if (editingId) {
         const updated = await eventApi.update(editingId, payload);
@@ -46,8 +52,12 @@ export function useEvents() {
         setEvents((prev) => [created, ...prev]);
         toast.success("Evento criado!");
       }
+      return true;
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Erro ao salvar evento.");
+      return false;
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -62,5 +72,5 @@ export function useEvents() {
     }
   };
 
-  return { events, loading, saveEvent, deleteEvent };
+  return { events, loading, saving, saveEvent, deleteEvent };
 }

@@ -430,7 +430,6 @@
   gap: 16px;
 }
 
-.infoCard,
 .eventCard {
   border: 1px solid var(--portal-line);
   border-radius: 18px;
@@ -438,41 +437,12 @@
   box-shadow: 0 12px 34px rgba(31, 42, 68, 0.055);
 }
 
-.infoCard {
-  padding: 22px;
-}
-
-.infoCard::before {
-  display: block;
-  width: 36px;
-  height: 4px;
-  margin-bottom: 17px;
-  border-radius: 99px;
-  background: var(--portal-primary);
-  content: "";
-}
-
-.cardBadge {
-  display: inline-block;
-  margin-bottom: 9px;
-  border-radius: 999px;
-  background: var(--portal-primary-soft);
-  padding: 5px 8px;
-  color: var(--portal-primary-dark);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.infoCard h3,
 .eventCard h3 {
   margin: 0 0 10px;
   font-size: 18px;
   letter-spacing: -0.025em;
 }
 
-.infoCard > p:last-child,
 .eventCard > div > p:last-child {
   margin: 14px 0 0;
   color: #4e586d;
@@ -527,7 +497,7 @@
 
 .locationToolbar {
   display: grid;
-  grid-template-columns: minmax(230px, 1.6fr) minmax(190px, 1fr) auto;
+  grid-template-columns: minmax(230px, 1.6fr) minmax(190px, 1fr);
   gap: 9px;
   margin-bottom: 13px;
 }
@@ -565,26 +535,6 @@
   border-radius: 12px;
   background: white;
   padding: 0 10px;
-}
-
-.gpsButton {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid #bcdcc7;
-  border-radius: 12px;
-  background: #effaf3;
-  padding: 0 14px;
-  color: #247345;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.gpsButton svg {
-  width: 17px;
 }
 
 .campusMap {

@@ -4,23 +4,59 @@ crud.py - Operacoes de banco com isolamento por tenant.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import unicodedata
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from functools import lru_cache
 from typing import Optional
 
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
-from .database import CompanyEvent, Config, Faq, Interaction, UnansweredQuestion, utc_now
+from .database import (
+    CampusLocation,
+    CompanyEvent,
+    Config,
+    Faq,
+    Interaction,
+    UnansweredQuestion,
+    utc_now,
+)
 from .middleware import latency_store
-from .schemas import ConfigUpdate, EventCreate, EventUpdate, FaqCreate, FaqUpdate
+from .schemas import (
+    CampusLocationCreate,
+    CampusLocationUpdate,
+    ConfigUpdate,
+    EventCreate,
+    EventUpdate,
+    FaqCreate,
+    FaqUpdate,
+)
 
 
 DEFAULT_TONE = "profissional e cordial"
 DEFAULT_VOICE = "feminina"
 FAQ_CACHE_MATCH_THRESHOLD = 1.0
+PUBLIC_SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def build_public_slug(company_name: str, tenant_id: str) -> str:
+    """Cria um slug legivel, estavel e sem expor o identificador interno."""
+    normalized = unicodedata.normalize("NFKD", company_name or "")
+    ascii_name = normalized.encode("ascii", "ignore").decode("ascii").lower()
+    base = re.sub(r"[^a-z0-9]+", "-", ascii_name).strip("-")
+    base = (base or "instituicao")[:83].rstrip("-")
+    tenant_hash = hashlib.sha256(tenant_id.encode("utf-8")).hexdigest()[:16]
+    return f"{base}-{tenant_hash}"
+
+
+def is_valid_public_slug(public_slug: str) -> bool:
+    return (
+        3 <= len(public_slug) <= 100
+        and PUBLIC_SLUG_PATTERN.fullmatch(public_slug) is not None
+    )
 
 
 def ensure_tenant_onboarded(
@@ -38,6 +74,11 @@ def ensure_tenant_onboarded(
     """
     existing = get_config(db, tenant_id)
     if existing:
+        if not existing.public_slug:
+            existing.public_slug = build_public_slug(existing.company_name, tenant_id)
+            existing.updated_at = utc_now()
+            db.commit()
+            db.refresh(existing)
         return existing
 
     display_name = (company_name or "").strip()
@@ -46,6 +87,7 @@ def ensure_tenant_onboarded(
 
     cfg = Config(
         tenant_id=tenant_id,
+        public_slug=build_public_slug(display_name, tenant_id),
         company_name=display_name,
         description=(
             f"Configure aqui as informacoes oficiais de {display_name} "
@@ -209,6 +251,26 @@ def get_events(db: Session, tenant_id: str) -> list[CompanyEvent]:
     )
 
 
+def get_public_events(
+    db: Session,
+    tenant_id: str,
+    *,
+    today: date | None = None,
+) -> list[CompanyEvent]:
+    """Lista somente eventos publicáveis do tenant, sem datas já encerradas."""
+    current_date = (today or date.today()).isoformat()
+    return (
+        db.query(CompanyEvent)
+        .filter(
+            CompanyEvent.tenant_id == tenant_id,
+            CompanyEvent.published.is_(True),
+            CompanyEvent.event_date >= current_date,
+        )
+        .order_by(CompanyEvent.event_date.asc(), CompanyEvent.id.asc())
+        .all()
+    )
+
+
 def create_event(db: Session, payload: EventCreate, tenant_id: str) -> CompanyEvent:
     event = CompanyEvent(
         tenant_id=tenant_id,
@@ -216,6 +278,8 @@ def create_event(db: Session, payload: EventCreate, tenant_id: str) -> CompanyEv
         event_date=payload.event_date,
         event_type=payload.event_type,
         description=payload.description,
+        location=payload.location,
+        published=payload.published,
     )
     db.add(event)
     db.commit()
@@ -257,17 +321,148 @@ def delete_event(db: Session, event_id: str, tenant_id: str) -> bool:
     return True
 
 
+# Locais do campus
+
+class CampusLocationNameConflictError(ValueError):
+    pass
+
+
+def get_campus_locations(db: Session, tenant_id: str) -> list[CampusLocation]:
+    return (
+        db.query(CampusLocation)
+        .filter(CampusLocation.tenant_id == tenant_id)
+        .order_by(CampusLocation.name.asc(), CampusLocation.id.asc())
+        .all()
+    )
+
+
+def get_public_campus_locations(
+    db: Session,
+    tenant_id: str,
+) -> list[CampusLocation]:
+    return (
+        db.query(CampusLocation)
+        .filter(
+            CampusLocation.tenant_id == tenant_id,
+            CampusLocation.active.is_(True),
+        )
+        .order_by(CampusLocation.name.asc(), CampusLocation.id.asc())
+        .all()
+    )
+
+
+def _campus_location_name_exists(
+    db: Session,
+    *,
+    tenant_id: str,
+    name: str,
+    exclude_id: str | None = None,
+) -> bool:
+    query = db.query(CampusLocation.id).filter(
+        CampusLocation.tenant_id == tenant_id,
+        func.lower(CampusLocation.name) == name.strip().lower(),
+    )
+    if exclude_id is not None:
+        query = query.filter(CampusLocation.id != exclude_id)
+    return query.first() is not None
+
+
+def create_campus_location(
+    db: Session,
+    payload: CampusLocationCreate,
+    tenant_id: str,
+) -> CampusLocation:
+    if _campus_location_name_exists(
+        db,
+        tenant_id=tenant_id,
+        name=payload.name,
+    ):
+        raise CampusLocationNameConflictError
+    location = CampusLocation(
+        tenant_id=tenant_id,
+        **payload.model_dump(),
+    )
+    db.add(location)
+    db.commit()
+    db.refresh(location)
+    return location
+
+
+def update_campus_location(
+    db: Session,
+    location_id: str,
+    payload: CampusLocationUpdate,
+    tenant_id: str,
+) -> Optional[CampusLocation]:
+    location = (
+        db.query(CampusLocation)
+        .filter(
+            CampusLocation.id == location_id,
+            CampusLocation.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if location is None:
+        return None
+    changes = payload.model_dump(exclude_unset=True)
+    if "name" in changes and _campus_location_name_exists(
+        db,
+        tenant_id=tenant_id,
+        name=changes["name"],
+        exclude_id=location.id,
+    ):
+        raise CampusLocationNameConflictError
+    for field, value in changes.items():
+        setattr(location, field, value)
+    location.updated_at = utc_now()
+    db.commit()
+    db.refresh(location)
+    return location
+
+
+def delete_campus_location(
+    db: Session,
+    location_id: str,
+    tenant_id: str,
+) -> bool:
+    location = (
+        db.query(CampusLocation)
+        .filter(
+            CampusLocation.id == location_id,
+            CampusLocation.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if location is None:
+        return False
+    db.delete(location)
+    db.commit()
+    return True
+
+
 # Config
 
 def get_config(db: Session, tenant_id: str) -> Optional[Config]:
     return db.query(Config).filter(Config.tenant_id == tenant_id).first()
 
 
+def get_config_by_public_slug(db: Session, public_slug: str) -> Optional[Config]:
+    if not is_valid_public_slug(public_slug):
+        return None
+    return db.query(Config).filter(Config.public_slug == public_slug).first()
+
+
 def upsert_config(db: Session, payload: ConfigUpdate, tenant_id: str) -> Config:
     cfg = get_config(db, tenant_id)
     if not cfg:
-        cfg = Config(tenant_id=tenant_id)
+        company_name = payload.company_name or "EchoMind Institution"
+        cfg = Config(
+            tenant_id=tenant_id,
+            public_slug=build_public_slug(company_name, tenant_id),
+        )
         db.add(cfg)
+    elif not cfg.public_slug:
+        cfg.public_slug = build_public_slug(cfg.company_name, tenant_id)
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(cfg, field, value)
