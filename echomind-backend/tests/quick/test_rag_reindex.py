@@ -84,7 +84,11 @@ def test_list_tenant_ids_includes_only_indexable_sources(db, rag_modules) -> Non
                 event_date="2026-09-01",
                 event_type="palestra",
             ),
-            Config(tenant_id="tenant-sem-conteudo", company_name="Sem conteudo"),
+            Config(
+                tenant_id="tenant-sem-conteudo",
+                public_slug="sem-conteudo-0f5fb54ff884a3ab",
+                company_name="Sem conteudo",
+            ),
             Document(
                 id="doc-ready",
                 tenant_id="tenant-c",

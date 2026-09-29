@@ -31,7 +31,14 @@ CONFIG_FIELDS = {
     "address",
     "business_hours",
 }
-EVENT_FIELDS = {"title", "event_date", "event_type", "description"}
+EVENT_FIELDS = {
+    "title",
+    "event_date",
+    "event_type",
+    "description",
+    "location",
+    "published",
+}
 
 
 def normalize(text: str) -> str:
@@ -84,12 +91,19 @@ def upsert_config(db, tenant_id: str, payload: dict[str, Any] | None) -> Config 
 
     cfg = db.query(Config).filter(Config.tenant_id == tenant_id).first()
     if not cfg:
-        cfg = Config(tenant_id=tenant_id)
+        company_name = str(payload.get("company_name") or "EchoMind Institution")
+        cfg = Config(
+            tenant_id=tenant_id,
+            public_slug=crud.build_public_slug(company_name, tenant_id),
+        )
         db.add(cfg)
 
     for field in CONFIG_FIELDS:
         if field in payload:
             setattr(cfg, field, payload[field])
+
+    if not cfg.public_slug:
+        cfg.public_slug = crud.build_public_slug(cfg.company_name, tenant_id)
 
     cfg.updated_at = utc_now()
     db.commit()
@@ -199,6 +213,8 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
                 event_date=event_date,
                 event_type=event_type,
                 description=item.get("description"),
+                location=item.get("location") or "Local a definir",
+                published=bool(item.get("published", False)),
             )
             db.add(event)
             created += 1
@@ -219,7 +235,10 @@ def reindex_imported(db, tenant_id: str, faqs: list[Faq], events: list[CompanyEv
         rag.reindex_faq(faq)
 
     for event in events:
-        rag.reindex_event(event)
+        if event.published:
+            rag.reindex_event(event)
+        else:
+            rag.delete_document(event.id, source="event")
 
 
 def parse_args() -> argparse.Namespace:

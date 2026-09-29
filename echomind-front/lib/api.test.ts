@@ -8,6 +8,8 @@ vi.mock("./supabase", () => ({
 
 import {
   documentApi,
+  publicPortalApi,
+  streamPublicChat,
   type DocumentListResponse,
   type DocumentUploadMetadata,
   type KnowledgeDocument,
@@ -162,5 +164,84 @@ describe("documentApi", () => {
     expect(error).toBeInstanceOf(Error);
     expect((error as Error).message).toBe(expectedMessage);
     expect((error as Error).message).not.toContain("stack trace");
+  });
+});
+
+describe("publicPortalApi", () => {
+  const fetchMock = vi.fn<typeof fetch>();
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+    localStorage.clear();
+  });
+
+  it("resolve instituição, FAQs, eventos e locais pelo slug sem enviar tenant ou autenticação", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          public_slug: "unievangelica-anapolis",
+          company_name: "UniEVANGÉLICA",
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]));
+
+    await publicPortalApi.getInstitution("unievangelica-anapolis");
+    await publicPortalApi.listFaqs("unievangelica-anapolis");
+    await publicPortalApi.listEvents("unievangelica-anapolis");
+    await publicPortalApi.listLocations("unievangelica-anapolis");
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      `${API_URL}/public/unievangelica-anapolis`,
+      expect.any(Object)
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      `${API_URL}/public/unievangelica-anapolis/faqs`,
+      expect.any(Object)
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      `${API_URL}/public/unievangelica-anapolis/events`,
+      expect.any(Object)
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      4,
+      `${API_URL}/public/unievangelica-anapolis/locations`,
+      expect.any(Object)
+    );
+    for (const call of fetchMock.mock.calls) {
+      const [url, init] = call;
+      expect(String(url)).not.toContain("tenant");
+      expect(new Headers(init?.headers).has("Authorization")).toBe(false);
+    }
+  });
+
+  it("envia chat público pelo slug sem tenant_id no corpo", async () => {
+    fetchMock.mockResolvedValueOnce(new Response("Resposta pública", { status: 200 }));
+    const tokens: string[] = [];
+    const onDone = vi.fn();
+    const onError = vi.fn();
+
+    await streamPublicChat(
+      "Onde fica a biblioteca?",
+      "unievangelica-anapolis",
+      (token) => tokens.push(token),
+      onDone,
+      onError
+    );
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`${API_URL}/public/unievangelica-anapolis/chat`);
+    expect(JSON.parse(String(init?.body))).toEqual({
+      message: "Onde fica a biblioteca?",
+    });
+    expect(tokens.join("")).toBe("Resposta pública");
+    expect(onDone).toHaveBeenCalledOnce();
+    expect(onError).not.toHaveBeenCalled();
   });
 });

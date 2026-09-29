@@ -18,6 +18,7 @@ BACKEND_ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_POSTGRES_MAJOR = 17
 EXPECTED_TABLES = {
     "alembic_version",
+    "campus_locations",
     "config",
     "document_chunks",
     "document_chunk_parents",
@@ -76,6 +77,112 @@ def test_pgvector_executes_real_vector_operation(postgres_engine: Engine) -> Non
         ).scalar_one()
 
     assert distance == pytest.approx(1.0)
+
+
+def test_config_has_unique_required_public_slug_and_keeps_rls(
+    postgres_engine: Engine,
+) -> None:
+    inspector = inspect(postgres_engine)
+    columns = {
+        column["name"]: column
+        for column in inspector.get_columns("config")
+    }
+    unique_constraints = {
+        constraint["name"]: constraint["column_names"]
+        for constraint in inspector.get_unique_constraints("config")
+    }
+    checks = {
+        constraint["name"]
+        for constraint in inspector.get_check_constraints("config")
+    }
+
+    assert columns["public_slug"]["nullable"] is False
+    assert unique_constraints["uq_config_public_slug"] == ["public_slug"]
+    assert "ck_config_public_slug_length" in checks
+
+    with postgres_engine.connect() as connection:
+        rls_enabled = connection.execute(
+            text(
+                "SELECT relrowsecurity FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE n.nspname = 'public' AND c.relname = 'config'"
+            )
+        ).scalar_one()
+
+    assert rls_enabled is True
+
+
+def test_events_have_publication_fields_index_and_keep_rls(
+    postgres_engine: Engine,
+) -> None:
+    inspector = inspect(postgres_engine)
+    columns = {
+        column["name"]: column
+        for column in inspector.get_columns("events")
+    }
+    indexes = {
+        index["name"]: index["column_names"]
+        for index in inspector.get_indexes("events")
+    }
+
+    assert columns["location"]["nullable"] is False
+    assert columns["published"]["nullable"] is False
+    assert indexes["ix_events_tenant_published_date"] == [
+        "tenant_id",
+        "published",
+        "event_date",
+    ]
+
+    with postgres_engine.connect() as connection:
+        rls_enabled = connection.execute(
+            text(
+                "SELECT relrowsecurity FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE n.nspname = 'public' AND c.relname = 'events'"
+            )
+        ).scalar_one()
+
+    assert rls_enabled is True
+
+
+def test_campus_locations_are_bounded_indexed_and_rls_enabled(
+    postgres_engine: Engine,
+) -> None:
+    inspector = inspect(postgres_engine)
+    columns = {
+        column["name"]: column
+        for column in inspector.get_columns("campus_locations")
+    }
+    indexes = {
+        index["name"]: index["column_names"]
+        for index in inspector.get_indexes("campus_locations")
+    }
+    checks = {
+        constraint["name"]
+        for constraint in inspector.get_check_constraints("campus_locations")
+    }
+
+    assert columns["tenant_id"]["nullable"] is False
+    assert columns["x"]["nullable"] is False
+    assert columns["y"]["nullable"] is False
+    assert indexes["ix_campus_locations_tenant_active_name"] == [
+        "tenant_id",
+        "active",
+        "name",
+    ]
+    assert "ck_campus_locations_x_range" in checks
+    assert "ck_campus_locations_y_range" in checks
+
+    with postgres_engine.connect() as connection:
+        rls_enabled = connection.execute(
+            text(
+                "SELECT relrowsecurity FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE n.nspname = 'public' AND c.relname = 'campus_locations'"
+            )
+        ).scalar_one()
+
+    assert rls_enabled is True
 
 
 def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine) -> None:

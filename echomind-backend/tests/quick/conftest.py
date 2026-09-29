@@ -269,6 +269,8 @@ def sample_event_data() -> dict:
         "event_date": "2025-08-20",
         "event_type": "palestra",
         "description": "Palestras e workshops para alunos.",
+        "location": "Auditório Central",
+        "published": True,
     }
 
 

@@ -19,6 +19,12 @@ class ChatRequest(BaseModel):
     tenant_id: str = Field(..., min_length=1)
 
 
+class PublicChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000, examples=["Onde fica a secretaria?"])
+
+    model_config = {"extra": "forbid"}
+
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  FAQ
@@ -49,6 +55,14 @@ class FaqResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PublicFaqResponse(BaseModel):
+    id: str
+    question: str
+    answer: str
+
+    model_config = {"from_attributes": True}
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  EVENTS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -58,6 +72,8 @@ class EventCreate(BaseModel):
     event_date: str    = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", examples=["2025-12-31"])
     event_type: str    = Field(..., examples=["palestra"])
     description: Optional[str] = Field(None, max_length=2000)
+    location: str = Field(default="Local a definir", min_length=2, max_length=300)
+    published: bool = False
 
     @field_validator("event_type")
     @classmethod
@@ -73,6 +89,18 @@ class EventUpdate(BaseModel):
     event_date: Optional[str]  = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     event_type: Optional[str]  = None
     description: Optional[str] = Field(None, max_length=2000)
+    location: Optional[str] = Field(None, min_length=2, max_length=300)
+    published: Optional[bool] = None
+
+    @field_validator("event_type")
+    @classmethod
+    def validate_event_type(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        allowed = {"palestra", "feriado", "promocao", "workshop", "reuniao", "evento_social", "outro"}
+        if v not in allowed:
+            raise ValueError(f"Tipo inválido. Permitidos: {allowed}")
+        return v
 
 
 class EventResponse(BaseModel):
@@ -81,7 +109,100 @@ class EventResponse(BaseModel):
     event_date: str
     event_type: str
     description: Optional[str]
+    location: str
+    published: bool
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  LOCAIS DO CAMPUS
+# ══════════════════════════════════════════════════════════════════════════════
+
+class CampusLocationCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=200)
+    description: Optional[str] = Field(None, max_length=2000)
+    category: str = Field(default="outro", min_length=2, max_length=100)
+    floor: Optional[str] = Field(None, max_length=50)
+    building: Optional[str] = Field(None, max_length=100)
+    x: float = Field(..., ge=0, le=100)
+    y: float = Field(..., ge=0, le=100)
+    active: bool = True
+
+    @field_validator("name", "category")
+    @classmethod
+    def normalize_required_text(cls, value: str) -> str:
+        normalized = value.strip()
+        if len(normalized) < 2:
+            raise ValueError("O campo deve ter pelo menos 2 caracteres.")
+        return normalized
+
+    @field_validator("description", "floor", "building")
+    @classmethod
+    def normalize_optional_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return value.strip() or None
+
+    model_config = {"extra": "forbid"}
+
+
+class CampusLocationUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=200)
+    description: Optional[str] = Field(None, max_length=2000)
+    category: Optional[str] = Field(None, min_length=2, max_length=100)
+    floor: Optional[str] = Field(None, max_length=50)
+    building: Optional[str] = Field(None, max_length=100)
+    x: Optional[float] = Field(None, ge=0, le=100)
+    y: Optional[float] = Field(None, ge=0, le=100)
+    active: Optional[bool] = None
+
+    @field_validator("name", "category")
+    @classmethod
+    def normalize_required_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if len(normalized) < 2:
+            raise ValueError("O campo deve ter pelo menos 2 caracteres.")
+        return normalized
+
+    @field_validator("description", "floor", "building")
+    @classmethod
+    def normalize_optional_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return value.strip() or None
+
+    model_config = {"extra": "forbid"}
+
+
+class CampusLocationResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str]
+    category: str
+    floor: Optional[str]
+    building: Optional[str]
+    x: float
+    y: float
+    active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class PublicCampusLocationResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str]
+    category: str
+    floor: Optional[str]
+    building: Optional[str]
+    x: float
+    y: float
 
     model_config = {"from_attributes": True}
 
@@ -103,6 +224,7 @@ class ConfigUpdate(BaseModel):
 
 class ConfigResponse(BaseModel):
     id: str
+    public_slug: str
     company_name: str
     description: Optional[str]
     tone_of_voice: str
@@ -112,6 +234,29 @@ class ConfigResponse(BaseModel):
     address: Optional[str]
     business_hours: Optional[str]
     updated_at: Optional[datetime]
+
+    model_config = {"from_attributes": True}
+
+
+class PublicEventResponse(BaseModel):
+    id: str
+    title: str
+    event_date: str
+    event_type: str
+    description: Optional[str]
+    location: str
+
+    model_config = {"from_attributes": True}
+
+
+class PublicInstitutionResponse(BaseModel):
+    public_slug: str
+    company_name: str
+    description: Optional[str]
+    website: Optional[str]
+    phone: Optional[str]
+    address: Optional[str]
+    business_hours: Optional[str]
 
     model_config = {"from_attributes": True}
 

@@ -1209,6 +1209,8 @@ class RAGEngine:
 
     def index_event(self, event: CompanyEvent) -> None:
         desc = f"\nDescrição: {event.description}" if event.description else ""
+        event_location = getattr(event, "location", None)
+        location = f"\nLocal: {event_location}" if event_location else ""
         self._upsert_document(
             source_id=event.id,
             source_type="event",
@@ -1216,6 +1218,7 @@ class RAGEngine:
                 f"Evento: {event.title}\n"
                 f"Data: {event.event_date}\n"
                 f"Tipo: {event.event_type}"
+                f"{location}"
                 f"{desc}"
             ),
         )

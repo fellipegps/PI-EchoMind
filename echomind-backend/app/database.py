@@ -78,6 +78,14 @@ class Faq(Base):
 class CompanyEvent(Base):
     """Eventos e datas institucionais."""
     __tablename__ = "events"
+    __table_args__ = (
+        Index(
+            "ix_events_tenant_published_date",
+            "tenant_id",
+            "published",
+            "event_date",
+        ),
+    )
 
     id          = Column(String, primary_key=True, default=new_uuid)
     tenant_id   = Column(String, nullable=False, index=True)
@@ -85,16 +93,59 @@ class CompanyEvent(Base):
     event_date  = Column(String, nullable=False)   # formato: YYYY-MM-DD
     event_type  = Column(String, nullable=False)
     description = Column(Text, nullable=True)
+    location    = Column(String(300), nullable=False, default="Local a definir")
+    published   = Column(Boolean, nullable=False, default=False)
     created_at  = Column(DateTime, default=utc_now, nullable=False)
     updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+
+class CampusLocation(Base):
+    """Ponto navegável do mapa esquemático de um campus por tenant."""
+    __tablename__ = "campus_locations"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id",
+            "name",
+            name="uq_campus_locations_tenant_name",
+        ),
+        CheckConstraint("x >= 0 AND x <= 100", name="ck_campus_locations_x_range"),
+        CheckConstraint("y >= 0 AND y <= 100", name="ck_campus_locations_y_range"),
+        Index(
+            "ix_campus_locations_tenant_active_name",
+            "tenant_id",
+            "active",
+            "name",
+        ),
+    )
+
+    id          = Column(String, primary_key=True, default=new_uuid)
+    tenant_id   = Column(String, nullable=False, index=True)
+    name        = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    category    = Column(String(100), nullable=False, default="outro")
+    floor       = Column(String(50), nullable=True)
+    building    = Column(String(100), nullable=True)
+    x           = Column(Float, nullable=False)
+    y           = Column(Float, nullable=False)
+    active      = Column(Boolean, nullable=False, default=True)
+    created_at  = Column(DateTime, default=utc_now, nullable=False)
+    updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
 
 class Config(Base):
     """Configurações da instituição (singleton – um registro por instalação)."""
     __tablename__ = "config"
+    __table_args__ = (
+        UniqueConstraint("public_slug", name="uq_config_public_slug"),
+        CheckConstraint(
+            "length(public_slug) BETWEEN 3 AND 100",
+            name="ck_config_public_slug_length",
+        ),
+    )
 
     id              = Column(String, primary_key=True, default=new_uuid)
     tenant_id       = Column(String, nullable=False, index=True)
+    public_slug     = Column(String(100), nullable=False)
     company_name    = Column(String, nullable=False, default="EchoMind Institution")
     description     = Column(Text, nullable=True)
     tone_of_voice   = Column(String, default="profissional e cordial")

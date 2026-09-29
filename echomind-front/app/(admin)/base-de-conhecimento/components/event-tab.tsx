@@ -16,15 +16,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
 export function EventTab() {
-  const { events, saveEvent, deleteEvent } = useEvents();
+  const { events, loading, saving, saveEvent, deleteEvent } = useEvents();
   
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -34,7 +42,9 @@ export function EventTab() {
     title: "", 
     event_date: undefined, 
     event_type: "outro", 
-    description: "" 
+    description: "",
+    location: "",
+    published: false,
   });
 
   const filteredEvents = events.filter((e) => 
@@ -52,21 +62,30 @@ export function EventTab() {
         event_date: new Date(event.event_date + "T12:00:00"),
         event_type: event.event_type,
         description: event.description || "",
+        location: event.location,
+        published: event.published,
       });
     } else {
-      setForm({ title: "", event_date: undefined, event_type: "outro", description: "" });
+      setForm({
+        title: "",
+        event_date: undefined,
+        event_type: "outro",
+        description: "",
+        location: "",
+        published: false,
+      });
     }
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
-    if (!form.title.trim() || !form.event_date) {
-      toast.error("Preencha título e data");
+  const handleSave = async () => {
+    if (!form.title.trim() || !form.event_date || !form.location.trim()) {
+      toast.error("Preencha título, data e local");
       return;
     }
-    
-    saveEvent(form, editingEvent?.id || null);
-    setDialogOpen(false);
+
+    const saved = await saveEvent(form, editingEvent?.id || null);
+    if (saved) setDialogOpen(false);
   };
 
   return (
@@ -94,6 +113,7 @@ export function EventTab() {
                 <TableHead>Título</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead>Tipo</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Descrição</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -108,21 +128,51 @@ export function EventTab() {
                   <TableCell>
                     <Badge variant="outline">{getEventTypeLabel(event.event_type)}</Badge>
                   </TableCell>
+                  <TableCell>
+                    <Badge variant={event.published ? "default" : "secondary"}>
+                      {event.published ? "Publicado" : "Rascunho"}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="hidden md:table-cell max-w-50 truncate text-muted-foreground">
                     {event.description || "—"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openDialog(event)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openDialog(event)}
+                        aria-label={`Editar ${event.title}`}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteEvent(event.id)} className="text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteEvent(event.id)}
+                        className="text-destructive"
+                        aria-label={`Excluir ${event.title}`}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
+              {!loading && filteredEvents.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    Nenhum evento encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    Carregando eventos...
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -132,6 +182,9 @@ export function EventTab() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingEvent ? "Editar Evento" : "Novo Evento"}</DialogTitle>
+            <DialogDescription>
+              Defina os dados do evento e escolha se ele ficará visível no portal público.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -182,6 +235,17 @@ export function EventTab() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="event-location">Local</Label>
+              <Input
+                id="event-location"
+                value={form.location}
+                onChange={(event) => setForm({ ...form, location: event.target.value })}
+                placeholder="Ex: Auditório do Bloco F"
+                maxLength={300}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label>Descrição (opcional)</Label>
               <Textarea 
                 value={form.description} 
@@ -190,10 +254,27 @@ export function EventTab() {
                 rows={3} 
               />
             </div>
+
+
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="space-y-1">
+                <Label htmlFor="event-published">Publicar no portal</Label>
+                <p className="text-sm text-muted-foreground">
+                  Somente eventos publicados e ainda não encerrados aparecem para estudantes.
+                </p>
+              </div>
+              <Switch
+                id="event-published"
+                checked={form.published}
+                onCheckedChange={(published) => setForm({ ...form, published })}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
+            <Button onClick={() => void handleSave()} disabled={saving}>
+              {saving ? "Salvando..." : "Salvar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
