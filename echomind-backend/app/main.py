@@ -1,5 +1,5 @@
 """
-EchoMind AI Totem - Backend Principal
+EchoMind Web - Backend Principal
 FastAPI + LangChain + Groq + pgvector
 """
 
@@ -133,8 +133,8 @@ async def lifespan(app: FastAPI):
 # ─── App & CORS ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="EchoMind AI Totem API",
-    description="Backend para o sistema de Totem de IA com RAG sobre pgvector",
+    title="EchoMind Web API",
+    description="Backend da aplicação web responsiva de atendimento, com foco em dispositivos móveis e RAG sobre pgvector",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -361,7 +361,7 @@ def get_public_faqs(
     db: Session = Depends(get_db),
 ):
     config = _public_config_or_404(db, public_slug)
-    return crud.get_totem_faqs(db, tenant_id=config.tenant_id)
+    return crud.get_chatbot_faqs(db, tenant_id=config.tenant_id)
 
 
 @router_public.get(
@@ -419,13 +419,13 @@ def list_faqs(
     return crud.get_faqs(db, tenant_id=current_user.id)
 
 
-@router_faqs.get("/totem", response_model=list[FaqResponse])
-def list_totem_faqs(
+@router_faqs.get("/chatbot", response_model=list[FaqResponse])
+def list_chatbot_faqs(
     tenant_id: str = Query(..., min_length=1),
     db: Session = Depends(get_db),
 ):
-    """Retorna apenas as FAQs marcadas para exibição no totem (máx. 4)."""
-    return crud.get_totem_faqs(db, tenant_id=tenant_id)
+    """Retorna apenas as FAQs marcadas para exibição no chatbot (máx. 4)."""
+    return crud.get_chatbot_faqs(db, tenant_id=tenant_id)
 
 
 @router_faqs.post("", response_model=FaqResponse, status_code=201)
@@ -455,18 +455,18 @@ def update_faq(
     return faq
 
 
-@router_faqs.patch("/{faq_id}/toggle-totem", response_model=FaqResponse)
-def toggle_totem(
+@router_faqs.patch("/{faq_id}/toggle-chatbot", response_model=FaqResponse)
+def toggle_chatbot(
     faq_id: str,
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
 ):
-    """Ativa ou desativa a exibição da FAQ no totem (limite: 4 FAQs ativas)."""
-    faq = crud.toggle_faq_totem(db, faq_id, tenant_id=current_user.id)
+    """Ativa ou desativa a exibição da FAQ no chatbot (limite: 4 FAQs ativas)."""
+    faq = crud.toggle_faq_chatbot(db, faq_id, tenant_id=current_user.id)
     if faq is None:
         raise HTTPException(status_code=404, detail="FAQ não encontrada.")
     if faq == "limit_exceeded":
-        raise HTTPException(status_code=409, detail="Limite máximo de 4 FAQs no totem atingido.")
+        raise HTTPException(status_code=409, detail="Limite máximo de 4 FAQs no chatbot atingido.")
     return faq
 
 
@@ -949,7 +949,7 @@ def save_response_feedback(
     payload: FeedbackRequest,
     db: Session = Depends(get_db),
 ):
-    """Registra avaliação simples do usuário sobre a resposta do totem."""
+    """Registra avaliação simples do usuário sobre a resposta do chatbot."""
     crud.save_feedback(
         db,
         question=payload.question.strip(),

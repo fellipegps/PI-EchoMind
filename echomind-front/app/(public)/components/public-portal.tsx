@@ -18,7 +18,7 @@ import {
 import { publicPortalApi, streamPublicChat } from "@/lib/api";
 import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
 
-import styles from "./mobile-portal.module.css";
+import styles from "./public-portal.module.css";
 
 type TabId = "chat" | "eventos" | "locais";
 
@@ -68,11 +68,11 @@ function schematicDistanceInMeters(
   return Math.max(25, Math.round(Math.hypot(to.x - from.x, to.y - from.y) * 12));
 }
 
-type MobilePortalProps = {
+type PublicPortalProps = {
   publicSlug?: string;
 };
 
-export function MobilePortal({ publicSlug = "" }: MobilePortalProps) {
+export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
   const [activeTab, setActiveTab] = useState<TabId>("chat");
   const normalizedSlug = publicSlug.trim();
   const [companyName, setCompanyName] = useState("Portal Acadêmico");

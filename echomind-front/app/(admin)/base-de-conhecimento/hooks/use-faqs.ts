@@ -27,7 +27,7 @@ export function useFaqs() {
         setFaqs((prev) => prev.map((f) => (f.id === editingId ? updated : f)));
         toast.success("FAQ atualizada!");
       } else {
-        const created = await faqApi.create({ ...form, show_on_totem: false });
+        const created = await faqApi.create({ ...form, show_in_chatbot: false });
         setFaqs((prev) => [created, ...prev]);
         toast.success("FAQ criada!");
       }
@@ -48,16 +48,16 @@ export function useFaqs() {
     }
   };
 
-  // ─── Toggle Totem ─────────────────────────────────────────────────────────
-  const toggleTotemStatus = async (id: string) => {
+  // ─── Toggle Chatbot ─────────────────────────────────────────────────────────
+  const toggleChatbotStatus = async (id: string) => {
     try {
-      const updated = await faqApi.toggleTotem(id);
+      const updated = await faqApi.toggleChatbot(id);
       setFaqs((prev) => prev.map((f) => (f.id === id ? updated : f)));
     } catch (err: unknown) {
-      // Backend retorna 409 quando limite de 4 FAQs no totem é atingido
-      toast.error(err instanceof Error ? err.message : "Erro ao alterar status do totem.");
+      // Backend retorna 409 quando limite de 4 FAQs no chatbot é atingido
+      toast.error(err instanceof Error ? err.message : "Erro ao alterar status do chatbot.");
     }
   };
 
-  return { faqs, loading, saveFaq, deleteFaq, toggleTotemStatus };
+  return { faqs, loading, saveFaq, deleteFaq, toggleChatbotStatus };
 }

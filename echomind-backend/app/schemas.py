@@ -33,20 +33,20 @@ class PublicChatRequest(BaseModel):
 class FaqCreate(BaseModel):
     question: str = Field(..., min_length=5, max_length=500)
     answer: str   = Field(..., min_length=5, max_length=4000)
-    show_on_totem: bool = False
+    show_in_chatbot: bool = False
 
 
 class FaqUpdate(BaseModel):
     question: Optional[str] = Field(None, min_length=5, max_length=500)
     answer: Optional[str]   = Field(None, min_length=5, max_length=4000)
-    show_on_totem: Optional[bool] = None
+    show_in_chatbot: Optional[bool] = None
 
 
 class FaqResponse(BaseModel):
     id: str
     question: str
     answer: str
-    show_on_totem: bool
+    show_in_chatbot: bool
     total_consults: int = 0
     positive_feedback: int = 0
     negative_feedback: int = 0
@@ -215,7 +215,7 @@ class ConfigUpdate(BaseModel):
     company_name: Optional[str]       = Field(None, min_length=2, max_length=200)
     description: Optional[str]        = Field(None, max_length=5000)
     tone_of_voice: Optional[str]      = None
-    totem_voice_gender: Optional[str] = None
+    chat_voice_gender: Optional[str] = None
     website: Optional[str]            = Field(None, max_length=500)
     phone: Optional[str]              = Field(None, max_length=30)
     address: Optional[str]            = Field(None, max_length=500)
@@ -228,7 +228,7 @@ class ConfigResponse(BaseModel):
     company_name: str
     description: Optional[str]
     tone_of_voice: str
-    totem_voice_gender: str
+    chat_voice_gender: str
     website: Optional[str]
     phone: Optional[str]
     address: Optional[str]

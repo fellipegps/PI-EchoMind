@@ -258,7 +258,7 @@ def sample_faq_data() -> dict:
     return {
         "question": "Como faço minha matrícula?",
         "answer": "Compareça à secretaria com seus documentos.",
-        "show_on_totem": False,
+        "show_in_chatbot": False,
     }
 
 
@@ -280,7 +280,7 @@ def sample_config_data() -> dict:
         "company_name": "UniEVANGÉLICA",
         "description": "Instituição de ensino superior.",
         "tone_of_voice": "profissional e cordial",
-        "totem_voice_gender": "feminina",
+        "chat_voice_gender": "feminina",
         "website": "https://www.unievangelica.edu.br",
         "phone": "(62) 3310-6600",
         "address": "Av. Universitária Km 3,5 - Anápolis, GO",

@@ -25,7 +25,7 @@ export interface Faq {
   id: string;
   question: string;
   answer: string;
-  show_on_totem: boolean;
+  show_in_chatbot: boolean;
   created_at: string;
 }
 
@@ -79,7 +79,7 @@ export interface Config {
   company_name: string;
   description: string | null;
   tone_of_voice: string;
-  totem_voice_gender: string;
+  chat_voice_gender: string;
   website: string | null;
   phone: string | null;
   address: string | null;
@@ -487,17 +487,17 @@ export function streamPublicChat(
 export const faqApi = {
   list: () => request<Faq[]>("/faqs"),
 
-  listTotem: (tenantId: string) =>
-    publicRequest<Faq[]>(`/faqs/totem?tenant_id=${encodeURIComponent(tenantId)}`),
+  listChatbot: (tenantId: string) =>
+    publicRequest<Faq[]>(`/faqs/chatbot?tenant_id=${encodeURIComponent(tenantId)}`),
 
-  create: (data: { question: string; answer: string; show_on_totem?: boolean }) =>
+  create: (data: { question: string; answer: string; show_in_chatbot?: boolean }) =>
     request<Faq>("/faqs", { method: "POST", body: JSON.stringify(data) }),
 
-  update: (id: string, data: Partial<{ question: string; answer: string; show_on_totem: boolean }>) =>
+  update: (id: string, data: Partial<{ question: string; answer: string; show_in_chatbot: boolean }>) =>
     request<Faq>(`/faqs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
-  toggleTotem: (id: string) =>
-    request<Faq>(`/faqs/${id}/toggle-totem`, { method: "PATCH" }),
+  toggleChatbot: (id: string) =>
+    request<Faq>(`/faqs/${id}/toggle-chatbot`, { method: "PATCH" }),
 
   delete: (id: string) =>
     request<void>(`/faqs/${id}`, { method: "DELETE" }),
@@ -646,7 +646,7 @@ export const dashboardApi = {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  FEEDBACK DO TOTEM
+//  FEEDBACK DO CHATBOT
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const feedbackApi = {

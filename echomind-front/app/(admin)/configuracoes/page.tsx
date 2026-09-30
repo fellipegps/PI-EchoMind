@@ -23,7 +23,7 @@ export default function SettingsPage() {
     company_name: "",
     description: "",
     tone_of_voice: "profissional e cordial",
-    totem_voice_gender: "feminina",
+    chat_voice_gender: "feminina",
     website: "",
     phone: "",
     address: "",
@@ -117,10 +117,10 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Voz do Totem</Label>
+                <Label>Voz do Chatbot</Label>
                 <Select
-                  value={form.totem_voice_gender ?? "feminina"}
-                  onValueChange={(v) => setForm({ ...form, totem_voice_gender: v })}
+                  value={form.chat_voice_gender ?? "feminina"}
+                  onValueChange={(v) => setForm({ ...form, chat_voice_gender: v })}
                 >
                   <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
                   <SelectContent>

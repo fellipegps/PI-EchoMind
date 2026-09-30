@@ -97,14 +97,14 @@ def test_public_faqs_are_isolated_by_resolved_tenant_and_hide_internal_metrics(
         tenant_id="tenant-a",
         question="Pergunta exclusiva do tenant A?",
         answer="Resposta exclusiva do tenant A.",
-        show_on_totem=True,
+        show_in_chatbot=True,
         total_consults=42,
     )
     faq_b = Faq(
         tenant_id="tenant-b",
         question="Pergunta exclusiva do tenant B?",
         answer="Resposta exclusiva do tenant B.",
-        show_on_totem=True,
+        show_in_chatbot=True,
     )
     db.add_all([config_a, config_b, faq_a, faq_b])
     db.commit()

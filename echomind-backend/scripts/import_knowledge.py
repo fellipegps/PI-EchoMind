@@ -25,7 +25,7 @@ CONFIG_FIELDS = {
     "company_name",
     "description",
     "tone_of_voice",
-    "totem_voice_gender",
+    "chat_voice_gender",
     "website",
     "phone",
     "address",
@@ -61,9 +61,9 @@ def load_template(path: Path) -> dict[str, Any]:
     if not isinstance(faqs, list) or not faqs:
         raise SystemExit("O template precisa conter uma lista nao vazia em 'faqs'.")
 
-    totem_count = sum(1 for item in faqs if bool(item.get("show_on_totem")))
-    if totem_count > 4:
-        raise SystemExit("O template nao pode marcar mais de 4 FAQs com show_on_totem=true.")
+    chatbot_count = sum(1 for item in faqs if bool(item.get("show_in_chatbot")))
+    if chatbot_count > 4:
+        raise SystemExit("O template nao pode marcar mais de 4 FAQs com show_in_chatbot=true.")
 
     seen_questions: set[str] = set()
     for index, item in enumerate(faqs, start=1):
@@ -126,7 +126,7 @@ def upsert_faqs(db, tenant_id: str, rows: list[dict[str, Any]]) -> tuple[list[Fa
 
         if faq:
             faq.answer = item["answer"].strip()
-            faq.show_on_totem = bool(item.get("show_on_totem", False))
+            faq.show_in_chatbot = bool(item.get("show_in_chatbot", False))
             faq.updated_at = utc_now()
             updated += 1
         else:
@@ -134,7 +134,7 @@ def upsert_faqs(db, tenant_id: str, rows: list[dict[str, Any]]) -> tuple[list[Fa
                 tenant_id=tenant_id,
                 question=question,
                 answer=item["answer"].strip(),
-                show_on_totem=bool(item.get("show_on_totem", False)),
+                show_in_chatbot=bool(item.get("show_in_chatbot", False)),
             )
             db.add(faq)
             created += 1
@@ -145,16 +145,16 @@ def upsert_faqs(db, tenant_id: str, rows: list[dict[str, Any]]) -> tuple[list[Fa
     for faq in imported:
         db.refresh(faq)
 
-    enforce_totem_limit(db, tenant_id, imported)
+    enforce_chatbot_limit(db, tenant_id, imported)
     crud.get_cached_faq_answers.cache_clear()
     return imported, created, updated
 
 
-def enforce_totem_limit(db, tenant_id: str, imported: list[Faq]) -> None:
-    active_imported_ids = {faq.id for faq in imported if faq.show_on_totem}
+def enforce_chatbot_limit(db, tenant_id: str, imported: list[Faq]) -> None:
+    active_imported_ids = {faq.id for faq in imported if faq.show_in_chatbot}
     active = (
         db.query(Faq)
-        .filter(Faq.tenant_id == tenant_id, Faq.show_on_totem == True)
+        .filter(Faq.tenant_id == tenant_id, Faq.show_in_chatbot == True)
         .order_by(Faq.created_at.asc())
         .all()
     )
@@ -167,12 +167,12 @@ def enforce_totem_limit(db, tenant_id: str, imported: list[Faq]) -> None:
             break
         if faq.id in active_imported_ids:
             continue
-        faq.show_on_totem = False
+        faq.show_in_chatbot = False
         faq.updated_at = utc_now()
         active.remove(faq)
 
     if len(active) > 4:
-        raise SystemExit("Nao foi possivel respeitar o limite de 4 FAQs no totem.")
+        raise SystemExit("Nao foi possivel respeitar o limite de 4 FAQs no chatbot.")
 
     db.commit()
 

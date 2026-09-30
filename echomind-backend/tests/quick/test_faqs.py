@@ -13,15 +13,15 @@ class TestCreateFaq:
         data = resp.json()
         assert data["question"] == sample_faq_data["question"]
         assert data["answer"] == sample_faq_data["answer"]
-        assert data["show_on_totem"] is False
+        assert data["show_in_chatbot"] is False
         assert "id" in data
         assert "created_at" in data
 
-    def test_create_faq_show_on_totem(self, client: TestClient, sample_faq_data: dict):
-        payload = {**sample_faq_data, "show_on_totem": True}
+    def test_create_faq_show_in_chatbot(self, client: TestClient, sample_faq_data: dict):
+        payload = {**sample_faq_data, "show_in_chatbot": True}
         resp = client.post("/faqs", json=payload)
         assert resp.status_code == 201
-        assert resp.json()["show_on_totem"] is True
+        assert resp.json()["show_in_chatbot"] is True
 
     def test_create_faq_question_too_short(self, client: TestClient):
         resp = client.post("/faqs", json={"question": "OK?", "answer": "Sim."})
@@ -49,17 +49,17 @@ class TestListFaqs:
         assert resp.status_code == 200
         assert len(resp.json()) == 2
 
-    def test_list_totem_faqs_only_marked(self, client: TestClient, sample_faq_data: dict):
-        # Cria 2 FAQs: 1 no totem, 1 fora
-        client.post("/faqs", json={**sample_faq_data, "show_on_totem": True})
+    def test_list_chatbot_faqs_only_marked(self, client: TestClient, sample_faq_data: dict):
+        # Cria 2 FAQs: 1 no chatbot, 1 fora
+        client.post("/faqs", json={**sample_faq_data, "show_in_chatbot": True})
         client.post("/faqs", json={**sample_faq_data,
                                    "question": "Segunda pergunta completamente válida?",
-                                   "show_on_totem": False})
-        resp = client.get("/faqs/totem?tenant_id=test-admin")
+                                   "show_in_chatbot": False})
+        resp = client.get("/faqs/chatbot?tenant_id=test-admin")
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
-        assert data[0]["show_on_totem"] is True
+        assert data[0]["show_in_chatbot"] is True
 
 
 class TestUpdateFaq:
@@ -78,47 +78,47 @@ class TestUpdateFaq:
         assert resp.status_code == 404
 
 
-class TestToggleTotemFaq:
+class TestToggleChatbotFaq:
     def test_toggle_activates(self, client: TestClient, sample_faq_data: dict):
         created = client.post("/faqs", json=sample_faq_data).json()
         faq_id = created["id"]
 
-        resp = client.patch(f"/faqs/{faq_id}/toggle-totem")
+        resp = client.patch(f"/faqs/{faq_id}/toggle-chatbot")
         assert resp.status_code == 200
-        assert resp.json()["show_on_totem"] is True
+        assert resp.json()["show_in_chatbot"] is True
 
     def test_toggle_deactivates(self, client: TestClient, sample_faq_data: dict):
-        created = client.post("/faqs", json={**sample_faq_data, "show_on_totem": True}).json()
+        created = client.post("/faqs", json={**sample_faq_data, "show_in_chatbot": True}).json()
         faq_id = created["id"]
 
-        resp = client.patch(f"/faqs/{faq_id}/toggle-totem")
+        resp = client.patch(f"/faqs/{faq_id}/toggle-chatbot")
         assert resp.status_code == 200
-        assert resp.json()["show_on_totem"] is False
+        assert resp.json()["show_in_chatbot"] is False
 
     def test_toggle_limit_4_faqs(self, client: TestClient, sample_faq_data: dict):
-        """Não deve permitir mais de 4 FAQs ativas no totem."""
+        """Não deve permitir mais de 4 FAQs ativas no chatbot."""
         ids = []
         for i in range(4):
             r = client.post("/faqs", json={
                 **sample_faq_data,
                 "question": f"Pergunta número {i+1} completamente válida?",
-                "show_on_totem": True,
+                "show_in_chatbot": True,
             })
             ids.append(r.json()["id"])
 
         # Quinta FAQ — ativar deve retornar 409
         fifth = client.post("/faqs", json={
             **sample_faq_data,
-            "question": "Quinta pergunta tentando entrar no totem?",
-            "show_on_totem": False,
+            "question": "Quinta pergunta tentando entrar no chatbot?",
+            "show_in_chatbot": False,
         }).json()
 
-        resp = client.patch(f"/faqs/{fifth['id']}/toggle-totem")
+        resp = client.patch(f"/faqs/{fifth['id']}/toggle-chatbot")
         assert resp.status_code == 409
         assert "Limite" in resp.json()["detail"]
 
     def test_toggle_not_found(self, client: TestClient):
-        resp = client.patch("/faqs/id-inexistente/toggle-totem")
+        resp = client.patch("/faqs/id-inexistente/toggle-chatbot")
         assert resp.status_code == 404
 
 

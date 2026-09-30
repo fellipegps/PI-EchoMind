@@ -112,6 +112,20 @@ def test_config_has_unique_required_public_slug_and_keeps_rls(
     assert rls_enabled is True
 
 
+def test_mobile_chat_fields_and_faq_index(postgres_engine: Engine) -> None:
+    inspector = inspect(postgres_engine)
+    faq_columns = {column["name"] for column in inspector.get_columns("faqs")}
+    config_columns = {column["name"] for column in inspector.get_columns("config")}
+    faq_indexes = {
+        index["name"]: index["column_names"]
+        for index in inspector.get_indexes("faqs")
+    }
+
+    assert "show_in_chatbot" in faq_columns
+    assert "chat_voice_gender" in config_columns
+    assert faq_indexes["ix_faqs_show_in_chatbot"] == ["show_in_chatbot"]
+
+
 def test_events_have_publication_fields_index_and_keep_rls(
     postgres_engine: Engine,
 ) -> None:

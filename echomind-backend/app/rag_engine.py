@@ -196,7 +196,7 @@ def _get_reranker() -> Reranker:
 @lru_cache(maxsize=1)
 def _get_llm() -> ChatGroq:
     """
-    ChatGroq otimizado para totem: temperature=0 (determinístico),
+    ChatGroq otimizado para chatbot: temperature=0 (determinístico),
     max_tokens=400 (respostas concisas), streaming ativado.
     """
     emit_event(event="rag.runtime", status="started", stage="llm")

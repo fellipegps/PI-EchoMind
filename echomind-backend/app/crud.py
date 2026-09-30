@@ -70,7 +70,7 @@ def ensure_tenant_onboarded(
     Garante que um usuario autenticado tenha o conjunto inicial de dados.
 
     Hoje o template cria a configuracao base do tenant. FAQs e eventos ficam
-    vazios para nao exibir conteudo ficticio no totem publico de uma empresa nova.
+    vazios para nao exibir conteudo ficticio no chatbot publico de uma empresa nova.
     """
     existing = get_config(db, tenant_id)
     if existing:
@@ -94,7 +94,7 @@ def ensure_tenant_onboarded(
             "para orientar as respostas do agente."
         ),
         tone_of_voice=DEFAULT_TONE,
-        totem_voice_gender=DEFAULT_VOICE,
+        chat_voice_gender=DEFAULT_VOICE,
     )
     db.add(cfg)
     db.commit()
@@ -113,10 +113,10 @@ def get_faqs(db: Session, tenant_id: str) -> list[Faq]:
     )
 
 
-def get_totem_faqs(db: Session, tenant_id: str) -> list[Faq]:
+def get_chatbot_faqs(db: Session, tenant_id: str) -> list[Faq]:
     return (
         db.query(Faq)
-        .filter(Faq.tenant_id == tenant_id, Faq.show_on_totem == True)
+        .filter(Faq.tenant_id == tenant_id, Faq.show_in_chatbot == True)
         .order_by(desc(Faq.created_at))
         .limit(4)
         .all()
@@ -128,7 +128,7 @@ def create_faq(db: Session, payload: FaqCreate, tenant_id: str) -> Faq:
         tenant_id=tenant_id,
         question=payload.question,
         answer=payload.answer,
-        show_on_totem=payload.show_on_totem,
+        show_in_chatbot=payload.show_in_chatbot,
     )
     db.add(faq)
     db.commit()
@@ -150,21 +150,21 @@ def update_faq(db: Session, faq_id: str, payload: FaqUpdate, tenant_id: str) -> 
     return faq
 
 
-def toggle_faq_totem(db: Session, faq_id: str, tenant_id: str) -> Faq | str | None:
+def toggle_faq_chatbot(db: Session, faq_id: str, tenant_id: str) -> Faq | str | None:
     faq = db.query(Faq).filter(Faq.id == faq_id, Faq.tenant_id == tenant_id).first()
     if not faq:
         return None
 
-    if not faq.show_on_totem:
+    if not faq.show_in_chatbot:
         active_count = (
             db.query(Faq)
-            .filter(Faq.tenant_id == tenant_id, Faq.show_on_totem == True)
+            .filter(Faq.tenant_id == tenant_id, Faq.show_in_chatbot == True)
             .count()
         )
         if active_count >= 4:
             return "limit_exceeded"
 
-    faq.show_on_totem = not faq.show_on_totem
+    faq.show_in_chatbot = not faq.show_in_chatbot
     faq.updated_at = utc_now()
     db.commit()
     db.refresh(faq)
@@ -553,7 +553,7 @@ def convert_unanswered_to_faq(
         tenant_id=tenant_id,
         question=(question or uq.canonical_question).strip(),
         answer=answer,
-        show_on_totem=False,
+        show_in_chatbot=False,
     )
     db.add(faq)
     uq.converted = True
