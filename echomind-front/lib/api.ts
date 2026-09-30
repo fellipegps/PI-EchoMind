@@ -1,12 +1,23 @@
 /**
  * lib/api.ts
  * Camada de serviço centralizada – toda comunicação com o backend FastAPI passa por aqui.
- * Troque BASE_URL via variável de ambiente NEXT_PUBLIC_API_URL no .env.local
+ * Configure NEXT_PUBLIC_API_URL no ambiente de deploy ou no .env.local.
  */
 
 import { supabase } from "./supabase";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const BASE_URL = configuredApiUrl
+  ? configuredApiUrl.replace(/\/$/, "")
+  : process.env.NODE_ENV === "production"
+    ? null
+    : "http://localhost:8000";
+const API_UNAVAILABLE_MESSAGE = "O servidor do EchoMind ainda não está disponível.";
+
+function apiUrl(path: string): string {
+  if (!BASE_URL) throw new Error(API_UNAVAILABLE_MESSAGE);
+  return `${BASE_URL}${path}`;
+}
 
 // ─── Tipos espelhados dos schemas Pydantic ────────────────────────────────────
 
@@ -233,9 +244,10 @@ async function handleAuthenticatedResponse<T>(res: Response): Promise<T> {
 }
 
 async function authenticatedFetch<T>(path: string, init: RequestInit): Promise<T> {
+  const url = apiUrl(path);
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}${path}`, init);
+    res = await fetch(url, init);
   } catch {
     throw new Error(CONNECTION_ERROR_MESSAGE);
   }
@@ -276,10 +288,11 @@ async function multipartRequest<T>(path: string, formData: FormData): Promise<T>
 }
 
 async function publicRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const url = apiUrl(path);
   const headers = new Headers(init?.headers);
   headers.set("Content-Type", "application/json");
 
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(url, {
     ...init,
     headers: {
       ...Object.fromEntries(headers.entries()),
@@ -378,10 +391,17 @@ async function streamResponse(
   onDone: () => void,
   onError: (err: Error) => void
 ): Promise<void> {
+  let url: string;
+  try {
+    url = apiUrl(path);
+  } catch {
+    onError(new Error(API_UNAVAILABLE_MESSAGE));
+    return;
+  }
   // 1. Tenta conectar ao backend
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}${path}`, {
+    res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -418,7 +438,7 @@ async function streamResponse(
     // Stream encerrou sem nenhum token = erro silencioso no backend
     // Neste caso chama onError para o frontend mostrar algo adequado
     if (!receivedAny) {
-      onError(new Error("A IA não retornou resposta. Verifique se o backend está rodando em http://localhost:8000"));
+      onError(new Error("A IA não retornou resposta. Verifique a conexão com o servidor."));
       return;
     }
 
