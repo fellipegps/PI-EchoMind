@@ -151,6 +151,49 @@ corepack pnpm dev
 
 Depois acesse [http://localhost:3000/login](http://localhost:3000/login).
 
+## Preparacao do frontend para a Vercel
+
+O projeto Vercel deve importar este repositorio com **Root Directory** em
+`echomind-front`, **Framework Preset** `Next.js` e branch de producao `main`.
+Use Node.js 22 nas configuracoes do projeto. O `package.json` fixa pnpm 10 e o
+`pnpm-lock.yaml` deve ser mantido no commit. Os comandos padrao de instalacao e
+build detectados pela Vercel sao suficientes. O `vercel.json` fixa o preset
+Next.js; o backend nao precisa ser hospedado na Vercel.
+
+Configure estas variaveis no ambiente **Production** do projeto Vercel, antes
+do primeiro build:
+
+| Variavel | Valor esperado |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | URL HTTPS publica do backend FastAPI, sem barra final; deixe ausente enquanto o backend nao estiver hospedado |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase usado pelo backend |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave publica (`sb_publishable_...`) do mesmo projeto Supabase |
+
+Sem `NEXT_PUBLIC_API_URL`, o frontend pode ser publicado e as chamadas a API
+mostram que o servidor ainda nao esta disponivel. Quando o backend for
+implantado, configure essa variavel e faca um novo deploy.
+
+As variaveis `NEXT_PUBLIC_*` entram no JavaScript publicado. Nunca configure
+`SUPABASE_SECRET_KEY`, `DATABASE_URL` ou `GROQ_API_KEY` no frontend. Alteracoes
+nessas variaveis publicas exigem um novo build.
+
+Antes de usar login, chat e documentos em producao:
+
+1. Hospede o backend separadamente, aplique as migrations necessarias e confira
+   que `https://SEU_BACKEND/health` responde com sucesso.
+2. No backend, inclua a origem HTTPS **exata** do frontend em `ALLOWED_ORIGINS`,
+   sem caminho nem barra final. O fallback local do backend nao libera a Vercel.
+3. No Supabase Auth, ajuste **Site URL** para a URL publica do frontend e inclua
+   `https://SEU_FRONTEND/redefinir-senha` nas **Redirect URLs**. Mantenha as
+   URLs locais se ainda forem usadas no desenvolvimento.
+4. Rode `corepack pnpm lint`, `corepack pnpm typecheck`,
+   `corepack pnpm test:run` e `corepack pnpm build` dentro de `echomind-front`.
+   A CI usa valores publicos de exemplo e nao confirma que as URLs de producao
+   estejam corretas.
+
+O deploy do frontend nao executa migrations nem publica o backend. Deploys de
+preview precisam de uma origem liberada no CORS e de Redirect URLs proprias.
+
 ## Banco De Dados
 
 O schema do banco e gerenciado somente por migrations Alembic. O backend nao cria tabelas automaticamente no startup.

@@ -23,7 +23,7 @@ interface Message {
 
 const userFriendlyError = (err: Error) => {
   if (err.message.toLowerCase().includes("docker")) {
-    return "A IA não retornou resposta. Verifique se o backend está rodando em http://localhost:8000";
+    return "A IA não retornou resposta. Verifique a conexão com o servidor.";
   }
   return err.message;
 };
