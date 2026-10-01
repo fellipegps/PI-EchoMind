@@ -75,26 +75,39 @@ class Faq(Base):
     updated_at   = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
+class EventCourse(Base):
+    """Catálogo de cursos disponíveis para classificar eventos do tenant."""
+    __tablename__ = "event_courses"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "name", name="uq_event_courses_tenant_name"),
+        Index("ix_event_courses_tenant_name", "tenant_id", "name"),
+    )
+
+    id         = Column(String, primary_key=True, default=new_uuid)
+    tenant_id  = Column(String, nullable=False)
+    name       = Column(String(200), nullable=False)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
 class CompanyEvent(Base):
     """Eventos e datas institucionais."""
     __tablename__ = "events"
     __table_args__ = (
-        Index(
-            "ix_events_tenant_published_date",
-            "tenant_id",
-            "published",
-            "event_date",
-        ),
+        Index("ix_events_tenant_end_date", "tenant_id", "event_end_date"),
     )
 
     id          = Column(String, primary_key=True, default=new_uuid)
     tenant_id   = Column(String, nullable=False, index=True)
     title       = Column(Text, nullable=False)
     event_date  = Column(String, nullable=False)   # formato: YYYY-MM-DD
+    event_end_date = Column(String, nullable=False)  # formato: YYYY-MM-DD
     event_type  = Column(String, nullable=False)
+    course      = Column(String(200), nullable=False, default="Geral")
     description = Column(Text, nullable=True)
     location    = Column(String(300), nullable=False, default="Local a definir")
-    published   = Column(Boolean, nullable=False, default=False)
+    image_url   = Column(String(2000), nullable=True)
+    link_url    = Column(String(2000), nullable=True)
     created_at  = Column(DateTime, default=utc_now, nullable=False)
     updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now)
 

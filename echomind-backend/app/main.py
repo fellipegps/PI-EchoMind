@@ -32,6 +32,7 @@ from .schemas import (
     ChatRequest, PublicChatRequest,
     FaqCreate, FaqUpdate, FaqResponse, PublicFaqResponse,
     EventCreate, EventUpdate, EventResponse, PublicEventResponse,
+    EventCourseCreate, EventCourseResponse,
     CampusLocationCreate, CampusLocationUpdate, CampusLocationResponse,
     PublicCampusLocationResponse,
     ConfigUpdate, ConfigResponse, PublicInstitutionResponse,
@@ -148,7 +149,7 @@ app.add_middleware(RequestLogMiddleware)
 router_auth = APIRouter(prefix="/auth", tags=["Autenticação"])
 router_chat = APIRouter(prefix="/chat", tags=["Chat"])
 router_faqs = APIRouter(prefix="/faqs", tags=["Base de Conhecimento"])
-router_events = APIRouter(prefix="/events", tags=["Base de Conhecimento"])
+router_events = APIRouter(prefix="/events", tags=["Eventos"])
 router_locations = APIRouter(prefix="/locations", tags=["Locais do Campus"])
 router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
@@ -499,13 +500,29 @@ def list_events(
 def create_event(
     payload: EventCreate,
     db: Session = Depends(get_db),
-    rag = Depends(get_rag),
     current_user: CurrentUser = Depends(get_current_user),
 ):
-    event = crud.create_event(db, payload, tenant_id=current_user.id)
-    if event.published:
-        rag.index_event(event)
-    return event
+    ensure_onboarding(db, current_user)
+    return crud.create_event(db, payload, tenant_id=current_user.id)
+
+
+@router_events.get("/courses", response_model=list[EventCourseResponse])
+def list_event_courses(
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    ensure_onboarding(db, current_user)
+    return crud.get_event_courses(db, tenant_id=current_user.id)
+
+
+@router_events.post("/courses", response_model=EventCourseResponse, status_code=201)
+def create_event_course(
+    payload: EventCourseCreate,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    ensure_onboarding(db, current_user)
+    return crud.create_event_course(db, payload, tenant_id=current_user.id)
 
 
 @router_events.put("/{event_id}", response_model=EventResponse)
@@ -513,16 +530,14 @@ def update_event(
     event_id: str,
     payload: EventUpdate,
     db: Session = Depends(get_db),
-    rag = Depends(get_rag),
     current_user: CurrentUser = Depends(get_current_user),
 ):
-    event = crud.update_event(db, event_id, payload, tenant_id=current_user.id)
+    try:
+        event = crud.update_event(db, event_id, payload, tenant_id=current_user.id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     if not event:
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
-    if event.published:
-        rag.reindex_event(event)
-    else:
-        rag.delete_document(event.id, source="event")
     return event
 
 
@@ -530,12 +545,10 @@ def update_event(
 def delete_event(
     event_id: str,
     db: Session = Depends(get_db),
-    rag = Depends(get_rag),
     current_user: CurrentUser = Depends(get_current_user),
 ):
     if not crud.delete_event(db, event_id, tenant_id=current_user.id):
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
-    rag.delete_document(event_id, source="event")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

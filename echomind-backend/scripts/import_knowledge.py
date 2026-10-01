@@ -14,7 +14,7 @@ from typing import Any
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
-from app.database import CompanyEvent, Config, Faq, SessionLocal, utc_now  # noqa: E402
+from app.database import CompanyEvent, Config, EventCourse, Faq, SessionLocal, utc_now  # noqa: E402
 from app.rag_engine import get_rag_engine  # noqa: E402
 from app import crud  # noqa: E402
 
@@ -35,9 +35,12 @@ EVENT_FIELDS = {
     "title",
     "event_date",
     "event_type",
+    "course",
     "description",
     "location",
-    "published",
+    "event_end_date",
+    "image_url",
+    "link_url",
 }
 
 
@@ -187,6 +190,10 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
     by_title_date = {(normalize(row.title), row.event_date): row for row in existing}
 
     imported: list[CompanyEvent] = []
+    known_courses = {
+        normalize(course.name): course
+        for course in db.query(EventCourse).filter(EventCourse.tenant_id == tenant_id).all()
+    }
     created = 0
     updated = 0
 
@@ -194,16 +201,20 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
         title = str(item.get("title", "")).strip()
         event_date = str(item.get("event_date", "")).strip()
         event_type = str(item.get("event_type", "")).strip()
+        course_name = str(item.get("course") or "Geral").strip()
         if not title or not event_date or not event_type:
             raise SystemExit(f"Evento #{index} precisa conter title, event_date e event_type.")
 
         key = (normalize(title), event_date)
         event = by_title_date.get(key)
+        event_end_date = str(item.get("event_end_date") or event_date).strip()
 
         if event:
             for field in EVENT_FIELDS:
                 if field in item:
                     setattr(event, field, item[field])
+            event.event_end_date = event_end_date
+            event.course = course_name
             event.updated_at = utc_now()
             updated += 1
         else:
@@ -211,13 +222,22 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
                 tenant_id=tenant_id,
                 title=title,
                 event_date=event_date,
+                event_end_date=event_end_date,
                 event_type=event_type,
+                course=course_name,
                 description=item.get("description"),
                 location=item.get("location") or "Local a definir",
-                published=bool(item.get("published", False)),
+                image_url=item.get("image_url") or None,
+                link_url=item.get("link_url") or None,
             )
             db.add(event)
             created += 1
+
+        course_key = normalize(course_name)
+        if course_key not in known_courses:
+            course = EventCourse(tenant_id=tenant_id, name=course_name)
+            db.add(course)
+            known_courses[course_key] = course
 
         imported.append(event)
 
@@ -228,17 +248,11 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
     return imported, created, updated
 
 
-def reindex_imported(db, tenant_id: str, faqs: list[Faq], events: list[CompanyEvent]) -> None:
+def reindex_imported(db, tenant_id: str, faqs: list[Faq]) -> None:
     rag = get_rag_engine(db, tenant_id=tenant_id)
 
     for faq in faqs:
         rag.reindex_faq(faq)
-
-    for event in events:
-        if event.published:
-            rag.reindex_event(event)
-        else:
-            rag.delete_document(event.id, source="event")
 
 
 def parse_args() -> argparse.Namespace:
@@ -270,12 +284,12 @@ def main() -> None:
         events, created_events, updated_events = upsert_events(db, tenant_id, data.get("events"))
 
         if not args.skip_rag:
-            reindex_imported(db, tenant_id, faqs, events)
+            reindex_imported(db, tenant_id, faqs)
 
         log.info("Tenant: %s", tenant_id)
         log.info("Config: %s", "atualizada" if config else "nao informada")
         log.info("FAQs: %d criadas, %d atualizadas, %d reindexadas", created_faqs, updated_faqs, len(faqs))
-        log.info("Eventos: %d criados, %d atualizados, %d reindexados", created_events, updated_events, len(events))
+        log.info("Eventos: %d criados, %d atualizados", created_events, updated_events)
         log.info("Importacao concluida.")
     finally:
         db.close()

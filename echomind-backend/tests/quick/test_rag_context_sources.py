@@ -89,33 +89,16 @@ def test_source_without_metadata_uses_generic_label(rag_engine_module) -> None:
     )
 
 
-@pytest.mark.parametrize(
-    ("source_type", "content", "expected"),
-    (
-        (
-            "faq",
-            "Pergunta: Como faço a matrícula?\nResposta: Procure a secretaria.",
-            "[Fonte: FAQ]\nPergunta: Como faço a matrícula?\nResposta: Procure a secretaria.",
-        ),
-        (
-            "event",
-            "Evento: Semana Acadêmica\nData: 2026-09-10",
-            "[Fonte: Evento]\nEvento: Semana Acadêmica\nData: 2026-09-10",
-        ),
-    ),
-)
-def test_faq_and_event_keep_simple_compatible_format(
-    rag_engine_module,
-    source_type: str,
-    content: str,
-    expected: str,
-) -> None:
+def test_faq_keeps_simple_compatible_format(rag_engine_module) -> None:
+    content = "Pergunta: Como faço a matrícula?\nResposta: Procure a secretaria."
     retrieved = Document(
         page_content=content,
-        metadata={"source_type": source_type},
+        metadata={"source_type": "faq"},
     )
 
-    assert rag_engine_module._format_retrieved_document(retrieved) == expected
+    assert rag_engine_module._format_retrieved_document(retrieved) == (
+        "[Fonte: FAQ]\nPergunta: Como faço a matrícula?\nResposta: Procure a secretaria."
+    )
 
 
 class _CapturingFakeLLM:
@@ -146,7 +129,7 @@ def _engine_with_fake_llm(rag_engine_module, fake_llm: _CapturingFakeLLM):
 
 
 @pytest.mark.asyncio
-async def test_faq_and_event_remain_respondable_in_chat_context(
+async def test_faq_remains_respondable_in_chat_context(
     monkeypatch,
     rag_engine_module,
 ) -> None:
@@ -155,29 +138,45 @@ async def test_faq_and_event_remain_respondable_in_chat_context(
             page_content="Pergunta: Como faço a matrícula?\nResposta: Procure a secretaria.",
             metadata={"source_type": "faq"},
         ),
-        Document(
-            page_content="Evento: Semana Acadêmica\nData: 2026-09-10",
-            metadata={"source_type": "event"},
-        ),
     ]
 
     async def retrieve_docs(_question: str, _tenant_id: str):
         return retrieved, 0.1
 
-    fake_llm = _CapturingFakeLLM(
-        "A matrícula é feita na secretaria e a Semana Acadêmica será em 10 de setembro."
-    )
+    fake_llm = _CapturingFakeLLM("A matrícula é feita na secretaria.")
     engine = _engine_with_fake_llm(rag_engine_module, fake_llm)
     monkeypatch.setattr(rag_engine_module, "_retrieve_docs", retrieve_docs)
 
-    answer = "".join([token async for token in engine.astream_chat("Matrícula e evento")])
+    answer = "".join([token async for token in engine.astream_chat("Matrícula")])
     system_message = fake_llm.messages[0].content
 
-    assert answer == (
-        "A matrícula é feita na secretaria e a Semana Acadêmica será em 10 de setembro."
-    )
+    assert answer == "A matrícula é feita na secretaria."
     assert "[Fonte: FAQ]" in system_message
-    assert "[Fonte: Evento]" in system_message
+
+
+@pytest.mark.asyncio
+async def test_retrieve_docs_ignores_legacy_event_vectors(
+    monkeypatch,
+    rag_engine_module,
+) -> None:
+    event = Document(
+        page_content="Evento legado",
+        metadata={"source_type": "event", "tenant_id": "tenant-a"},
+    )
+    faq = Document(
+        page_content="Pergunta e resposta",
+        metadata={"source_type": "faq", "tenant_id": "tenant-a"},
+    )
+    vector_store = SimpleNamespace(
+        similarity_search_with_score=lambda *_args, **_kwargs: [(event, 0.05), (faq, 0.1)]
+    )
+    monkeypatch.setattr(rag_engine_module, "_get_vector_store", lambda _tenant_id: vector_store)
+    monkeypatch.setattr(rag_engine_module, "_search_lexical_documents", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(rag_engine_module, "RERANKER_ENABLED", False)
+
+    documents, _score = await rag_engine_module._retrieve_docs("pergunta", "tenant-a")
+
+    assert documents == [faq]
 
 
 @pytest.mark.asyncio

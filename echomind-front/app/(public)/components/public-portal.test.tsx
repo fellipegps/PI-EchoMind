@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -34,9 +34,13 @@ const publicEvent = {
   id: "event-1",
   title: "Mostra de projetos reais",
   event_date: "2099-08-15",
+  event_end_date: "2099-08-17",
   event_type: "evento_social",
+  course: "Engenharia Civil",
   description: "Projetos desenvolvidos pelos estudantes.",
   location: "Auditório Central",
+  image_url: "https://cdn.example.com/mostra.webp",
+  link_url: "https://example.com/mostra",
 };
 
 const publicLocations = [
@@ -167,7 +171,31 @@ describe("PublicPortal", () => {
     expect(screen.getByRole("heading", { name: "Próximos eventos" })).toBeInTheDocument();
     expect(screen.getByText(publicEvent.title)).toBeInTheDocument();
     expect(screen.getByText(publicEvent.location)).toBeInTheDocument();
+    expect(screen.getByText(/15 a 17 de Agosto de 2099/)).toBeInTheDocument();
+    expect(screen.getByText(publicEvent.course)).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: publicEvent.title })).toHaveAttribute(
+      "src",
+      publicEvent.image_url
+    );
+    expect(screen.queryByText("Saiba mais")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: publicEvent.link_url })).toHaveAttribute("target", "_blank");
+    expect(screen.getByRole("link", { name: publicEvent.link_url })).toHaveAttribute(
+      "rel",
+      "noopener noreferrer"
+    );
     expect(screen.queryByText("Semana da Tecnologia")).not.toBeInTheDocument();
+  });
+
+  it("remove a capa quebrada e mantém o card do evento", async () => {
+    const user = userEvent.setup();
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+
+    await user.click(screen.getByRole("button", { name: "Eventos" }));
+    const cover = await screen.findByRole("img", { name: publicEvent.title });
+    fireEvent.error(cover);
+
+    expect(screen.queryByRole("img", { name: publicEvent.title })).not.toBeInTheDocument();
+    expect(screen.getByText(publicEvent.title)).toBeInTheDocument();
   });
 
   it("trata lista vazia e falha de eventos sem expor detalhes internos", async () => {
@@ -176,7 +204,7 @@ describe("PublicPortal", () => {
     const { unmount } = render(<PublicPortal publicSlug="unievangelica-anapolis" />);
 
     await user.click(screen.getByRole("button", { name: "Eventos" }));
-    expect(await screen.findByText("Nenhum evento publicado no momento.")).toBeInTheDocument();
+    expect(await screen.findByText("Nenhum evento programado no momento.")).toBeInTheDocument();
     unmount();
 
     apiMocks.listEvents.mockRejectedValueOnce(new Error("segredo interno"));

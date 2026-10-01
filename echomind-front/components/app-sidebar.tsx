@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, HelpCircle, Bot, Settings, LogOut, Database, MapPin } from "lucide-react";
+import { LayoutDashboard, HelpCircle, Bot, Settings, LogOut, Database, MapPin, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -23,6 +23,7 @@ const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Base de Conhecimento", url: "/base-de-conhecimento", icon: Database },
   { title: "Locais do Campus", url: "/locais", icon: MapPin },
+  { title: "Eventos", url: "/eventos", icon: CalendarDays },
   { title: "Não Respondidas", url: "/nao-respondidas", icon: HelpCircle },
   { title: "Agente (Chatbot)", url: "/agente", icon: Bot },
   { title: "Configurações", url: "/configuracoes", icon: Settings },

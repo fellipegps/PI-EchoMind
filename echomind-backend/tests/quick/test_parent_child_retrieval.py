@@ -321,7 +321,7 @@ def test_interrupted_backfill_stops_by_tenant_and_resumes_without_orphan_ids(
         processed.append(tenant_id)
         if tenant_id == "tenant-b" and fail_tenant_b:
             raise RuntimeError("falha vetorial sintetica")
-        return reindex_all.ReindexResult(tenant_id, faq_count=0, event_count=0)
+        return reindex_all.ReindexResult(tenant_id, faq_count=0)
 
     monkeypatch.setattr(reindex_all, "reindex_tenant", fake_reindex)
 

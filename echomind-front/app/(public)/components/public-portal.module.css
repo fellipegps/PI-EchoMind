@@ -430,69 +430,78 @@
   gap: 16px;
 }
 
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .eventCard {
+  overflow: hidden;
   border: 1px solid var(--portal-line);
-  border-radius: 18px;
+  border-radius: 12px;
   background: var(--portal-surface);
-  box-shadow: 0 12px 34px rgba(31, 42, 68, 0.055);
+  box-shadow: 0 8px 24px rgba(31, 42, 68, 0.045);
 }
 
 .eventCard h3 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  color: var(--portal-primary);
   font-size: 18px;
   letter-spacing: -0.025em;
 }
 
-.eventCard > div > p:last-child {
-  margin: 14px 0 0;
-  color: #4e586d;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.eventInfo {
   margin: 5px 0;
   color: var(--portal-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
-.meta svg {
-  width: 14px;
-  height: 14px;
+.eventInfo strong {
+  color: #4e586d;
+  font-weight: 600;
 }
 
-.eventCard {
-  display: flex;
-  gap: 16px;
+.eventDescription {
+  margin: 14px 0 0;
+  color: #30384a;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.eventBody {
   padding: 20px;
 }
 
-.eventDate {
-  display: flex;
-  width: 58px;
-  height: 66px;
-  flex: 0 0 auto;
-  flex-direction: column;
+.eventCover {
+  display: block;
+  width: calc(100% - 40px);
+  height: clamp(190px, 30vw, 290px);
+  margin: 20px 20px 0;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.eventBodyContent {
+  min-width: 0;
+  flex: 1;
+}
+
+.eventLink {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 15px;
-  background: linear-gradient(155deg, var(--portal-primary), #397ce2);
-  color: white;
+  gap: 4px;
+  margin-top: 14px;
+  color: var(--portal-primary);
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.eventDate strong {
-  font-size: 23px;
-  line-height: 1;
-}
-
-.eventDate span {
-  margin-top: 5px;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+.eventLink:hover {
+  text-decoration: underline;
 }
 
 .locationToolbar {
@@ -1000,9 +1009,14 @@
     display: none;
   }
 
-  .eventCard {
-    gap: 12px;
+  .eventBody {
     padding: 16px;
+  }
+
+  .eventCover {
+    width: calc(100% - 32px);
+    height: 170px;
+    margin: 16px 16px 0;
   }
 }
 

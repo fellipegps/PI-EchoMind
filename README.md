@@ -2,6 +2,8 @@
 
 EchoMind e uma aplicacao web responsiva de atendimento com IA para instituicoes de ensino e empresas, com foco na experiencia em dispositivos moveis e acesso tambem pelo desktop. O portal publico oferece chat, eventos e locais; o painel administrativo gerencia a base de conhecimento de cada instituicao. O backend usa FastAPI, SQLAlchemy, Alembic, pgvector, LangChain, Groq e FastEmbed para responder perguntas com base nos dados do tenant.
 
+Os eventos sao exibidos em uma lista vertical no portal e nao alimentam o chatbot. Cada evento expira depois do ultimo dia do periodo cadastrado, pode ser relacionado a um curso do catalogo da instituicao e a capa deve usar uma URL `https` de uma imagem ja hospedada externamente. Quando informado, o link relacionado aparece como endereco clicavel no card.
+
 O projeto usa Supabase para:
 
 - PostgreSQL hospedado, acessado pelo backend via `DATABASE_URL`
@@ -241,7 +243,7 @@ O importador:
 - atualiza FAQs existentes quando a pergunta ja existe no mesmo tenant;
 - evita duplicacao por pergunta;
 - respeita o limite de 4 FAQs exibidas no chatbot;
-- reindexa FAQs e eventos no RAG automaticamente.
+- reindexa as FAQs no RAG automaticamente; eventos permanecem somente no portal.
 
 Se quiser apenas validar a gravacao no banco sem reindexar o RAG, use:
 
@@ -266,10 +268,10 @@ cd echomind-backend
 python scripts/reindex_all.py --confirm
 ```
 
-O script le a configuracao normal do backend, encontra tenants que possuem FAQs,
-eventos ou documentos com status `ready` e processa um por vez. Para cada tenant,
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs
+ou documentos com status `ready` e processa um por vez. Para cada tenant,
 somente a colecao `knowledge_<tenant>` correspondente e limpa e recriada; em
-seguida, as FAQs, os eventos e os `document_chunks` ja persistidos dos documentos
+seguida, as FAQs e os `document_chunks` ja persistidos dos documentos
 `ready` desse tenant sao indexados novamente com os IDs deterministicos atuais.
 Documentos `pending`, `processing` e `error` sao ignorados. O arquivo original
 nao e reprocessado e os chunks nao sao recriados.
@@ -313,10 +315,11 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `GET` | `/faqs/chatbot` | FAQs publicas do chatbot por `tenant_id` |
 | `PATCH` | `/faqs/{id}/toggle-chatbot` | Exibe ou oculta uma FAQ no chat publico |
 | `GET` | `/public/{slug}/faqs` | FAQs publicas do portal web |
-| `GET` | `/public/{slug}/events` | Eventos publicados no portal web |
+| `GET` | `/public/{slug}/events` | Eventos programados no portal web |
 | `GET` | `/public/{slug}/locations` | Locais ativos no portal web |
 | `POST` | `/public/{slug}/chat` | Chat publico vinculado ao slug da instituicao |
 | `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
+| `GET/POST` | `/events/courses` | Lista ou cria cursos relacionados a eventos |
 | `GET/PUT` | `/config` | Configuracoes autenticadas do tenant |
 | `GET` | `/config/public` | Configuracao publica por `tenant_id` |
 | `GET/DELETE` | `/unanswered` | Perguntas nao respondidas |

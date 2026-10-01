@@ -79,9 +79,10 @@ def test_list_tenant_ids_includes_only_indexable_sources(db, rag_modules) -> Non
             Faq(tenant_id="tenant-b", question="Pergunta B?", answer="Resposta B."),
             Faq(tenant_id="tenant-a", question="Pergunta A?", answer="Resposta A."),
             CompanyEvent(
-                tenant_id="tenant-b",
-                title="Evento B",
-                event_date="2026-09-01",
+                tenant_id="tenant-only-event",
+                title="Evento fora do RAG",
+                event_date="2099-09-01",
+                event_end_date="2099-09-01",
                 event_type="palestra",
             ),
             Config(
@@ -145,8 +146,9 @@ def test_reindex_tenant_indexes_only_ready_documents_and_persisted_chunks(
     faq_b = Faq(tenant_id="tenant-b", question="Pergunta B?", answer="Resposta B.")
     event_a = CompanyEvent(
         tenant_id="tenant-a",
-        title="Evento A",
-        event_date="2026-09-02",
+        title="Evento fora do RAG",
+        event_date="2099-09-02",
+        event_end_date="2099-09-02",
         event_type="workshop",
     )
     ready_a = Document(
@@ -244,13 +246,12 @@ def test_reindex_tenant_indexes_only_ready_documents_and_persisted_chunks(
     assert result == reindex_all.ReindexResult(
         "tenant-a",
         faq_count=1,
-        event_count=1,
         document_count=1,
         document_chunk_count=2,
     )
     assert cleared_tenants == ["tenant-a"]
     fake_rag.index_faq.assert_called_once_with(faq_a)
-    fake_rag.index_event.assert_called_once_with(event_a)
+    fake_rag.index_event.assert_not_called()
     assert fake_rag.index_document_chunk.call_args_list == [
         call(ready_a, ready_chunks[1]),
         call(ready_a, ready_chunks[0]),
@@ -308,13 +309,6 @@ def test_reindex_tenant_second_execution_produces_same_deterministic_set(
         question="Pergunta idempotente?",
         answer="Resposta idempotente.",
     )
-    event = rag_modules.CompanyEvent(
-        id="evento-idempotente",
-        tenant_id="tenant-a",
-        title="Evento idempotente",
-        event_date="2026-09-10",
-        event_type="palestra",
-    )
     document = rag_modules.Document(
         id="doc-idempotente",
         tenant_id="tenant-a",
@@ -332,7 +326,7 @@ def test_reindex_tenant_second_execution_produces_same_deterministic_set(
         chunk_index=0,
         content="Chunk idempotente.",
     )
-    db.add_all([faq, event, document, chunk])
+    db.add_all([faq, document, chunk])
     db.flush()
 
     collections = {
@@ -346,11 +340,6 @@ def test_reindex_tenant_second_execution_produces_same_deterministic_set(
         def index_faq(self, source):
             collections[self.tenant_id].add(
                 rag_engine._make_vector_id(source.id, "faq", self.tenant_id)
-            )
-
-        def index_event(self, source):
-            collections[self.tenant_id].add(
-                rag_engine._make_vector_id(source.id, "event", self.tenant_id)
             )
 
         def index_document_chunk(self, _document, source):
@@ -373,7 +362,7 @@ def test_reindex_tenant_second_execution_produces_same_deterministic_set(
 
     assert first_result == second_result
     assert collections["tenant-a"] == first_set
-    assert len(first_set) == 3
+    assert len(first_set) == 2
     assert collections["tenant-b"] == {"vetor-b-preservado"}
     assert cleared_tenants == ["tenant-a", "tenant-a"]
 
@@ -389,7 +378,7 @@ def test_reindex_all_processes_each_tenant_in_order(monkeypatch, rag_modules) ->
 
     def fake_reindex_tenant(db, tenant_id: str) -> reindex_all.ReindexResult:
         processed.append(tenant_id)
-        return reindex_all.ReindexResult(tenant_id, faq_count=1, event_count=2)
+        return reindex_all.ReindexResult(tenant_id, faq_count=1)
 
     monkeypatch.setattr(reindex_all, "reindex_tenant", fake_reindex_tenant)
 
@@ -415,7 +404,7 @@ def test_reindex_all_stops_before_touching_tenants_after_failure(
         processed.append(tenant_id)
         if tenant_id == "tenant-b":
             raise RuntimeError("falha visivel")
-        return reindex_all.ReindexResult(tenant_id, faq_count=1, event_count=0)
+        return reindex_all.ReindexResult(tenant_id, faq_count=1)
 
     monkeypatch.setattr(reindex_all, "reindex_tenant", failing_reindex)
 
@@ -466,7 +455,7 @@ def test_script_rejects_old_embedding_before_opening_session(
     session_factory.assert_not_called()
 
 
-def test_faq_and_event_reindex_keep_deterministic_vector_ids(
+def test_faq_reindex_keeps_deterministic_vector_id(
     monkeypatch,
     rag_modules,
 ) -> None:
@@ -477,23 +466,11 @@ def test_faq_and_event_reindex_keep_deterministic_vector_ids(
     indexer.tenant_id = "tenant-a"
 
     faq = SimpleNamespace(id="faq-1", question="Pergunta?", answer="Resposta.")
-    event = SimpleNamespace(
-        id="event-1",
-        title="Evento",
-        event_date="2026-09-03",
-        event_type="palestra",
-        description=None,
-    )
-
     indexer.reindex_faq(faq)
-    indexer.reindex_event(event)
 
     faq_id = rag_engine._make_vector_id("faq-1", "faq", "tenant-a")
-    event_id = rag_engine._make_vector_id("event-1", "event", "tenant-a")
     assert store.delete.call_args_list[0].kwargs == {"ids": [faq_id]}
-    assert store.delete.call_args_list[1].kwargs == {"ids": [event_id]}
     assert store.add_documents.call_args_list[0].kwargs == {"ids": [faq_id]}
-    assert store.add_documents.call_args_list[1].kwargs == {"ids": [event_id]}
 
 
 def test_upsert_without_extra_metadata_preserves_existing_contract(

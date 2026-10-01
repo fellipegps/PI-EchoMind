@@ -7,7 +7,10 @@ from __future__ import annotations
 from datetime import date, datetime
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
+from urllib.parse import urlsplit
+from zoneinfo import ZoneInfo
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -67,50 +70,197 @@ class PublicFaqResponse(BaseModel):
 #  EVENTS
 # ══════════════════════════════════════════════════════════════════════════════
 
+EVENT_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
+EVENT_TYPES = {"palestra", "feriado", "promocao", "workshop", "reuniao", "evento_social", "outro"}
+
+
+def sao_paulo_today() -> date:
+    return datetime.now(ZoneInfo("America/Sao_Paulo")).date()
+
+
+def validate_event_date(value: str, field_name: str) -> str:
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(f"{field_name} deve ser uma data real no formato YYYY-MM-DD.") from exc
+    if parsed.isoformat() != value:
+        raise ValueError(f"{field_name} deve estar no formato YYYY-MM-DD.")
+    return value
+
+
+def validate_event_period(
+    event_date: str,
+    event_end_date: str,
+    *,
+    today: date | None = None,
+) -> None:
+    start = date.fromisoformat(validate_event_date(event_date, "event_date"))
+    end = date.fromisoformat(validate_event_date(event_end_date, "event_end_date"))
+    if end < start:
+        raise ValueError("event_end_date deve ser igual ou posterior a event_date.")
+    if end < (today or sao_paulo_today()):
+        raise ValueError("event_end_date não pode estar no passado.")
+
+
+def validate_external_url(
+    value: Optional[str],
+    *,
+    field_name: str,
+    allowed_schemes: set[str],
+) -> Optional[str]:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError(f"{field_name} deve ser uma URL válida.")
+    if not value.strip():
+        return None
+    if len(value) > 2000:
+        raise ValueError(f"{field_name} deve ter no máximo 2000 caracteres.")
+    if any(char.isspace() or ord(char) < 32 or ord(char) == 127 for char in value):
+        raise ValueError(f"{field_name} não pode conter espaços ou caracteres de controle.")
+
+    try:
+        parsed = urlsplit(value)
+        hostname = parsed.hostname
+    except ValueError as exc:
+        raise ValueError(f"{field_name} deve ser uma URL válida.") from exc
+    if parsed.scheme.lower() not in allowed_schemes or not hostname:
+        schemes = " ou ".join(sorted(allowed_schemes))
+        raise ValueError(f"{field_name} deve usar {schemes} e possuir um host.")
+    if parsed.username is not None or parsed.password is not None:
+        raise ValueError(f"{field_name} não pode conter credenciais.")
+    return value
+
+
+def normalize_event_course(value: str) -> str:
+    normalized = value.strip()
+    if len(normalized) < 2:
+        raise ValueError("course deve ter pelo menos 2 caracteres.")
+    if len(normalized) > 200:
+        raise ValueError("course deve ter no máximo 200 caracteres.")
+    if any(ord(char) < 32 or ord(char) == 127 for char in normalized):
+        raise ValueError("course não pode conter caracteres de controle.")
+    return normalized
+
+
+class EventCourseCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=200)
+
+    @field_validator("name")
+    @classmethod
+    def normalize_name(cls, value: str) -> str:
+        return normalize_event_course(value)
+
+
+class EventCourseResponse(BaseModel):
+    id: str
+    name: str
+
+    model_config = {"from_attributes": True}
+
 class EventCreate(BaseModel):
     title: str         = Field(..., min_length=3, max_length=300)
-    event_date: str    = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", examples=["2025-12-31"])
+    event_date: str    = Field(..., pattern=EVENT_DATE_PATTERN, examples=["2026-12-31"])
+    event_end_date: Optional[str] = Field(None, pattern=EVENT_DATE_PATTERN)
     event_type: str    = Field(..., examples=["palestra"])
+    course: str = Field(default="Geral", min_length=2, max_length=200)
     description: Optional[str] = Field(None, max_length=2000)
     location: str = Field(default="Local a definir", min_length=2, max_length=300)
-    published: bool = False
+    image_url: Optional[str] = Field(None, max_length=2000)
+    link_url: Optional[str] = Field(None, max_length=2000)
+
+    @field_validator("event_date", "event_end_date")
+    @classmethod
+    def validate_dates(cls, value: Optional[str], info) -> Optional[str]:
+        if value is None:
+            return None
+        return validate_event_date(value, info.field_name)
 
     @field_validator("event_type")
     @classmethod
     def validate_event_type(cls, v: str) -> str:
-        allowed = {"palestra", "feriado", "promocao", "workshop", "reuniao", "evento_social", "outro"}
-        if v not in allowed:
-            raise ValueError(f"Tipo inválido. Permitidos: {allowed}")
+        if v not in EVENT_TYPES:
+            raise ValueError(f"Tipo inválido. Permitidos: {EVENT_TYPES}")
         return v
+
+    @field_validator("course")
+    @classmethod
+    def validate_course(cls, value: str) -> str:
+        return normalize_event_course(value)
+
+    @field_validator("image_url", mode="before")
+    @classmethod
+    def validate_image_url(cls, value: Optional[str]) -> Optional[str]:
+        return validate_external_url(value, field_name="image_url", allowed_schemes={"https"})
+
+    @field_validator("link_url", mode="before")
+    @classmethod
+    def validate_link_url(cls, value: Optional[str]) -> Optional[str]:
+        return validate_external_url(value, field_name="link_url", allowed_schemes={"http", "https"})
+
+    @model_validator(mode="after")
+    def validate_period(self) -> "EventCreate":
+        self.event_end_date = self.event_end_date or self.event_date
+        validate_event_period(self.event_date, self.event_end_date)
+        return self
 
 
 class EventUpdate(BaseModel):
     title: Optional[str]       = Field(None, min_length=3, max_length=300)
-    event_date: Optional[str]  = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    event_date: Optional[str]  = Field(None, pattern=EVENT_DATE_PATTERN)
+    event_end_date: Optional[str] = Field(None, pattern=EVENT_DATE_PATTERN)
     event_type: Optional[str]  = None
+    course: Optional[str] = Field(None, min_length=2, max_length=200)
     description: Optional[str] = Field(None, max_length=2000)
     location: Optional[str] = Field(None, min_length=2, max_length=300)
-    published: Optional[bool] = None
+    image_url: Optional[str] = Field(None, max_length=2000)
+    link_url: Optional[str] = Field(None, max_length=2000)
+
+    @field_validator("event_date", "event_end_date")
+    @classmethod
+    def validate_dates(cls, value: Optional[str], info) -> Optional[str]:
+        if value is None:
+            return None
+        return validate_event_date(value, info.field_name)
 
     @field_validator("event_type")
     @classmethod
     def validate_event_type(cls, v: Optional[str]) -> Optional[str]:
         if v is None:
             return v
-        allowed = {"palestra", "feriado", "promocao", "workshop", "reuniao", "evento_social", "outro"}
-        if v not in allowed:
-            raise ValueError(f"Tipo inválido. Permitidos: {allowed}")
+        if v not in EVENT_TYPES:
+            raise ValueError(f"Tipo inválido. Permitidos: {EVENT_TYPES}")
         return v
+
+    @field_validator("course")
+    @classmethod
+    def validate_course(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return normalize_event_course(value)
+
+    @field_validator("image_url", mode="before")
+    @classmethod
+    def validate_image_url(cls, value: Optional[str]) -> Optional[str]:
+        return validate_external_url(value, field_name="image_url", allowed_schemes={"https"})
+
+    @field_validator("link_url", mode="before")
+    @classmethod
+    def validate_link_url(cls, value: Optional[str]) -> Optional[str]:
+        return validate_external_url(value, field_name="link_url", allowed_schemes={"http", "https"})
 
 
 class EventResponse(BaseModel):
     id: str
     title: str
     event_date: str
+    event_end_date: str
     event_type: str
+    course: str
     description: Optional[str]
     location: str
-    published: bool
+    image_url: Optional[str]
+    link_url: Optional[str]
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -242,9 +392,13 @@ class PublicEventResponse(BaseModel):
     id: str
     title: str
     event_date: str
+    event_end_date: str
     event_type: str
+    course: str
     description: Optional[str]
     location: str
+    image_url: Optional[str]
+    link_url: Optional[str]
 
     model_config = {"from_attributes": True}
 

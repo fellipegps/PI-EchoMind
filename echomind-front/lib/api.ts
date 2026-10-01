@@ -33,10 +33,13 @@ export interface CompanyEvent {
   id: string;
   title: string;
   event_date: string;
+  event_end_date: string;
   event_type: string;
+  course: string;
   description: string | null;
   location: string;
-  published: boolean;
+  image_url: string | null;
+  link_url: string | null;
   created_at: string;
 }
 
@@ -44,9 +47,30 @@ export interface PublicEvent {
   id: string;
   title: string;
   event_date: string;
+  event_end_date: string;
   event_type: string;
+  course: string;
   description: string | null;
   location: string;
+  image_url: string | null;
+  link_url: string | null;
+}
+
+export interface EventInput {
+  title: string;
+  event_date: string;
+  event_end_date: string;
+  event_type: string;
+  course: string;
+  description?: string | null;
+  location: string;
+  image_url?: string | null;
+  link_url?: string | null;
+}
+
+export interface EventCourse {
+  id: string;
+  name: string;
 }
 
 export interface CampusLocation {
@@ -510,10 +534,18 @@ export const faqApi = {
 export const eventApi = {
   list: () => request<CompanyEvent[]>("/events"),
 
-  create: (data: { title: string; event_date: string; event_type: string; description?: string; location: string; published: boolean }) =>
+  listCourses: () => request<EventCourse[]>("/events/courses"),
+
+  createCourse: (name: string) =>
+    request<EventCourse>("/events/courses", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
+
+  create: (data: EventInput) =>
     request<CompanyEvent>("/events", { method: "POST", body: JSON.stringify(data) }),
 
-  update: (id: string, data: Partial<{ title: string; event_date: string; event_type: string; description: string; location: string; published: boolean }>) =>
+  update: (id: string, data: Partial<EventInput>) =>
     request<CompanyEvent>(`/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
   delete: (id: string) =>

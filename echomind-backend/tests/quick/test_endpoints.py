@@ -22,13 +22,45 @@ class TestCreateEvent:
         data = resp.json()
         assert data["title"] == sample_event_data["title"]
         assert data["event_date"] == sample_event_data["event_date"]
+        assert data["event_end_date"] == sample_event_data["event_end_date"]
         assert data["event_type"] == sample_event_data["event_type"]
+        assert data["course"] == sample_event_data["course"]
         assert data["location"] == sample_event_data["location"]
-        assert data["published"] is True
+        assert data["image_url"] == sample_event_data["image_url"]
+        assert data["link_url"] == sample_event_data["link_url"]
+        assert "published" not in data
         assert "id" in data
+
+    def test_create_event_defaults_end_to_start(self, client: TestClient, sample_event_data: dict):
+        payload = {**sample_event_data}
+        payload.pop("event_end_date")
+        resp = client.post("/events", json=payload)
+        assert resp.status_code == 201
+        assert resp.json()["event_end_date"] == payload["event_date"]
 
     def test_create_event_invalid_date(self, client: TestClient, sample_event_data: dict):
         resp = client.post("/events", json={**sample_event_data, "event_date": "20-08-2025"})
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize("field", ["event_date", "event_end_date"])
+    def test_create_event_rejects_nonexistent_date(
+        self, client: TestClient, sample_event_data: dict, field: str
+    ):
+        resp = client.post("/events", json={**sample_event_data, field: "2026-02-30"})
+        assert resp.status_code == 422
+
+    def test_create_event_rejects_end_before_start(self, client: TestClient, sample_event_data: dict):
+        resp = client.post(
+            "/events",
+            json={**sample_event_data, "event_date": "2099-08-20", "event_end_date": "2099-08-19"},
+        )
+        assert resp.status_code == 422
+
+    def test_create_event_rejects_end_in_past(self, client: TestClient, sample_event_data: dict):
+        resp = client.post(
+            "/events",
+            json={**sample_event_data, "event_date": "2000-01-01", "event_end_date": "2000-01-02"},
+        )
         assert resp.status_code == 422
 
     def test_create_event_invalid_type(self, client: TestClient, sample_event_data: dict):
@@ -41,6 +73,37 @@ class TestCreateEvent:
         resp = client.post("/events", json=payload)
         assert resp.status_code == 201
         assert resp.json()["description"] is None
+
+    @pytest.mark.parametrize("link_url", ["javascript:alert(1)", "ftp://example.com/file"])
+    def test_create_event_rejects_invalid_link_url(
+        self, client: TestClient, sample_event_data: dict, link_url: str
+    ):
+        resp = client.post("/events", json={**sample_event_data, "link_url": link_url})
+        assert resp.status_code == 422
+
+    @pytest.mark.parametrize(
+        "image_url",
+        [
+            "http://example.com/capa.jpg",
+            "javascript:alert(1)",
+            "data:image/png;base64,abc",
+            "https://usuario:senha@example.com/capa.jpg",
+        ],
+    )
+    def test_create_event_rejects_invalid_image_url(
+        self, client: TestClient, sample_event_data: dict, image_url: str
+    ):
+        resp = client.post("/events", json={**sample_event_data, "image_url": image_url})
+        assert resp.status_code == 422
+
+    def test_create_event_normalizes_empty_urls(self, client: TestClient, sample_event_data: dict):
+        resp = client.post(
+            "/events",
+            json={**sample_event_data, "image_url": "", "link_url": "   "},
+        )
+        assert resp.status_code == 201
+        assert resp.json()["image_url"] is None
+        assert resp.json()["link_url"] is None
 
 
 class TestListEvents:
@@ -56,6 +119,38 @@ class TestListEvents:
         assert len(resp.json()) == 2
 
 
+class TestEventCourses:
+    def test_lists_general_and_courses_created_with_events(
+        self,
+        client: TestClient,
+        sample_event_data: dict,
+    ):
+        client.post("/events", json=sample_event_data)
+
+        response = client.get("/events/courses")
+
+        assert response.status_code == 200
+        assert [course["name"] for course in response.json()] == [
+            "Engenharia Civil",
+            "Geral",
+        ]
+
+    def test_creates_a_new_course_and_reuses_case_insensitive_duplicate(
+        self,
+        client: TestClient,
+    ):
+        created = client.post("/events/courses", json={"name": "Medicina"})
+        duplicate = client.post("/events/courses", json={"name": " medicina "})
+
+        assert created.status_code == 201
+        assert duplicate.status_code == 201
+        assert duplicate.json() == created.json()
+
+    def test_rejects_blank_course(self, client: TestClient):
+        response = client.post("/events/courses", json={"name": "   "})
+        assert response.status_code == 422
+
+
 class TestUpdateEvent:
     def test_update_event(self, client: TestClient, sample_event_data: dict):
         created = client.post("/events", json=sample_event_data).json()
@@ -67,23 +162,16 @@ class TestUpdateEvent:
         resp = client.put("/events/nao-existe", json={"title": "Título Qualquer"})
         assert resp.status_code == 404
 
-    def test_unpublishing_event_removes_it_from_rag(
-        self,
-        client: TestClient,
-        sample_event_data: dict,
-        fake_rag_engine,
-    ):
+    def test_update_event_clears_image_url(self, client: TestClient, sample_event_data: dict):
         created = client.post("/events", json=sample_event_data).json()
-
-        response = client.put(
-            f"/events/{created['id']}",
-            json={"published": False},
-        )
-
+        response = client.put(f"/events/{created['id']}", json={"image_url": None})
         assert response.status_code == 200
-        assert response.json()["published"] is False
-        assert created["id"] in fake_rag_engine.indexed_events
-        assert (created["id"], "event") in fake_rag_engine.deleted
+        assert response.json()["image_url"] is None
+
+    def test_update_event_validates_merged_period(self, client: TestClient, sample_event_data: dict):
+        created = client.post("/events", json=sample_event_data).json()
+        response = client.put(f"/events/{created['id']}", json={"event_date": "2099-08-23"})
+        assert response.status_code == 422
 
     def test_update_event_rejects_invalid_type(
         self,
@@ -109,6 +197,18 @@ class TestDeleteEvent:
     def test_delete_event_not_found(self, client: TestClient):
         resp = client.delete("/events/nao-existe")
         assert resp.status_code == 404
+
+    def test_event_mutations_do_not_touch_rag(
+        self,
+        client: TestClient,
+        sample_event_data: dict,
+        fake_rag_engine,
+    ):
+        created = client.post("/events", json=sample_event_data).json()
+        assert client.put(f"/events/{created['id']}", json={"title": "Evento atualizado"}).status_code == 200
+        assert client.delete(f"/events/{created['id']}").status_code == 204
+        assert fake_rag_engine.indexed_faqs == []
+        assert fake_rag_engine.deleted == []
 
 
 # ══════════════════════════════════════════════════════════════════════════════

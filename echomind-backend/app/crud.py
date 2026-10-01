@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 import unicodedata
 from datetime import date, datetime, timedelta
@@ -13,12 +14,14 @@ from functools import lru_cache
 from typing import Optional
 
 from sqlalchemy import desc, func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .database import (
     CampusLocation,
     CompanyEvent,
     Config,
+    EventCourse,
     Faq,
     Interaction,
     UnansweredQuestion,
@@ -29,10 +32,13 @@ from .schemas import (
     CampusLocationCreate,
     CampusLocationUpdate,
     ConfigUpdate,
+    EventCourseCreate,
     EventCreate,
     EventUpdate,
     FaqCreate,
     FaqUpdate,
+    sao_paulo_today,
+    validate_event_period,
 )
 
 
@@ -40,6 +46,7 @@ DEFAULT_TONE = "profissional e cordial"
 DEFAULT_VOICE = "feminina"
 FAQ_CACHE_MATCH_THRESHOLD = 1.0
 PUBLIC_SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+logger = logging.getLogger("echomind.events")
 
 
 def build_public_slug(company_name: str, tenant_id: str) -> str:
@@ -70,7 +77,7 @@ def ensure_tenant_onboarded(
     Garante que um usuario autenticado tenha o conjunto inicial de dados.
 
     Hoje o template cria a configuracao base do tenant. FAQs e eventos ficam
-    vazios para nao exibir conteudo ficticio no chatbot publico de uma empresa nova.
+    vazios para nao exibir conteudo ficticio nos canais publicos de uma empresa nova.
     """
     existing = get_config(db, tenant_id)
     if existing:
@@ -242,11 +249,97 @@ def increment_faq_consult(db: Session, faq_id: str, tenant_id: str) -> None:
 
 # Events
 
-def get_events(db: Session, tenant_id: str) -> list[CompanyEvent]:
+def _get_or_create_event_course(
+    db: Session,
+    tenant_id: str,
+    name: str,
+) -> EventCourse:
+    normalized = name.strip()
+    existing = (
+        db.query(EventCourse)
+        .filter(
+            EventCourse.tenant_id == tenant_id,
+            func.lower(EventCourse.name) == normalized.lower(),
+        )
+        .first()
+    )
+    if existing:
+        return existing
+    course = EventCourse(tenant_id=tenant_id, name=normalized)
+    db.add(course)
+    db.flush()
+    return course
+
+
+def get_event_courses(db: Session, tenant_id: str) -> list[EventCourse]:
+    _get_or_create_event_course(db, tenant_id, "Geral")
+    db.commit()
+    return (
+        db.query(EventCourse)
+        .filter(EventCourse.tenant_id == tenant_id)
+        .order_by(func.lower(EventCourse.name).asc(), EventCourse.id.asc())
+        .all()
+    )
+
+
+def create_event_course(
+    db: Session,
+    payload: EventCourseCreate,
+    tenant_id: str,
+) -> EventCourse:
+    course = _get_or_create_event_course(db, tenant_id, payload.name)
+    db.commit()
+    db.refresh(course)
+    return course
+
+def purge_expired_events(
+    db: Session,
+    tenant_id: str,
+    *,
+    today: date | None = None,
+) -> int:
+    """Exclui eventos encerrados antes de hoje, sempre isolados por tenant."""
+    current_date = (today or sao_paulo_today()).isoformat()
+    deleted = (
+        db.query(CompanyEvent)
+        .filter(
+            CompanyEvent.tenant_id == tenant_id,
+            CompanyEvent.event_end_date < current_date,
+        )
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    return deleted
+
+
+def _purge_expired_events_safely(
+    db: Session,
+    tenant_id: str,
+    *,
+    today: date,
+) -> None:
+    try:
+        purge_expired_events(db, tenant_id, today=today)
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Falha ao excluir eventos expirados do tenant %s", tenant_id)
+
+
+def get_events(
+    db: Session,
+    tenant_id: str,
+    *,
+    today: date | None = None,
+) -> list[CompanyEvent]:
+    current_day = today or sao_paulo_today()
+    _purge_expired_events_safely(db, tenant_id, today=current_day)
     return (
         db.query(CompanyEvent)
-        .filter(CompanyEvent.tenant_id == tenant_id)
-        .order_by(desc(CompanyEvent.event_date))
+        .filter(
+            CompanyEvent.tenant_id == tenant_id,
+            CompanyEvent.event_end_date >= current_day.isoformat(),
+        )
+        .order_by(CompanyEvent.event_date.asc(), CompanyEvent.id.asc())
         .all()
     )
 
@@ -257,14 +350,14 @@ def get_public_events(
     *,
     today: date | None = None,
 ) -> list[CompanyEvent]:
-    """Lista somente eventos publicáveis do tenant, sem datas já encerradas."""
-    current_date = (today or date.today()).isoformat()
+    """Lista eventos ainda programados do tenant."""
+    current_day = today or sao_paulo_today()
+    _purge_expired_events_safely(db, tenant_id, today=current_day)
     return (
         db.query(CompanyEvent)
         .filter(
             CompanyEvent.tenant_id == tenant_id,
-            CompanyEvent.published.is_(True),
-            CompanyEvent.event_date >= current_date,
+            CompanyEvent.event_end_date >= current_day.isoformat(),
         )
         .order_by(CompanyEvent.event_date.asc(), CompanyEvent.id.asc())
         .all()
@@ -272,14 +365,18 @@ def get_public_events(
 
 
 def create_event(db: Session, payload: EventCreate, tenant_id: str) -> CompanyEvent:
+    course = _get_or_create_event_course(db, tenant_id, payload.course)
     event = CompanyEvent(
         tenant_id=tenant_id,
         title=payload.title,
         event_date=payload.event_date,
+        event_end_date=payload.event_end_date,
         event_type=payload.event_type,
+        course=course.name,
         description=payload.description,
         location=payload.location,
-        published=payload.published,
+        image_url=payload.image_url,
+        link_url=payload.link_url,
     )
     db.add(event)
     db.commit()
@@ -300,7 +397,19 @@ def update_event(
     )
     if not event:
         return None
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    changes = payload.model_dump(exclude_unset=True)
+    event_date = changes.get("event_date", event.event_date)
+    event_end_date = changes.get("event_end_date", event.event_end_date)
+    if event_date is None or event_end_date is None:
+        raise ValueError("event_date e event_end_date não podem ser nulos.")
+    validate_event_period(event_date, event_end_date)
+    if changes.get("course") is not None:
+        changes["course"] = _get_or_create_event_course(
+            db,
+            tenant_id,
+            changes["course"],
+        ).name
+    for field, value in changes.items():
         setattr(event, field, value)
     event.updated_at = utc_now()
     db.commit()

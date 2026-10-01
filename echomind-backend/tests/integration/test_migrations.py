@@ -24,6 +24,7 @@ EXPECTED_TABLES = {
     "document_chunk_parents",
     "documents",
     "events",
+    "event_courses",
     "faqs",
     "interactions",
     "rag_metric_daily",
@@ -126,7 +127,7 @@ def test_mobile_chat_fields_and_faq_index(postgres_engine: Engine) -> None:
     assert faq_indexes["ix_faqs_show_in_chatbot"] == ["show_in_chatbot"]
 
 
-def test_events_have_publication_fields_index_and_keep_rls(
+def test_events_have_period_and_links_index_and_keep_rls(
     postgres_engine: Engine,
 ) -> None:
     inspector = inspect(postgres_engine)
@@ -140,12 +141,13 @@ def test_events_have_publication_fields_index_and_keep_rls(
     }
 
     assert columns["location"]["nullable"] is False
-    assert columns["published"]["nullable"] is False
-    assert indexes["ix_events_tenant_published_date"] == [
-        "tenant_id",
-        "published",
-        "event_date",
-    ]
+    assert columns["event_end_date"]["nullable"] is False
+    assert columns["image_url"]["nullable"] is True
+    assert columns["link_url"]["nullable"] is True
+    assert columns["course"]["nullable"] is False
+    assert "published" not in columns
+    assert indexes["ix_events_tenant_end_date"] == ["tenant_id", "event_end_date"]
+    assert indexes["ix_events_tenant_course_date"] == ["tenant_id", "course", "event_date"]
 
     with postgres_engine.connect() as connection:
         rls_enabled = connection.execute(
@@ -153,6 +155,33 @@ def test_events_have_publication_fields_index_and_keep_rls(
                 "SELECT relrowsecurity FROM pg_class c "
                 "JOIN pg_namespace n ON n.oid = c.relnamespace "
                 "WHERE n.nspname = 'public' AND c.relname = 'events'"
+            )
+        ).scalar_one()
+
+    assert rls_enabled is True
+
+
+def test_event_courses_are_tenant_scoped_and_keep_rls(postgres_engine: Engine) -> None:
+    inspector = inspect(postgres_engine)
+    columns = {
+        column["name"]: column
+        for column in inspector.get_columns("event_courses")
+    }
+    unique_constraints = {
+        constraint["name"]: constraint["column_names"]
+        for constraint in inspector.get_unique_constraints("event_courses")
+    }
+
+    assert columns["tenant_id"]["nullable"] is False
+    assert columns["name"]["nullable"] is False
+    assert unique_constraints["uq_event_courses_tenant_name"] == ["tenant_id", "name"]
+
+    with postgres_engine.connect() as connection:
+        rls_enabled = connection.execute(
+            text(
+                "SELECT relrowsecurity FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE n.nspname = 'public' AND c.relname = 'event_courses'"
             )
         ).scalar_one()
 
@@ -283,10 +312,10 @@ def test_document_tables_columns_indexes_and_constraints(postgres_engine: Engine
         )
     assert {
         "ix_faqs_fts_portuguese",
-        "ix_events_fts_portuguese",
         "ix_documents_fts_portuguese",
         "ix_document_chunks_fts_portuguese",
     } <= fts_indexes
+    assert "ix_events_fts_portuguese" not in fts_indexes
 
     document_checks = {
         constraint["name"] for constraint in inspector.get_check_constraints("documents")

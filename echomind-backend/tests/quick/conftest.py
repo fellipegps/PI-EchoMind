@@ -202,7 +202,6 @@ class FakeRAGEngine:
         self.last_had_docs = has_context
         self.error = error
         self.indexed_faqs: list = []
-        self.indexed_events: list = []
         self.deleted: list = []
         self.deleted_document_chunks: list[tuple[str, tuple[str, ...]]] = []
         self.document_chunk_delete_error = False
@@ -228,12 +227,6 @@ class FakeRAGEngine:
 
     def reindex_faq(self, faq):
         self.index_faq(faq)
-
-    def index_event(self, event):
-        self.indexed_events.append(event.id)
-
-    def reindex_event(self, event):
-        self.index_event(event)
 
     def delete_document(self, source_id: str, source: str):
         self.deleted.append((source_id, source))
@@ -266,11 +259,14 @@ def sample_faq_data() -> dict:
 def sample_event_data() -> dict:
     return {
         "title": "Semana Acadêmica",
-        "event_date": "2025-08-20",
+        "event_date": "2099-08-20",
+        "event_end_date": "2099-08-22",
         "event_type": "palestra",
+        "course": "Engenharia Civil",
         "description": "Palestras e workshops para alunos.",
         "location": "Auditório Central",
-        "published": True,
+        "image_url": "https://cdn.example.com/evento.webp",
+        "link_url": "https://example.com/inscricoes",
     }
 
 
