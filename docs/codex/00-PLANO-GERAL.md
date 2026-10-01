@@ -180,6 +180,6 @@ Fixtures documentais devem ser mínimas, sintéticas e sem dados pessoais/sigilo
 
 ## Funcionalidades explicitamente fora do escopo inicial
 
-Até a PR 21, não implementar Hybrid Search, reranker, Parent-Child Retrieval, context compression, query expansion, HyDE, OCR, Celery/Redis, memória de conversa, multi-LLM, WhatsApp, analytics avançado, A/B testing, relatórios automáticos, import/export, onboarding, preview de totem, sugestão automática de FAQ ou dockerização completa.
+Até a PR 21, não implementar Hybrid Search, reranker, Parent-Child Retrieval, context compression, query expansion, HyDE, OCR, Celery/Redis, memória de conversa, multi-LLM, WhatsApp, analytics avançado, A/B testing, relatórios automáticos, import/export, onboarding, sugestão automática de FAQ ou dockerização completa.
 
 As decisões condicionais e o backlog após a PR 35 estão detalhados em `99-BACKLOG-E-DECISOES-FUTURAS.md`.

@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
 export function FaqTab() {
-  const { faqs, saveFaq, deleteFaq, toggleTotemStatus } = useFaqs();
+  const { faqs, saveFaq, deleteFaq, toggleChatbotStatus } = useFaqs();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFaq, setEditingFaq] = useState<Faq | null>(null);
@@ -87,7 +87,7 @@ export function FaqTab() {
               <TableRow>
                 <TableHead>Pergunta</TableHead>
                 <TableHead className="hidden md:table-cell">Resposta</TableHead>
-                <TableHead className="w-35">Totem</TableHead>
+                <TableHead className="w-35">Chatbot</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -103,14 +103,14 @@ export function FaqTab() {
                   <TableCell>
                     <div className="flex items-center gap-2 w-30">
                       <Switch
-                        checked={faq.show_on_totem}
-                        onCheckedChange={() => toggleTotemStatus(faq.id)}
+                        checked={faq.show_in_chatbot}
+                        onCheckedChange={() => toggleChatbotStatus(faq.id)}
                       />
                       <Badge
-                        variant={faq.show_on_totem ? "default" : "secondary"}
+                        variant={faq.show_in_chatbot ? "default" : "secondary"}
                         className="w-20 justify-center"
                       >
-                        {faq.show_on_totem ? "No Totem" : "Oculta"}
+                        {faq.show_in_chatbot ? "No Chatbot" : "Oculta"}
                       </Badge>
                     </div>
                   </TableCell>

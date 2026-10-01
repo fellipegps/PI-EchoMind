@@ -25,7 +25,7 @@ export interface Faq {
   id: string;
   question: string;
   answer: string;
-  show_on_totem: boolean;
+  show_in_chatbot: boolean;
   created_at: string;
 }
 
@@ -33,10 +33,13 @@ export interface CompanyEvent {
   id: string;
   title: string;
   event_date: string;
+  event_end_date: string;
   event_type: string;
+  course: string;
   description: string | null;
   location: string;
-  published: boolean;
+  image_url: string | null;
+  link_url: string | null;
   created_at: string;
 }
 
@@ -44,9 +47,30 @@ export interface PublicEvent {
   id: string;
   title: string;
   event_date: string;
+  event_end_date: string;
   event_type: string;
+  course: string;
   description: string | null;
   location: string;
+  image_url: string | null;
+  link_url: string | null;
+}
+
+export interface EventInput {
+  title: string;
+  event_date: string;
+  event_end_date: string;
+  event_type: string;
+  course: string;
+  description?: string | null;
+  location: string;
+  image_url?: string | null;
+  link_url?: string | null;
+}
+
+export interface EventCourse {
+  id: string;
+  name: string;
 }
 
 export interface CampusLocation {
@@ -79,7 +103,7 @@ export interface Config {
   company_name: string;
   description: string | null;
   tone_of_voice: string;
-  totem_voice_gender: string;
+  chat_voice_gender: string;
   website: string | null;
   phone: string | null;
   address: string | null;
@@ -487,17 +511,17 @@ export function streamPublicChat(
 export const faqApi = {
   list: () => request<Faq[]>("/faqs"),
 
-  listTotem: (tenantId: string) =>
-    publicRequest<Faq[]>(`/faqs/totem?tenant_id=${encodeURIComponent(tenantId)}`),
+  listChatbot: (tenantId: string) =>
+    publicRequest<Faq[]>(`/faqs/chatbot?tenant_id=${encodeURIComponent(tenantId)}`),
 
-  create: (data: { question: string; answer: string; show_on_totem?: boolean }) =>
+  create: (data: { question: string; answer: string; show_in_chatbot?: boolean }) =>
     request<Faq>("/faqs", { method: "POST", body: JSON.stringify(data) }),
 
-  update: (id: string, data: Partial<{ question: string; answer: string; show_on_totem: boolean }>) =>
+  update: (id: string, data: Partial<{ question: string; answer: string; show_in_chatbot: boolean }>) =>
     request<Faq>(`/faqs/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
-  toggleTotem: (id: string) =>
-    request<Faq>(`/faqs/${id}/toggle-totem`, { method: "PATCH" }),
+  toggleChatbot: (id: string) =>
+    request<Faq>(`/faqs/${id}/toggle-chatbot`, { method: "PATCH" }),
 
   delete: (id: string) =>
     request<void>(`/faqs/${id}`, { method: "DELETE" }),
@@ -510,10 +534,18 @@ export const faqApi = {
 export const eventApi = {
   list: () => request<CompanyEvent[]>("/events"),
 
-  create: (data: { title: string; event_date: string; event_type: string; description?: string; location: string; published: boolean }) =>
+  listCourses: () => request<EventCourse[]>("/events/courses"),
+
+  createCourse: (name: string) =>
+    request<EventCourse>("/events/courses", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
+
+  create: (data: EventInput) =>
     request<CompanyEvent>("/events", { method: "POST", body: JSON.stringify(data) }),
 
-  update: (id: string, data: Partial<{ title: string; event_date: string; event_type: string; description: string; location: string; published: boolean }>) =>
+  update: (id: string, data: Partial<EventInput>) =>
     request<CompanyEvent>(`/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
 
   delete: (id: string) =>
@@ -646,7 +678,7 @@ export const dashboardApi = {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  FEEDBACK DO TOTEM
+//  FEEDBACK DO CHATBOT
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const feedbackApi = {

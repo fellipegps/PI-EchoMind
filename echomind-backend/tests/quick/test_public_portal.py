@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
@@ -97,14 +99,14 @@ def test_public_faqs_are_isolated_by_resolved_tenant_and_hide_internal_metrics(
         tenant_id="tenant-a",
         question="Pergunta exclusiva do tenant A?",
         answer="Resposta exclusiva do tenant A.",
-        show_on_totem=True,
+        show_in_chatbot=True,
         total_consults=42,
     )
     faq_b = Faq(
         tenant_id="tenant-b",
         question="Pergunta exclusiva do tenant B?",
         answer="Resposta exclusiva do tenant B.",
-        show_on_totem=True,
+        show_in_chatbot=True,
     )
     db.add_all([config_a, config_b, faq_a, faq_b])
     db.commit()
@@ -124,7 +126,7 @@ def test_public_faqs_are_isolated_by_resolved_tenant_and_hide_internal_metrics(
     assert faq_b.question not in response.text
 
 
-def test_public_events_are_published_current_ordered_and_tenant_scoped(
+def test_public_events_are_current_ordered_and_tenant_scoped(
     client: TestClient,
     db: Session,
 ) -> None:
@@ -142,43 +144,47 @@ def test_public_events_are_published_current_ordered_and_tenant_scoped(
         tenant_id=config_a.tenant_id,
         title="Evento posterior",
         event_date="2099-12-20",
+        event_end_date="2099-12-21",
         event_type="palestra",
         description="Segundo na ordenação.",
         location="Auditório B",
-        published=True,
+        image_url="https://cdn.example.com/posterior.webp",
+        link_url="https://example.com/posterior",
     )
     sooner = CompanyEvent(
         tenant_id=config_a.tenant_id,
         title="Evento mais próximo",
         event_date="2099-01-10",
+        event_end_date="2099-01-10",
         event_type="workshop",
         description=None,
         location="Laboratório 1",
-        published=True,
+        image_url=None,
+        link_url=None,
     )
-    unpublished = CompanyEvent(
+    formerly_unpublished = CompanyEvent(
         tenant_id=config_a.tenant_id,
-        title="Rascunho interno",
-        event_date="2099-01-01",
+        title="Evento sem status",
+        event_date="2099-06-01",
+        event_end_date="2099-06-01",
         event_type="reuniao",
         location="Sala interna",
-        published=False,
     )
     finished = CompanyEvent(
         tenant_id=config_a.tenant_id,
         title="Evento encerrado",
         event_date="2000-01-01",
+        event_end_date="2000-01-02",
         event_type="outro",
         location="Arquivo",
-        published=True,
     )
     other_tenant = CompanyEvent(
         tenant_id=config_b.tenant_id,
         title="Evento do tenant B",
         event_date="2099-01-02",
+        event_end_date="2099-01-03",
         event_type="outro",
         location="Outro campus",
-        published=True,
     )
     db.add_all(
         [
@@ -186,12 +192,13 @@ def test_public_events_are_published_current_ordered_and_tenant_scoped(
             config_b,
             later,
             sooner,
-            unpublished,
+            formerly_unpublished,
             finished,
             other_tenant,
         ]
     )
     db.commit()
+    finished_title = finished.title
 
     response = client.get(f"/public/{config_a.public_slug}/events")
 
@@ -201,23 +208,94 @@ def test_public_events_are_published_current_ordered_and_tenant_scoped(
             "id": sooner.id,
             "title": sooner.title,
             "event_date": sooner.event_date,
+            "event_end_date": sooner.event_end_date,
             "event_type": sooner.event_type,
+            "course": "Geral",
             "description": None,
             "location": sooner.location,
+            "image_url": None,
+            "link_url": None,
+        },
+        {
+            "id": formerly_unpublished.id,
+            "title": formerly_unpublished.title,
+            "event_date": formerly_unpublished.event_date,
+            "event_end_date": formerly_unpublished.event_end_date,
+            "event_type": formerly_unpublished.event_type,
+            "course": "Geral",
+            "description": None,
+            "location": formerly_unpublished.location,
+            "image_url": None,
+            "link_url": None,
         },
         {
             "id": later.id,
             "title": later.title,
             "event_date": later.event_date,
+            "event_end_date": later.event_end_date,
             "event_type": later.event_type,
+            "course": "Geral",
             "description": later.description,
             "location": later.location,
+            "image_url": later.image_url,
+            "link_url": later.link_url,
         },
     ]
     assert "tenant_id" not in response.text
-    assert unpublished.title not in response.text
-    assert finished.title not in response.text
+    assert "created_at" not in response.text
+    assert "published" not in response.text
+    assert finished_title not in response.text
     assert other_tenant.title not in response.text
+
+
+def test_public_multiday_event_is_visible_through_last_day_and_removed_next_day(
+    db: Session,
+) -> None:
+    event = CompanyEvent(
+        tenant_id="period-tenant",
+        title="Semana de integração",
+        event_date="2026-09-28",
+        event_end_date="2026-09-30",
+        event_type="evento_social",
+        location="Campus",
+    )
+    future = CompanyEvent(
+        tenant_id="period-tenant",
+        title="Evento futuro",
+        event_date="2026-10-05",
+        event_end_date="2026-10-05",
+        event_type="palestra",
+        location="Auditório",
+    )
+    db.add_all([event, future])
+    db.commit()
+
+    on_last_day = crud.get_public_events(db, "period-tenant", today=date(2026, 9, 30))
+    assert [item.title for item in on_last_day] == [event.title, future.title]
+
+    next_day = crud.get_public_events(db, "period-tenant", today=date(2026, 10, 1))
+    assert [item.title for item in next_day] == [future.title]
+
+
+def test_purge_expired_events_only_deletes_target_tenant(db: Session) -> None:
+    expired_a = CompanyEvent(
+        tenant_id="purge-a", title="Expirado A", event_date="2026-09-01",
+        event_end_date="2026-09-10", event_type="outro", location="A",
+    )
+    active_a = CompanyEvent(
+        tenant_id="purge-a", title="Ativo A", event_date="2026-09-20",
+        event_end_date="2026-09-30", event_type="outro", location="A",
+    )
+    expired_b = CompanyEvent(
+        tenant_id="purge-b", title="Expirado B", event_date="2026-09-01",
+        event_end_date="2026-09-10", event_type="outro", location="B",
+    )
+    db.add_all([expired_a, active_a, expired_b])
+    db.commit()
+
+    assert crud.purge_expired_events(db, "purge-a", today=date(2026, 9, 30)) == 1
+    assert db.query(CompanyEvent).filter(CompanyEvent.id == active_a.id).one()
+    assert db.query(CompanyEvent).filter(CompanyEvent.id == expired_b.id).one()
 
 
 def test_public_chat_uses_slug_and_rejects_client_supplied_tenant(

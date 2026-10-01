@@ -1,6 +1,8 @@
-# EchoMind - Totem de IA Institucional
+# EchoMind - Aplicação web de atendimento institucional
 
-EchoMind e um sistema multiusuario de totem interativo com IA para instituicoes de ensino e empresas. O backend usa FastAPI, SQLAlchemy, Alembic, pgvector, LangChain, Groq e FastEmbed para responder perguntas com base na base de conhecimento cadastrada por cada usuario/empresa.
+EchoMind e uma aplicacao web responsiva de atendimento com IA para instituicoes de ensino e empresas, com foco na experiencia em dispositivos moveis e acesso tambem pelo desktop. O portal publico oferece chat, eventos e locais; o painel administrativo gerencia a base de conhecimento de cada instituicao. O backend usa FastAPI, SQLAlchemy, Alembic, pgvector, LangChain, Groq e FastEmbed para responder perguntas com base nos dados do tenant.
+
+Os eventos sao exibidos em uma lista vertical no portal e nao alimentam o chatbot. Cada evento expira depois do ultimo dia do periodo cadastrado, pode ser relacionado a um curso do catalogo da instituicao e a capa deve usar uma URL `https` de uma imagem ja hospedada externamente. Quando informado, o link relacionado aparece como endereco clicavel no card.
 
 O projeto usa Supabase para:
 
@@ -232,7 +234,7 @@ O template de exemplo fica em:
 echomind-backend/templates/unievangelica.json
 ```
 
-Ele contem configuracao institucional e 30 FAQs para uma instituicao de ensino superior, com ate 4 perguntas marcadas para aparecerem no totem publico.
+Ele contem configuracao institucional e 30 FAQs para uma instituicao de ensino superior, com ate 4 perguntas marcadas para aparecerem no chatbot publico.
 
 O importador:
 
@@ -240,8 +242,8 @@ O importador:
 - cria FAQs que ainda nao existem;
 - atualiza FAQs existentes quando a pergunta ja existe no mesmo tenant;
 - evita duplicacao por pergunta;
-- respeita o limite de 4 FAQs exibidas no totem;
-- reindexa FAQs e eventos no RAG automaticamente.
+- respeita o limite de 4 FAQs exibidas no chatbot;
+- reindexa as FAQs no RAG automaticamente; eventos permanecem somente no portal.
 
 Se quiser apenas validar a gravacao no banco sem reindexar o RAG, use:
 
@@ -266,10 +268,10 @@ cd echomind-backend
 python scripts/reindex_all.py --confirm
 ```
 
-O script le a configuracao normal do backend, encontra tenants que possuem FAQs,
-eventos ou documentos com status `ready` e processa um por vez. Para cada tenant,
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs
+ou documentos com status `ready` e processa um por vez. Para cada tenant,
 somente a colecao `knowledge_<tenant>` correspondente e limpa e recriada; em
-seguida, as FAQs, os eventos e os `document_chunks` ja persistidos dos documentos
+seguida, as FAQs e os `document_chunks` ja persistidos dos documentos
 `ready` desse tenant sao indexados novamente com os IDs deterministicos atuais.
 Documentos `pending`, `processing` e `error` sao ignorados. O arquivo original
 nao e reprocessado e os chunks nao sao recriados.
@@ -310,8 +312,14 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `GET` | `/auth/me` | Usuario autenticado e onboarding do tenant |
 | `POST` | `/chat` | Chat publico com streaming e `tenant_id` |
 | `GET/POST/PUT/DELETE` | `/faqs` | CRUD de FAQs autenticado |
-| `GET` | `/faqs/totem` | FAQs publicas do totem por `tenant_id` |
+| `GET` | `/faqs/chatbot` | FAQs publicas do chatbot por `tenant_id` |
+| `PATCH` | `/faqs/{id}/toggle-chatbot` | Exibe ou oculta uma FAQ no chat publico |
+| `GET` | `/public/{slug}/faqs` | FAQs publicas do portal web |
+| `GET` | `/public/{slug}/events` | Eventos programados no portal web |
+| `GET` | `/public/{slug}/locations` | Locais ativos no portal web |
+| `POST` | `/public/{slug}/chat` | Chat publico vinculado ao slug da instituicao |
 | `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
+| `GET/POST` | `/events/courses` | Lista ou cria cursos relacionados a eventos |
 | `GET/PUT` | `/config` | Configuracoes autenticadas do tenant |
 | `GET` | `/config/public` | Configuracao publica por `tenant_id` |
 | `GET/DELETE` | `/unanswered` | Perguntas nao respondidas |
@@ -320,7 +328,7 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `POST` | `/documents/upload` | Upload documental autenticado via multipart |
 | `GET` | `/documents` | Lista documentos do tenant autenticado |
 | `GET/DELETE` | `/documents/{id}` | Consulta ou exclui documento terminal do tenant |
-| `POST` | `/feedback` | Feedback publico do totem |
+| `POST` | `/feedback` | Feedback publico do chatbot |
 | `GET` | `/health` | Health check |
 
 ## Fluxo Rapido De Teste
@@ -331,10 +339,10 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 4. Crie uma conta em `/registrar-conta`.
 5. Entre em `/login`.
 6. Abra configuracoes e complete os dados da empresa.
-7. Cadastre FAQs e marque ate 4 para aparecerem no totem.
+7. Cadastre FAQs e marque ate 4 para aparecerem no chatbot.
 8. Envie um TXT, PDF textual ou DOCX pela aba Documentos e aguarde `ready`.
 9. Confirme que o chat usa a fonte documental e que a exclusao remove o item.
-10. Copie a URL do totem em configuracoes e teste o atendimento publico.
+10. Copie a URL do portal publico em configuracoes e teste o atendimento no celular e no desktop.
 
 ## Avaliação RAG offline
 

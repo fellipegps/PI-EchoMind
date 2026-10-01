@@ -14,7 +14,7 @@ from typing import Any
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
-from app.database import CompanyEvent, Config, Faq, SessionLocal, utc_now  # noqa: E402
+from app.database import CompanyEvent, Config, EventCourse, Faq, SessionLocal, utc_now  # noqa: E402
 from app.rag_engine import get_rag_engine  # noqa: E402
 from app import crud  # noqa: E402
 
@@ -25,7 +25,7 @@ CONFIG_FIELDS = {
     "company_name",
     "description",
     "tone_of_voice",
-    "totem_voice_gender",
+    "chat_voice_gender",
     "website",
     "phone",
     "address",
@@ -35,9 +35,12 @@ EVENT_FIELDS = {
     "title",
     "event_date",
     "event_type",
+    "course",
     "description",
     "location",
-    "published",
+    "event_end_date",
+    "image_url",
+    "link_url",
 }
 
 
@@ -61,9 +64,9 @@ def load_template(path: Path) -> dict[str, Any]:
     if not isinstance(faqs, list) or not faqs:
         raise SystemExit("O template precisa conter uma lista nao vazia em 'faqs'.")
 
-    totem_count = sum(1 for item in faqs if bool(item.get("show_on_totem")))
-    if totem_count > 4:
-        raise SystemExit("O template nao pode marcar mais de 4 FAQs com show_on_totem=true.")
+    chatbot_count = sum(1 for item in faqs if bool(item.get("show_in_chatbot")))
+    if chatbot_count > 4:
+        raise SystemExit("O template nao pode marcar mais de 4 FAQs com show_in_chatbot=true.")
 
     seen_questions: set[str] = set()
     for index, item in enumerate(faqs, start=1):
@@ -126,7 +129,7 @@ def upsert_faqs(db, tenant_id: str, rows: list[dict[str, Any]]) -> tuple[list[Fa
 
         if faq:
             faq.answer = item["answer"].strip()
-            faq.show_on_totem = bool(item.get("show_on_totem", False))
+            faq.show_in_chatbot = bool(item.get("show_in_chatbot", False))
             faq.updated_at = utc_now()
             updated += 1
         else:
@@ -134,7 +137,7 @@ def upsert_faqs(db, tenant_id: str, rows: list[dict[str, Any]]) -> tuple[list[Fa
                 tenant_id=tenant_id,
                 question=question,
                 answer=item["answer"].strip(),
-                show_on_totem=bool(item.get("show_on_totem", False)),
+                show_in_chatbot=bool(item.get("show_in_chatbot", False)),
             )
             db.add(faq)
             created += 1
@@ -145,16 +148,16 @@ def upsert_faqs(db, tenant_id: str, rows: list[dict[str, Any]]) -> tuple[list[Fa
     for faq in imported:
         db.refresh(faq)
 
-    enforce_totem_limit(db, tenant_id, imported)
+    enforce_chatbot_limit(db, tenant_id, imported)
     crud.get_cached_faq_answers.cache_clear()
     return imported, created, updated
 
 
-def enforce_totem_limit(db, tenant_id: str, imported: list[Faq]) -> None:
-    active_imported_ids = {faq.id for faq in imported if faq.show_on_totem}
+def enforce_chatbot_limit(db, tenant_id: str, imported: list[Faq]) -> None:
+    active_imported_ids = {faq.id for faq in imported if faq.show_in_chatbot}
     active = (
         db.query(Faq)
-        .filter(Faq.tenant_id == tenant_id, Faq.show_on_totem == True)
+        .filter(Faq.tenant_id == tenant_id, Faq.show_in_chatbot == True)
         .order_by(Faq.created_at.asc())
         .all()
     )
@@ -167,12 +170,12 @@ def enforce_totem_limit(db, tenant_id: str, imported: list[Faq]) -> None:
             break
         if faq.id in active_imported_ids:
             continue
-        faq.show_on_totem = False
+        faq.show_in_chatbot = False
         faq.updated_at = utc_now()
         active.remove(faq)
 
     if len(active) > 4:
-        raise SystemExit("Nao foi possivel respeitar o limite de 4 FAQs no totem.")
+        raise SystemExit("Nao foi possivel respeitar o limite de 4 FAQs no chatbot.")
 
     db.commit()
 
@@ -187,6 +190,10 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
     by_title_date = {(normalize(row.title), row.event_date): row for row in existing}
 
     imported: list[CompanyEvent] = []
+    known_courses = {
+        normalize(course.name): course
+        for course in db.query(EventCourse).filter(EventCourse.tenant_id == tenant_id).all()
+    }
     created = 0
     updated = 0
 
@@ -194,16 +201,20 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
         title = str(item.get("title", "")).strip()
         event_date = str(item.get("event_date", "")).strip()
         event_type = str(item.get("event_type", "")).strip()
+        course_name = str(item.get("course") or "Geral").strip()
         if not title or not event_date or not event_type:
             raise SystemExit(f"Evento #{index} precisa conter title, event_date e event_type.")
 
         key = (normalize(title), event_date)
         event = by_title_date.get(key)
+        event_end_date = str(item.get("event_end_date") or event_date).strip()
 
         if event:
             for field in EVENT_FIELDS:
                 if field in item:
                     setattr(event, field, item[field])
+            event.event_end_date = event_end_date
+            event.course = course_name
             event.updated_at = utc_now()
             updated += 1
         else:
@@ -211,13 +222,22 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
                 tenant_id=tenant_id,
                 title=title,
                 event_date=event_date,
+                event_end_date=event_end_date,
                 event_type=event_type,
+                course=course_name,
                 description=item.get("description"),
                 location=item.get("location") or "Local a definir",
-                published=bool(item.get("published", False)),
+                image_url=item.get("image_url") or None,
+                link_url=item.get("link_url") or None,
             )
             db.add(event)
             created += 1
+
+        course_key = normalize(course_name)
+        if course_key not in known_courses:
+            course = EventCourse(tenant_id=tenant_id, name=course_name)
+            db.add(course)
+            known_courses[course_key] = course
 
         imported.append(event)
 
@@ -228,17 +248,11 @@ def upsert_events(db, tenant_id: str, rows: list[dict[str, Any]] | None) -> tupl
     return imported, created, updated
 
 
-def reindex_imported(db, tenant_id: str, faqs: list[Faq], events: list[CompanyEvent]) -> None:
+def reindex_imported(db, tenant_id: str, faqs: list[Faq]) -> None:
     rag = get_rag_engine(db, tenant_id=tenant_id)
 
     for faq in faqs:
         rag.reindex_faq(faq)
-
-    for event in events:
-        if event.published:
-            rag.reindex_event(event)
-        else:
-            rag.delete_document(event.id, source="event")
 
 
 def parse_args() -> argparse.Namespace:
@@ -270,12 +284,12 @@ def main() -> None:
         events, created_events, updated_events = upsert_events(db, tenant_id, data.get("events"))
 
         if not args.skip_rag:
-            reindex_imported(db, tenant_id, faqs, events)
+            reindex_imported(db, tenant_id, faqs)
 
         log.info("Tenant: %s", tenant_id)
         log.info("Config: %s", "atualizada" if config else "nao informada")
         log.info("FAQs: %d criadas, %d atualizadas, %d reindexadas", created_faqs, updated_faqs, len(faqs))
-        log.info("Eventos: %d criados, %d atualizados, %d reindexados", created_events, updated_events, len(events))
+        log.info("Eventos: %d criados, %d atualizados", created_events, updated_events)
         log.info("Importacao concluida.")
     finally:
         db.close()

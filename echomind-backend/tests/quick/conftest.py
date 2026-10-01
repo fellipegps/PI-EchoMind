@@ -202,7 +202,6 @@ class FakeRAGEngine:
         self.last_had_docs = has_context
         self.error = error
         self.indexed_faqs: list = []
-        self.indexed_events: list = []
         self.deleted: list = []
         self.deleted_document_chunks: list[tuple[str, tuple[str, ...]]] = []
         self.document_chunk_delete_error = False
@@ -229,12 +228,6 @@ class FakeRAGEngine:
     def reindex_faq(self, faq):
         self.index_faq(faq)
 
-    def index_event(self, event):
-        self.indexed_events.append(event.id)
-
-    def reindex_event(self, event):
-        self.index_event(event)
-
     def delete_document(self, source_id: str, source: str):
         self.deleted.append((source_id, source))
 
@@ -258,7 +251,7 @@ def sample_faq_data() -> dict:
     return {
         "question": "Como faço minha matrícula?",
         "answer": "Compareça à secretaria com seus documentos.",
-        "show_on_totem": False,
+        "show_in_chatbot": False,
     }
 
 
@@ -266,11 +259,14 @@ def sample_faq_data() -> dict:
 def sample_event_data() -> dict:
     return {
         "title": "Semana Acadêmica",
-        "event_date": "2025-08-20",
+        "event_date": "2099-08-20",
+        "event_end_date": "2099-08-22",
         "event_type": "palestra",
+        "course": "Engenharia Civil",
         "description": "Palestras e workshops para alunos.",
         "location": "Auditório Central",
-        "published": True,
+        "image_url": "https://cdn.example.com/evento.webp",
+        "link_url": "https://example.com/inscricoes",
     }
 
 
@@ -280,7 +276,7 @@ def sample_config_data() -> dict:
         "company_name": "UniEVANGÉLICA",
         "description": "Instituição de ensino superior.",
         "tone_of_voice": "profissional e cordial",
-        "totem_voice_gender": "feminina",
+        "chat_voice_gender": "feminina",
         "website": "https://www.unievangelica.edu.br",
         "phone": "(62) 3310-6600",
         "address": "Av. Universitária Km 3,5 - Anápolis, GO",

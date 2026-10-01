@@ -1,4 +1,4 @@
-import { MobilePortal } from "../../agente-publico/components/mobile-portal";
+import { PublicPortal } from "../../components/public-portal";
 
 type PublicPortalPageProps = {
   params: Promise<{ slug: string }>;
@@ -6,5 +6,5 @@ type PublicPortalPageProps = {
 
 export default async function PublicPortalPage({ params }: PublicPortalPageProps) {
   const { slug } = await params;
-  return <MobilePortal publicSlug={slug} />;
+  return <PublicPortal publicSlug={slug} />;
 }

@@ -16,7 +16,6 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
 from app.database import (  # noqa: E402
-    CompanyEvent,
     DATABASE_URL,
     Document,
     DocumentChunk,
@@ -47,7 +46,6 @@ log = logging.getLogger("reindex_all")
 class ReindexResult:
     tenant_id: str
     faq_count: int
-    event_count: int
     document_count: int = 0
     document_chunk_count: int = 0
 
@@ -81,16 +79,10 @@ def validate_configuration() -> None:
 
 
 def list_tenant_ids(db: Session) -> list[str]:
-    """Seleciona tenants com FAQ, evento ou documento ready para reindexar."""
+    """Seleciona tenants com FAQ ou documento ready para reindexar."""
     faq_rows = (
         db.query(Faq.tenant_id)
         .filter(Faq.tenant_id.isnot(None), Faq.tenant_id != "")
-        .distinct()
-        .all()
-    )
-    event_rows = (
-        db.query(CompanyEvent.tenant_id)
-        .filter(CompanyEvent.tenant_id.isnot(None), CompanyEvent.tenant_id != "")
         .distinct()
         .all()
     )
@@ -104,7 +96,7 @@ def list_tenant_ids(db: Session) -> list[str]:
         .distinct()
         .all()
     )
-    return sorted({row[0] for row in (*faq_rows, *event_rows, *document_rows)})
+    return sorted({row[0] for row in (*faq_rows, *document_rows)})
 
 
 def reindex_tenant(db: Session, tenant_id: str) -> ReindexResult:
@@ -113,12 +105,6 @@ def reindex_tenant(db: Session, tenant_id: str) -> ReindexResult:
         db.query(Faq)
         .filter(Faq.tenant_id == tenant_id)
         .order_by(Faq.id.asc())
-        .all()
-    )
-    events = (
-        db.query(CompanyEvent)
-        .filter(CompanyEvent.tenant_id == tenant_id)
-        .order_by(CompanyEvent.id.asc())
         .all()
     )
     documents = (
@@ -166,15 +152,12 @@ def reindex_tenant(db: Session, tenant_id: str) -> ReindexResult:
 
     for faq in faqs:
         rag.index_faq(faq)
-    for event in events:
-        rag.index_event(event)
     for chunk in chunks:
         rag.index_document_chunk(documents_by_id[chunk.document_id], chunk)
 
     return ReindexResult(
         tenant_id=tenant_id,
         faq_count=len(faqs),
-        event_count=len(events),
         document_count=len(documents),
         document_chunk_count=len(chunks),
     )
@@ -188,11 +171,9 @@ def reindex_all(db: Session) -> list[ReindexResult]:
             result = reindex_tenant(db, tenant_id)
             results.append(result)
             log.info(
-                "Tenant %s concluido: %d FAQ(s), %d evento(s), "
-                "%d documento(s) ready, %d chunk(s).",
+                "Tenant %s concluido: %d FAQ(s), %d documento(s) ready, %d chunk(s).",
                 tenant_id,
                 result.faq_count,
-                result.event_count,
                 result.document_count,
                 result.document_chunk_count,
             )
@@ -353,7 +334,7 @@ def rewrite_parent_child_and_reindex(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Limpa e reindexa colecoes RAG de FAQs, eventos e chunks ready por tenant."
+            "Limpa e reindexa colecoes RAG de FAQs e chunks ready por tenant."
         )
     )
     parser.add_argument(
@@ -410,15 +391,12 @@ def main() -> None:
         db.close()
 
     total_faqs = sum(result.faq_count for result in results)
-    total_events = sum(result.event_count for result in results)
     total_documents = sum(result.document_count for result in results)
     total_document_chunks = sum(result.document_chunk_count for result in results)
     log.info(
-        "Reindexacao concluida: %d tenant(s), %d FAQ(s), %d evento(s), "
-        "%d documento(s) ready, %d chunk(s).",
+        "Reindexacao concluida: %d tenant(s), %d FAQ(s), %d documento(s) ready, %d chunk(s).",
         len(results),
         total_faqs,
-        total_events,
         total_documents,
         total_document_chunks,
     )

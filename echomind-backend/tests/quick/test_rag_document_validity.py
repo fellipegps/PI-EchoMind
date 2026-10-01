@@ -143,7 +143,7 @@ async def test_overfetch_filters_expired_then_restores_ranking_and_top_k(
 
 
 @pytest.mark.asyncio
-async def test_faq_and_event_ignore_document_validity_filter(
+async def test_faq_ignores_validity_and_legacy_event_is_filtered(
     monkeypatch,
     rag_engine_module,
 ) -> None:
@@ -173,8 +173,8 @@ async def test_faq_and_event_ignore_document_validity_filter(
         results,
     )
 
-    assert [doc.metadata["source_type"] for doc in docs] == ["faq", "event"]
-    assert [doc.metadata["source_id"] for doc in docs] == ["faq-1", "evento-1"]
+    assert [doc.metadata["source_type"] for doc in docs] == ["faq"]
+    assert [doc.metadata["source_id"] for doc in docs] == ["faq-1"]
     assert nearest_distance == 0.10
 
 
