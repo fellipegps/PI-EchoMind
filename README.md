@@ -29,7 +29,34 @@ EchoMind-main/
 - Projeto criado no Supabase
 - Chave da API Groq
 
-> O backend deve ser executado com Python 3.12. Se sua maquina tiver outra versao instalada, crie o ambiente virtual com `py -3.12`.
+> O backend deve ser executado com Python 3.12. O ambiente virtual precisa ser
+> criado com esse interpretador, mesmo que outra versao do Python esteja
+> instalada no sistema.
+
+#### Preparacao no Arch Linux
+
+No Arch Linux, instale `uv`, Node.js e Corepack. O `uv` instala o Python 3.12
+sem substituir a versao do Python usada pelo sistema, e o Corepack executa a
+versao do pnpm definida no `package.json`.
+
+```bash
+sudo pacman -Syu uv nodejs corepack
+```
+
+Confirme que as ferramentas estao disponiveis:
+
+```bash
+uv --version
+node --version
+corepack --version
+```
+
+O Node.js deve ser 20 ou mais recente. Se Node.js e `uv` ja estiverem
+instalados, instale apenas o que estiver faltando; por exemplo:
+
+```bash
+sudo pacman -S corepack
+```
 
 ### Backend
 
@@ -44,21 +71,43 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-No Linux/macOS:
+No Arch Linux, instale o Python 3.12 gerenciado pelo `uv` e crie o ambiente
+virtual:
+
+```bash
+uv python install 3.12
+uv venv --python 3.12 --seed .venv
+source .venv/bin/activate
+```
+
+Em outras distribuicoes Linux ou no macOS, se `python3.12` ja estiver
+instalado:
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
+Confirme que o ambiente virtual esta usando a versao correta:
+
+```bash
+python --version
+```
+
+A saida deve indicar `Python 3.12.x`.
+
 Instale as dependencias:
 
 ```bash
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-Crie o `.env` do backend e preencha:
+Crie o `.env` do backend a partir do exemplo e preencha os valores:
+
+```bash
+cp .env.example .env
+```
 
 ```env
 DATABASE_URL=postgresql://postgres:[SUA_SENHA]@db.[SEU_PROJECT_REF].supabase.co:5432/postgres
@@ -131,19 +180,43 @@ A API fica em [http://localhost:8000](http://localhost:8000).
 
 ### Frontend
 
+Abra outro terminal na raiz do projeto. No Arch Linux, verifique primeiro se o
+Node.js e o Corepack estao disponiveis:
+
+```bash
+node --version
+corepack --version
+```
+
+Depois, entre no frontend e instale as dependencias. Nao execute o comando com
+`sudo`:
+
 ```bash
 cd echomind-front
 corepack pnpm install
-copy .env.local.example .env.local
 ```
 
-Preencha `echomind-front/.env.local`:
+O `package.json` fixa a versao do pnpm usada pelo projeto; por isso, prefira
+`corepack pnpm` em vez de um pnpm global.
+
+Crie o arquivo de configuracao local:
+
+```bash
+nano .env.local
+```
+
+Preencha `echomind-front/.env.local` com:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_SUPABASE_URL=https://[SEU_PROJECT_REF].supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
+
+A URL e a chave publica ficam nas configuracoes de API do projeto no Supabase.
+Use a chave publica `sb_publishable_...` do mesmo projeto configurado no
+backend. Nunca coloque `SUPABASE_SECRET_KEY`, `DATABASE_URL` ou `GROQ_API_KEY`
+no frontend. Depois de alterar `.env.local`, reinicie o servidor do Next.js.
 
 Inicie o frontend:
 
@@ -152,6 +225,29 @@ corepack pnpm dev
 ```
 
 Depois acesse [http://localhost:3000/login](http://localhost:3000/login).
+
+### Execucoes seguintes no Linux
+
+Depois da primeira instalacao, nao e necessario reinstalar as dependencias.
+Execute backend e frontend em terminais separados.
+
+Terminal 1, a partir da raiz do projeto:
+
+```bash
+cd echomind-backend
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+Terminal 2, a partir da raiz do projeto:
+
+```bash
+cd echomind-front
+corepack pnpm dev
+```
+
+Use `Ctrl+C` em cada terminal para encerrar os servidores. Use `deactivate`
+para sair do ambiente virtual do backend.
 
 ## Preparacao do frontend para a Vercel
 
