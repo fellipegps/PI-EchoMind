@@ -132,6 +132,26 @@ describe("PublicPortal", () => {
     expect(apiMocks.streamPublicChat).toHaveBeenCalledOnce();
   });
 
+  it("formata o negrito da resposta mesmo quando os marcadores chegam em partes", async () => {
+    const user = userEvent.setup();
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _publicSlug, onToken, onDone) => {
+      onToken("Acesse o **Portal do ");
+      onToken("Aluno** e consulte **Disciplinas** (Fonte: FAQ).");
+      onDone();
+    });
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Onde vejo minhas notas?");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+
+    const portal = await screen.findByText("Portal do Aluno");
+    expect(portal).toHaveProperty("tagName", "STRONG");
+    expect(screen.getByText("Disciplinas")).toHaveProperty("tagName", "STRONG");
+    expect(portal.closest("div")).toHaveTextContent("Acesse o Portal do Aluno e consulte Disciplinas (Fonte: FAQ).");
+    expect(portal.closest("div")).not.toHaveTextContent("**");
+  });
+
   it("bloqueia o chat e não consulta APIs quando o link não possui slug", () => {
     render(<PublicPortal />);
 

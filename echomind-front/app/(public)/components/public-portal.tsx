@@ -13,6 +13,7 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import Markdown from "react-markdown";
 
 import { publicPortalApi, streamPublicChat } from "@/lib/api";
 import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
@@ -371,11 +372,21 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                       {message.role === "assistant" && (
                         <span className={styles.avatar}><Bot aria-hidden="true" /></span>
                       )}
-                      <p className={`${styles.message} ${
-                        message.role === "user" ? styles.userMessage : styles.assistantMessage
-                      }`}>
-                        {message.content}
-                      </p>
+                      {message.role === "assistant" ? (
+                        <div className={`${styles.message} ${styles.assistantMessage}`}>
+                          <Markdown
+                            skipHtml
+                            allowedElements={["p", "strong", "em", "a", "br", "ul", "ol", "li", "code", "pre", "blockquote"]}
+                            unwrapDisallowed
+                          >
+                            {message.content}
+                          </Markdown>
+                        </div>
+                      ) : (
+                        <p className={`${styles.message} ${styles.userMessage}`}>
+                          {message.content}
+                        </p>
+                      )}
                     </div>
                   ))}
                   {sending && waitingForFirstToken && (

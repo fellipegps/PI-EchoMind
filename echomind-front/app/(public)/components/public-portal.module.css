@@ -285,6 +285,39 @@
   font-size: 14px;
   line-height: 1.55;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.assistantMessage p,
+.assistantMessage pre,
+.assistantMessage blockquote {
+  margin: 0;
+}
+
+.assistantMessage p + p,
+.assistantMessage p + ul,
+.assistantMessage p + ol,
+.assistantMessage ul + p,
+.assistantMessage ol + p {
+  margin-top: 0.75em;
+}
+
+.assistantMessage ul,
+.assistantMessage ol {
+  padding-left: 1.4em;
+}
+
+.assistantMessage ul {
+  list-style: disc;
+}
+
+.assistantMessage ol {
+  list-style: decimal;
+}
+
+.assistantMessage a {
+  color: var(--portal-primary);
+  text-decoration: underline;
 }
 
 .assistantMessage {
