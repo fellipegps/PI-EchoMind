@@ -29,6 +29,7 @@ EXPECTED_TABLES = {
     "interactions",
     "rag_metric_daily",
     "unanswered_questions",
+    "unanswered_suppressions",
 }
 
 
@@ -57,6 +58,32 @@ def test_database_revision_is_exactly_alembic_head(postgres_engine: Engine) -> N
 
     existing_tables = set(inspect(postgres_engine).get_table_names(schema="public"))
     assert EXPECTED_TABLES <= existing_tables
+
+
+def test_unanswered_triage_schema_and_suppression_rls(postgres_engine: Engine) -> None:
+    inspector = inspect(postgres_engine)
+    columns = {column["name"] for column in inspector.get_columns("unanswered_questions")}
+    checks = {
+        constraint["name"]
+        for constraint in inspector.get_check_constraints("unanswered_questions")
+    }
+    indexes = {index["name"] for index in inspector.get_indexes("unanswered_questions")}
+    suppression_pk = inspector.get_pk_constraint("unanswered_suppressions")
+
+    assert {"triage_status", "triage_reason", "fingerprint"} <= columns
+    assert "ck_unanswered_triage_status" in checks
+    assert "ix_unanswered_tenant_fingerprint" in indexes
+    assert set(suppression_pk["constrained_columns"]) == {
+        "tenant_id", "fingerprint", "question_id"
+    }
+
+    with postgres_engine.connect() as connection:
+        rls_enabled = connection.execute(text(
+            "SELECT relrowsecurity FROM pg_class c "
+            "JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE n.nspname = 'public' AND c.relname = 'unanswered_suppressions'"
+        )).scalar_one()
+    assert rls_enabled is True
 
 
 def test_pgvector_executes_real_vector_operation(postgres_engine: Engine) -> None:

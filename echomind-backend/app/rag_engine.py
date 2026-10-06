@@ -45,9 +45,11 @@ from .database import (
     Faq,
     SessionLocal,
     UnansweredQuestion,
+    UnansweredSuppression,
     engine,
     utc_now,
 )
+from .unanswered_triage import classify_question_v1, question_fingerprint
 from .reranker import FastEmbedCrossEncoderReranker, Reranker, rerank_documents
 from .hybrid_search import (
     fuse_hybrid_results as _fuse_hybrid_results,
@@ -1366,36 +1368,88 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
     erros silenciosos de 'Session already closed', impedindo o registro.
     """
     import difflib
+    decision = classify_question_v1(question)
+    if decision.status == "discard":
+        emit_event(
+            event="rag.unanswered-triage",
+            status="success",
+            stage="discarded",
+            tenant_id=tenant_id,
+        )
+        return
+
+    fingerprint = question_fingerprint(question)
     db = SessionLocal()
     try:
-        existing = (
+        suppressed = (
+            db.query(UnansweredSuppression)
+            .filter(
+                UnansweredSuppression.tenant_id == tenant_id,
+                UnansweredSuppression.fingerprint == fingerprint,
+            )
+            .first()
+        )
+        if suppressed:
+            emit_event(
+                event="rag.unanswered-triage",
+                status="success",
+                stage="suppressed",
+                tenant_id=tenant_id,
+            )
+            return
+
+        exact_match = (
             db.query(UnansweredQuestion)
             .filter(
                 UnansweredQuestion.tenant_id == tenant_id,
                 UnansweredQuestion.converted == False,
+                UnansweredQuestion.triage_status.in_(("pending", "review")),
+                UnansweredQuestion.fingerprint == fingerprint,
+            )
+            .order_by(UnansweredQuestion.last_asked.desc())
+            .first()
+        )
+        recent = (
+            db.query(UnansweredQuestion)
+            .filter(
+                UnansweredQuestion.tenant_id == tenant_id,
+                UnansweredQuestion.converted == False,
+                UnansweredQuestion.triage_status.in_(("pending", "review")),
             )
             .order_by(UnansweredQuestion.last_asked.desc())
             .limit(100)
             .all()
-        )
+        ) if exact_match is None else [exact_match]
 
         best_match, best_ratio = None, 0.0
-        for uq in existing:
+        for uq in recent:
+            if uq.fingerprint == fingerprint:
+                best_match, best_ratio = uq, 1.0
+                break
+            if uq.triage_status != decision.status:
+                continue
             ratio = difflib.SequenceMatcher(
-                None, question.lower(), uq.canonical_question.lower()
+                None, question.casefold(), uq.canonical_question.casefold()
             ).ratio()
             if ratio > best_ratio:
                 best_ratio, best_match = ratio, uq
 
-        if best_match and best_ratio > 0.65:
+        if best_match and best_ratio >= 0.85:
             similar = json.loads(best_match.similar_questions or "[]")
-            if question not in similar and question != best_match.canonical_question:
+            if (
+                question not in similar
+                and question != best_match.canonical_question
+                and len(similar) < 20
+            ):
                 similar.append(question)
             best_match.similar_questions = json.dumps(similar, ensure_ascii=False)
             best_match.count += 1
             best_match.last_asked = utc_now()
+            if decision.status == "review" and best_match.triage_reason != "approved_by_admin":
+                best_match.triage_status = "review"
+                best_match.triage_reason = decision.reason
             emit_event(
-                event="rag.unanswered",
+                event="rag.unanswered-triage",
                 status="success",
                 stage="grouped",
                 tenant_id=tenant_id,
@@ -1406,11 +1460,14 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
                 tenant_id=tenant_id,
                 canonical_question=question,
                 similar_questions="[]",
+                triage_status=decision.status,
+                triage_reason=decision.reason,
+                fingerprint=fingerprint,
             ))
             emit_event(
-                event="rag.unanswered",
+                event="rag.unanswered-triage",
                 status="success",
-                stage="created",
+                stage=decision.status,
                 tenant_id=tenant_id,
                 counts={"matched_existing": 0},
             )
@@ -1419,7 +1476,7 @@ def _register_unanswered_standalone(question: str, tenant_id: str) -> None:
     except Exception as exc:
         db.rollback()
         emit_event(
-            event="rag.unanswered",
+            event="rag.unanswered-triage",
             status="error",
             stage="persistence",
             tenant_id=tenant_id,

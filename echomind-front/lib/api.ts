@@ -134,6 +134,8 @@ export interface UnansweredQuestion {
   first_asked: string;
   last_asked: string;
   similar_questions: string[];
+  triage_status: "pending" | "review" | "ignored";
+  triage_reason: string | null;
 }
 
 export interface DashboardData {
@@ -652,7 +654,8 @@ export const publicPortalApi = {
 // ══════════════════════════════════════════════════════════════════════════════
 
 export const unansweredApi = {
-  list: () => request<UnansweredQuestion[]>("/unanswered"),
+  list: (status: "pending" | "review" | "ignored" = "pending") =>
+    request<UnansweredQuestion[]>(`/unanswered?status=${status}`),
 
   convert: (id: string, answer: string, question?: string) =>
     request<Faq>(`/unanswered/${id}/convert`, {
@@ -663,6 +666,15 @@ export const unansweredApi = {
   /** Remove a pergunta da lista sem criar FAQ. */
   delete: (id: string) =>
     request<void>(`/unanswered/${id}`, { method: "DELETE" }),
+
+  ignore: (id: string) =>
+    request<void>(`/unanswered/${id}/ignore`, { method: "POST" }),
+
+  approve: (id: string) =>
+    request<void>(`/unanswered/${id}/approve`, { method: "POST" }),
+
+  restore: (id: string) =>
+    request<void>(`/unanswered/${id}/restore`, { method: "POST" }),
 
 };
 

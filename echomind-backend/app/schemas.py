@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
@@ -426,6 +426,8 @@ class UnansweredQuestionResponse(BaseModel):
     first_asked: datetime
     last_asked: datetime
     similar_questions: list[str] = Field(default_factory=list)
+    triage_status: Literal["pending", "review", "ignored"]
+    triage_reason: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

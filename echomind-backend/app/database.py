@@ -202,6 +202,32 @@ class UnansweredQuestion(Base):
     # variações detectadas (JSON list serializado como texto)
     similar_questions   = Column(Text, default="[]")     # JSON array de strings
     converted           = Column(Boolean, default=False) # True após virar FAQ
+    triage_status       = Column(String(16), default="pending", server_default="pending", nullable=False)
+    triage_reason       = Column(String(40), nullable=True)
+    fingerprint         = Column(String(64), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "triage_status IN ('pending', 'review', 'ignored')",
+            name="ck_unanswered_triage_status",
+        ),
+        Index("ix_unanswered_tenant_fingerprint", "tenant_id", "fingerprint"),
+    )
+
+
+class UnansweredSuppression(Base):
+    """Impressão normalizada de pergunta ignorada, sempre isolada por tenant."""
+
+    __tablename__ = "unanswered_suppressions"
+
+    tenant_id = Column(String, primary_key=True)
+    fingerprint = Column(String(64), primary_key=True)
+    question_id = Column(String, primary_key=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+
+    __table_args__ = (
+        Index("ix_unanswered_suppressions_tenant_question", "tenant_id", "question_id"),
+    )
 
 
 class Document(Base):

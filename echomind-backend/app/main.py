@@ -5,6 +5,7 @@ FastAPI + LangChain + Groq + pgvector
 
 from contextlib import asynccontextmanager
 from datetime import date
+from typing import Literal
 
 from fastapi import (
     APIRouter,
@@ -303,6 +304,12 @@ async def _stream_chat_for_tenant(
                 # request, evitando o problema de create_task() que disparava após
                 # o context do request ser destruído.
                 if not rag.last_had_docs:
+                    emit_event(
+                        event="rag.unanswered",
+                        status="success",
+                        stage="detected",
+                        context=log_context,
+                    )
                     try:
                         loop = asyncio.get_event_loop()
                         await loop.run_in_executor(
@@ -657,10 +664,41 @@ def update_config(
 
 @router_unanswered.get("", response_model=list[UnansweredQuestionResponse])
 def list_unanswered(
+    status: Literal["pending", "review", "ignored"] = Query("pending"),
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
 ):
-    return crud.get_unanswered_questions(db, tenant_id=current_user.id)
+    return crud.get_unanswered_questions(db, tenant_id=current_user.id, status=status)
+
+
+@router_unanswered.post("/{question_id}/ignore", status_code=204)
+def ignore_unanswered(
+    question_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    if not crud.ignore_unanswered_question(db, question_id, tenant_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Pergunta não encontrada.")
+
+
+@router_unanswered.post("/{question_id}/approve", status_code=204)
+def approve_unanswered(
+    question_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    if not crud.approve_unanswered_question(db, question_id, tenant_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Pergunta não encontrada.")
+
+
+@router_unanswered.post("/{question_id}/restore", status_code=204)
+def restore_unanswered(
+    question_id: str,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    if not crud.restore_unanswered_question(db, question_id, tenant_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Pergunta não encontrada.")
 
 
 @router_unanswered.delete("/{question_id}", status_code=204)
