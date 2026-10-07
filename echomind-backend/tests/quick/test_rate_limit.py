@@ -223,6 +223,19 @@ def test_multiple_workers_fail_before_startup(
         load_rate_limit_config()
 
 
+def test_web_concurrency_cannot_be_masked_by_uvicorn_workers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("WEB_CONCURRENCY", "2")
+    monkeypatch.setenv("UVICORN_WORKERS", "1")
+
+    with pytest.raises(
+        InvalidRateLimitConfigurationError,
+        match="exatamente uma instancia e um worker",
+    ):
+        load_rate_limit_config()
+
+
 def test_multiple_instances_fail_before_startup(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

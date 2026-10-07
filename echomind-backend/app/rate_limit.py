@@ -72,11 +72,9 @@ def _positive_environment_integer(name: str, default: int) -> int:
 def load_rate_limit_config() -> RateLimitConfig:
     """Carrega limites independentes e falha cedo para valores invalidos."""
     instance_count = _positive_environment_integer("RATE_LIMIT_INSTANCE_COUNT", 1)
-    worker_count = _positive_environment_integer(
-        "UVICORN_WORKERS",
-        _positive_environment_integer("WEB_CONCURRENCY", 1),
-    )
-    if instance_count != 1 or worker_count != 1:
+    uvicorn_workers = _positive_environment_integer("UVICORN_WORKERS", 1)
+    web_concurrency = _positive_environment_integer("WEB_CONCURRENCY", 1)
+    if instance_count != 1 or uvicorn_workers != 1 or web_concurrency != 1:
         raise InvalidRateLimitConfigurationError(
             "O rate limiter em memoria exige exatamente uma instancia e um worker. "
             "Defina um store compartilhado antes de aumentar RATE_LIMIT_INSTANCE_COUNT, "

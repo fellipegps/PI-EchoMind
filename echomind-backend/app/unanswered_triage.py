@@ -23,10 +23,10 @@ class TriageDecision:
 
 
 _ABUSIVE_WORDS = frozenset({
-    "burro", "burros", "cacete", "caralho", "danar", "fdp", "foda", "fodase",
+    "arrombado", "babaca", "burro", "burros", "cacete", "caralho", "danar", "fdp", "foda", "fodase",
     "foder", "fodida", "fodido", "idiota", "idiotas", "imbecil",
-    "imbecis", "lixo", "merda", "otaria", "otario", "porra", "pqp",
-    "puta", "putas", "vsf",
+    "imbecis", "lascar", "lixo", "merda", "otaria", "otario", "porra", "pqp",
+    "puta", "putas", "vsf", "vtnc",
 })
 _FILLER_WORDS = frozenset({
     "a", "as", "da", "de", "do", "e", "filho", "o", "os", "se", "seu",
@@ -40,6 +40,11 @@ _OFF_TOPIC_PHRASES = (
     "conte uma piada", "me conte uma piada", "receita de bolo",
     "previsao do tempo", "qual a previsao do tempo",
 )
+_ABUSIVE_PHRASES = ("cala a boca", "tomar no cu")
+_ABUSE_ONLY_PHRASES = frozenset({
+    "cala a boca", "seu arrombado", "vai se lascar", "vai tomar no cu", "vtnc",
+})
+_ABUSE_SPELLING = str.maketrans({"0": "o", "@": "a", "*": "o"})
 _URL_PATTERN = re.compile(r"(?:https?://|www\.)\S+", re.IGNORECASE)
 
 
@@ -69,11 +74,17 @@ def classify_question_v1(question: str) -> TriageDecision:
         return TriageDecision("discard", "link_only")
     if _URL_PATTERN.search(question):
         return TriageDecision("review", "external_link")
-    if all(word in _ABUSIVE_WORDS | _FILLER_WORDS for word in words) and any(
-        word in _ABUSIVE_WORDS for word in words
+    abuse_text = normalized_question(question.translate(_ABUSE_SPELLING))
+    abuse_words = abuse_text.split()
+    contains_abuse = any(word in _ABUSIVE_WORDS for word in abuse_words) or any(
+        f" {phrase} " in f" {abuse_text} " for phrase in _ABUSIVE_PHRASES
+    )
+    if abuse_text in _ABUSE_ONLY_PHRASES or (
+        all(word in _ABUSIVE_WORDS | _FILLER_WORDS for word in abuse_words)
+        and any(word in _ABUSIVE_WORDS for word in abuse_words)
     ):
         return TriageDecision("discard", "abuse_only")
-    if any(word in _ABUSIVE_WORDS for word in words):
+    if contains_abuse:
         return TriageDecision("review", "abusive_language")
     if any(phrase in normalized for phrase in _OFF_TOPIC_PHRASES):
         return TriageDecision("review", "possible_off_topic")
