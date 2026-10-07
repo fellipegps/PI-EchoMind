@@ -13,10 +13,12 @@ import {
   Send,
   Sparkles,
 } from "lucide-react";
+import Markdown from "react-markdown";
 
 import { publicPortalApi, streamPublicChat } from "@/lib/api";
 import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
 
+import { PublicCampusNavigator } from "./public-campus-navigator";
 import styles from "./public-portal.module.css";
 
 type TabId = "chat" | "eventos" | "locais";
@@ -142,6 +144,8 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
   const [locations, setLocations] = useState<PublicCampusLocation[]>([]);
   const [locationsLoading, setLocationsLoading] = useState(Boolean(normalizedSlug));
   const [locationsError, setLocationsError] = useState("");
+  const [geoAvailable, setGeoAvailable] = useState(false);
+  const [showLegacyMap, setShowLegacyMap] = useState(false);
   const [portalLoading, setPortalLoading] = useState(Boolean(normalizedSlug));
   const [portalError, setPortalError] = useState(
     normalizedSlug ? "" : "Link inválido. Solicite à instituição o endereço correto do portal."
@@ -371,11 +375,21 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                       {message.role === "assistant" && (
                         <span className={styles.avatar}><Bot aria-hidden="true" /></span>
                       )}
-                      <p className={`${styles.message} ${
-                        message.role === "user" ? styles.userMessage : styles.assistantMessage
-                      }`}>
-                        {message.content}
-                      </p>
+                      {message.role === "assistant" ? (
+                        <div className={`${styles.message} ${styles.assistantMessage}`}>
+                          <Markdown
+                            skipHtml
+                            allowedElements={["p", "strong", "em", "a", "br", "ul", "ol", "li", "code", "pre", "blockquote"]}
+                            unwrapDisallowed
+                          >
+                            {message.content}
+                          </Markdown>
+                        </div>
+                      ) : (
+                        <p className={`${styles.message} ${styles.userMessage}`}>
+                          {message.content}
+                        </p>
+                      )}
                     </div>
                   ))}
                   {sending && waitingForFirstToken && (
@@ -457,6 +471,23 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                 <h2 id="places-title">Locais do campus</h2>
                 <span>Pesquise os espaços cadastrados pela instituição.</span>
               </div>
+
+              <PublicCampusNavigator
+                publicSlug={normalizedSlug}
+                onAvailabilityChange={setGeoAvailable}
+              />
+              {geoAvailable && (
+                <button
+                  className={styles.legacyMapToggle}
+                  type="button"
+                  onClick={() => setShowLegacyMap((visible) => !visible)}
+                  aria-expanded={showLegacyMap}
+                >
+                  {showLegacyMap ? "Ocultar mapa esquemático" : "Ver mapa esquemático"}
+                </button>
+              )}
+
+              {(!geoAvailable || showLegacyMap) && <>
 
               {locationsLoading && (
                 <div className={styles.alert} role="status">Carregando locais...</div>
@@ -563,6 +594,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                   <p className={styles.emptyState}>Nenhum local encontrado para essa busca.</p>
                 )}
               </div>
+              </>}
             </section>
           )}
         </main>

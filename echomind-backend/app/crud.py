@@ -25,8 +25,10 @@ from .database import (
     Faq,
     Interaction,
     UnansweredQuestion,
+    UnansweredSuppression,
     utc_now,
 )
+from .unanswered_triage import question_fingerprint
 from .middleware import latency_store
 from .schemas import (
     CampusLocationCreate,
@@ -607,12 +609,13 @@ def save_interaction(db: Session, question: str, answer: str, tenant_id: str) ->
 
 # Unanswered questions
 
-def get_unanswered_questions(db: Session, tenant_id: str) -> list[dict]:
+def get_unanswered_questions(db: Session, tenant_id: str, status: str = "pending") -> list[dict]:
     rows = (
         db.query(UnansweredQuestion)
         .filter(
             UnansweredQuestion.tenant_id == tenant_id,
             UnansweredQuestion.converted == False,
+            UnansweredQuestion.triage_status == status,
         )
         .order_by(desc(UnansweredQuestion.count))
         .all()
@@ -625,9 +628,81 @@ def get_unanswered_questions(db: Session, tenant_id: str) -> list[dict]:
             "first_asked": row.first_asked,
             "last_asked": row.last_asked,
             "similar_questions": json.loads(row.similar_questions or "[]"),
+            "triage_status": row.triage_status,
+            "triage_reason": row.triage_reason,
         }
         for row in rows
     ]
+
+
+def ignore_unanswered_question(db: Session, question_id: str, tenant_id: str) -> bool:
+    question = (
+        db.query(UnansweredQuestion)
+        .filter(
+            UnansweredQuestion.id == question_id,
+            UnansweredQuestion.tenant_id == tenant_id,
+            UnansweredQuestion.converted == False,
+            UnansweredQuestion.triage_status.in_(("pending", "review")),
+        )
+        .first()
+    )
+    if question is None:
+        return False
+
+    variants = [question.canonical_question, *json.loads(question.similar_questions or "[]")]
+    fingerprints = {question_fingerprint(variant) for variant in variants}
+    for fingerprint in fingerprints:
+        db.add(UnansweredSuppression(
+            tenant_id=tenant_id,
+            fingerprint=fingerprint,
+            question_id=question.id,
+        ))
+    question.triage_status = "ignored"
+    question.triage_reason = "ignored_by_admin"
+    db.commit()
+    return True
+
+
+def restore_unanswered_question(db: Session, question_id: str, tenant_id: str) -> bool:
+    question = (
+        db.query(UnansweredQuestion)
+        .filter(
+            UnansweredQuestion.id == question_id,
+            UnansweredQuestion.tenant_id == tenant_id,
+            UnansweredQuestion.converted == False,
+            UnansweredQuestion.triage_status == "ignored",
+        )
+        .first()
+    )
+    if question is None:
+        return False
+    db.query(UnansweredSuppression).filter(
+        UnansweredSuppression.tenant_id == tenant_id,
+        UnansweredSuppression.question_id == question_id,
+    ).delete(synchronize_session=False)
+    question.triage_status = "pending"
+    question.triage_reason = "approved_by_admin"
+    db.commit()
+    return True
+
+
+def approve_unanswered_question(db: Session, question_id: str, tenant_id: str) -> bool:
+    question = (
+        db.query(UnansweredQuestion)
+        .filter(
+            UnansweredQuestion.id == question_id,
+            UnansweredQuestion.tenant_id == tenant_id,
+            UnansweredQuestion.converted == False,
+            UnansweredQuestion.triage_status == "review",
+        )
+        .first()
+    )
+    if question is None:
+        return False
+    question.triage_status = "pending"
+    question.triage_reason = "approved_by_admin"
+    db.commit()
+    return True
 
 
 def delete_unanswered_question(db: Session, question_id: str, tenant_id: str) -> bool:
@@ -652,7 +727,12 @@ def convert_unanswered_to_faq(
 ) -> Optional[Faq]:
     uq = (
         db.query(UnansweredQuestion)
-        .filter(UnansweredQuestion.id == question_id, UnansweredQuestion.tenant_id == tenant_id)
+        .filter(
+            UnansweredQuestion.id == question_id,
+            UnansweredQuestion.tenant_id == tenant_id,
+            UnansweredQuestion.converted == False,
+            UnansweredQuestion.triage_status == "pending",
+        )
         .first()
     )
     if not uq:
@@ -700,6 +780,7 @@ def get_dashboard_stats(db: Session, tenant_id: str) -> dict:
         .filter(
             UnansweredQuestion.tenant_id == tenant_id,
             UnansweredQuestion.converted == False,
+            UnansweredQuestion.triage_status == "pending",
         )
         .count()
     )

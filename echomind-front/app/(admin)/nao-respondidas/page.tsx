@@ -34,9 +34,11 @@ import {
   ChevronDown,
   ChevronUp,
   HelpCircle,
-  Trash2,
+  Ban,
   BookOpen,
   Pencil,
+  Check,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/page-container";
@@ -44,11 +46,20 @@ import { Label } from "@/components/ui/label";
 import { unansweredApi } from "@/lib/api";
 import type { UnansweredQuestion } from "@/lib/api";
 
+const REVIEW_REASON_LABELS: Record<string, string> = {
+  abusive_language: "linguagem inadequada",
+  possible_off_topic: "possivelmente fora do tema",
+  external_link: "contém link externo",
+  unclear: "pergunta pouco clara",
+  mixed_variants: "variações diferentes precisam de avaliação",
+};
+
 export default function UnansweredQuestions() {
   const router = useRouter();
   const [questions, setQuestions] = useState<UnansweredQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<"pending" | "review" | "ignored">("pending");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [editedQuestion, setEditedQuestion] = useState("");
@@ -57,15 +68,20 @@ export default function UnansweredQuestions() {
 
   // ─── Carrega perguntas não respondidas do backend ─────────────────────────
   useEffect(() => {
-    unansweredApi
-      .list()
-      .then(setQuestions)
+    Promise.all([
+      unansweredApi.list("pending"),
+      unansweredApi.list("review"),
+      unansweredApi.list("ignored"),
+    ])
+      .then(([pending, review, ignored]) => setQuestions([...pending, ...review, ...ignored]))
       .catch(() => toast.error("Erro ao carregar perguntas."))
       .finally(() => setLoading(false));
   }, []);
 
   const filtered = questions.filter((q) =>
-    q.canonical_question.toLowerCase().includes(search.toLowerCase())
+    q.triage_status === selectedStatus &&
+    [q.canonical_question, ...q.similar_questions]
+      .some((text) => text.toLowerCase().includes(search.toLowerCase()))
   );
 
   // ─── Remove imediatamente da lista (otimistic update) ─────────────────────
@@ -97,17 +113,49 @@ export default function UnansweredQuestions() {
     }
   };
 
-  // ─── Deletar pergunta pendente ─────────────────────────────────────────────
-  const deleteQuestion = async (id: string) => {
+  // ─── Ignorar a pergunta e suas variações, sem reincidência ────────────────
+  const ignoreQuestion = async (id: string) => {
     setDeleting(id);
     try {
-      await unansweredApi.delete(id);
-      removeFromList(id);
-      toast.success("Pergunta removida da lista.");
+      await unansweredApi.ignore(id);
+      setQuestions((current) => current.map((question) =>
+        question.id === id
+          ? { ...question, triage_status: "ignored", triage_reason: "ignored_by_admin" }
+          : question
+      ));
+      toast.success("Pergunta ignorada. Repetições iguais não voltarão à lista.");
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Erro ao remover pergunta.");
+      toast.error(err instanceof Error ? err.message : "Erro ao ignorar pergunta.");
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const approveQuestion = async (id: string) => {
+    try {
+      await unansweredApi.approve(id);
+      setQuestions((current) => current.map((question) =>
+        question.id === id
+          ? { ...question, triage_status: "pending", triage_reason: null }
+          : question
+      ));
+      toast.success("Pergunta enviada para pendentes.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao aprovar pergunta.");
+    }
+  };
+
+  const restoreQuestion = async (id: string) => {
+    try {
+      await unansweredApi.restore(id);
+      setQuestions((current) => current.map((question) =>
+        question.id === id
+          ? { ...question, triage_status: "pending", triage_reason: "approved_by_admin" }
+          : question
+      ));
+      toast.success("Pergunta restaurada para pendentes.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao restaurar pergunta.");
     }
   };
 
@@ -138,6 +186,30 @@ export default function UnansweredQuestions() {
           Analise o que o EchoMind ainda não sabe e transforme em
           conhecimento oficial.
         </p>
+      </div>
+
+      <div className="flex gap-2" aria-label="Filtrar perguntas">
+        <Button
+          variant={selectedStatus === "pending" ? "default" : "outline"}
+          onClick={() => setSelectedStatus("pending")}
+          aria-pressed={selectedStatus === "pending"}
+        >
+          Pendentes ({questions.filter((q) => q.triage_status === "pending").length})
+        </Button>
+        <Button
+          variant={selectedStatus === "review" ? "default" : "outline"}
+          onClick={() => setSelectedStatus("review")}
+          aria-pressed={selectedStatus === "review"}
+        >
+          Revisar ({questions.filter((q) => q.triage_status === "review").length})
+        </Button>
+        <Button
+          variant={selectedStatus === "ignored" ? "default" : "outline"}
+          onClick={() => setSelectedStatus("ignored")}
+          aria-pressed={selectedStatus === "ignored"}
+        >
+          Ignoradas ({questions.filter((q) => q.triage_status === "ignored").length})
+        </Button>
       </div>
 
       <div className="relative max-w-md">
@@ -178,6 +250,18 @@ export default function UnansweredQuestions() {
                     <span>•</span>
                     <span>Última vez: {formatDate(q.last_asked)}</span>
                   </div>
+                  {q.triage_status === "review" && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Revisão necessária: {REVIEW_REASON_LABELS[q.triage_reason ?? ""] ?? "avaliação manual"}.
+                    </p>
+                  )}
+                  {q.triage_status === "ignored" && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {q.triage_reason === "ignored_by_admin"
+                        ? "Ignorada pelo administrador."
+                        : "Filtrada como mensagem sem pergunta aproveitável."}
+                    </p>
+                  )}
 
                   {q.similar_questions.length > 0 && (
                     <div className="mt-4">
@@ -213,8 +297,18 @@ export default function UnansweredQuestions() {
 
                 {/* ── Ações ── */}
                 <div className="flex items-center gap-2 shrink-0">
+                  {q.triage_status === "ignored" && (
+                    <Button variant="outline" onClick={() => restoreQuestion(q.id)}>
+                      <RotateCcw className="h-4 w-4" /> Restaurar
+                    </Button>
+                  )}
+                  {q.triage_status === "review" && (
+                    <Button variant="outline" onClick={() => approveQuestion(q.id)}>
+                      <Check className="h-4 w-4" /> Enviar para pendentes
+                    </Button>
+                  )}
                   {/* Botão Criar FAQ (Dialog direto, sem abas) */}
-                  <Dialog
+                  {q.triage_status === "pending" && <Dialog
                     onOpenChange={(open) => {
                       if (open) {
                         setEditedQuestion(q.canonical_question);
@@ -317,45 +411,45 @@ export default function UnansweredQuestions() {
                         </Button>
                       </DialogFooter>
                     </DialogContent>
-                  </Dialog>
+                  </Dialog>}
 
-                  {/* Botão Excluir com confirmação */}
-                  <AlertDialog>
+                  {/* Ignorar com confirmação */}
+                  {q.triage_status !== "ignored" && <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        aria-label="Excluir pergunta"
+                        aria-label="Ignorar pergunta"
                         disabled={deleting === q.id}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Ban className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
 
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Excluir pergunta?</AlertDialogTitle>
+                        <AlertDialogTitle>Ignorar pergunta?</AlertDialogTitle>
                         <AlertDialogDescription>
                           A pergunta{" "}
                           <span className="font-semibold text-foreground">
                             &quot;{q.canonical_question}&quot;
                           </span>{" "}
-                          será removida permanentemente da lista de pendentes.
-                          Esta ação não pode ser desfeita.
+                          deixará de aparecer nesta lista. Repetições iguais e
+                          as variações já identificadas também serão ignoradas.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => deleteQuestion(q.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => ignoreQuestion(q.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
                         >
-                          Excluir
+                          Ignorar
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
-                  </AlertDialog>
+                  </AlertDialog>}
                 </div>
               </div>
             </CardContent>
@@ -368,9 +462,13 @@ export default function UnansweredQuestions() {
               <div className="flex flex-col items-center gap-3">
                 <HelpCircle className="h-10 w-10 text-muted-foreground/50" />
                 <p className="text-muted-foreground text-lg">
-                  {questions.length === 0
-                    ? "Excelente! Nenhuma pergunta pendente."
-                    : "Nenhum resultado para esta busca."}
+                  {search
+                    ? "Nenhum resultado para esta busca."
+                    : selectedStatus === "pending"
+                      ? "Nenhuma pergunta pendente."
+                      : selectedStatus === "review"
+                        ? "Nenhuma pergunta para revisar."
+                        : "Nenhuma pergunta ignorada."}
                 </p>
               </div>
             </CardContent>

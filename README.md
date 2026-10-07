@@ -413,8 +413,10 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `GET` | `/public/{slug}/faqs` | FAQs publicas do portal web |
 | `GET` | `/public/{slug}/events` | Eventos programados no portal web |
 | `GET` | `/public/{slug}/locations` | Locais ativos no portal web |
+| `GET` | `/public/{slug}/geo-campus` | Campi, prédios, espaços e caminhos ativos da instituição |
 | `POST` | `/public/{slug}/chat` | Chat publico vinculado ao slug da instituicao |
 | `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
+| `GET/POST/PUT/DELETE` | `/campuses` e sub-recursos | Cadastro geográfico autenticado de campi, prédios, espaços e caminhos |
 | `GET/POST` | `/events/courses` | Lista ou cria cursos relacionados a eventos |
 | `GET/PUT` | `/config` | Configuracoes autenticadas do tenant |
 | `GET` | `/config/public` | Configuracao publica por `tenant_id` |
@@ -426,6 +428,9 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `GET/DELETE` | `/documents/{id}` | Consulta ou exclui documento terminal do tenant |
 | `POST` | `/feedback` | Feedback publico do chatbot |
 | `GET` | `/health` | Health check |
+
+O cadastro e a navegação no mapa geográfico estão descritos em
+[`docs/NAVEGACAO-CAMPUS.md`](docs/NAVEGACAO-CAMPUS.md).
 
 ## Fluxo Rapido De Teste
 
