@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
-    CheckConstraint, Date, DateTime, Float, ForeignKey, Index, Integer,
+    CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer,
     UniqueConstraint,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -143,6 +143,159 @@ class CampusLocation(Base):
     active      = Column(Boolean, nullable=False, default=True)
     created_at  = Column(DateTime, default=utc_now, nullable=False)
     updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class Campus(Base):
+    """Mapa geográfico de um campus pertencente a uma instituição."""
+
+    __tablename__ = "campuses"
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", name="uq_campuses_id_tenant"),
+        UniqueConstraint("tenant_id", "name", name="uq_campuses_tenant_name"),
+        CheckConstraint("center_lat BETWEEN -90 AND 90", name="ck_campuses_lat"),
+        CheckConstraint("center_lng BETWEEN -180 AND 180", name="ck_campuses_lng"),
+        CheckConstraint("zoom BETWEEN 1 AND 22", name="ck_campuses_zoom"),
+        Index("ix_campuses_tenant_active", "tenant_id", "active"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    center_lat = Column(Float, nullable=False)
+    center_lng = Column(Float, nullable=False)
+    zoom = Column(Integer, nullable=False, default=17)
+    active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class CampusBuilding(Base):
+    """Prédio e sua entrada física; um nó opcional ancora a rota nesta entrada."""
+
+    __tablename__ = "campus_buildings"
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "campus_id", name="uq_campus_buildings_identity"),
+        UniqueConstraint("tenant_id", "campus_id", "name", name="uq_campus_buildings_name"),
+        ForeignKeyConstraint(
+            ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
+            name="fk_campus_buildings_campus", ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["entrance_node_id", "tenant_id", "campus_id"],
+            ["campus_path_nodes.id", "campus_path_nodes.tenant_id", "campus_path_nodes.campus_id"],
+            name="fk_campus_buildings_entrance_node", ondelete="RESTRICT",
+        ),
+        CheckConstraint("entrance_lat BETWEEN -90 AND 90", name="ck_campus_buildings_lat"),
+        CheckConstraint("entrance_lng BETWEEN -180 AND 180", name="ck_campus_buildings_lng"),
+        Index("ix_campus_buildings_tenant_campus_active", "tenant_id", "campus_id", "active"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    campus_id = Column(String, nullable=False)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String(100), nullable=False, default="predio")
+    entrance_lat = Column(Float, nullable=False)
+    entrance_lng = Column(Float, nullable=False)
+    entrance_node_id = Column(String, nullable=True)
+    active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class CampusSpace(Base):
+    """Espaço no interior de um prédio, descrito por piso e tipo."""
+
+    __tablename__ = "campus_spaces"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "campus_id", "building_id", "name", name="uq_campus_spaces_name"),
+        ForeignKeyConstraint(
+            ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
+            name="fk_campus_spaces_campus", ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["building_id", "tenant_id", "campus_id"],
+            ["campus_buildings.id", "campus_buildings.tenant_id", "campus_buildings.campus_id"],
+            name="fk_campus_spaces_building", ondelete="RESTRICT",
+        ),
+        Index("ix_campus_spaces_tenant_building_active", "tenant_id", "building_id", "active"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    campus_id = Column(String, nullable=False)
+    building_id = Column(String, nullable=False)
+    name = Column(String(200), nullable=False)
+    kind = Column(String(100), nullable=False, default="outro")
+    floor = Column(String(50), nullable=True)
+    description = Column(Text, nullable=True)
+    active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class CampusPathNode(Base):
+    """Vértice de uma rede de caminhos para pedestres em um campus."""
+
+    __tablename__ = "campus_path_nodes"
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "campus_id", name="uq_campus_path_nodes_identity"),
+        ForeignKeyConstraint(
+            ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
+            name="fk_campus_path_nodes_campus", ondelete="RESTRICT",
+        ),
+        CheckConstraint("lat BETWEEN -90 AND 90", name="ck_campus_path_nodes_lat"),
+        CheckConstraint("lng BETWEEN -180 AND 180", name="ck_campus_path_nodes_lng"),
+        Index("ix_campus_path_nodes_tenant_campus", "tenant_id", "campus_id"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    campus_id = Column(String, nullable=False)
+    lat = Column(Float, nullable=False)
+    lng = Column(Float, nullable=False)
+    label = Column(String(200), nullable=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class CampusPathEdge(Base):
+    """Trecho bidirecional entre nós; acessibilidade pode ser filtrada na rota."""
+
+    __tablename__ = "campus_path_edges"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "campus_id", "from_node_id", "to_node_id", name="uq_campus_path_edges_pair"),
+        ForeignKeyConstraint(
+            ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
+            name="fk_campus_path_edges_campus", ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["from_node_id", "tenant_id", "campus_id"],
+            ["campus_path_nodes.id", "campus_path_nodes.tenant_id", "campus_path_nodes.campus_id"],
+            name="fk_campus_path_edges_from", ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["to_node_id", "tenant_id", "campus_id"],
+            ["campus_path_nodes.id", "campus_path_nodes.tenant_id", "campus_path_nodes.campus_id"],
+            name="fk_campus_path_edges_to", ondelete="RESTRICT",
+        ),
+        CheckConstraint("from_node_id < to_node_id", name="ck_campus_path_edges_order"),
+        CheckConstraint("distance_m IS NULL OR distance_m > 0", name="ck_campus_path_edges_distance"),
+        Index("ix_campus_path_edges_tenant_campus_active", "tenant_id", "campus_id", "active"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    campus_id = Column(String, nullable=False)
+    from_node_id = Column(String, nullable=False)
+    to_node_id = Column(String, nullable=False)
+    distance_m = Column(Float, nullable=True)
+    accessible = Column(Boolean, nullable=False, default=True)
+    active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
 
 class Config(Base):

@@ -18,6 +18,7 @@ import Markdown from "react-markdown";
 import { publicPortalApi, streamPublicChat } from "@/lib/api";
 import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
 
+import { PublicCampusNavigator } from "./public-campus-navigator";
 import styles from "./public-portal.module.css";
 
 type TabId = "chat" | "eventos" | "locais";
@@ -143,6 +144,8 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
   const [locations, setLocations] = useState<PublicCampusLocation[]>([]);
   const [locationsLoading, setLocationsLoading] = useState(Boolean(normalizedSlug));
   const [locationsError, setLocationsError] = useState("");
+  const [geoAvailable, setGeoAvailable] = useState(false);
+  const [showLegacyMap, setShowLegacyMap] = useState(false);
   const [portalLoading, setPortalLoading] = useState(Boolean(normalizedSlug));
   const [portalError, setPortalError] = useState(
     normalizedSlug ? "" : "Link inválido. Solicite à instituição o endereço correto do portal."
@@ -469,6 +472,23 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                 <span>Pesquise os espaços cadastrados pela instituição.</span>
               </div>
 
+              <PublicCampusNavigator
+                publicSlug={normalizedSlug}
+                onAvailabilityChange={setGeoAvailable}
+              />
+              {geoAvailable && (
+                <button
+                  className={styles.legacyMapToggle}
+                  type="button"
+                  onClick={() => setShowLegacyMap((visible) => !visible)}
+                  aria-expanded={showLegacyMap}
+                >
+                  {showLegacyMap ? "Ocultar mapa esquemático" : "Ver mapa esquemático"}
+                </button>
+              )}
+
+              {(!geoAvailable || showLegacyMap) && <>
+
               {locationsLoading && (
                 <div className={styles.alert} role="status">Carregando locais...</div>
               )}
@@ -574,6 +594,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                   <p className={styles.emptyState}>Nenhum local encontrado para essa busca.</p>
                 )}
               </div>
+              </>}
             </section>
           )}
         </main>

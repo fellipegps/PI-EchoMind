@@ -20,6 +20,10 @@ vi.mock("@/lib/api", () => ({
   },
 }));
 
+vi.mock("./public-campus-navigator", () => ({
+  PublicCampusNavigator: () => null,
+}));
+
 import { PublicPortal } from "./public-portal";
 
 const faq = {

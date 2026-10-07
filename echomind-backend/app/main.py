@@ -27,6 +27,7 @@ import logging
 import os
 
 from .database import get_db
+from .campus_map_routes import router_campuses, router_public_geo
 from .cors_config import configure_cors
 from .middleware import TimingMiddleware, RequestLogMiddleware, latency_store
 from .schemas import (
@@ -1027,4 +1028,6 @@ app.include_router(router_dashboard)
 app.include_router(router_documents)
 app.include_router(router_feedback)
 app.include_router(router_public)
+app.include_router(router_campuses)
+app.include_router(router_public_geo)
 app.include_router(router_system)

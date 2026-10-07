@@ -1053,6 +1053,18 @@
   }
 }
 
+.legacyMapToggle {
+  margin: 0 0 14px;
+  border: 1px solid #c9dafa;
+  border-radius: 10px;
+  background: #fff;
+  padding: 9px 12px;
+  color: var(--portal-primary-dark);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .panel,
   .typing svg,

@@ -1,0 +1,254 @@
+.navigator {
+  margin: 0 0 22px;
+  overflow: hidden;
+  border: 1px solid #d6e0ee;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(30, 48, 81, 0.06);
+}
+
+.heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 20px 20px 16px;
+}
+
+.heading p {
+  margin: 0 0 3px;
+  color: #0b57d0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.heading h3 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -0.025em;
+}
+
+.heading label {
+  display: grid;
+  gap: 4px;
+  color: #536079;
+  font-size: 11px;
+}
+
+.heading select,
+.originChoices select,
+.searchField input {
+  min-height: 40px;
+  border: 1px solid #ccd6e6;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0 10px;
+  color: #172033;
+  font: inherit;
+}
+
+.mapPanel {
+  padding: 0 20px;
+}
+
+.mapPanel :global(.geo-campus-map) {
+  height: 370px;
+  overflow: hidden;
+  border: 1px solid #ccd6e6;
+  border-radius: 14px;
+  background: #e9eef4;
+  z-index: 0;
+}
+
+.mapHint {
+  margin: 8px 0 0;
+  color: #687086;
+  font-size: 11px;
+}
+
+.controls {
+  display: grid;
+  gap: 14px;
+  border-bottom: 1px solid #edf0f5;
+  padding: 18px 20px;
+}
+
+.controlTitle,
+.routeTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+  font-size: 13px;
+}
+
+.controlTitle svg,
+.routeTitle svg {
+  width: 17px;
+  height: 17px;
+  color: #0b57d0;
+}
+
+.originChoices {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.originChoices button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: #0b57d0;
+  padding: 0 12px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.originChoices button:hover { background: #083e98; }
+.originChoices button svg { width: 16px; height: 16px; }
+.originChoices select { width: 100%; font-size: 12px; }
+
+.accuracy,
+.helper {
+  margin: 8px 0 0;
+  color: #536079;
+  font-size: 12px;
+}
+
+.accessibility {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.accessibility input { width: 16px; height: 16px; accent-color: #0b57d0; }
+.accessibility svg { width: 17px; height: 17px; color: #0b57d0; }
+
+.destinationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 20px 10px;
+}
+
+.destinationHeader h4 { margin: 0; font-size: 14px; }
+
+.searchField { display: flex; align-items: center; gap: 6px; }
+.searchField svg { width: 17px; height: 17px; color: #687086; }
+.searchField input { width: min(300px, 40vw); font-size: 12px; }
+
+.buildingList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  max-height: 390px;
+  overflow-y: auto;
+  padding: 0 20px 20px;
+}
+
+.buildingCard {
+  min-width: 0;
+  border: 1px solid #dfe4ec;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.buildingCardSelected { border-color: #0b57d0; background: #f5f9ff; }
+
+.buildingCard > button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 11px;
+  color: #172033;
+  cursor: pointer;
+  text-align: left;
+}
+
+.buildingCard > button > svg { width: 16px; height: 16px; color: #687086; }
+.buildingCard strong { display: block; font-size: 12px; }
+.buildingCard small { display: block; margin-top: 3px; color: #687086; font-size: 11px; line-height: 1.4; }
+
+.buildingIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: #e8f0fe;
+  color: #0b57d0;
+}
+
+.buildingIcon svg { width: 17px; height: 17px; }
+
+.spaces { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 11px 11px 54px; }
+
+.spaces button {
+  border: 1px solid #d7dfeb;
+  border-radius: 999px;
+  background: #fff;
+  padding: 5px 8px;
+  color: #3c4a63;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.spaces .spaceSelected { border-color: #0b57d0; background: #e8f0fe; color: #083e98; }
+.empty { grid-column: 1 / -1; color: #687086; font-size: 12px; }
+
+.routePanel {
+  margin: 0 20px 20px;
+  border: 1px solid #c9dafa;
+  border-radius: 13px;
+  background: #f2f7ff;
+  padding: 14px;
+  color: #18365f;
+}
+
+.routePanel p { margin: 8px 0; font-size: 12px; line-height: 1.5; }
+.routePanel .routeMetrics { font-size: 14px; font-weight: 750; }
+.routePanel .arrival { color: #216b44; font-weight: 700; }
+.routePanel small { display: block; margin-top: 4px; color: #536079; font-size: 11px; }
+.steps { margin: 8px 0 12px; padding-left: 22px; font-size: 12px; line-height: 1.6; }
+.steps li + li { margin-top: 4px; }
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .heading { align-items: stretch; flex-direction: column; padding: 16px; }
+  .mapPanel { padding: 0 16px; }
+  .mapPanel :global(.geo-campus-map) { height: 320px; }
+  .controls { padding: 16px; }
+  .originChoices { grid-template-columns: 1fr; }
+  .destinationHeader { align-items: stretch; flex-direction: column; padding: 16px 16px 10px; }
+  .searchField input { width: 100%; }
+  .searchField { width: 100%; }
+  .buildingList { grid-template-columns: 1fr; padding: 0 16px 16px; }
+  .routePanel { margin: 0 16px 16px; }
+}
