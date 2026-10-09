@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     create_engine, Column, String, Boolean, Text,
     CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer,
-    UniqueConstraint,
+    UniqueConstraint, text,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from dotenv import load_dotenv
@@ -402,6 +402,12 @@ class Document(Base):
         CheckConstraint("chunk_count >= 0", name="ck_documents_chunk_count_nonnegative"),
         Index("ix_documents_tenant_status", "tenant_id", "status"),
         Index("ix_documents_tenant_sha256", "tenant_id", "sha256"),
+        Index(
+            "uq_documents_active_tenant_sha256", "tenant_id", "sha256",
+            unique=True,
+            postgresql_where=text("status IN ('pending', 'processing', 'ready')"),
+            sqlite_where=text("status IN ('pending', 'processing', 'ready')"),
+        ),
         Index("ix_documents_tenant_created_at", "tenant_id", "created_at"),
     )
 
