@@ -567,8 +567,8 @@ const DOCUMENT_METADATA_FIELDS = [
 ] as const satisfies readonly (keyof DocumentUploadMetadata)[];
 
 export const documentApi = {
-  list: () =>
-    request<DocumentListResponse>("/documents", { method: "GET" }),
+  list: (signal?: AbortSignal) =>
+    request<DocumentListResponse>("/documents", { method: "GET", signal }),
 
   get: (id: string) =>
     request<KnowledgeDocument>(`/documents/${encodeURIComponent(id)}`, { method: "GET" }),

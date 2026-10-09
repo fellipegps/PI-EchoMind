@@ -112,7 +112,12 @@ function compactMetadata(metadata: DocumentUploadMetadata): DocumentUploadMetada
 export function DocumentTab() {
   const inputRef = useRef<HTMLInputElement>(null);
   const mountedRef = useRef(false);
+  const listVersionRef = useRef(0);
+  const listControllerRef = useRef<AbortController | null>(null);
+  const mutationCountRef = useRef(0);
+  const feedbackVersionRef = useRef(0);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
+  const [listingState, setListingState] = useState({ pending: false, version: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -121,85 +126,89 @@ export function DocumentTab() {
   const [metadata, setMetadata] = useState<DocumentUploadMetadata>(EMPTY_METADATA);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadDocuments = useCallback(async () => {
+  const invalidateListing = useCallback(() => {
+    listVersionRef.current += 1;
+    listControllerRef.current?.abort();
+    listControllerRef.current = null;
+  }, []);
+
+  const loadDocuments = useCallback(async (source: "manual" | "poll" = "manual") => {
+    if (!mountedRef.current || mutationCountRef.current > 0) return;
+
+    invalidateListing();
+    const version = listVersionRef.current;
+    const feedbackVersion = ++feedbackVersionRef.current;
+    const controller = new AbortController();
+    listControllerRef.current = controller;
+    setListingState({ pending: true, version });
+    if (source === "manual") {
+      setIsLoading(true);
+      setErrorMessage(null);
+    }
+    const isCurrent = () => mountedRef.current
+      && listVersionRef.current === version
+      && !controller.signal.aborted;
+
     try {
-      const response = await documentApi.list();
-      if (mountedRef.current) {
+      const response = await documentApi.list(controller.signal);
+      if (isCurrent()) {
         setDocuments(response.documents);
-        setErrorMessage(null);
+        if (feedbackVersionRef.current === feedbackVersion) setErrorMessage(null);
       }
     } catch {
-      if (mountedRef.current) {
-        setErrorMessage("Não foi possível carregar os documentos.");
+      if (isCurrent() && feedbackVersionRef.current === feedbackVersion) {
+        setErrorMessage(source === "poll"
+          ? "Não foi possível atualizar o processamento dos documentos."
+          : "Não foi possível carregar os documentos.");
       }
     } finally {
-      if (mountedRef.current) setIsLoading(false);
+      if (isCurrent()) {
+        listControllerRef.current = null;
+        setListingState({ pending: false, version });
+        setIsLoading(false);
+      }
     }
-  }, []);
+  }, [invalidateListing]);
 
   useEffect(() => {
     mountedRef.current = true;
-    documentApi
-      .list()
-      .then((response) => {
-        if (mountedRef.current) {
-          setDocuments(response.documents);
-          setErrorMessage(null);
-        }
-      })
-      .catch(() => {
-        if (mountedRef.current) {
-          setErrorMessage("Não foi possível carregar os documentos.");
-        }
-      })
-      .finally(() => {
-        if (mountedRef.current) setIsLoading(false);
-      });
+    void loadDocuments();
 
     return () => {
       mountedRef.current = false;
+      invalidateListing();
     };
-  }, []);
+  }, [invalidateListing, loadDocuments]);
 
   const hasActiveDocuments = documents.some((document) =>
     ACTIVE_STATUSES.has(document.status)
   );
 
   useEffect(() => {
-    if (!hasActiveDocuments) return;
+    if (!hasActiveDocuments || listingState.pending || isUploading || deletingId !== null) return;
 
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timer = setTimeout(() => void loadDocuments("poll"), POLLING_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [hasActiveDocuments, listingState, isUploading, deletingId, loadDocuments]);
 
-    const schedulePoll = () => {
-      timer = setTimeout(async () => {
-        try {
-          const response = await documentApi.list();
-          if (cancelled || !mountedRef.current) return;
+  const beginMutation = () => {
+    mutationCountRef.current += 1;
+    invalidateListing();
+    setListingState({ pending: false, version: listVersionRef.current });
+    setIsLoading(false);
+    return ++feedbackVersionRef.current;
+  };
 
-          setDocuments(response.documents);
-          setErrorMessage(null);
-          if (response.documents.some((document) => ACTIVE_STATUSES.has(document.status))) {
-            schedulePoll();
-          }
-        } catch {
-          if (cancelled || !mountedRef.current) return;
-          setErrorMessage("Não foi possível atualizar o processamento dos documentos.");
-          schedulePoll();
-        }
-      }, POLLING_INTERVAL_MS);
-    };
-
-    schedulePoll();
-
-    return () => {
-      cancelled = true;
-      if (timer !== undefined) clearTimeout(timer);
-    };
-  }, [hasActiveDocuments]);
+  const finishMutation = () => {
+    mutationCountRef.current -= 1;
+    // Leituras anteriores a uma escrita nao podem publicar snapshots antigos,
+    // mesmo quando o transporte/fake nao respeita o cancelamento.
+    invalidateListing();
+  };
 
   const selectFile = (files: FileList | File[]) => {
     const selectedFiles = Array.from(files);
+    feedbackVersionRef.current += 1;
     setErrorMessage(null);
 
     if (selectedFiles.length !== 1) {
@@ -240,6 +249,7 @@ export function DocumentTab() {
     event.preventDefault();
     if (!selectedFile || isUploading) return;
 
+    const feedbackVersion = beginMutation();
     setIsUploading(true);
     setErrorMessage(null);
 
@@ -253,8 +263,11 @@ export function DocumentTab() {
       ]);
       cancelSelection();
     } catch {
-      if (mountedRef.current) setErrorMessage("Não foi possível enviar o documento.");
+      if (mountedRef.current && feedbackVersionRef.current === feedbackVersion) {
+        setErrorMessage("Não foi possível enviar o documento.");
+      }
     } finally {
+      finishMutation();
       if (mountedRef.current) setIsUploading(false);
     }
   };
@@ -262,6 +275,7 @@ export function DocumentTab() {
   const deleteDocument = async (document: KnowledgeDocument) => {
     if (ACTIVE_STATUSES.has(document.status) || deletingId !== null) return;
 
+    const feedbackVersion = beginMutation();
     setDeletingId(document.id);
     setErrorMessage(null);
 
@@ -271,8 +285,11 @@ export function DocumentTab() {
         setDocuments((current) => current.filter((item) => item.id !== document.id));
       }
     } catch {
-      if (mountedRef.current) setErrorMessage("Não foi possível excluir o documento.");
+      if (mountedRef.current && feedbackVersionRef.current === feedbackVersion) {
+        setErrorMessage("Não foi possível excluir o documento.");
+      }
     } finally {
+      finishMutation();
       if (mountedRef.current) setDeletingId(null);
     }
   };
@@ -420,8 +437,6 @@ export function DocumentTab() {
                 size="sm"
                 variant="outline"
                 onClick={() => {
-                  setIsLoading(true);
-                  setErrorMessage(null);
                   void loadDocuments();
                 }}
               >

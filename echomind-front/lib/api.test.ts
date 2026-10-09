@@ -130,6 +130,22 @@ describe("documentApi", () => {
     expect(formData.has("tenant_id")).toBe(false);
   });
 
+  it("encaminha AbortSignal da listagem ao fetch e permite cancelar a leitura", async () => {
+    const controller = new AbortController();
+    fetchMock.mockImplementationOnce((_url, init) => new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("Cancelado", "AbortError")));
+    }));
+    const request = documentApi.list(controller.signal).catch((error: unknown) => error);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/documents`, expect.objectContaining({
+      method: "GET", signal: controller.signal,
+    }));
+    expect(requestHeaders(fetchMock.mock.calls[0]).get("Authorization")).toBe("Bearer token-do-admin");
+    controller.abort();
+    expect(await request).toBeInstanceOf(Error);
+    expect(controller.signal.aborted).toBe(true);
+    expect(tokenStore.get()).toBe("token-do-admin");
+  });
+
   it("envia somente o arquivo quando metadata não é informada", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(document, 202));
     const file = new File(["texto"], "norma.txt", { type: "text/plain" });
