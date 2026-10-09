@@ -10,9 +10,16 @@ from langchain_core.documents import Document
 
 
 @pytest.fixture()
-def rag_engine_module(quick_test_context):
+def rag_engine_module(quick_test_context, persist_retrieval_sources, monkeypatch):
     from app import rag_engine
 
+    original_search = _FakeVectorStore.similarity_search_with_score
+
+    def search(store, question, *, k):
+        persist_retrieval_sources([doc for doc, _distance in store.results])
+        return original_search(store, question, k=k)
+
+    monkeypatch.setattr(_FakeVectorStore, "similarity_search_with_score", search)
     return rag_engine
 
 

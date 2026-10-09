@@ -492,54 +492,60 @@ async def test_real_postgresql_hybrid_search_is_lexical_tenant_scoped_and_validi
 async def test_real_pgvector_retrieval_excludes_expired_chunks_and_keeps_tenant(
     real_rag_runtime,
 ) -> None:
+    from app.database import Document, DocumentChunk, SessionLocal
+
     query = "regra sintetica de validade"
     tenant_a = "pr17-validity-a"
     tenant_b = "pr17-validity-b"
     indexer_a = real_rag_runtime.make_indexer(tenant_a)
     indexer_b = real_rag_runtime.make_indexer(tenant_b)
 
-    indexer_a._upsert_document(
-        source_id="expired-a",
-        source_type="document_chunk",
-        content=query,
-        extra_metadata={"valid_until": "2026-08-23"},
-    )
-    indexer_a._upsert_document(
-        source_id="current-a",
-        source_type="document_chunk",
-        content=query,
-        extra_metadata={"valid_until": "2026-08-24"},
-    )
-    indexer_a._upsert_document(
-        source_id="faq-a",
-        source_type="faq",
-        content=query,
-        extra_metadata={"valid_until": "2020-01-01"},
-    )
-    indexer_b._upsert_document(
-        source_id="current-b",
-        source_type="document_chunk",
-        content=query,
-        extra_metadata={"valid_until": "2027-01-01"},
-    )
+    stored_documents = []
+    session = SessionLocal()
+    try:
+        for source_id, tenant_id, validity, indexer in (
+            ("expired-a", tenant_a, date(2026, 8, 23), indexer_a),
+            ("current-a", tenant_a, date(2026, 8, 24), indexer_a),
+            ("current-b", tenant_b, date(2027, 1, 1), indexer_b),
+        ):
+            document = Document(
+                id=f"validity-{source_id}", tenant_id=tenant_id, filename="norma.txt",
+                mime_type="text/plain", size_bytes=32, status="ready",
+                sha256=sha256(source_id.encode()).hexdigest(), valid_until=validity,
+            )
+            session.add(document)
+            session.flush()
+            session.add(DocumentChunk(
+                id=source_id, tenant_id=tenant_id, document_id=document.id,
+                chunk_index=0, content=query,
+            ))
+            session.commit()
+            stored_documents.append((tenant_id, document.id))
+            indexer._upsert_document(
+                source_id=source_id, source_type="document_chunk", content=query,
+                extra_metadata={"valid_until": validity.isoformat(), "document_id": document.id},
+            )
+        indexer_a._upsert_document(
+            source_id="faq-a", source_type="faq", content=query,
+            extra_metadata={"valid_until": "2020-01-01"},
+        )
+        docs_a, distance_a = await real_rag_runtime.module._retrieve_docs(
+            query, tenant_a, today=date(2026, 8, 24),
+        )
+        docs_b, distance_b = await real_rag_runtime.module._retrieve_docs(
+            query, tenant_b, today=date(2026, 8, 24),
+        )
 
-    docs_a, distance_a = await real_rag_runtime.module._retrieve_docs(
-        query,
-        tenant_a,
-        today=date(2026, 8, 24),
-    )
-    docs_b, distance_b = await real_rag_runtime.module._retrieve_docs(
-        query,
-        tenant_b,
-        today=date(2026, 8, 24),
-    )
-
-    assert {doc.metadata["source_id"] for doc in docs_a} == {"current-a", "faq-a"}
-    assert {doc.metadata["tenant_id"] for doc in docs_a} == {tenant_a}
-    assert [doc.metadata["source_id"] for doc in docs_b] == ["current-b"]
-    assert [doc.metadata["tenant_id"] for doc in docs_b] == [tenant_b]
-    assert distance_a == pytest.approx(0.0, abs=1e-6)
-    assert distance_b == pytest.approx(0.0, abs=1e-6)
+        assert {doc.metadata["source_id"] for doc in docs_a} == {"current-a", "faq-a"}
+        assert {doc.metadata["tenant_id"] for doc in docs_a} == {tenant_a}
+        assert [doc.metadata["source_id"] for doc in docs_b] == ["current-b"]
+        assert [doc.metadata["tenant_id"] for doc in docs_b] == [tenant_b]
+        assert distance_a == pytest.approx(0.0, abs=1e-6)
+        assert distance_b == pytest.approx(0.0, abs=1e-6)
+    finally:
+        session.close()
+        for tenant_id, document_id in stored_documents:
+            _remove_processing_document(tenant_id, document_id)
 
 
 def test_manual_reindex_rebuilds_ready_sources_idempotently_per_tenant(
@@ -754,6 +760,139 @@ def test_process_document_compensates_real_partial_vector_failure(
         assert _documents_for(real_rag_runtime, tenant_id) == []
     finally:
         _remove_processing_document(tenant_id, document_id)
+
+
+def test_partial_index_and_failed_cleanup_never_retrieve_and_can_retry(
+    monkeypatch, real_rag_runtime,
+) -> None:
+    from app import rag_engine
+    from app.database import SessionLocal
+    from app.document_processing import process_document
+    from app.document_repository import list_document_chunks, list_document_parents
+
+    tenant_id = f"retrieval-failure-{uuid4()}"
+    real_rag_runtime.make_indexer(tenant_id)
+    document_id = _create_pending_processing_document(tenant_id)
+    observed = []
+
+    def fail_after_first_vector(self, document, chunks, *, previous_chunks=None):
+        self.index_document_chunk(document, chunks[0])
+        query = _documents_for(real_rag_runtime, tenant_id)[0].page_content
+        # Durante a indexacao o estado persistido ainda e processing.
+        observed.append(asyncio.run(rag_engine._retrieve_docs(query, tenant_id))[0])
+        raise RuntimeError("falha apos gravacao parcial")
+
+    original_delete = rag_engine.RAGEngine.delete_document_chunks
+
+    def fail_cleanup(self, document, chunks=None):
+        raise RuntimeError("falha de compensacao vetorial")
+
+    monkeypatch.setattr(rag_engine.RAGEngine, "reindex_document_chunks", fail_after_first_vector)
+    monkeypatch.setattr(rag_engine.RAGEngine, "delete_document_chunks", fail_cleanup)
+    try:
+        first = process_document(
+            document_id=document_id, tenant_id=tenant_id,
+            content=(b"Norma sintetica para falha parcial. " * 60),
+        )
+        partial = _processing_state(tenant_id, document_id)
+        vectors = _documents_for(real_rag_runtime, tenant_id)
+        assert first.status == partial.status == "error"
+        assert partial.chunk_count > 1
+        assert len(vectors) == 1
+
+        session = SessionLocal()
+        try:
+            chunk_ids = [chunk.id for chunk in list_document_chunks(
+                session, tenant_id=tenant_id, document_id=document_id,
+            )]
+            assert vectors[0].metadata["source_id"] in chunk_ids
+            assert list_document_parents(session, tenant_id=tenant_id, document_id=document_id)
+        finally:
+            session.close()
+
+        # Tambem cobre o fallback vetorial se a busca lexical falhar.
+        def fail_lexical(*args, **kwargs):
+            raise RuntimeError("busca lexical indisponivel")
+
+        monkeypatch.setattr(rag_engine, "_search_lexical_documents", fail_lexical)
+        retrieved, distance = asyncio.run(rag_engine._retrieve_docs(vectors[0].page_content, tenant_id))
+        observed.append(retrieved)
+        assert observed == [[], []]
+        assert distance is None
+        assert _processing_state(tenant_id, document_id).chunk_count == len(chunk_ids)
+
+        monkeypatch.setattr(rag_engine.RAGEngine, "delete_document_chunks", original_delete)
+        second = process_document(document_id=document_id, tenant_id=tenant_id, content=b"retry")
+        assert second.status == "error"
+        assert _processing_state(tenant_id, document_id).chunk_count == 0
+        assert _documents_for(real_rag_runtime, tenant_id) == []
+    finally:
+        _remove_processing_document(tenant_id, document_id)
+
+
+@pytest.mark.parametrize("with_parent", [False, True])
+@pytest.mark.parametrize(
+    "state", ["ready", "pending", "processing", "error", "deleted", "expired", "other-tenant", "missing-chunk"],
+)
+def test_real_residual_vectors_require_ready_current_matching_document_and_chunk(
+    monkeypatch, real_rag_runtime, state, with_parent,
+) -> None:
+    from app.database import Document, DocumentChunk, SessionLocal
+    from app.document_repository import DocumentChunkData, DocumentParentData, replace_document_chunks
+
+    tenant_id = f"retrieval-state-{uuid4()}"
+    stored_tenant = f"other-{tenant_id}" if state == "other-tenant" else tenant_id
+    document_id = str(uuid4())
+    indexer = real_rag_runtime.make_indexer(tenant_id)
+    today = date(2026, 9, 1)
+    session = SessionLocal()
+    try:
+        document = Document(
+            id=document_id, tenant_id=stored_tenant, filename="regra.txt",
+            mime_type="text/plain", size_bytes=32, sha256="a" * 64,
+            status=state if state in {"pending", "processing", "error"} else "ready",
+        )
+        session.add(document)
+        session.flush()
+        chunk = replace_document_chunks(
+            session, tenant_id=stored_tenant, document_id=document_id,
+            chunks=[DocumentChunkData(content="Regra sintetica.", parent_index=0 if with_parent else None)],
+            parents=[DocumentParentData(content="Regra sintetica. Excecao obrigatoria.")] if with_parent else (),
+        )[0]
+        session.commit()
+        # Ate metadata que alega o tenant consultado precisa de confirmacao relacional.
+        indexer._upsert_document(
+            source_id=chunk.id, source_type="document_chunk", content="Regra sintetica.",
+            extra_metadata={"document_id": document_id, "parent_id": chunk.parent_id},
+        )
+        if state == "deleted":
+            session.delete(document)
+        elif state == "expired":
+            document.valid_until = date(2026, 8, 31)
+        elif state == "missing-chunk":
+            session.query(DocumentChunk).filter_by(id=chunk.id, tenant_id=stored_tenant).delete()
+        session.commit()
+        assert len(_documents_for(real_rag_runtime, tenant_id)) == 1
+        monkeypatch.setattr(real_rag_runtime.module, "_search_lexical_documents", lambda *args, **kwargs: [])
+        retrieved, distance = asyncio.run(real_rag_runtime.module._retrieve_docs(
+            "Regra sintetica.", tenant_id, today=today,
+        ))
+        if state == "ready":
+            assert len(retrieved) == 1
+            assert retrieved[0].metadata["source_type"] == (
+                "document_parent" if with_parent else "document_chunk"
+            )
+            assert distance == pytest.approx(0.0, abs=1e-6)
+        else:
+            assert retrieved == []
+            assert distance is None
+    finally:
+        session.rollback()
+        remaining = session.query(Document).filter_by(id=document_id, tenant_id=stored_tenant).first()
+        if remaining is not None:
+            session.delete(remaining)
+            session.commit()
+        session.close()
 
 
 def test_delete_document_endpoint_removes_real_record_chunks_and_vectors(

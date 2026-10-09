@@ -609,6 +609,90 @@ def _document_belongs_to_tenant(document: Document, *, tenant_id: str) -> bool:
     return metadata.get("tenant_id") == tenant_id
 
 
+def _validated_document_sources(
+    documents: Sequence[Document],
+    *,
+    tenant_id: str,
+    today: date,
+    session_factory: Callable[[], Session] | None = None,
+) -> list[Document]:
+    """Autoriza fontes pelo estado persistido; vetores residuais nao bastam."""
+    eligible = [
+        document for document in documents
+        if _document_belongs_to_tenant(document, tenant_id=tenant_id)
+        and _document_is_current(document, today=today)
+    ]
+
+    def chunk_key(document: Document) -> tuple[str, str] | None:
+        metadata = document.metadata
+        chunk_id = metadata.get(
+            "matched_child_id" if metadata.get("source_type") == _DOCUMENT_PARENT_SOURCE_TYPE
+            else "source_id"
+        )
+        document_id = metadata.get("document_id")
+        if not isinstance(chunk_id, str) or not isinstance(document_id, str):
+            return None
+        return (document_id, chunk_id) if document_id and chunk_id else None
+
+    requested = {
+        key for document in eligible
+        if document.metadata.get("source_type") in _DOCUMENT_SOURCE_TYPES
+        and (key := chunk_key(document)) is not None
+    }
+    resolved: dict[tuple[str, str], str | None] = {}
+    if requested:
+        session = None
+        try:
+            session = (session_factory or SessionLocal)()
+            rows = (
+                session.query(DocumentChunk.document_id, DocumentChunk.id, DocumentChunkParent.id)
+                .join(
+                    StoredDocument,
+                    (StoredDocument.id == DocumentChunk.document_id)
+                    & (StoredDocument.tenant_id == DocumentChunk.tenant_id),
+                )
+                .outerjoin(
+                    DocumentChunkParent,
+                    (DocumentChunkParent.id == DocumentChunk.parent_id)
+                    & (DocumentChunkParent.document_id == DocumentChunk.document_id)
+                    & (DocumentChunkParent.tenant_id == DocumentChunk.tenant_id),
+                )
+                .filter(
+                    StoredDocument.tenant_id == tenant_id,
+                    DocumentChunk.tenant_id == tenant_id,
+                    StoredDocument.status == "ready",
+                    (StoredDocument.valid_until.is_(None)) | (StoredDocument.valid_until >= today),
+                    DocumentChunk.id.in_([chunk_id for _document_id, chunk_id in requested]),
+                )
+                .all()
+            )
+            resolved = {(document_id, chunk_id): parent_id for document_id, chunk_id, parent_id in rows}
+        except Exception as exc:
+            emit_event(
+                event="rag.retrieval-filter",
+                status="error",
+                stage="document-state",
+                tenant_id=tenant_id,
+                error_code=safe_error_code(exc),
+                level=logging.WARNING,
+            )
+        finally:
+            if session is not None:
+                session.close()
+
+    return [
+        document for document in eligible
+        if document.metadata.get("source_type") not in _DOCUMENT_SOURCE_TYPES
+        or (
+            (key := chunk_key(document)) in resolved
+            and (
+                document.metadata.get("source_type") != _DOCUMENT_PARENT_SOURCE_TYPE
+                or document.metadata.get("source_id") == resolved[key] is not None
+            )
+        )
+    ]
+
+
 def _lexical_document_chunk(row: Mapping[str, Any]) -> Document:
     document = SimpleNamespace(
         id=row["document_id"],
@@ -801,12 +885,9 @@ def _expand_document_parents(
     session_factory: Callable[[], Session] | None = None,
 ) -> list[Document]:
     """Resolve parents em lote, por tenant/documento, e remove repeticoes."""
-    eligible_documents = [
-        document
-        for document in documents
-        if _document_belongs_to_tenant(document, tenant_id=tenant_id)
-        and _document_is_current(document, today=today)
-    ]
+    eligible_documents = _validated_document_sources(
+        documents, tenant_id=tenant_id, today=today, session_factory=session_factory,
+    )
     requested: list[tuple[str, str]] = []
     for document in eligible_documents:
         metadata = document.metadata if isinstance(document.metadata, Mapping) else {}
@@ -821,19 +902,26 @@ def _expand_document_parents(
         return eligible_documents
 
     parent_ids = tuple(dict.fromkeys(parent_id for _document_id, parent_id in requested))
-    resolved: dict[tuple[str, str], tuple[StoredDocument, DocumentChunkParent]] = {}
+    resolved: dict[tuple[str, str, str], tuple[StoredDocument, DocumentChunkParent]] = {}
     session = (session_factory or SessionLocal)()
     try:
         rows = (
-            session.query(StoredDocument, DocumentChunkParent)
+            session.query(StoredDocument, DocumentChunkParent, DocumentChunk.id)
             .join(
                 DocumentChunkParent,
                 (DocumentChunkParent.document_id == StoredDocument.id)
                 & (DocumentChunkParent.tenant_id == StoredDocument.tenant_id),
             )
+            .join(
+                DocumentChunk,
+                (DocumentChunk.parent_id == DocumentChunkParent.id)
+                & (DocumentChunk.document_id == StoredDocument.id)
+                & (DocumentChunk.tenant_id == StoredDocument.tenant_id),
+            )
             .filter(
                 StoredDocument.tenant_id == tenant_id,
                 DocumentChunkParent.tenant_id == tenant_id,
+                DocumentChunk.tenant_id == tenant_id,
                 StoredDocument.status == "ready",
                 (StoredDocument.valid_until.is_(None)) | (StoredDocument.valid_until >= today),
                 DocumentChunkParent.id.in_(parent_ids),
@@ -841,8 +929,8 @@ def _expand_document_parents(
             .all()
         )
         resolved = {
-            (stored_document.id, parent.id): (stored_document, parent)
-            for stored_document, parent in rows
+            (stored_document.id, parent.id, chunk_id): (stored_document, parent)
+            for stored_document, parent, chunk_id in rows
         }
     except Exception as exc:
         emit_event(
@@ -863,7 +951,7 @@ def _expand_document_parents(
     for child in eligible_documents:
         metadata = child.metadata if isinstance(child.metadata, Mapping) else {}
         key = (str(metadata.get("document_id", "")), str(metadata.get("parent_id", "")))
-        parent_row = resolved.get(key)
+        parent_row = resolved.get((*key, str(metadata.get("source_id", ""))))
         if parent_row is None:
             expanded.append(child)
             continue
@@ -942,10 +1030,17 @@ async def _retrieve_docs(
     else:
         lexical_documents = lexical_outcome
 
+    validated_sources = _validated_document_sources(
+        [doc for doc, _distance in results] + lexical_documents,
+        tenant_id=tenant_id,
+        today=reference_date,
+    )
+    validated_ids = {id(doc) for doc in validated_sources}
+    lexical_documents = [doc for doc in lexical_documents if id(doc) in validated_ids]
     current_candidates = [
         (doc, distance)
         for doc, distance in results
-        if _document_belongs_to_tenant(doc, tenant_id=tenant_id)
+        if id(doc) in validated_ids
         and doc.metadata.get("source_type") != "event"
         and _document_is_current(doc, today=reference_date)
     ]

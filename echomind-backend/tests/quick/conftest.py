@@ -141,6 +141,56 @@ def db(quick_test_context: QuickTestContext) -> Generator[Session, None, None]:
 
 
 @pytest.fixture()
+def persist_retrieval_sources(db: Session, monkeypatch):
+    """Cria os registros ready correspondentes aos candidatos sinteticos."""
+    from datetime import date
+    from hashlib import sha256
+    from app import rag_engine
+    from app.database import Document, DocumentChunk
+
+    class NonClosingSession:
+        def __getattr__(self, name):
+            return getattr(db, name)
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(rag_engine, "SessionLocal", NonClosingSession)
+
+    def persist(documents):
+        for source in documents:
+            metadata = source.metadata
+            if metadata.get("source_type") != "document_chunk":
+                continue
+            tenant_id = metadata["tenant_id"]
+            chunk_id = metadata["source_id"]
+            document_id = metadata.setdefault("document_id", f"doc-{tenant_id}-{chunk_id}")
+            if db.get(DocumentChunk, chunk_id) is not None:
+                continue
+            valid_until = metadata.get("valid_until")
+            if isinstance(valid_until, datetime):
+                valid_until = valid_until.date()
+            elif isinstance(valid_until, str):
+                try:
+                    valid_until = date.fromisoformat(valid_until)
+                except ValueError:
+                    valid_until = None
+            db.add(Document(
+                id=document_id, tenant_id=tenant_id, filename=metadata.get("filename", "norma.txt"),
+                mime_type="text/plain", size_bytes=32,
+                sha256=sha256(document_id.encode()).hexdigest(), status="ready",
+                valid_until=valid_until,
+            ))
+            db.flush()
+            db.add(DocumentChunk(
+                id=chunk_id, tenant_id=tenant_id, document_id=document_id,
+                chunk_index=0, content=source.page_content,
+            ))
+            db.flush()
+    return persist
+
+
+@pytest.fixture()
 def client(
     db: Session,
     quick_test_context: QuickTestContext,
