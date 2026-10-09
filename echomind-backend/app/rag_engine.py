@@ -37,6 +37,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .embedding_adapter import E5FastEmbedEmbeddings
+from .schemas import sao_paulo_today
 from .database import (
     DATABASE_URL,
     Config,
@@ -980,14 +981,14 @@ async def _retrieve_docs(
     """
     Combina candidatos vetoriais e lexicais por RRF, sem substituir PGVector.
 
-    ``today`` representa a data civil local do backend. Como ``valid_until`` e
+    ``today`` representa a data civil de America/Sao_Paulo. Como ``valid_until`` e
     uma data sem horario, o documento segue vigente durante todo o dia indicado.
     Testes e chamadores podem injetar a data para evitar dependencia do relogio.
     """
     loop = asyncio.get_running_loop()
     retrieval_started = time.perf_counter()
     log_context = create_log_context(tenant_id)
-    reference_date = today or date.today()
+    reference_date = today if today is not None else sao_paulo_today()
     candidate_k = _retrieval_candidate_k()
 
     vector_task = loop.run_in_executor(
@@ -1208,7 +1209,8 @@ class RAGEngine:
         2. O LLM recebeu documentos mas respondeu negativamente — significa
            que os docs eram irrelevantes (falsos positivos do retriever).
         """
-        docs, nearest_distance = await _retrieve_docs(question, self.tenant_id)
+        reference_date = sao_paulo_today()
+        docs, nearest_distance = await _retrieve_docs(question, self.tenant_id, today=reference_date)
         self._last_retrieved_count = len(docs)
         institution_context = _build_institution_context(self._config)
 
@@ -1220,10 +1222,9 @@ class RAGEngine:
             if doc_context
             else institution_context
         )
-        from datetime import date as _date
         _months = ["","janeiro","fevereiro","março","abril","maio","junho",
                    "julho","agosto","setembro","outubro","novembro","dezembro"]
-        _t = _date.today()
+        _t = reference_date
         today_str = f"{_t.day} de {_months[_t.month]} de {_t.year}"
         system_msg = (
             SYSTEM_PROMPT

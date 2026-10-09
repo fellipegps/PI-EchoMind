@@ -80,9 +80,18 @@ A preparação e a compensação usam locks no documento do tenant; se outra
 tentativa restaurar `ready` antes da remoção, a API retorna 409 sem tocar nos
 vetores. Nenhuma migration é necessária para esse comportamento.
 
-Um `document_chunk` com `valid_until` anterior à data civil atual é filtrado
-depois da recuperação e não entra no contexto final. Sem `valid_until`, o chunk
-permanece elegível. FAQs e eventos não passam por esse filtro. As fontes
+As fontes documentais usam a data civil de `America/Sao_Paulo`, o mesmo calendário
+institucional dos eventos, independentemente do fuso do servidor. Uma única data
+é capturada no início da consulta e compartilhada pela recuperação vetorial,
+lexical, expansão Parent-Child e seus fallbacks, além da data apresentada ao modelo,
+mesmo se a consulta atravessar a meia-noite local. Testes podem congelar a fonte
+`sao_paulo_today` ou injetar explicitamente `today` na recuperação.
+`published_at` e `valid_until` continuam datas sem horário (`YYYY-MM-DD`);
+`published_at` é informativo e não cria uma nova restrição de recuperação.
+Um documento com `valid_until` anterior ao dia local é filtrado e não entra no
+contexto final. Validade igual ao dia local inclui todo esse dia; a exclusão ocorre
+somente a partir do próximo dia em São Paulo. Datas futuras e ausência de
+`valid_until` permanecem elegíveis. FAQs e eventos não passam por esse filtro. As fontes
 documentais apresentam apenas os metadados realmente disponíveis; o conteúdo
 recuperado é tratado como dado, nunca como instrução do sistema.
 

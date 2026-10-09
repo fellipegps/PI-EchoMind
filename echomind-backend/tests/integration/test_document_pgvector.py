@@ -548,6 +548,94 @@ async def test_real_pgvector_retrieval_excludes_expired_chunks_and_keeps_tenant(
             _remove_processing_document(tenant_id, document_id)
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("utc_hour,utc_minute,utc_second", [(0, 0, 0), (2, 59, 59), (3, 0, 0)])
+async def test_real_retrieval_uses_sao_paulo_calendar_through_local_midnight(
+    real_rag_runtime, monkeypatch, utc_hour, utc_minute, utc_second,
+) -> None:
+    from app import schemas
+    from app.database import Document, DocumentChunk, DocumentChunkParent, SessionLocal
+
+    instant = datetime(2026, 9, 2, utc_hour, utc_minute, utc_second, tzinfo=timezone.utc)
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return instant.astimezone(tz)
+
+    monkeypatch.setattr(schemas, "datetime", FrozenDatetime)
+    monkeypatch.setattr(real_rag_runtime.module, "TOP_K_DOCS", 10)
+    monkeypatch.setattr(real_rag_runtime.module, "RERANKER_ENABLED", False)
+    query = "CALENDARIOLOCALXYZ"
+    tenant = f"calendar-real-{uuid4()}"
+    created = []
+    session = SessionLocal()
+    try:
+        for key, validity, tenant_id in (
+            ("yesterday", date(2026, 8, 31), tenant),
+            ("today", date(2026, 9, 1), tenant),
+            ("future", date(2026, 9, 3), tenant),
+            ("unlimited", None, tenant),
+            ("other-tenant", None, f"{tenant}-other"),
+        ):
+            document_id = f"{tenant}-{key}"
+            chunk_id, parent_id = f"{document_id}-child", f"{document_id}-parent"
+            document = Document(
+                id=document_id, tenant_id=tenant_id, filename=f"{query}-{key}.txt",
+                mime_type="text/plain", size_bytes=32, status="ready",
+                sha256=sha256(document_id.encode()).hexdigest(),
+                published_at=date(2026, 1, 1), valid_until=validity,
+            )
+            session.add(document)
+            session.flush()
+            session.add(DocumentChunkParent(
+                id=parent_id, document_id=document_id, tenant_id=tenant_id,
+                parent_index=0, content=f"{query}: contexto completo {key}.",
+            ))
+            session.flush()
+            session.add(DocumentChunk(
+                id=chunk_id, tenant_id=tenant_id, document_id=document_id,
+                parent_id=parent_id, chunk_index=0, content=query,
+            ))
+            session.commit()
+            created.append((tenant_id, document_id))
+            real_rag_runtime.make_indexer(tenant_id)._upsert_document(
+                source_id=chunk_id, source_type="document_chunk", content=query,
+                extra_metadata={
+                    "document_id": document_id, "parent_id": parent_id,
+                    "published_at": "2026-01-01",
+                    "valid_until": validity.isoformat() if validity else None,
+                },
+            )
+
+        lexical_results = []
+        search = real_rag_runtime.module._search_lexical_documents
+
+        def capture_lexical(question, tenant_id, *, today, limit):
+            result = search(question, tenant_id, today=today, limit=limit)
+            lexical_results.append((today, {doc.metadata["source_id"] for doc in result}))
+            return result
+
+        monkeypatch.setattr(real_rag_runtime.module, "_search_lexical_documents", capture_lexical)
+        documents, distance = await real_rag_runtime.module._retrieve_docs(query, tenant)
+        expected_keys = {"future", "unlimited"} | ({"today"} if utc_hour < 3 else set())
+        expected_children = {f"{tenant}-{key}-child" for key in expected_keys}
+        assert lexical_results == [(date(2026, 9, 1 if utc_hour < 3 else 2), expected_children)]
+        assert {doc.metadata["matched_child_id"] for doc in documents} == expected_children
+        assert all(doc.metadata["source_type"] == "document_parent" for doc in documents)
+        assert all(doc.metadata["tenant_id"] == tenant for doc in documents)
+        assert all(doc.metadata["published_at"] == "2026-01-01" for doc in documents)
+        assert distance == pytest.approx(0.0, abs=1e-6)
+        stored = session.get(Document, f"{tenant}-today")
+        assert stored.valid_until == date(2026, 9, 1)
+        assert type(stored.valid_until) is date
+        assert type(stored.published_at) is date
+    finally:
+        session.close()
+        for tenant_id, document_id in created:
+            _remove_processing_document(tenant_id, document_id)
+
+
 def test_manual_reindex_rebuilds_ready_sources_idempotently_per_tenant(
     real_rag_runtime,
 ) -> None:
