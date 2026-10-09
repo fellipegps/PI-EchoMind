@@ -918,6 +918,52 @@ def get_stored_document(
     return document
 
 
+def _compensate_failed_document_delete(
+    db: Session,
+    rag,
+    *,
+    tenant_id: str,
+    document_id: str,
+    previous_status: str,
+    previous_error_message: str | None,
+) -> None:
+    """Restaura apenas fontes antes ready, sem perder o marcador se falhar."""
+    try:
+        db.rollback()
+        if previous_status != DocumentStatus.READY.value:
+            return
+        document = get_document(
+            db, tenant_id=tenant_id, document_id=document_id, for_update=True,
+        )
+        # Nao ressuscita vetores de registros removidos por outra tentativa,
+        # nem altera um estado que outro processamento ja tenha assumido.
+        if document is None or document.status != DocumentStatus.ERROR.value:
+            return
+        chunks = list_document_chunks(db, tenant_id=tenant_id, document_id=document_id)
+        rag.reindex_document_chunks(document, chunks)
+        document.status = previous_status
+        document.error_message = previous_error_message
+        db.commit()
+    except Exception as exc:
+        try:
+            db.rollback()
+        except Exception:
+            # O marcador ja foi confirmado antes de qualquer remocao vetorial.
+            # Nao e necessario conseguir outra escrita para preservar o erro.
+            pass
+        emit_event(
+            event="rag.document-delete", status="error", stage="delete-compensation",
+            tenant_id=tenant_id, error_code=safe_error_code(exc),
+        )
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Não foi possível restaurar o documento após a falha na exclusão. "
+                "O documento permanece em erro, com os chunks preservados; tente excluir novamente."
+            ),
+        ) from exc
+
+
 @router_documents.delete("/{document_id}", status_code=204)
 def delete_stored_document(
     document_id: str,
@@ -929,6 +975,7 @@ def delete_stored_document(
         db,
         tenant_id=current_user.id,
         document_id=document_id,
+        for_update=True,
     )
     if document is None:
         raise HTTPException(status_code=404, detail="Documento não encontrado.")
@@ -942,6 +989,48 @@ def delete_stored_document(
             detail="Documento pendente ou em processamento não pode ser excluído.",
         )
 
+    previous_status = document.status
+    previous_error_message = document.error_message
+    # PGVector confirma suas proprias transacoes. Persistir este marcador antes
+    # da remocao evita deixar um ready sem vetores se a compensacao ou o banco
+    # falharem depois. DELETE de error continua sendo uma recuperacao idempotente.
+    document.status = DocumentStatus.ERROR.value
+    recovery_message = "Exclusão não concluída; tente excluir novamente. Documento e chunks preservados."
+    if previous_error_message and previous_error_message.startswith(recovery_message):
+        document.error_message = previous_error_message
+    else:
+        previous_error = f" Erro anterior: {previous_error_message}" if previous_error_message else ""
+        document.error_message = (recovery_message + previous_error)[:1000]
+    try:
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        emit_event(
+            event="rag.document-delete", status="error", stage="delete-prepare",
+            tenant_id=current_user.id, error_code=safe_error_code(exc),
+        )
+        raise HTTPException(
+            status_code=500, detail="Não foi possível preparar a exclusão do documento.",
+        ) from exc
+
+    # O commit libera o lock. Resolve novamente antes de tocar os vetores.
+    document = get_document(
+        db, tenant_id=current_user.id, document_id=document_id, for_update=True,
+    )
+    if document is None:
+        raise HTTPException(status_code=404, detail="Documento não encontrado.")
+    if document.status in {DocumentStatus.PENDING.value, DocumentStatus.PROCESSING.value}:
+        raise HTTPException(
+            status_code=409,
+            detail="Documento pendente ou em processamento não pode ser excluído.",
+        )
+    if document.status != DocumentStatus.ERROR.value:
+        # Outra tentativa pode ter compensado e restaurado ready entre o
+        # commit do marcador e este lock. Nao remove vetores sem o marcador.
+        raise HTTPException(
+            status_code=409,
+            detail="O estado do documento mudou durante a exclusão; tente novamente.",
+        )
     chunks = list_document_chunks(
         db,
         tenant_id=current_user.id,
@@ -957,6 +1046,10 @@ def delete_stored_document(
             tenant_id=current_user.id,
             counts={"persisted_chunks": len(chunks)},
             error_code=safe_error_code(exc),
+        )
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
         )
         raise HTTPException(
             status_code=503,
@@ -974,15 +1067,21 @@ def delete_stored_document(
             raise HTTPException(status_code=404, detail="Documento não encontrado.")
         db.commit()
     except DocumentDeletionBlockedError as exc:
-        db.rollback()
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
+        )
         raise HTTPException(
             status_code=409,
             detail="Documento pendente ou em processamento não pode ser excluído.",
         ) from exc
     except HTTPException:
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
+        )
         raise
     except Exception as exc:
-        db.rollback()
         emit_event(
             event="rag.document-delete",
             status="error",
@@ -990,6 +1089,10 @@ def delete_stored_document(
             tenant_id=current_user.id,
             counts={"persisted_chunks": len(chunks)},
             error_code=safe_error_code(exc),
+        )
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
         )
         raise HTTPException(
             status_code=500,

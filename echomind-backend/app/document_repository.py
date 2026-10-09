@@ -100,12 +100,15 @@ def get_document(
     *,
     tenant_id: str,
     document_id: str,
+    for_update: bool = False,
 ) -> Document | None:
-    return (
+    query = (
         db.query(Document)
         .filter(Document.id == document_id, Document.tenant_id == tenant_id)
-        .first()
     )
+    if for_update:
+        query = query.populate_existing().with_for_update()
+    return query.first()
 
 
 def list_documents(db: Session, *, tenant_id: str) -> list[Document]:

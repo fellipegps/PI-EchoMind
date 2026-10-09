@@ -42,11 +42,30 @@ As demais operações autenticadas são `GET /documents`,
 | `pending` | Registro criado e aguardando processamento | Consultar novamente em aproximadamente 2 s |
 | `processing` | Extração, chunking ou indexação em andamento | Continuar a consulta periódica |
 | `ready` | Chunks persistidos e vetores disponíveis | Mostrar `chunk_count` e encerrar polling |
-| `error` | Processamento terminou com erro seguro | Mostrar a mensagem e encerrar polling |
+| `error` | Processamento ou exclusão requer recuperação | Mostrar a mensagem e encerrar polling |
 
-Documentos `pending` e `processing` não podem ser excluídos. A remoção de um
-documento terminal apaga primeiro seus vetores e só então o registro relacional;
-o painel o remove da lista somente após o `DELETE` bem-sucedido.
+Documentos `pending` e `processing` não podem ser excluídos (HTTP 409). Antes de
+remover vetores de um documento terminal, o DELETE confirma `error` com uma
+mensagem de exclusão não concluída. Só depois remove vetores e registro
+relacional, retornando 204. O painel remove o item apenas após esse sucesso.
+
+Se a remoção vetorial ou relacional falhar, um documento antes `ready` tem seus
+vetores reconstruídos pelos chunks preservados, com os mesmos IDs determinísticos,
+e volta a `ready`. A API ainda informa a falha original: 503 para remoção vetorial
+ou 500 para exclusão/commit relacional. Documentos que já estavam em `error` não
+são reativados por essa compensação.
+
+Se a compensação ou seu commit falhar, a API retorna 503 e o marcador `error`
+continua confirmado, com documento, chunks e parents preservados. Vetores
+residuais não entram no contexto do chat. Após resolver a indisponibilidade,
+repita o DELETE: ele remove também os vetores parciais pelos mesmos IDs antes
+de apagar os registros. Outra repetição após a conclusão retorna 404.
+
+Não há transação distribuída nem recuperação automática em background. Uma
+interrupção depois de confirmar o marcador também exige nova tentativa de DELETE.
+A preparação e a compensação usam locks no documento do tenant; se outra
+tentativa restaurar `ready` antes da remoção, a API retorna 409 sem tocar nos
+vetores. Nenhuma migration é necessária para esse comportamento.
 
 Um `document_chunk` com `valid_until` anterior à data civil atual é filtrado
 depois da recuperação e não entra no contexto final. Sem `valid_until`, o chunk

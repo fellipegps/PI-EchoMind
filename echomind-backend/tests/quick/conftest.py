@@ -255,6 +255,8 @@ class FakeRAGEngine:
         self.deleted: list = []
         self.deleted_document_chunks: list[tuple[str, tuple[str, ...]]] = []
         self.document_chunk_delete_error = False
+        self.reindexed_document_chunks: list[tuple[str, tuple[str, ...]]] = []
+        self.document_chunk_reindex_error = False
 
     async def astream_chat(self, question: str) -> AsyncGenerator[str, None]:
         self.last_had_docs = self.has_context
@@ -285,6 +287,13 @@ class FakeRAGEngine:
         if self.document_chunk_delete_error:
             raise RuntimeError("falha vetorial sintetica")
         self.deleted_document_chunks.append(
+            (document.id, tuple(chunk.id for chunk in chunks))
+        )
+
+    def reindex_document_chunks(self, document, chunks):
+        if self.document_chunk_reindex_error:
+            raise RuntimeError("falha sintetica da compensacao vetorial")
+        self.reindexed_document_chunks.append(
             (document.id, tuple(chunk.id for chunk in chunks))
         )
 
