@@ -656,8 +656,33 @@ anteriores da mesma branch ou PR sao canceladas quando uma nova comeca.
 
 No aceite do MVP, a suite rapida permanece baseada em SQLite e mocks, sem Groq,
 Supabase ou banco externo. O gate global continua em 72%, sem elevar ou manipular
-a baseline historica. Os modulos documentais novos devem permanecer com pelo
-menos 80% de cobertura; o relatorio `term-missing` e a fonte dos percentuais.
+a baseline historica. Um segundo gate exige pelo menos 80% **por modulo
+documental novo do backend**, usando o mesmo `coverage.xml` dessa execucao.
+A medida e cobertura de linhas executaveis (statements), como no
+`term-missing`, sem adicionar cobertura de branches. A decisao usa as contagens
+inteiras de linhas cobertas/medidas, sem arredondar o percentual para aprovar.
+
+A lista obrigatoria e fixa em `scripts/check_document_coverage.py`:
+
+| Modulo | Origem no MVP | Cobertura minima |
+|---|---|---:|
+| `app/document_repository.py` | PR 06: repositorio, estados e isolamento por tenant | 80% |
+| `app/document_ingestion.py` | PRs 07–10: validacao, extractors e chunking | 80% |
+| `app/document_processing.py` | PR 13: orquestracao e compensacao | 80% |
+| `app/document_upload.py` | Barreira de recebimento extraida posteriormente da borda HTTP da PR 15 | 80% |
+
+As PRs 05, 11–12 e 14–17 estenderam os modulos compartilhados ja existentes
+`database.py`, `schemas.py`, `main.py` e `rag_engine.py`, que continuam incluidos
+integralmente em `--cov=app` e no gate global. A PR 18 estendeu o script existente
+`scripts/reindex_all.py`, coberto por testes rapidos e de integracao, sem mudar
+o universo da medicao global. As PRs 19–20 usam o gate de testes/componentes do
+frontend; esta verificacao de cobertura Python nao altera o gate do frontend.
+Nao ha exclusoes novas de linhas, modulos ou testes.
+
+O gate documental reprova tambem se faltar qualquer modulo obrigatorio no XML,
+se ele nao tiver linhas medidas ou se o relatorio for invalido/ambiguo. Cobertura
+maior de outro modulo nao compensa um resultado abaixo de 80%. A CI executa os
+dois gates em `Backend / unit-api` e preserva o XML como artifact mesmo em falha.
 
 Para reproduzir o gate do backend:
 
@@ -665,7 +690,11 @@ Para reproduzir o gate do backend:
 cd echomind-backend
 python -m pip install -r requirements.txt -r requirements-dev.txt
 python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+python scripts/check_document_coverage.py coverage.xml
 ```
+
+Os dois comandos devem terminar com sucesso. Execute a verificacao imediatamente
+apos o pytest, usando o XML que ele acabou de gerar; nao reutilize relatorio antigo.
 
 Para reproduzir o gate do frontend com Node.js 20+ e Corepack:
 

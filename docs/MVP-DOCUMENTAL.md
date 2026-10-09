@@ -143,7 +143,17 @@ Backend rápido, determinístico e sem serviços externos:
 cd echomind-backend
 python -m pip install -r requirements.txt -r requirements-dev.txt
 python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+python scripts/check_document_coverage.py coverage.xml
 ```
+
+Ambos devem passar: o primeiro preserva a meta global de 72%; o segundo exige
+80% de linhas executáveis em cada módulo `app/document_ingestion.py`,
+`app/document_processing.py`, `app/document_repository.py` e
+`app/document_upload.py`. O XML é o mesmo da coleta global, recém-gerado pelo
+pytest. A decisão usa contagens exatas, sem arredondar; módulo ausente, sem
+linhas ou relatório inválido reprovam. Nenhuma linha, módulo ou teste foi
+excluído da medição. O mapeamento das PRs 05–20 para essa lista e para os módulos
+compartilhados existentes está na seção de CI rápida do `README.md`.
 
 Integração requer PostgreSQL 17 + pgvector descartável, banco local chamado
 `echomind_integration`, embedding fake e nenhuma chamada a Groq ou Supabase. O
