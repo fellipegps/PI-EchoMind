@@ -26,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const POLLING_INTERVAL_MS = 2_000;
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+const BYTES_PER_MEGABYTE = 1024 * 1024;
 const ACCEPTED_FILES = ".pdf,.txt,.docx,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const ACTIVE_STATUSES = new Set<DocumentStatus>(["pending", "processing"]);
 const METADATA_FIELDS = [
@@ -82,7 +82,11 @@ function formatDateTime(value: string) {
   }).format(date);
 }
 
-function validateFile(file: File): string | null {
+function formatUploadLimit(bytes: number) {
+  return new Intl.NumberFormat("pt-BR").format(bytes / BYTES_PER_MEGABYTE);
+}
+
+function validateFile(file: File, maxSizeBytes: number): string | null {
   const extension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
   const expectedMimeType = ALLOWED_FILE_TYPES[extension];
   const normalizedMimeType = file.type.toLowerCase();
@@ -91,8 +95,8 @@ function validateFile(file: File): string | null {
     return "Selecione um arquivo PDF, TXT ou DOCX válido.";
   }
 
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    return "O arquivo deve ter no máximo 10 MB.";
+  if (file.size > maxSizeBytes) {
+    return `O arquivo deve ter no máximo ${formatUploadLimit(maxSizeBytes)} MB.`;
   }
 
   return null;
@@ -116,6 +120,10 @@ export function DocumentTab() {
   const listControllerRef = useRef<AbortController | null>(null);
   const mutationCountRef = useRef(0);
   const feedbackVersionRef = useRef(0);
+  const limitsControllerRef = useRef<AbortController | null>(null);
+  const [maxFileSizeBytes, setMaxFileSizeBytes] = useState<number | null>(null);
+  const [limitsLoading, setLimitsLoading] = useState(true);
+  const [limitsError, setLimitsError] = useState(false);
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [listingState, setListingState] = useState({ pending: false, version: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -125,6 +133,31 @@ export function DocumentTab() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [metadata, setMetadata] = useState<DocumentUploadMetadata>(EMPTY_METADATA);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadUploadLimits = useCallback(() => {
+    limitsControllerRef.current?.abort();
+    const controller = new AbortController();
+    limitsControllerRef.current = controller;
+    const isCurrent = () => mountedRef.current
+      && limitsControllerRef.current === controller
+      && !controller.signal.aborted;
+    return documentApi.uploadLimits(controller.signal)
+      .then((limits) => {
+        if (!Number.isSafeInteger(limits.max_document_size_bytes) || limits.max_document_size_bytes <= 0) {
+          throw new Error("Limite de upload inválido.");
+        }
+        if (isCurrent()) setMaxFileSizeBytes(limits.max_document_size_bytes);
+      })
+      .catch(() => {
+        if (isCurrent()) setLimitsError(true);
+      })
+      .finally(() => {
+        if (isCurrent()) {
+          setLimitsLoading(false);
+          limitsControllerRef.current = null;
+        }
+      });
+  }, []);
 
   const invalidateListing = useCallback(() => {
     listVersionRef.current += 1;
@@ -173,12 +206,15 @@ export function DocumentTab() {
   useEffect(() => {
     mountedRef.current = true;
     void loadDocuments();
+    void loadUploadLimits();
 
     return () => {
       mountedRef.current = false;
       invalidateListing();
+      limitsControllerRef.current?.abort();
+      limitsControllerRef.current = null;
     };
-  }, [invalidateListing, loadDocuments]);
+  }, [invalidateListing, loadDocuments, loadUploadLimits]);
 
   const hasActiveDocuments = documents.some((document) =>
     ACTIVE_STATUSES.has(document.status)
@@ -207,6 +243,7 @@ export function DocumentTab() {
   };
 
   const selectFile = (files: FileList | File[]) => {
+    if (maxFileSizeBytes === null) return;
     const selectedFiles = Array.from(files);
     feedbackVersionRef.current += 1;
     setErrorMessage(null);
@@ -218,7 +255,7 @@ export function DocumentTab() {
     }
 
     const file = selectedFiles[0];
-    const validationError = validateFile(file);
+    const validationError = validateFile(file, maxFileSizeBytes);
     if (validationError) {
       setSelectedFile(null);
       setErrorMessage(validationError);
@@ -232,7 +269,7 @@ export function DocumentTab() {
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
-    if (!isUploading) selectFile(event.dataTransfer.files);
+    if (canSelectFile) selectFile(event.dataTransfer.files);
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -247,7 +284,12 @@ export function DocumentTab() {
 
   const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!selectedFile || isUploading) return;
+    if (!selectedFile || isUploading || maxFileSizeBytes === null) return;
+    const validationError = validateFile(selectedFile, maxFileSizeBytes);
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
 
     const feedbackVersion = beginMutation();
     setIsUploading(true);
@@ -298,6 +340,8 @@ export function DocumentTab() {
     setMetadata((current) => ({ ...current, [field]: value }));
   };
 
+  const canSelectFile = !isUploading && maxFileSizeBytes !== null;
+
   return (
     <div className="space-y-4">
       <Card>
@@ -306,7 +350,7 @@ export function DocumentTab() {
             data-testid="document-dropzone"
             onDragOver={(event) => {
               event.preventDefault();
-              if (!isUploading) setIsDragging(true);
+              if (canSelectFile) setIsDragging(true);
             }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -315,17 +359,17 @@ export function DocumentTab() {
               isDragging
                 ? "border-primary bg-primary/5"
                 : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
-              isUploading && "cursor-not-allowed opacity-60"
+              !canSelectFile && "cursor-not-allowed opacity-60"
             )}
             role="button"
-            tabIndex={isUploading ? -1 : 0}
-            aria-disabled={isUploading}
-            aria-busy={isUploading}
+            tabIndex={canSelectFile ? 0 : -1}
+            aria-disabled={!canSelectFile}
+            aria-busy={isUploading || limitsLoading}
             onClick={() => {
-              if (!isUploading) inputRef.current?.click();
+              if (canSelectFile) inputRef.current?.click();
             }}
             onKeyDown={(event) => {
-              if (!isUploading && (event.key === "Enter" || event.key === " ")) {
+              if (canSelectFile && (event.key === "Enter" || event.key === " ")) {
                 event.preventDefault();
                 inputRef.current?.click();
               }
@@ -337,6 +381,7 @@ export function DocumentTab() {
               accept={ACCEPTED_FILES}
               className="hidden"
               aria-label="Selecionar documento"
+              disabled={!canSelectFile}
               onChange={handleInputChange}
             />
             <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary">
@@ -344,10 +389,13 @@ export function DocumentTab() {
             </div>
             <h2 className="text-lg font-semibold">Arraste documentos para alimentar o agente</h2>
             <p className="mt-2 max-w-md text-sm text-muted-foreground">
-              Solte um arquivo PDF, TXT ou DOCX aqui ou clique para selecionar. Limite de 10 MB.
+              Solte um arquivo PDF, TXT ou DOCX aqui ou clique para selecionar.{" "}
+              {maxFileSizeBytes !== null
+                ? `Limite de ${formatUploadLimit(maxFileSizeBytes)} MB.`
+                : limitsLoading ? "Consultando limite de upload..." : "Envio indisponível até carregar o limite."}
             </p>
-            <Button type="button" className="mt-5" disabled={isUploading}>
-              {isUploading ? "Enviando..." : "Selecionar documento"}
+            <Button type="button" className="mt-5" disabled={!canSelectFile}>
+              {isUploading ? "Enviando..." : limitsLoading ? "Carregando limite..." : "Selecionar documento"}
             </Button>
           </div>
 
@@ -418,12 +466,27 @@ export function DocumentTab() {
                 <Button type="button" variant="outline" onClick={cancelSelection} disabled={isUploading}>
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={isUploading}>
+                <Button type="submit" disabled={!canSelectFile}>
                   {isUploading && <Loader2 className="animate-spin" aria-hidden="true" />}
                   {isUploading ? "Enviando..." : "Enviar documento"}
                 </Button>
               </div>
             </form>
+          )}
+
+          {limitsError && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+              <p>Não foi possível carregar o limite de upload. Recarregue o limite para habilitar o envio.</p>
+              <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => {
+                setMaxFileSizeBytes(null);
+                setLimitsLoading(true);
+                setLimitsError(false);
+                void loadUploadLimits();
+              }}>
+                <RefreshCw aria-hidden="true" />
+                Recarregar limite
+              </Button>
+            </div>
           )}
 
           {errorMessage && (

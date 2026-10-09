@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const documentApiMock = vi.hoisted(() => ({
+  uploadLimits: vi.fn(),
   list: vi.fn(),
   upload: vi.fn(),
   delete: vi.fn(),
@@ -102,6 +103,7 @@ describe("DocumentTab", () => {
   beforeEach(() => {
     vi.useRealTimers();
     documentApiMock.list.mockReset();
+    documentApiMock.uploadLimits.mockReset().mockResolvedValue({ max_document_size_bytes: 10 * 1024 * 1024 });
     documentApiMock.upload.mockReset();
     documentApiMock.delete.mockReset();
   });
@@ -597,5 +599,110 @@ describe("DocumentTab", () => {
     expect(screen.queryByText("stale.pdf")).not.toBeInTheDocument();
     expect(vi.getTimerCount()).toBe(0);
     view.unmount();
+  });
+
+  it.each([2, 20])("usa o limite de %i MB do servidor, aceita igualdade e rejeita um byte acima", async (limitMb) => {
+    documentApiMock.uploadLimits.mockResolvedValueOnce({ max_document_size_bytes: limitMb * 1024 * 1024 });
+    documentApiMock.upload.mockResolvedValueOnce(makeDocument("pending", "at-limit"));
+    await renderLoaded();
+    expect(screen.getByText(new RegExp(`Limite de ${limitMb} MB`))).toBeInTheDocument();
+    const file = new File(["texto"], "limite.txt", { type: "text/plain" });
+    Object.defineProperty(file, "size", { value: limitMb * 1024 * 1024 });
+    fireEvent.change(screen.getByLabelText("Selecionar documento"), { target: { files: [file] } });
+    fireEvent.submit(screen.getByRole("form", { name: "Metadados do documento" }));
+    await screen.findByText("at-limit.pdf");
+    expect(documentApiMock.upload).toHaveBeenCalledWith(file, {});
+
+    const oversized = new File(["texto"], "excesso.txt", { type: "text/plain" });
+    Object.defineProperty(oversized, "size", { value: limitMb * 1024 * 1024 + 1 });
+    fireEvent.drop(screen.getByTestId("document-dropzone"), { dataTransfer: { files: [oversized] } });
+    expect(screen.getByRole("alert")).toHaveTextContent(`O arquivo deve ter no máximo ${limitMb} MB.`);
+    expect(documentApiMock.upload).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+  });
+
+  it("aguarda o limite antes de habilitar envio, independentemente da listagem", async () => {
+    const limits = deferred<{ max_document_size_bytes: number }>();
+    documentApiMock.uploadLimits.mockReturnValueOnce(limits.promise);
+    await renderLoaded();
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Selecionar documento"), {
+      target: { files: [new File(["texto"], "norma.txt", { type: "text/plain" })] },
+    });
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(documentApiMock.upload).not.toHaveBeenCalled();
+    await act(async () => limits.resolve({ max_document_size_bytes: 2 * 1024 * 1024 }));
+    expect(screen.getByLabelText("Selecionar documento")).toBeEnabled();
+  });
+
+  it("falha de configuração bloqueia envio e permite recarregar sem bloquear exclusão", async () => {
+    documentApiMock.uploadLimits.mockRejectedValueOnce(new Error("detalhe privado"));
+    const ready = makeDocument("ready", "existing");
+    documentApiMock.delete.mockResolvedValueOnce(undefined);
+    await renderLoaded([ready]);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("detalhe privado");
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(screen.queryByText(/Limite de 10 MB/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Excluir ${ready.filename}` }));
+    await waitFor(() => expect(screen.queryByText(ready.filename)).not.toBeInTheDocument());
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    documentApiMock.uploadLimits.mockResolvedValueOnce({ max_document_size_bytes: 20 * 1024 * 1024 });
+    fireEvent.click(screen.getByRole("button", { name: "Recarregar limite" }));
+    await waitFor(() => expect(screen.getByLabelText("Selecionar documento")).toBeEnabled());
+    expect(screen.getByText(/Limite de 20 MB/)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(documentApiMock.list).toHaveBeenCalledOnce();
+  });
+
+  it.each([0, -1, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1, undefined])("trata limite inválido %s como falha sem fallback", async (invalidLimit) => {
+    documentApiMock.uploadLimits.mockResolvedValueOnce({ max_document_size_bytes: invalidLimit });
+    await renderLoaded();
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(documentApiMock.upload).not.toHaveBeenCalled();
+  });
+
+  it("polling não apaga falha do limite nem habilita envio por conta própria", async () => {
+    vi.useFakeTimers();
+    documentApiMock.uploadLimits.mockRejectedValueOnce(new Error("indisponível"));
+    documentApiMock.list.mockResolvedValueOnce(listing([makeDocument("processing", "active")]))
+      .mockResolvedValueOnce(listing([makeDocument("ready", "active")]));
+    render(<DocumentTab />);
+    await act(async () => Promise.resolve());
+    expect(vi.getTimerCount()).toBe(1);
+    await act(async () => vi.advanceTimersByTimeAsync(2_000));
+    expect(screen.getByText("Pronto")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("descarta limite de montagem antiga no StrictMode", async () => {
+    const oldLimits = deferred<{ max_document_size_bytes: number }>();
+    const latestLimits = deferred<{ max_document_size_bytes: number }>();
+    documentApiMock.uploadLimits.mockReturnValueOnce(oldLimits.promise).mockReturnValueOnce(latestLimits.promise);
+    documentApiMock.list.mockResolvedValue(listing([]));
+    const view = render(<StrictMode><DocumentTab /></StrictMode>);
+    const oldSignal = documentApiMock.uploadLimits.mock.calls[0][0] as AbortSignal;
+    expect(oldSignal.aborted).toBe(true);
+    await act(async () => latestLimits.resolve({ max_document_size_bytes: 2 * 1024 * 1024 }));
+    await act(async () => oldLimits.resolve({ max_document_size_bytes: 20 * 1024 * 1024 }));
+    expect(screen.getByText(/Limite de 2 MB/)).toBeInTheDocument();
+    expect(screen.queryByText(/Limite de 20 MB/)).not.toBeInTheDocument();
+    view.unmount();
+    expect(documentApiMock.uploadLimits).toHaveBeenCalledTimes(2);
+  });
+
+  it("cancela a consulta do limite ao desmontar e ignora falha tardia", async () => {
+    const limits = deferred<{ max_document_size_bytes: number }>();
+    documentApiMock.uploadLimits.mockReturnValueOnce(limits.promise);
+    documentApiMock.list.mockResolvedValueOnce(listing([]));
+    const view = render(<DocumentTab />);
+    const signal = documentApiMock.uploadLimits.mock.calls[0][0] as AbortSignal;
+    view.unmount();
+    expect(signal.aborted).toBe(true);
+    await act(async () => limits.reject(new Error("erro após unmount")));
+    expect(documentApiMock.uploadLimits).toHaveBeenCalledOnce();
   });
 });

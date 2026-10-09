@@ -35,6 +35,19 @@ campos opcionais são `document_type`, `document_number`, `department`,
 As demais operações autenticadas são `GET /documents`,
 `GET /documents/{document_id}` e `DELETE /documents/{document_id}`.
 
+A aba Documentos consulta `GET /documents/upload-limits`, autenticado e sem cache,
+que retorna somente `{"max_document_size_bytes": 10485760}` no limite padrão.
+O valor reutiliza a configuração efetiva do backend; não revela outros ajustes.
+A UI compara o tamanho original do arquivo em bytes com esse valor, aceitando
+igualdade. A unidade MB da configuração e da UI usa `1024 × 1024` bytes (MiB).
+Se a consulta falhar ou retornar um limite inválido, o envio fica desabilitado
+até uma nova consulta bem-sucedida pelo botão **Recarregar limite**; listagem,
+polling e exclusão continuam independentes. Não há fallback fixo de 10 MB.
+O servidor continua validando cada upload e retornando 413 para excesso.
+Publique o endpoint no backend antes de atualizar o frontend; um backend antigo
+sem esse contrato mantém o envio bloqueado na nova UI. Os contratos existentes
+de listagem, consulta, upload e DELETE permanecem iguais.
+
 ## Estados e comportamento
 
 | Estado | Significado | Ação esperada no painel |

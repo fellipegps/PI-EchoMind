@@ -559,3 +559,7 @@ class DocumentResponse(BaseModel):
 class DocumentListResponse(BaseModel):
     documents: list[DocumentResponse]
     total: int
+
+
+class DocumentUploadLimitsResponse(BaseModel):
+    max_document_size_bytes: int = Field(gt=0)

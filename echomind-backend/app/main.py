@@ -17,6 +17,7 @@ from fastapi import (
     HTTPException,
     Query,
     Request,
+    Response,
     UploadFile,
 )
 from fastapi.responses import StreamingResponse
@@ -41,7 +42,7 @@ from .schemas import (
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, RagMetricsResponse, FeedbackRequest, FeedbackResponse,
     CurrentUserResponse,
-    DocumentListResponse, DocumentResponse, DocumentStatus,
+    DocumentListResponse, DocumentResponse, DocumentStatus, DocumentUploadLimitsResponse,
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
@@ -900,6 +901,18 @@ def list_stored_documents(
 ):
     documents = list_documents(db, tenant_id=current_user.id)
     return DocumentListResponse(documents=documents, total=len(documents))
+
+
+@router_documents.get("/upload-limits", response_model=DocumentUploadLimitsResponse)
+def get_document_upload_limits(
+    response: Response,
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        return DocumentUploadLimitsResponse(max_document_size_bytes=get_max_document_size_bytes())
+    except InvalidDocumentConfigurationError as exc:
+        raise HTTPException(status_code=500, detail="Configuração inválida do limite de upload.") from exc
 
 
 @router_documents.get("/{document_id}", response_model=DocumentResponse)

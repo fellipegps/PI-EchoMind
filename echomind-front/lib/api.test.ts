@@ -146,6 +146,17 @@ describe("documentApi", () => {
     expect(tokenStore.get()).toBe("token-do-admin");
   });
 
+  it("consulta somente o limite documental com autenticação e sinal de cancelamento", async () => {
+    const limits = { max_document_size_bytes: 2 * 1024 * 1024 };
+    const controller = new AbortController();
+    fetchMock.mockResolvedValueOnce(jsonResponse(limits));
+    await expect(documentApi.uploadLimits(controller.signal)).resolves.toEqual(limits);
+    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/documents/upload-limits`, expect.objectContaining({
+      method: "GET", signal: controller.signal,
+    }));
+    expect(requestHeaders(fetchMock.mock.calls[0]).get("Authorization")).toBe("Bearer token-do-admin");
+  });
+
   it("envia somente o arquivo quando metadata não é informada", async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(document, 202));
     const file = new File(["texto"], "norma.txt", { type: "text/plain" });

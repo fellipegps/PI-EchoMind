@@ -220,6 +220,10 @@ export interface DocumentListResponse {
   total: number;
 }
 
+export interface DocumentUploadLimits {
+  max_document_size_bytes: number;
+}
+
 export interface DocumentUploadMetadata {
   document_type?: string;
   document_number?: string;
@@ -567,6 +571,9 @@ const DOCUMENT_METADATA_FIELDS = [
 ] as const satisfies readonly (keyof DocumentUploadMetadata)[];
 
 export const documentApi = {
+  uploadLimits: (signal?: AbortSignal) =>
+    request<DocumentUploadLimits>("/documents/upload-limits", { method: "GET", signal }),
+
   list: (signal?: AbortSignal) =>
     request<DocumentListResponse>("/documents", { method: "GET", signal }),
 
