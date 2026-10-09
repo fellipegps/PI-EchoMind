@@ -58,6 +58,7 @@ from .document_ingestion import (
     validate_document_for_tenant,
 )
 from .document_processing import process_document
+from .document_upload import DocumentUploadLimitMiddleware, DocumentUploadRoute
 from .document_repository import (
     DocumentCreateData,
     DocumentDeletionBlockedError,
@@ -147,6 +148,7 @@ configure_cors(app)
 # Middlewares próprios (ordem importa: último registrado = primeiro executado)
 app.add_middleware(TimingMiddleware)
 app.add_middleware(RequestLogMiddleware)
+app.add_middleware(DocumentUploadLimitMiddleware)
 
 router_auth = APIRouter(prefix="/auth", tags=["Autenticação"])
 router_chat = APIRouter(prefix="/chat", tags=["Chat"])
@@ -157,6 +159,9 @@ router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 router_documents = APIRouter(prefix="/documents", tags=["Documentos"])
+router_document_upload = APIRouter(
+    prefix="/documents", tags=["Documentos"], route_class=DocumentUploadRoute,
+)
 router_feedback = APIRouter(prefix="/feedback", tags=["Feedback"])
 router_public = APIRouter(prefix="/public", tags=["Portal público"])
 router_system = APIRouter(tags=["Sistema"])
@@ -766,7 +771,7 @@ def get_dashboard_rag_metrics(
 #  DOCUMENTOS  /documents
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router_documents.post(
+@router_document_upload.post(
     "/upload",
     response_model=DocumentResponse,
     status_code=202,
@@ -1026,6 +1031,7 @@ app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)
 app.include_router(router_documents)
+app.include_router(router_document_upload)
 app.include_router(router_feedback)
 app.include_router(router_public)
 app.include_router(router_campuses)
