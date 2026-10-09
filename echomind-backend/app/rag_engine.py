@@ -36,6 +36,7 @@ from langchain_groq import ChatGroq
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from .embedding_adapter import E5FastEmbedEmbeddings
 from .database import (
     DATABASE_URL,
     Config,
@@ -178,7 +179,8 @@ def _get_embeddings() -> FastEmbedEmbeddings:
     emit_event(event="rag.runtime", status="started", stage="embedding-model")
     try:
         _register_default_embedding_model()
-        return FastEmbedEmbeddings(model_name=EMBED_MODEL, cache_dir=_MODEL_CACHE)
+        adapter = E5FastEmbedEmbeddings if EMBED_MODEL == DEFAULT_EMBED_MODEL else FastEmbedEmbeddings
+        return adapter(model_name=EMBED_MODEL, cache_dir=_MODEL_CACHE)
     except Exception as exc:
         raise RuntimeError(
             "Falha ao carregar embeddings FastEmbed. Execute: pip install fastembed"

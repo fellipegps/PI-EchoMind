@@ -256,9 +256,52 @@ Use `--skip-rag` somente para diagnostico. Para a IA responder com base nos dado
 ## Reindexacao Manual Do RAG
 
 O embedding padrao e `intfloat/multilingual-e5-small`, com exatamente 384
-dimensoes. Depois de implantar essa troca, execute conscientemente uma
-reindexacao para evitar misturar vetores do modelo anterior com o novo espaco
-vetorial:
+dimensoes. O adapter aplica `query: ` nas consultas e `passage: ` nas FAQs e
+chunks **somente na entrada do encoder**; o texto persistido/apresentado, os
+metadados e os IDs permanecem originais. Os chamadores entregam texto original,
+sem acrescentar prefixos. Esse contrato segue o
+[model card do E5](https://huggingface.co/intfloat/multilingual-e5-small#faq).
+
+A inspecao do ambiente Python 3.12 (FastEmbed 0.6.1, LangChain Community 0.2.19
+e Core 0.2.43) mostrou que o modelo customizado usa `CustomTextEmbedding`,
+herdando `query_embed`/`passage_embed` sem prefixacao. O tokenizer recebia o
+texto cru. O adapter E5 agora usa `TextEmbedding.embed` diretamente com o
+prefixo correspondente, evitando combinar prefixos proprios com instrucoes
+automaticas dos metodos especializados. Testes executam esse caminho real ate
+um tokenizer/ONNX fake, sem baixar modelos. Outros modelos configurados mantem
+o adapter anterior. Reavalie esse contrato ao atualizar FastEmbed/LangChain.
+
+**Esta correcao exige reconstruir todos os vetores existentes, mesmo quando o
+nome do modelo e a dimensao continuam iguais.** Nao existe troca atomica entre
+colecoes nem uma barreira automatica por versao de embedding. Para atualizar:
+
+1. Reserve janela de manutencao e registre a versao anterior. Tenha um backup
+   consistente de fontes e vetores para eventual restauracao. Confirme o banco
+   alvo e o inventario completo dos tenants/colecoes.
+2. Bloqueie consultas ao chat/RAG e todas as escritas vetoriais (FAQs, upload,
+   ingestao, exclusao, importacao). Drene requisicoes e processamento em curso;
+   pare todas as instancias antigas antes de qualquer gravacao com o novo
+   contrato. Somente pausar uploads nao impede consultas com contratos mistos.
+3. Instale a versao corrigida em todos os executores, mantendo o atendimento
+   bloqueado. Confirme as variaveis abaixo e a disponibilidade local do modelo
+   no cache utilizado pelo operador/runtime. Nao use rollout gradual com
+   instancias antigas e novas consultando a mesma colecao.
+4. Execute a previa abaixo, revise todas as colecoes e resolva qualquer
+   identificacao ambigua usando evidencia operacional. Execute a reconstrucao
+   manual com as primitivas existentes, sem flags de Parent-Child.
+5. Exija conclusao sem falhas e sem pendencias (saida `0`), confira todos os
+   tenants, contagens de FAQs/chunks e amostras de fontes. Em caso de falha ou
+   saida `2`, mantenha o RAG bloqueado, corrija a causa e gere outra previa antes
+   de repetir. A repeticao reconstrói com os mesmos IDs, sem duplicar fontes.
+6. Reinicie todas as instancias com a versao corrigida e so entao libere as
+   consultas/escritas. Para reverter, mantenha a manutencao e restaure um backup
+   compativel ou reconstrua integralmente os vetores com o adapter da versao
+   anterior antes de reabrir o atendimento. Reverter somente o codigo misturaria
+   novamente os contratos.
+
+Os thresholds atuais permanecem inalterados; esta correcao nao os calibra. Nao
+execute essa atualizacao automaticamente em ambientes reais. Os comandos a
+seguir sao para o operador autorizado, durante a janela descrita acima:
 
 ```bash
 cd echomind-backend

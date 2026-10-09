@@ -44,16 +44,22 @@ def test_default_embedding_model_and_dimension(monkeypatch, rag_modules) -> None
     assert registered["dim"] == 384
 
 
-def test_embedding_loader_uses_multilingual_default_without_network(
+@pytest.mark.parametrize("model_name, adapter_name", [
+    ("intfloat/multilingual-e5-small", "E5FastEmbedEmbeddings"),
+    ("BAAI/bge-small-en-v1.5", "FastEmbedEmbeddings"),
+])
+def test_embedding_loader_uses_configured_model_without_network(
     monkeypatch,
     rag_modules,
+    model_name,
+    adapter_name,
 ) -> None:
     rag_engine = rag_modules.rag_engine
     registration = MagicMock()
     fake_embeddings = MagicMock(return_value="embeddings")
-    monkeypatch.setattr(rag_engine, "EMBED_MODEL", rag_engine.DEFAULT_EMBED_MODEL)
+    monkeypatch.setattr(rag_engine, "EMBED_MODEL", model_name)
     monkeypatch.setattr(rag_engine, "_register_default_embedding_model", registration)
-    monkeypatch.setattr(rag_engine, "FastEmbedEmbeddings", fake_embeddings)
+    monkeypatch.setattr(rag_engine, adapter_name, fake_embeddings)
     rag_engine._get_embeddings.cache_clear()
 
     try:
@@ -63,7 +69,7 @@ def test_embedding_loader_uses_multilingual_default_without_network(
 
     registration.assert_called_once_with()
     fake_embeddings.assert_called_once_with(
-        model_name="intfloat/multilingual-e5-small",
+        model_name=model_name,
         cache_dir=rag_engine._MODEL_CACHE,
     )
 
