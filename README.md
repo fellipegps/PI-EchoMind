@@ -265,20 +265,52 @@ cd echomind-backend
 # Confirme antes que o ambiente usa:
 # EMBED_MODEL=intfloat/multilingual-e5-small
 # EMBEDDING_DIM=384
+python scripts/reindex_all.py --dry-run
+# Revise a previa antes de autorizar as remocoes no mesmo banco:
 python scripts/reindex_all.py --confirm
 ```
 
-O script le a configuracao normal do backend, encontra tenants que possuem FAQs
-ou documentos com status `ready` e processa um por vez. Para cada tenant,
-somente a colecao `knowledge_<tenant>` correspondente e limpa e recriada; em
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs,
+documentos `ready` ou uma colecao comprovadamente gerenciada pelo EchoMind e
+processa um por vez. Isso inclui tenants sem fontes, que possuem apenas vetores
+orfaos. A previa mostra tenant original, nome, UUID da colecao e quantidade de
+vetores que sera removida, sem carregar o modelo ou escrever no banco. Para cada
+tenant autorizado, somente a colecao correspondente e limpa e recriada; em
 seguida, as FAQs e os `document_chunks` ja persistidos dos documentos
 `ready` desse tenant sao indexados novamente com os IDs deterministicos atuais.
 Documentos `pending`, `processing` e `error` sao ignorados. O arquivo original
 nao e reprocessado e os chunks nao sao recriados.
 
+Novas colecoes registram `managed_by=echomind`, `schema_version=1` e o
+`tenant_id` original em seus metadados. Colecoes legadas sem esse marcador so
+sao reconhecidas quando **todos** os vetores concordam sobre o tenant original,
+o nome corresponde a sua sanitizacao e os tipos/IDs obedecem ao contrato
+deterministico do EchoMind. Vetores legados de evento podem comprovar propriedade,
+mas eventos nao sao reconstruidos. O nome sanitizado nunca e invertido para
+adivinhar um tenant. Nomes duplicados, tenants que colidem na sanitizacao,
+marcadores conflitantes e colecoes vazias sem identidade comprovada exigem
+revisao operacional. Colecoes alheias, mesmo com prefixo `knowledge_`, permanecem
+intactas. A identidade e revalidada antes de cada limpeza; uma troca do UUID
+desde a previa interrompe a operacao.
+
+Codigos de saida: `0` indica conclusao sem pendencias, `1` indica falha de
+execucao e `2` indica casos preservados para revisao operacional. Na execucao
+com `--confirm`, as acoes comprovadas podem concluir mesmo quando ha casos de
+revisao; nenhuma colecao pendente e apagada. O relatorio mostra nome, UUID e
+motivo. O operador deve consultar inventario/auditoria confiavel para comprovar
+propriedade e tenant original antes de corrigir a identificacao. Nao associe
+uma colecao a um tenant por semelhanca de nomes e nao a apague para contornar
+o bloqueio.
+
 A operacao para no primeiro tenant que falhar e informa os tenants ja concluidos.
-Como cada colecao e reconstruida de forma deterministica, corrija a causa e rode
-o mesmo comando manual novamente. Nao execute duas reindexacoes em paralelo.
+A colecao que falhou pode estar vazia ou parcialmente reconstruida: nao ha
+rollback vetorial distribuido. As fontes relacionais permanecem preservadas.
+Corrija a causa, gere nova previa e repita o comando; os IDs deterministicos
+permitem retomar sem duplicar vetores. Execute em janela de manutencao, com
+upload, ingestao, exclusao e outras escritas vetoriais pausados. Nao execute duas
+reindexacoes em paralelo. Confira o banco/ambiente alvo antes de cada comando;
+testes e validacao usam somente PostgreSQL/pgvector local descartavel, nunca
+staging ou producao.
 Nenhuma reindexacao e iniciada automaticamente em startup, deploy, endpoint,
 scheduler ou importacao.
 

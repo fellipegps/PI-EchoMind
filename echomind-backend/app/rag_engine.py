@@ -220,6 +220,11 @@ def _tenant_collection_name(tenant_id: str) -> str:
     return f"knowledge_{safe}"
 
 
+def _tenant_collection_metadata(tenant_id: str) -> dict[str, Any]:
+    """Identidade original e propriedade explicita, sem inverter sanitizacao."""
+    return {"managed_by": "echomind", "schema_version": 1, "tenant_id": tenant_id}
+
+
 def _vector_store_engine_args() -> dict[str, Any]:
     """Preserva SSL por padrao e respeita sslmode explicito da conexao."""
     engine_args: dict[str, Any] = {"pool_pre_ping": True}
@@ -251,6 +256,7 @@ def _get_vector_store(tenant_id: str) -> PGVector:
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
         collection_name=_tenant_collection_name(tenant_id),
+        collection_metadata=_tenant_collection_metadata(tenant_id),
         use_jsonb=True,
         engine_args=_vector_store_engine_args(),
     )

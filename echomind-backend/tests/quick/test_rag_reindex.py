@@ -373,7 +373,7 @@ def test_reindex_all_processes_each_tenant_in_order(monkeypatch, rag_modules) ->
     monkeypatch.setattr(
         reindex_all,
         "list_tenant_ids",
-        lambda db: ["tenant-a", "tenant-b"],
+        lambda db, **kwargs: ["tenant-a", "tenant-b"],
     )
 
     def fake_reindex_tenant(db, tenant_id: str) -> reindex_all.ReindexResult:
@@ -397,7 +397,7 @@ def test_reindex_all_stops_before_touching_tenants_after_failure(
     monkeypatch.setattr(
         reindex_all,
         "list_tenant_ids",
-        lambda db: ["tenant-a", "tenant-b", "tenant-c"],
+        lambda db, **kwargs: ["tenant-a", "tenant-b", "tenant-c"],
     )
 
     def failing_reindex(db, tenant_id: str) -> reindex_all.ReindexResult:
@@ -453,6 +453,137 @@ def test_script_rejects_old_embedding_before_opening_session(
         reindex_all.main()
 
     session_factory.assert_not_called()
+
+
+def test_new_collection_records_original_tenant_and_owner(monkeypatch, rag_modules):
+    rag = rag_modules.rag_engine
+    constructor = MagicMock()
+    monkeypatch.setattr(rag, "PGVector", constructor)
+    monkeypatch.setattr(rag, "_get_embeddings", lambda: "local-embeddings")
+    monkeypatch.setattr(rag, "_enable_langchain_rls_if_possible", lambda: None)
+    rag._get_vector_store.cache_clear()
+    try:
+        rag._get_vector_store("tenant-with/hyphens")
+    finally:
+        rag._get_vector_store.cache_clear()
+    assert constructor.call_args.kwargs["collection_name"] == "knowledge_tenant_with_hyphens"
+    assert constructor.call_args.kwargs["collection_metadata"] == {
+        "managed_by": "echomind", "schema_version": 1, "tenant_id": "tenant-with/hyphens",
+    }
+
+
+@pytest.mark.parametrize(
+    ("case", "expected_status"),
+    [
+        ("marked", "managed"), ("legacy", "managed"), ("legacy-event", "managed"),
+        ("empty-unmarked", "review"), ("mixed-tenants", "review"),
+        ("invalid-id", "review"), ("unknown-source", "review"),
+        ("conflicting-marker", "review"), ("invalid-marker", "review"),
+        ("foreign-owner", "foreign"), ("foreign-name", "foreign"),
+    ],
+)
+def test_collection_identity_requires_proof_without_inverting_name(rag_modules, case, expected_status):
+    rag, script = rag_modules.rag_engine, rag_modules.reindex_all
+    tenant = "original-tenant"
+    source = "event" if case == "legacy-event" else "faq"
+    item = {"tenant_id": tenant, "source_type": source, "source_id": "source-a"}
+    vector_id = rag._make_vector_id("source-a", source, tenant)
+    vectors = [(vector_id, item)]
+    metadata = rag._tenant_collection_metadata(tenant) if case in {
+        "marked", "conflicting-marker", "invalid-marker",
+    } else None
+    name = rag._tenant_collection_name(tenant)
+    if case == "marked":
+        vectors = []
+    elif case == "empty-unmarked":
+        vectors = []
+    elif case == "mixed-tenants":
+        other = "original_tenant"
+        vectors.append((rag._make_vector_id("source-b", "faq", other), {
+            "tenant_id": other, "source_type": "faq", "source_id": "source-b",
+        }))
+    elif case == "invalid-id":
+        vectors[0] = ("random-id", item)
+    elif case == "unknown-source":
+        vectors[0] = (rag._make_vector_id("source-a", "foreign", tenant), {**item, "source_type": "foreign"})
+    elif case == "conflicting-marker":
+        metadata["tenant_id"] = "original_tenant"
+    elif case == "invalid-marker":
+        metadata["schema_version"] = True
+    elif case == "foreign-owner":
+        metadata = {"managed_by": "another-application"}
+    elif case == "foreign-name":
+        name = "another-application"
+    info = script.identify_collection("collection-uuid", name, metadata, vectors)
+    assert info.status == expected_status
+    assert info.tenant_id == (tenant if expected_status == "managed" else None)
+
+
+def test_plan_blocks_colliding_source_tenants_without_creating_collections(db, rag_modules):
+    script, Faq = rag_modules.reindex_all, rag_modules.Faq
+    db.add_all([
+        Faq(tenant_id="original-tenant", question="A?", answer="A."),
+        Faq(tenant_id="original_tenant", question="B?", answer="B."),
+    ])
+    db.flush()
+    plan = script.build_reindex_plan(db)
+    assert plan.actions == ()
+    assert plan.blocked_tenants == ("original-tenant", "original_tenant")
+    assert plan.requires_review
+
+
+def test_dry_run_never_clears_indexes_or_rewrites(monkeypatch, rag_modules, caplog):
+    script = rag_modules.reindex_all
+    database = MagicMock()
+    plan = script.ReindexPlan((script.ReindexAction("original-tenant", "knowledge_original_tenant", "uuid", 7),), (), ())
+    monkeypatch.setattr(script, "parse_args", lambda: SimpleNamespace(confirm=False, dry_run=True))
+    monkeypatch.setattr(script, "validate_configuration", lambda: None)
+    monkeypatch.setattr(script, "SessionLocal", lambda: database)
+    monkeypatch.setattr(script, "build_reindex_plan", lambda _: plan)
+    clear, reindex, rewrite = MagicMock(), MagicMock(), MagicMock()
+    monkeypatch.setattr(script, "clear_tenant_collection", clear)
+    monkeypatch.setattr(script, "reindex_tenant", reindex)
+    monkeypatch.setattr(script, "rewrite_parent_child_and_reindex", rewrite)
+    with caplog.at_level("INFO"):
+        script.main()
+    assert "remover 7 vetor(es)" in caplog.text
+    assert "original-tenant" in caplog.text
+    clear.assert_not_called()
+    reindex.assert_not_called()
+    rewrite.assert_not_called()
+    database.commit.assert_not_called()
+    database.close.assert_called_once()
+
+
+def test_review_is_reported_with_nonzero_exit_and_no_cleanup(monkeypatch, rag_modules, caplog):
+    script = rag_modules.reindex_all
+    info = script.CollectionInfo("uuid-review", "knowledge_ambiguous", None, 3, "review", "Tenant nao comprovado.")
+    plan = script.ReindexPlan((), (info,), ())
+    database, clear = MagicMock(), MagicMock()
+    monkeypatch.setattr(script, "parse_args", lambda: SimpleNamespace(confirm=False, dry_run=True))
+    monkeypatch.setattr(script, "validate_configuration", lambda: None)
+    monkeypatch.setattr(script, "SessionLocal", lambda: database)
+    monkeypatch.setattr(script, "build_reindex_plan", lambda _: plan)
+    monkeypatch.setattr(script, "clear_tenant_collection", clear)
+    with pytest.raises(SystemExit) as caught:
+        script.main()
+    assert caught.value.code == 2
+    assert "REVISAO OPERACIONAL" in caplog.text
+    assert "uuid-review" in caplog.text
+    clear.assert_not_called()
+
+
+def test_apply_revalidates_collection_uuid_before_destruction(monkeypatch, rag_modules):
+    script = rag_modules.reindex_all
+    info = script.CollectionInfo("replacement-uuid", "knowledge_tenant", "tenant", 1, "managed", "marker")
+    monkeypatch.setattr(script, "read_collection_inventory", lambda *args, **kwargs: [info])
+    plan = script.ReindexPlan((script.ReindexAction("tenant", "knowledge_tenant", "approved-uuid", 1),), (), ())
+    reindex = MagicMock()
+    monkeypatch.setattr(script, "reindex_tenant", reindex)
+    with pytest.raises(script.TenantReindexError) as caught:
+        script.reindex_all(MagicMock(), plan=plan)
+    assert "mudou desde a previa" in str(caught.value.__cause__)
+    reindex.assert_not_called()
 
 
 def test_faq_reindex_keeps_deterministic_vector_id(

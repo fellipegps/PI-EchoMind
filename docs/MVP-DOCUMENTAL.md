@@ -98,11 +98,20 @@ cd echomind-backend
 python scripts/reindex_all.py --confirm
 ```
 
-O comando reindexa, tenant por tenant, FAQs, eventos e chunks já persistidos de
-documentos `ready`. Ele ignora `pending`, `processing` e `error`, não lê novamente
+Use primeiro `python scripts/reindex_all.py --dry-run` e revise as remoções
+previstas antes de executar com `--confirm`. O comando reindexa, tenant por
+tenant, FAQs e chunks já persistidos de documentos `ready`, incluindo coleções
+comprovadamente gerenciadas que só possuem vetores órfãos. Ele ignora documentos
+`pending`, `processing` e `error`, não lê novamente
 o arquivo original, não recria chunks e nunca roda em startup ou deploy. A
 operação para no primeiro tenant com falha; corrija a causa e repita o comando.
-Não execute duas reindexações em paralelo.
+Coleções ambíguas ou alheias são preservadas. A identidade vem de metadados
+explícitos ou do contrato legado completo, nunca da inversão do nome sanitizado.
+Saída `2` indica revisão operacional pendente; saída `1` indica falha de execução,
+que pode deixar a coleção do tenant vazia ou parcial. Pause as escritas vetoriais,
+corrija a causa e gere nova prévia antes de retomar. Não execute duas reindexações
+em paralelo. Os critérios de identidade, limites e roteiro operacional estão na
+seção de reindexação manual do `README.md`.
 
 ## Gates reproduzíveis
 
