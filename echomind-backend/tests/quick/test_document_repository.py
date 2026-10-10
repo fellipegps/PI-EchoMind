@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 from sqlalchemy.exc import IntegrityError
@@ -111,6 +113,46 @@ def test_same_hash_is_allowed_in_different_tenants(db, repository) -> None:
     tenant_b_document = create_document(db, repository, "tenant-b", sha256)
 
     assert tenant_a_document.id != tenant_b_document.id
+
+
+@pytest.mark.parametrize(
+    ("sqlstate", "constraint", "is_duplicate"),
+    [
+        ("23505", "uq_documents_active_tenant_sha256", True),
+        ("23505", "documents_pkey", False),
+        ("23514", "ck_documents_size_bytes_positive", False),
+        ("23514", "uq_documents_active_tenant_sha256", False),
+        ("23505", None, False),
+    ],
+)
+def test_only_active_hash_unique_violation_is_a_domain_duplicate(
+    repository, monkeypatch, sqlstate, constraint, is_duplicate,
+) -> None:
+    monkeypatch.setattr(repository, "find_active_duplicate_document", lambda *args, **kwargs: None)
+    original_error = IntegrityError("INSERT", {}, SimpleNamespace(
+        pgcode=sqlstate, diag=SimpleNamespace(constraint_name=constraint),
+    ))
+    session = MagicMock()
+    session.flush.side_effect = original_error
+    expected_error = repository.DuplicateDocumentError if is_duplicate else IntegrityError
+
+    with pytest.raises(expected_error) as caught:
+        create_document(session, repository, "tenant-a", "a" * 64)
+    if is_duplicate:
+        assert caught.value.__cause__ is original_error
+    else:
+        assert caught.value is original_error
+    session.rollback.assert_not_called()
+
+
+def test_database_index_protects_insert_when_precheck_is_stale(db, repository, monkeypatch):
+    create_document(db, repository, "tenant-a", "a" * 64)
+    monkeypatch.setattr(repository, "find_active_duplicate_document", lambda *args, **kwargs: None)
+    # SQLite verifica o indice nos testes rapidos; a traducao PostgreSQL e a
+    # corrida entre conexoes reais sao cobertas na suite integration.
+    with pytest.raises(IntegrityError):
+        create_document(db, repository, "tenant-a", "a" * 64)
+    db.rollback()
 
 
 def test_valid_transition_to_ready_sets_completion_fields(db, repository) -> None:

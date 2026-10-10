@@ -248,26 +248,162 @@ def test_delete_pending_or_processing_returns_conflict(
 
 
 def test_vector_failure_preserves_relational_state(
-    client: TestClient,
-    db,
+    durable_delete_api,
     fake_rag_engine,
 ) -> None:
+    from sqlalchemy.orm import Session
     from app.document_repository import get_document, list_document_chunks
 
-    document = _create_document(db, chunk_contents=("Chunk preservado.",))
+    client, engine = durable_delete_api
+    with Session(engine) as session:
+        document = _create_document(session, chunk_contents=("Chunk preservado.",))
+        identifier = document.id
     fake_rag_engine.document_chunk_delete_error = True
 
-    response = client.delete(f"/documents/{document.id}")
+    response = client.delete(f"/documents/{identifier}")
 
     assert response.status_code == 503
     assert response.json() == {
         "detail": "Não foi possível excluir os vetores do documento."
     }
-    assert get_document(db, tenant_id="test-admin", document_id=document.id) is not None
-    assert len(
-        list_document_chunks(
-            db,
-            tenant_id="test-admin",
-            document_id=document.id,
+    with Session(engine) as session:
+        restored = get_document(session, tenant_id="test-admin", document_id=identifier)
+        assert restored.status == "ready"
+        assert restored.error_message is None
+        assert len(list_document_chunks(
+            session, tenant_id="test-admin", document_id=identifier,
+        )) == 1
+
+
+@pytest.fixture()
+def durable_delete_api(quick_test_context, fake_rag_engine):
+    """SQLite independente: commits/rollbacks reais, sem transacao externa."""
+    from sqlalchemy import create_engine, event
+    from sqlalchemy.orm import Session
+    from sqlalchemy.pool import StaticPool
+    from app.database import Base
+    from app import main
+
+    engine = create_engine(
+        "sqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False},
+    )
+
+    @event.listens_for(engine, "connect")
+    def enable_foreign_keys(connection, _):
+        connection.execute("PRAGMA foreign_keys = ON")
+
+    Base.metadata.create_all(engine)
+
+    def request_db():
+        with Session(engine) as session:
+            yield session
+
+    app = quick_test_context.app
+    overrides = dict(app.dependency_overrides)
+    app.dependency_overrides[quick_test_context.get_db] = request_db
+    app.dependency_overrides[quick_test_context.get_current_user] = lambda: quick_test_context.current_user_type(
+        id="test-admin", email="delete@example.test", is_active=True,
+        created_at=datetime.now(timezone.utc),
+    )
+    app.dependency_overrides[main.get_document_rag] = lambda: fake_rag_engine
+    try:
+        with TestClient(app) as client:
+            yield client, engine
+    finally:
+        app.dependency_overrides.clear()
+        app.dependency_overrides.update(overrides)
+        engine.dispose()
+
+
+@pytest.mark.parametrize(
+    ("failure", "expected_http", "expected_status"),
+    [
+        ("relational", 500, "ready"),
+        ("commit", 500, "ready"),
+        ("compensation", 503, "error"),
+        ("recovery-commit", 503, "error"),
+        ("prepare", 500, "ready"),
+        ("already-error", 500, "error"),
+    ],
+)
+def test_delete_compensation_and_retry(
+    durable_delete_api, fake_rag_engine, monkeypatch,
+    failure, expected_http, expected_status,
+):
+    from sqlalchemy.orm import Session
+    from app import main
+    from app.document_repository import get_document, list_document_chunks
+
+    client, engine = durable_delete_api
+    with Session(engine) as session:
+        document = _create_document(
+            session, status="error" if failure == "already-error" else "ready",
+            chunk_contents=("Primeiro trecho.", "Segundo trecho."),
         )
-    ) == 1
+        identifier = document.id
+        chunk_ids = [chunk.id for chunk in list_document_chunks(
+            session, tenant_id="test-admin", document_id=identifier,
+        )]
+    original_delete = main.delete_document_record
+    original_commit = Session.commit
+    failed = False
+    original_reindex = fake_rag_engine.reindex_document_chunks
+
+    def fail_relational(*args, **kwargs):
+        if failure in {"relational", "compensation", "already-error"}:
+            raise RuntimeError("Falha relacional sintetica.")
+        return original_delete(*args, **kwargs)
+
+    def fail_commit(session):
+        nonlocal failed
+        vectors_removed = bool(fake_rag_engine.deleted_document_chunks)
+        if failure == "prepare" or (
+            failure in {"commit", "recovery-commit"} and vectors_removed
+            and (not failed or failure == "recovery-commit")
+        ):
+            failed = True
+            raise RuntimeError("Falha sintetica de commit.")
+        return original_commit(session)
+
+    monkeypatch.setattr(main, "delete_document_record", fail_relational)
+    monkeypatch.setattr(Session, "commit", fail_commit)
+    fake_rag_engine.document_chunk_reindex_error = failure == "compensation"
+    response = client.delete(f"/documents/{identifier}")
+    assert response.status_code == expected_http
+    with Session(engine) as session:
+        stored = get_document(session, tenant_id="test-admin", document_id=identifier)
+        assert stored.status == expected_status
+        assert [chunk.id for chunk in list_document_chunks(
+            session, tenant_id="test-admin", document_id=identifier,
+        )] == chunk_ids
+        if expected_status == "error":
+            assert "Exclusão não concluída" in stored.error_message
+        else:
+            assert stored.error_message is None
+    if failure == "prepare":
+        assert fake_rag_engine.deleted_document_chunks == []
+    elif failure != "already-error":
+        assert fake_rag_engine.deleted_document_chunks == [(identifier, tuple(chunk_ids))]
+    if failure in {"relational", "commit", "recovery-commit"}:
+        assert fake_rag_engine.reindexed_document_chunks == [(identifier, tuple(chunk_ids))]
+    if failure == "already-error":
+        assert fake_rag_engine.reindexed_document_chunks == []
+        with Session(engine) as session:
+            recovery_message = get_document(
+                session, tenant_id="test-admin", document_id=identifier,
+            ).error_message
+        assert client.delete(f"/documents/{identifier}").status_code == 500
+        with Session(engine) as session:
+            assert get_document(
+                session, tenant_id="test-admin", document_id=identifier,
+            ).error_message == recovery_message
+
+    monkeypatch.setattr(Session, "commit", original_commit)
+    monkeypatch.setattr(main, "delete_document_record", original_delete)
+    monkeypatch.setattr(fake_rag_engine, "reindex_document_chunks", original_reindex)
+    fake_rag_engine.document_chunk_reindex_error = False
+    assert client.delete(f"/documents/{identifier}").status_code == 204
+    assert client.delete(f"/documents/{identifier}").status_code == 404
+    with Session(engine) as session:
+        assert get_document(session, tenant_id="test-admin", document_id=identifier) is None
+        assert list_document_chunks(session, tenant_id="test-admin", document_id=identifier) == []

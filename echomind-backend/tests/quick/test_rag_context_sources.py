@@ -140,7 +140,7 @@ async def test_faq_remains_respondable_in_chat_context(
         ),
     ]
 
-    async def retrieve_docs(_question: str, _tenant_id: str):
+    async def retrieve_docs(_question: str, _tenant_id: str, *, today):
         return retrieved, 0.1
 
     fake_llm = _CapturingFakeLLM("A matrícula é feita na secretaria.")
@@ -195,7 +195,7 @@ async def test_mocked_response_uses_available_document_source(
         },
     )
 
-    async def retrieve_docs(question: str, tenant_id: str):
+    async def retrieve_docs(question: str, tenant_id: str, *, today):
         assert (question, tenant_id) == ("Qual é o prazo para recurso?", "tenant-a")
         return [retrieved], 0.1
 
@@ -236,7 +236,7 @@ async def test_document_prompt_injection_remains_data_below_system_rules(
         },
     )
 
-    async def retrieve_docs(_question: str, _tenant_id: str):
+    async def retrieve_docs(_question: str, _tenant_id: str, *, today):
         return [retrieved], 0.1
 
     fake_llm = _CapturingFakeLLM("Não tenho essa informação. Consulte a instituição.")

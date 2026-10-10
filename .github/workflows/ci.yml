@@ -46,7 +46,11 @@ jobs:
           --cov-report=xml:coverage.xml
           --cov-fail-under=72
 
+      - name: Enforce documentary module coverage
+        run: python scripts/check_document_coverage.py coverage.xml
+
       - name: Upload backend coverage
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: backend-coverage

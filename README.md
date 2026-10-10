@@ -352,29 +352,104 @@ Use `--skip-rag` somente para diagnostico. Para a IA responder com base nos dado
 ## Reindexacao Manual Do RAG
 
 O embedding padrao e `intfloat/multilingual-e5-small`, com exatamente 384
-dimensoes. Depois de implantar essa troca, execute conscientemente uma
-reindexacao para evitar misturar vetores do modelo anterior com o novo espaco
-vetorial:
+dimensoes. O adapter aplica `query: ` nas consultas e `passage: ` nas FAQs e
+chunks **somente na entrada do encoder**; o texto persistido/apresentado, os
+metadados e os IDs permanecem originais. Os chamadores entregam texto original,
+sem acrescentar prefixos. Esse contrato segue o
+[model card do E5](https://huggingface.co/intfloat/multilingual-e5-small#faq).
+
+A inspecao do ambiente Python 3.12 (FastEmbed 0.6.1, LangChain Community 0.2.19
+e Core 0.2.43) mostrou que o modelo customizado usa `CustomTextEmbedding`,
+herdando `query_embed`/`passage_embed` sem prefixacao. O tokenizer recebia o
+texto cru. O adapter E5 agora usa `TextEmbedding.embed` diretamente com o
+prefixo correspondente, evitando combinar prefixos proprios com instrucoes
+automaticas dos metodos especializados. Testes executam esse caminho real ate
+um tokenizer/ONNX fake, sem baixar modelos. Outros modelos configurados mantem
+o adapter anterior. Reavalie esse contrato ao atualizar FastEmbed/LangChain.
+
+**Esta correcao exige reconstruir todos os vetores existentes, mesmo quando o
+nome do modelo e a dimensao continuam iguais.** Nao existe troca atomica entre
+colecoes nem uma barreira automatica por versao de embedding. Para atualizar:
+
+1. Reserve janela de manutencao e registre a versao anterior. Tenha um backup
+   consistente de fontes e vetores para eventual restauracao. Confirme o banco
+   alvo e o inventario completo dos tenants/colecoes.
+2. Bloqueie consultas ao chat/RAG e todas as escritas vetoriais (FAQs, upload,
+   ingestao, exclusao, importacao). Drene requisicoes e processamento em curso;
+   pare todas as instancias antigas antes de qualquer gravacao com o novo
+   contrato. Somente pausar uploads nao impede consultas com contratos mistos.
+3. Instale a versao corrigida em todos os executores, mantendo o atendimento
+   bloqueado. Confirme as variaveis abaixo e a disponibilidade local do modelo
+   no cache utilizado pelo operador/runtime. Nao use rollout gradual com
+   instancias antigas e novas consultando a mesma colecao.
+4. Execute a previa abaixo, revise todas as colecoes e resolva qualquer
+   identificacao ambigua usando evidencia operacional. Execute a reconstrucao
+   manual com as primitivas existentes, sem flags de Parent-Child.
+5. Exija conclusao sem falhas e sem pendencias (saida `0`), confira todos os
+   tenants, contagens de FAQs/chunks e amostras de fontes. Em caso de falha ou
+   saida `2`, mantenha o RAG bloqueado, corrija a causa e gere outra previa antes
+   de repetir. A repeticao reconstrói com os mesmos IDs, sem duplicar fontes.
+6. Reinicie todas as instancias com a versao corrigida e so entao libere as
+   consultas/escritas. Para reverter, mantenha a manutencao e restaure um backup
+   compativel ou reconstrua integralmente os vetores com o adapter da versao
+   anterior antes de reabrir o atendimento. Reverter somente o codigo misturaria
+   novamente os contratos.
+
+Os thresholds atuais permanecem inalterados; esta correcao nao os calibra. Nao
+execute essa atualizacao automaticamente em ambientes reais. Os comandos a
+seguir sao para o operador autorizado, durante a janela descrita acima:
 
 ```bash
 cd echomind-backend
 # Confirme antes que o ambiente usa:
 # EMBED_MODEL=intfloat/multilingual-e5-small
 # EMBEDDING_DIM=384
+python scripts/reindex_all.py --dry-run
+# Revise a previa antes de autorizar as remocoes no mesmo banco:
 python scripts/reindex_all.py --confirm
 ```
 
-O script le a configuracao normal do backend, encontra tenants que possuem FAQs
-ou documentos com status `ready` e processa um por vez. Para cada tenant,
-somente a colecao `knowledge_<tenant>` correspondente e limpa e recriada; em
+O script le a configuracao normal do backend, encontra tenants que possuem FAQs,
+documentos `ready` ou uma colecao comprovadamente gerenciada pelo EchoMind e
+processa um por vez. Isso inclui tenants sem fontes, que possuem apenas vetores
+orfaos. A previa mostra tenant original, nome, UUID da colecao e quantidade de
+vetores que sera removida, sem carregar o modelo ou escrever no banco. Para cada
+tenant autorizado, somente a colecao correspondente e limpa e recriada; em
 seguida, as FAQs e os `document_chunks` ja persistidos dos documentos
 `ready` desse tenant sao indexados novamente com os IDs deterministicos atuais.
 Documentos `pending`, `processing` e `error` sao ignorados. O arquivo original
 nao e reprocessado e os chunks nao sao recriados.
 
+Novas colecoes registram `managed_by=echomind`, `schema_version=1` e o
+`tenant_id` original em seus metadados. Colecoes legadas sem esse marcador so
+sao reconhecidas quando **todos** os vetores concordam sobre o tenant original,
+o nome corresponde a sua sanitizacao e os tipos/IDs obedecem ao contrato
+deterministico do EchoMind. Vetores legados de evento podem comprovar propriedade,
+mas eventos nao sao reconstruidos. O nome sanitizado nunca e invertido para
+adivinhar um tenant. Nomes duplicados, tenants que colidem na sanitizacao,
+marcadores conflitantes e colecoes vazias sem identidade comprovada exigem
+revisao operacional. Colecoes alheias, mesmo com prefixo `knowledge_`, permanecem
+intactas. A identidade e revalidada antes de cada limpeza; uma troca do UUID
+desde a previa interrompe a operacao.
+
+Codigos de saida: `0` indica conclusao sem pendencias, `1` indica falha de
+execucao e `2` indica casos preservados para revisao operacional. Na execucao
+com `--confirm`, as acoes comprovadas podem concluir mesmo quando ha casos de
+revisao; nenhuma colecao pendente e apagada. O relatorio mostra nome, UUID e
+motivo. O operador deve consultar inventario/auditoria confiavel para comprovar
+propriedade e tenant original antes de corrigir a identificacao. Nao associe
+uma colecao a um tenant por semelhanca de nomes e nao a apague para contornar
+o bloqueio.
+
 A operacao para no primeiro tenant que falhar e informa os tenants ja concluidos.
-Como cada colecao e reconstruida de forma deterministica, corrija a causa e rode
-o mesmo comando manual novamente. Nao execute duas reindexacoes em paralelo.
+A colecao que falhou pode estar vazia ou parcialmente reconstruida: nao ha
+rollback vetorial distribuido. As fontes relacionais permanecem preservadas.
+Corrija a causa, gere nova previa e repita o comando; os IDs deterministicos
+permitem retomar sem duplicar vetores. Execute em janela de manutencao, com
+upload, ingestao, exclusao e outras escritas vetoriais pausados. Nao execute duas
+reindexacoes em paralelo. Confira o banco/ambiente alvo antes de cada comando;
+testes e validacao usam somente PostgreSQL/pgvector local descartavel, nunca
+staging ou producao.
 Nenhuma reindexacao e iniciada automaticamente em startup, deploy, endpoint,
 scheduler ou importacao.
 
@@ -677,8 +752,33 @@ anteriores da mesma branch ou PR sao canceladas quando uma nova comeca.
 
 No aceite do MVP, a suite rapida permanece baseada em SQLite e mocks, sem Groq,
 Supabase ou banco externo. O gate global continua em 72%, sem elevar ou manipular
-a baseline historica. Os modulos documentais novos devem permanecer com pelo
-menos 80% de cobertura; o relatorio `term-missing` e a fonte dos percentuais.
+a baseline historica. Um segundo gate exige pelo menos 80% **por modulo
+documental novo do backend**, usando o mesmo `coverage.xml` dessa execucao.
+A medida e cobertura de linhas executaveis (statements), como no
+`term-missing`, sem adicionar cobertura de branches. A decisao usa as contagens
+inteiras de linhas cobertas/medidas, sem arredondar o percentual para aprovar.
+
+A lista obrigatoria e fixa em `scripts/check_document_coverage.py`:
+
+| Modulo | Origem no MVP | Cobertura minima |
+|---|---|---:|
+| `app/document_repository.py` | PR 06: repositorio, estados e isolamento por tenant | 80% |
+| `app/document_ingestion.py` | PRs 07–10: validacao, extractors e chunking | 80% |
+| `app/document_processing.py` | PR 13: orquestracao e compensacao | 80% |
+| `app/document_upload.py` | Barreira de recebimento extraida posteriormente da borda HTTP da PR 15 | 80% |
+
+As PRs 05, 11–12 e 14–17 estenderam os modulos compartilhados ja existentes
+`database.py`, `schemas.py`, `main.py` e `rag_engine.py`, que continuam incluidos
+integralmente em `--cov=app` e no gate global. A PR 18 estendeu o script existente
+`scripts/reindex_all.py`, coberto por testes rapidos e de integracao, sem mudar
+o universo da medicao global. As PRs 19–20 usam o gate de testes/componentes do
+frontend; esta verificacao de cobertura Python nao altera o gate do frontend.
+Nao ha exclusoes novas de linhas, modulos ou testes.
+
+O gate documental reprova tambem se faltar qualquer modulo obrigatorio no XML,
+se ele nao tiver linhas medidas ou se o relatorio for invalido/ambiguo. Cobertura
+maior de outro modulo nao compensa um resultado abaixo de 80%. A CI executa os
+dois gates em `Backend / unit-api` e preserva o XML como artifact mesmo em falha.
 
 Para reproduzir o gate do backend:
 
@@ -686,7 +786,11 @@ Para reproduzir o gate do backend:
 cd echomind-backend
 python -m pip install -r requirements.txt -r requirements-dev.txt
 python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+python scripts/check_document_coverage.py coverage.xml
 ```
+
+Os dois comandos devem terminar com sucesso. Execute a verificacao imediatamente
+apos o pytest, usando o XML que ele acabou de gerar; nao reutilize relatorio antigo.
 
 Para reproduzir o gate do frontend com Node.js 20+ e Corepack:
 

@@ -221,11 +221,13 @@ async def test_timeout_keeps_capacity_bounded_until_abandoned_inference_finishes
 async def test_retrieval_reranks_only_the_fused_candidate_pool(
     quick_test_context,
     monkeypatch,
+    persist_retrieval_sources,
 ) -> None:
     from app import rag_engine
 
     vector_documents = [(_document(f"vector-{index}"), 0.01 * index) for index in range(1, 8)]
     lexical_documents = [_document(f"lexical-{index}") for index in range(1, 8)]
+    persist_retrieval_sources([doc for doc, _distance in vector_documents] + lexical_documents)
 
     class VectorStore:
         def similarity_search_with_score(self, question: str, *, k: int):
@@ -272,6 +274,7 @@ async def test_retrieval_reranks_only_the_fused_candidate_pool(
 async def test_retrieval_falls_back_to_pr24_on_error_or_timeout(
     quick_test_context,
     monkeypatch,
+    persist_retrieval_sources,
     fake,
     timeout_seconds: float,
 ) -> None:
@@ -286,6 +289,7 @@ async def test_retrieval_falls_back_to_pr24_on_error_or_timeout(
         _document("shared"),
         _document("lexical-only"),
     ]
+    persist_retrieval_sources([doc for doc, _distance in vector_documents] + lexical_documents)
 
     class VectorStore:
         def similarity_search_with_score(self, question: str, *, k: int):

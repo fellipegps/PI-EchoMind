@@ -8,6 +8,7 @@ from typing import Iterable
 import uuid
 
 from sqlalchemy import desc
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import Document, DocumentChunk, DocumentChunkParent, utc_now
@@ -99,12 +100,15 @@ def get_document(
     *,
     tenant_id: str,
     document_id: str,
+    for_update: bool = False,
 ) -> Document | None:
-    return (
+    query = (
         db.query(Document)
         .filter(Document.id == document_id, Document.tenant_id == tenant_id)
-        .first()
     )
+    if for_update:
+        query = query.populate_existing().with_for_update()
+    return query.first()
 
 
 def list_documents(db: Session, *, tenant_id: str) -> list[Document]:
@@ -161,7 +165,19 @@ def create_document(
         valid_until=data.valid_until,
     )
     db.add(document)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        # A consulta preliminar nao serializa uploads concorrentes. Somente a
+        # violacao deste indice representa duplicidade documental; o chamador
+        # continua responsavel pelo rollback da transacao que falhou.
+        sqlstate = getattr(exc.orig, "sqlstate", None) or getattr(exc.orig, "pgcode", None)
+        constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", None)
+        if sqlstate == "23505" and constraint == "uq_documents_active_tenant_sha256":
+            raise DuplicateDocumentError(
+                "Documento ativo com o mesmo SHA-256 neste tenant."
+            ) from exc
+        raise
     return document
 
 

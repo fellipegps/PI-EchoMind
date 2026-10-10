@@ -1,8 +1,10 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const documentApiMock = vi.hoisted(() => ({
+  uploadLimits: vi.fn(),
   list: vi.fn(),
   upload: vi.fn(),
   delete: vi.fn(),
@@ -62,10 +64,46 @@ async function renderLoaded(documents: KnowledgeDocument[] = []) {
   await screen.findByText(documents.length ? documents[0].filename : "Nenhum documento enviado.");
 }
 
+type Listing = { documents: KnowledgeDocument[]; total: number };
+
+function listing(documents: KnowledgeDocument[]): Listing {
+  return { documents, total: documents.length };
+}
+
+function selectUpload() {
+  fireEvent.change(screen.getByLabelText("Selecionar documento"), {
+    target: { files: [new File(["texto"], "novo.txt", { type: "text/plain" })] },
+  });
+  fireEvent.submit(screen.getByRole("form", { name: "Metadados do documento" }));
+}
+
+function retryListing() {
+  fireEvent.change(screen.getByLabelText("Selecionar documento"), {
+    target: { files: [new File(["exe"], "invalido.exe")] },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Tentar novamente" }));
+}
+
+async function delayedListing(kind: "initial" | "poll" | "manual", documents: KnowledgeDocument[]) {
+  vi.useFakeTimers();
+  const request = deferred<Listing>();
+  if (kind !== "initial") documentApiMock.list.mockResolvedValueOnce(listing(documents));
+  documentApiMock.list.mockReturnValueOnce(request.promise);
+  const view = render(<DocumentTab />);
+  await act(async () => Promise.resolve());
+  if (kind === "poll") {
+    await act(async () => vi.advanceTimersByTimeAsync(2_000));
+  } else if (kind === "manual") {
+    retryListing();
+  }
+  return { request, view, signal: documentApiMock.list.mock.lastCall?.[0] as AbortSignal };
+}
+
 describe("DocumentTab", () => {
   beforeEach(() => {
     vi.useRealTimers();
     documentApiMock.list.mockReset();
+    documentApiMock.uploadLimits.mockReset().mockResolvedValue({ max_document_size_bytes: 10 * 1024 * 1024 });
     documentApiMock.upload.mockReset();
     documentApiMock.delete.mockReset();
   });
@@ -310,5 +348,361 @@ describe("DocumentTab", () => {
     expect(screen.getByText(failureDocument.filename)).toBeInTheDocument();
     expect(documentApiMock.delete).toHaveBeenNthCalledWith(1, successDocument.id);
     expect(documentApiMock.delete).toHaveBeenNthCalledWith(2, failureDocument.id);
+  });
+
+  it.each([
+    ["initial", "success"], ["initial", "error"],
+    ["poll", "success"], ["poll", "error"],
+    ["manual", "success"], ["manual", "error"],
+  ] as const)("preserva upload concluído antes da resposta antiga de %s (%s)", async (kind, outcome) => {
+    const existing = makeDocument(kind === "poll" ? "processing" : "ready", "existing");
+    const uploaded = makeDocument("pending", "uploaded");
+    const upload = deferred<KnowledgeDocument>();
+    documentApiMock.upload.mockReturnValueOnce(upload.promise);
+    const old = await delayedListing(kind, [existing]);
+
+    selectUpload();
+    await act(async () => upload.resolve(uploaded));
+    expect(screen.getByText(uploaded.filename)).toBeInTheDocument();
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing(kind === "initial" ? [] : [existing]));
+      else old.request.reject(new Error("erro antigo"));
+    });
+
+    expect(screen.getByText(uploaded.filename)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(old.signal.aborted).toBe(true);
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
+  it.each(["success", "error"])("preserva DELETE concluído antes do polling antigo (%s)", async (outcome) => {
+    const active = makeDocument("processing", "active");
+    const removed = makeDocument("ready", "removed");
+    const deletion = deferred<void>();
+    documentApiMock.delete.mockReturnValueOnce(deletion.promise);
+    const old = await delayedListing("poll", [active, removed]);
+
+    fireEvent.click(screen.getByRole("button", { name: `Excluir ${removed.filename}` }));
+    expect(screen.getByText(removed.filename)).toBeInTheDocument();
+    await act(async () => deletion.resolve());
+    expect(screen.queryByText(removed.filename)).not.toBeInTheDocument();
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing([active, removed]));
+      else old.request.reject(new Error("erro antigo"));
+    });
+
+    expect(screen.queryByText(removed.filename)).not.toBeInTheDocument();
+    expect(screen.getByText(active.filename)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(old.signal.aborted).toBe(true);
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
+  it.each([
+    ["upload", "success"], ["upload", "error"],
+    ["delete", "success"], ["delete", "error"],
+  ] as const)("preserva erro recente de %s após resposta antiga (%s)", async (mutation, outcome) => {
+    const active = makeDocument("processing", "active");
+    const ready = makeDocument("ready", "ready");
+    const old = await delayedListing("poll", [active, ready]);
+    const failure = deferred<never>();
+    if (mutation === "upload") {
+      documentApiMock.upload.mockReturnValueOnce(failure.promise);
+      selectUpload();
+    } else {
+      documentApiMock.delete.mockReturnValueOnce(failure.promise);
+      fireEvent.click(screen.getByRole("button", { name: `Excluir ${ready.filename}` }));
+    }
+    await act(async () => failure.reject(new Error("falha recente")));
+    const expected = mutation === "upload" ? "Não foi possível enviar o documento." : "Não foi possível excluir o documento.";
+    expect(screen.getByRole("alert")).toHaveTextContent(expected);
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing([active, ready]));
+      else old.request.reject(new Error("erro antigo"));
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent(expected);
+    expect(screen.getByText(ready.filename)).toBeInTheDocument();
+  });
+
+  it.each(["success", "error"])("atualização manual prevalece sobre polling antigo (%s)", async (outcome) => {
+    const active = makeDocument("processing", "active");
+    const otherActive = makeDocument("pending", "other-active");
+    const ready = makeDocument("ready", active.id);
+    const old = await delayedListing("poll", [active, otherActive]);
+    const manual = deferred<Listing>();
+    documentApiMock.list.mockReturnValueOnce(manual.promise);
+    retryListing();
+    await act(async () => manual.resolve(listing([ready, otherActive])));
+    expect(screen.getByText("Pronto")).toBeInTheDocument();
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing([active, otherActive]));
+      else old.request.reject(new Error("erro antigo"));
+    });
+    expect(screen.getByText("Pronto")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(old.signal.aborted).toBe(true);
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
+  it.each(["success", "error"])("a última atualização manual vence a anterior (%s)", async (outcome) => {
+    const ready = makeDocument("ready", "latest");
+    const old = await delayedListing("manual", []);
+    const latest = deferred<Listing>();
+    documentApiMock.list.mockReturnValueOnce(latest.promise);
+    retryListing();
+    await act(async () => latest.resolve(listing([ready])));
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing([makeDocument("processing", "stale")]));
+      else old.request.reject(new Error("erro antigo"));
+    });
+    expect(screen.getByText(ready.filename)).toBeInTheDocument();
+    expect(screen.queryByText("stale.pdf")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each(["success", "error"])("resposta antiga não encerra loading da atualização manual pendente (%s)", async (outcome) => {
+    const old = await delayedListing("initial", []);
+    const latest = deferred<Listing>();
+    documentApiMock.list.mockReturnValueOnce(latest.promise);
+    retryListing();
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing([]));
+      else old.request.reject(new Error("erro antigo"));
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("Carregando documentos...");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await act(async () => latest.reject(new Error("erro atual")));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar os documentos.");
+  });
+
+  it.each(["upload", "delete"])("pausa polling enquanto %s está pendente e retoma após concluir", async (mutation) => {
+    vi.useFakeTimers();
+    const active = makeDocument("processing", "active");
+    const ready = makeDocument("ready", "ready");
+    documentApiMock.list.mockResolvedValueOnce(listing([active, ready]));
+    render(<DocumentTab />);
+    await act(async () => Promise.resolve());
+    const upload = deferred<KnowledgeDocument>();
+    const deletion = deferred<void>();
+    if (mutation === "upload") {
+      documentApiMock.upload.mockReturnValueOnce(upload.promise);
+      selectUpload();
+    } else {
+      documentApiMock.delete.mockReturnValueOnce(deletion.promise);
+      fireEvent.click(screen.getByRole("button", { name: `Excluir ${ready.filename}` }));
+    }
+    expect(vi.getTimerCount()).toBe(0);
+    await act(async () => vi.advanceTimersByTimeAsync(6_000));
+    expect(documentApiMock.list).toHaveBeenCalledOnce();
+    expect(screen.getByText(ready.filename)).toBeInTheDocument();
+    await act(async () => {
+      if (mutation === "upload") upload.resolve(makeDocument("pending", "uploaded"));
+      else deletion.resolve();
+    });
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
+  it("mantém apenas um polling pendente e retoma após erro atual", async () => {
+    const active = makeDocument("processing", "active");
+    const old = await delayedListing("poll", [active]);
+    await act(async () => vi.advanceTimersByTimeAsync(10_000));
+    expect(documentApiMock.list).toHaveBeenCalledTimes(2);
+    await act(async () => old.request.reject(new Error("erro atual")));
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível atualizar o processamento dos documentos.");
+    expect(vi.getTimerCount()).toBe(1);
+    documentApiMock.list.mockResolvedValueOnce(listing([makeDocument("ready", active.id)]));
+    await act(async () => vi.advanceTimersByTimeAsync(2_000));
+    expect(screen.getByText("Pronto")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each([
+    ["upload", "success"], ["upload", "error"],
+    ["delete", "success"], ["delete", "error"],
+  ] as const)("erro de %s antigo não substitui a operação mais recente (%s)", async (older, outcome) => {
+    vi.useFakeTimers();
+    const ready = makeDocument("ready", "ready");
+    const active = makeDocument("processing", "active");
+    documentApiMock.list.mockResolvedValueOnce(listing([active, ready]));
+    const upload = deferred<KnowledgeDocument>();
+    const deletion = deferred<void>();
+    documentApiMock.upload.mockReturnValueOnce(upload.promise);
+    documentApiMock.delete.mockReturnValueOnce(deletion.promise);
+    render(<DocumentTab />);
+    await act(async () => Promise.resolve());
+    const remove = () => fireEvent.click(screen.getByRole("button", { name: `Excluir ${ready.filename}` }));
+    if (older === "upload") {
+      selectUpload();
+      remove();
+    } else {
+      remove();
+      selectUpload();
+    }
+    await act(async () => {
+      if (older === "upload") {
+        if (outcome === "success") deletion.resolve();
+        else deletion.reject(new Error("erro atual"));
+      } else {
+        if (outcome === "success") upload.resolve(makeDocument("pending", "uploaded"));
+        else upload.reject(new Error("erro atual"));
+      }
+    });
+    expect(vi.getTimerCount()).toBe(0);
+    await act(async () => {
+      if (older === "upload") upload.reject(new Error("erro antigo"));
+      else deletion.reject(new Error("erro antigo"));
+    });
+    if (outcome === "success") {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      if (older === "upload") expect(screen.queryByText(ready.filename)).not.toBeInTheDocument();
+      else expect(screen.getByText("uploaded.pdf")).toBeInTheDocument();
+    } else {
+      expect(screen.getByRole("alert")).toHaveTextContent(older === "upload"
+        ? "Não foi possível excluir o documento." : "Não foi possível enviar o documento.");
+      expect(screen.getByText(ready.filename)).toBeInTheDocument();
+    }
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
+  it.each([
+    ["initial", "success"], ["initial", "error"],
+    ["poll", "success"], ["poll", "error"],
+    ["manual", "success"], ["manual", "error"],
+  ] as const)("cancela %s no unmount sem reativar polling com resposta tardia (%s)", async (kind, outcome) => {
+    const active = makeDocument("processing", "active");
+    const old = await delayedListing(kind, [active]);
+    old.view.unmount();
+    expect(old.signal.aborted).toBe(true);
+    await act(async () => {
+      if (outcome === "success") old.request.resolve(listing([active]));
+      else old.request.reject(new Error("erro tardio"));
+    });
+    expect(vi.getTimerCount()).toBe(0);
+    await act(async () => vi.advanceTimersByTimeAsync(4_000));
+    expect(documentApiMock.list).toHaveBeenCalledTimes(kind === "initial" ? 1 : 2);
+  });
+
+  it("invalida a primeira montagem ao repetir efeitos no StrictMode", async () => {
+    vi.useFakeTimers();
+    const old = deferred<Listing>();
+    const latest = deferred<Listing>();
+    documentApiMock.list.mockReturnValueOnce(old.promise).mockReturnValueOnce(latest.promise);
+    const view = render(<StrictMode><DocumentTab /></StrictMode>);
+    expect(documentApiMock.list).toHaveBeenCalledTimes(2);
+    expect(documentApiMock.list.mock.calls[0][0].aborted).toBe(true);
+    await act(async () => latest.resolve(listing([makeDocument("ready", "latest")])));
+    await act(async () => old.resolve(listing([makeDocument("processing", "stale")])));
+    expect(screen.getByText("latest.pdf")).toBeInTheDocument();
+    expect(screen.queryByText("stale.pdf")).not.toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(0);
+    view.unmount();
+  });
+
+  it.each([2, 20])("usa o limite de %i MB do servidor, aceita igualdade e rejeita um byte acima", async (limitMb) => {
+    documentApiMock.uploadLimits.mockResolvedValueOnce({ max_document_size_bytes: limitMb * 1024 * 1024 });
+    documentApiMock.upload.mockResolvedValueOnce(makeDocument("pending", "at-limit"));
+    await renderLoaded();
+    expect(screen.getByText(new RegExp(`Limite de ${limitMb} MB`))).toBeInTheDocument();
+    const file = new File(["texto"], "limite.txt", { type: "text/plain" });
+    Object.defineProperty(file, "size", { value: limitMb * 1024 * 1024 });
+    fireEvent.change(screen.getByLabelText("Selecionar documento"), { target: { files: [file] } });
+    fireEvent.submit(screen.getByRole("form", { name: "Metadados do documento" }));
+    await screen.findByText("at-limit.pdf");
+    expect(documentApiMock.upload).toHaveBeenCalledWith(file, {});
+
+    const oversized = new File(["texto"], "excesso.txt", { type: "text/plain" });
+    Object.defineProperty(oversized, "size", { value: limitMb * 1024 * 1024 + 1 });
+    fireEvent.drop(screen.getByTestId("document-dropzone"), { dataTransfer: { files: [oversized] } });
+    expect(screen.getByRole("alert")).toHaveTextContent(`O arquivo deve ter no máximo ${limitMb} MB.`);
+    expect(documentApiMock.upload).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+  });
+
+  it("aguarda o limite antes de habilitar envio, independentemente da listagem", async () => {
+    const limits = deferred<{ max_document_size_bytes: number }>();
+    documentApiMock.uploadLimits.mockReturnValueOnce(limits.promise);
+    await renderLoaded();
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("Selecionar documento"), {
+      target: { files: [new File(["texto"], "norma.txt", { type: "text/plain" })] },
+    });
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(documentApiMock.upload).not.toHaveBeenCalled();
+    await act(async () => limits.resolve({ max_document_size_bytes: 2 * 1024 * 1024 }));
+    expect(screen.getByLabelText("Selecionar documento")).toBeEnabled();
+  });
+
+  it("falha de configuração bloqueia envio e permite recarregar sem bloquear exclusão", async () => {
+    documentApiMock.uploadLimits.mockRejectedValueOnce(new Error("detalhe privado"));
+    const ready = makeDocument("ready", "existing");
+    documentApiMock.delete.mockResolvedValueOnce(undefined);
+    await renderLoaded([ready]);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("detalhe privado");
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(screen.queryByText(/Limite de 10 MB/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Excluir ${ready.filename}` }));
+    await waitFor(() => expect(screen.queryByText(ready.filename)).not.toBeInTheDocument());
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    documentApiMock.uploadLimits.mockResolvedValueOnce({ max_document_size_bytes: 20 * 1024 * 1024 });
+    fireEvent.click(screen.getByRole("button", { name: "Recarregar limite" }));
+    await waitFor(() => expect(screen.getByLabelText("Selecionar documento")).toBeEnabled());
+    expect(screen.getByText(/Limite de 20 MB/)).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(documentApiMock.list).toHaveBeenCalledOnce();
+  });
+
+  it.each([0, -1, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1, undefined])("trata limite inválido %s como falha sem fallback", async (invalidLimit) => {
+    documentApiMock.uploadLimits.mockResolvedValueOnce({ max_document_size_bytes: invalidLimit });
+    await renderLoaded();
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(documentApiMock.upload).not.toHaveBeenCalled();
+  });
+
+  it("polling não apaga falha do limite nem habilita envio por conta própria", async () => {
+    vi.useFakeTimers();
+    documentApiMock.uploadLimits.mockRejectedValueOnce(new Error("indisponível"));
+    documentApiMock.list.mockResolvedValueOnce(listing([makeDocument("processing", "active")]))
+      .mockResolvedValueOnce(listing([makeDocument("ready", "active")]));
+    render(<DocumentTab />);
+    await act(async () => Promise.resolve());
+    expect(vi.getTimerCount()).toBe(1);
+    await act(async () => vi.advanceTimersByTimeAsync(2_000));
+    expect(screen.getByText("Pronto")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível carregar o limite de upload.");
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("descarta limite de montagem antiga no StrictMode", async () => {
+    const oldLimits = deferred<{ max_document_size_bytes: number }>();
+    const latestLimits = deferred<{ max_document_size_bytes: number }>();
+    documentApiMock.uploadLimits.mockReturnValueOnce(oldLimits.promise).mockReturnValueOnce(latestLimits.promise);
+    documentApiMock.list.mockResolvedValue(listing([]));
+    const view = render(<StrictMode><DocumentTab /></StrictMode>);
+    const oldSignal = documentApiMock.uploadLimits.mock.calls[0][0] as AbortSignal;
+    expect(oldSignal.aborted).toBe(true);
+    await act(async () => latestLimits.resolve({ max_document_size_bytes: 2 * 1024 * 1024 }));
+    await act(async () => oldLimits.resolve({ max_document_size_bytes: 20 * 1024 * 1024 }));
+    expect(screen.getByText(/Limite de 2 MB/)).toBeInTheDocument();
+    expect(screen.queryByText(/Limite de 20 MB/)).not.toBeInTheDocument();
+    view.unmount();
+    expect(documentApiMock.uploadLimits).toHaveBeenCalledTimes(2);
+  });
+
+  it("cancela a consulta do limite ao desmontar e ignora falha tardia", async () => {
+    const limits = deferred<{ max_document_size_bytes: number }>();
+    documentApiMock.uploadLimits.mockReturnValueOnce(limits.promise);
+    documentApiMock.list.mockResolvedValueOnce(listing([]));
+    const view = render(<DocumentTab />);
+    const signal = documentApiMock.uploadLimits.mock.calls[0][0] as AbortSignal;
+    view.unmount();
+    expect(signal.aborted).toBe(true);
+    await act(async () => limits.reject(new Error("erro após unmount")));
+    expect(documentApiMock.uploadLimits).toHaveBeenCalledOnce();
   });
 });

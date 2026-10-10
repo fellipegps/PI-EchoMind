@@ -35,6 +35,19 @@ campos opcionais são `document_type`, `document_number`, `department`,
 As demais operações autenticadas são `GET /documents`,
 `GET /documents/{document_id}` e `DELETE /documents/{document_id}`.
 
+A aba Documentos consulta `GET /documents/upload-limits`, autenticado e sem cache,
+que retorna somente `{"max_document_size_bytes": 10485760}` no limite padrão.
+O valor reutiliza a configuração efetiva do backend; não revela outros ajustes.
+A UI compara o tamanho original do arquivo em bytes com esse valor, aceitando
+igualdade. A unidade MB da configuração e da UI usa `1024 × 1024` bytes (MiB).
+Se a consulta falhar ou retornar um limite inválido, o envio fica desabilitado
+até uma nova consulta bem-sucedida pelo botão **Recarregar limite**; listagem,
+polling e exclusão continuam independentes. Não há fallback fixo de 10 MB.
+O servidor continua validando cada upload e retornando 413 para excesso.
+Publique o endpoint no backend antes de atualizar o frontend; um backend antigo
+sem esse contrato mantém o envio bloqueado na nova UI. Os contratos existentes
+de listagem, consulta, upload e DELETE permanecem iguais.
+
 ## Estados e comportamento
 
 | Estado | Significado | Ação esperada no painel |
@@ -42,15 +55,43 @@ As demais operações autenticadas são `GET /documents`,
 | `pending` | Registro criado e aguardando processamento | Consultar novamente em aproximadamente 2 s |
 | `processing` | Extração, chunking ou indexação em andamento | Continuar a consulta periódica |
 | `ready` | Chunks persistidos e vetores disponíveis | Mostrar `chunk_count` e encerrar polling |
-| `error` | Processamento terminou com erro seguro | Mostrar a mensagem e encerrar polling |
+| `error` | Processamento ou exclusão requer recuperação | Mostrar a mensagem e encerrar polling |
 
-Documentos `pending` e `processing` não podem ser excluídos. A remoção de um
-documento terminal apaga primeiro seus vetores e só então o registro relacional;
-o painel o remove da lista somente após o `DELETE` bem-sucedido.
+Documentos `pending` e `processing` não podem ser excluídos (HTTP 409). Antes de
+remover vetores de um documento terminal, o DELETE confirma `error` com uma
+mensagem de exclusão não concluída. Só depois remove vetores e registro
+relacional, retornando 204. O painel remove o item apenas após esse sucesso.
 
-Um `document_chunk` com `valid_until` anterior à data civil atual é filtrado
-depois da recuperação e não entra no contexto final. Sem `valid_until`, o chunk
-permanece elegível. FAQs e eventos não passam por esse filtro. As fontes
+Se a remoção vetorial ou relacional falhar, um documento antes `ready` tem seus
+vetores reconstruídos pelos chunks preservados, com os mesmos IDs determinísticos,
+e volta a `ready`. A API ainda informa a falha original: 503 para remoção vetorial
+ou 500 para exclusão/commit relacional. Documentos que já estavam em `error` não
+são reativados por essa compensação.
+
+Se a compensação ou seu commit falhar, a API retorna 503 e o marcador `error`
+continua confirmado, com documento, chunks e parents preservados. Vetores
+residuais não entram no contexto do chat. Após resolver a indisponibilidade,
+repita o DELETE: ele remove também os vetores parciais pelos mesmos IDs antes
+de apagar os registros. Outra repetição após a conclusão retorna 404.
+
+Não há transação distribuída nem recuperação automática em background. Uma
+interrupção depois de confirmar o marcador também exige nova tentativa de DELETE.
+A preparação e a compensação usam locks no documento do tenant; se outra
+tentativa restaurar `ready` antes da remoção, a API retorna 409 sem tocar nos
+vetores. Nenhuma migration é necessária para esse comportamento.
+
+As fontes documentais usam a data civil de `America/Sao_Paulo`, o mesmo calendário
+institucional dos eventos, independentemente do fuso do servidor. Uma única data
+é capturada no início da consulta e compartilhada pela recuperação vetorial,
+lexical, expansão Parent-Child e seus fallbacks, além da data apresentada ao modelo,
+mesmo se a consulta atravessar a meia-noite local. Testes podem congelar a fonte
+`sao_paulo_today` ou injetar explicitamente `today` na recuperação.
+`published_at` e `valid_until` continuam datas sem horário (`YYYY-MM-DD`);
+`published_at` é informativo e não cria uma nova restrição de recuperação.
+Um documento com `valid_until` anterior ao dia local é filtrado e não entra no
+contexto final. Validade igual ao dia local inclui todo esse dia; a exclusão ocorre
+somente a partir do próximo dia em São Paulo. Datas futuras e ausência de
+`valid_until` permanecem elegíveis. FAQs e eventos não passam por esse filtro. As fontes
 documentais apresentam apenas os metadados realmente disponíveis; o conteúdo
 recuperado é tratado como dado, nunca como instrução do sistema.
 
@@ -79,11 +120,20 @@ cd echomind-backend
 python scripts/reindex_all.py --confirm
 ```
 
-O comando reindexa, tenant por tenant, FAQs, eventos e chunks já persistidos de
-documentos `ready`. Ele ignora `pending`, `processing` e `error`, não lê novamente
+Use primeiro `python scripts/reindex_all.py --dry-run` e revise as remoções
+previstas antes de executar com `--confirm`. O comando reindexa, tenant por
+tenant, FAQs e chunks já persistidos de documentos `ready`, incluindo coleções
+comprovadamente gerenciadas que só possuem vetores órfãos. Ele ignora documentos
+`pending`, `processing` e `error`, não lê novamente
 o arquivo original, não recria chunks e nunca roda em startup ou deploy. A
 operação para no primeiro tenant com falha; corrija a causa e repita o comando.
-Não execute duas reindexações em paralelo.
+Coleções ambíguas ou alheias são preservadas. A identidade vem de metadados
+explícitos ou do contrato legado completo, nunca da inversão do nome sanitizado.
+Saída `2` indica revisão operacional pendente; saída `1` indica falha de execução,
+que pode deixar a coleção do tenant vazia ou parcial. Pause as escritas vetoriais,
+corrija a causa e gere nova prévia antes de retomar. Não execute duas reindexações
+em paralelo. Os critérios de identidade, limites e roteiro operacional estão na
+seção de reindexação manual do `README.md`.
 
 ## Gates reproduzíveis
 
@@ -93,7 +143,17 @@ Backend rápido, determinístico e sem serviços externos:
 cd echomind-backend
 python -m pip install -r requirements.txt -r requirements-dev.txt
 python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+python scripts/check_document_coverage.py coverage.xml
 ```
+
+Ambos devem passar: o primeiro preserva a meta global de 72%; o segundo exige
+80% de linhas executáveis em cada módulo `app/document_ingestion.py`,
+`app/document_processing.py`, `app/document_repository.py` e
+`app/document_upload.py`. O XML é o mesmo da coleta global, recém-gerado pelo
+pytest. A decisão usa contagens exatas, sem arredondar; módulo ausente, sem
+linhas ou relatório inválido reprovam. Nenhuma linha, módulo ou teste foi
+excluído da medição. O mapeamento das PRs 05–20 para essa lista e para os módulos
+compartilhados existentes está na seção de CI rápida do `README.md`.
 
 Integração requer PostgreSQL 17 + pgvector descartável, banco local chamado
 `echomind_integration`, embedding fake e nenhuma chamada a Groq ou Supabase. O

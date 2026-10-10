@@ -244,7 +244,7 @@ def test_parent_lookup_never_uses_id_without_tenant_and_document(db) -> None:
             today=date(2026, 9, 1),
         )
 
-    assert result == [child]
+    assert result == []
 
 
 def test_explicit_backfill_and_rollback_preserve_children(db, monkeypatch) -> None:

@@ -17,6 +17,7 @@ from fastapi import (
     HTTPException,
     Query,
     Request,
+    Response,
     UploadFile,
 )
 from fastapi.responses import StreamingResponse
@@ -41,7 +42,7 @@ from .schemas import (
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, RagMetricsResponse, FeedbackRequest, FeedbackResponse,
     CurrentUserResponse,
-    DocumentListResponse, DocumentResponse, DocumentStatus,
+    DocumentListResponse, DocumentResponse, DocumentStatus, DocumentUploadLimitsResponse,
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
@@ -58,6 +59,7 @@ from .document_ingestion import (
     validate_document_for_tenant,
 )
 from .document_processing import process_document
+from .document_upload import DocumentUploadLimitMiddleware, DocumentUploadRoute
 from .document_repository import (
     DocumentCreateData,
     DocumentDeletionBlockedError,
@@ -147,6 +149,7 @@ configure_cors(app)
 # Middlewares próprios (ordem importa: último registrado = primeiro executado)
 app.add_middleware(TimingMiddleware)
 app.add_middleware(RequestLogMiddleware)
+app.add_middleware(DocumentUploadLimitMiddleware)
 
 router_auth = APIRouter(prefix="/auth", tags=["Autenticação"])
 router_chat = APIRouter(prefix="/chat", tags=["Chat"])
@@ -157,6 +160,9 @@ router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 router_documents = APIRouter(prefix="/documents", tags=["Documentos"])
+router_document_upload = APIRouter(
+    prefix="/documents", tags=["Documentos"], route_class=DocumentUploadRoute,
+)
 router_feedback = APIRouter(prefix="/feedback", tags=["Feedback"])
 router_public = APIRouter(prefix="/public", tags=["Portal público"])
 router_system = APIRouter(tags=["Sistema"])
@@ -766,7 +772,7 @@ def get_dashboard_rag_metrics(
 #  DOCUMENTOS  /documents
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router_documents.post(
+@router_document_upload.post(
     "/upload",
     response_model=DocumentResponse,
     status_code=202,
@@ -897,6 +903,18 @@ def list_stored_documents(
     return DocumentListResponse(documents=documents, total=len(documents))
 
 
+@router_documents.get("/upload-limits", response_model=DocumentUploadLimitsResponse)
+def get_document_upload_limits(
+    response: Response,
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        return DocumentUploadLimitsResponse(max_document_size_bytes=get_max_document_size_bytes())
+    except InvalidDocumentConfigurationError as exc:
+        raise HTTPException(status_code=500, detail="Configuração inválida do limite de upload.") from exc
+
+
 @router_documents.get("/{document_id}", response_model=DocumentResponse)
 def get_stored_document(
     document_id: str,
@@ -913,6 +931,52 @@ def get_stored_document(
     return document
 
 
+def _compensate_failed_document_delete(
+    db: Session,
+    rag,
+    *,
+    tenant_id: str,
+    document_id: str,
+    previous_status: str,
+    previous_error_message: str | None,
+) -> None:
+    """Restaura apenas fontes antes ready, sem perder o marcador se falhar."""
+    try:
+        db.rollback()
+        if previous_status != DocumentStatus.READY.value:
+            return
+        document = get_document(
+            db, tenant_id=tenant_id, document_id=document_id, for_update=True,
+        )
+        # Nao ressuscita vetores de registros removidos por outra tentativa,
+        # nem altera um estado que outro processamento ja tenha assumido.
+        if document is None or document.status != DocumentStatus.ERROR.value:
+            return
+        chunks = list_document_chunks(db, tenant_id=tenant_id, document_id=document_id)
+        rag.reindex_document_chunks(document, chunks)
+        document.status = previous_status
+        document.error_message = previous_error_message
+        db.commit()
+    except Exception as exc:
+        try:
+            db.rollback()
+        except Exception:
+            # O marcador ja foi confirmado antes de qualquer remocao vetorial.
+            # Nao e necessario conseguir outra escrita para preservar o erro.
+            pass
+        emit_event(
+            event="rag.document-delete", status="error", stage="delete-compensation",
+            tenant_id=tenant_id, error_code=safe_error_code(exc),
+        )
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Não foi possível restaurar o documento após a falha na exclusão. "
+                "O documento permanece em erro, com os chunks preservados; tente excluir novamente."
+            ),
+        ) from exc
+
+
 @router_documents.delete("/{document_id}", status_code=204)
 def delete_stored_document(
     document_id: str,
@@ -924,6 +988,7 @@ def delete_stored_document(
         db,
         tenant_id=current_user.id,
         document_id=document_id,
+        for_update=True,
     )
     if document is None:
         raise HTTPException(status_code=404, detail="Documento não encontrado.")
@@ -937,6 +1002,48 @@ def delete_stored_document(
             detail="Documento pendente ou em processamento não pode ser excluído.",
         )
 
+    previous_status = document.status
+    previous_error_message = document.error_message
+    # PGVector confirma suas proprias transacoes. Persistir este marcador antes
+    # da remocao evita deixar um ready sem vetores se a compensacao ou o banco
+    # falharem depois. DELETE de error continua sendo uma recuperacao idempotente.
+    document.status = DocumentStatus.ERROR.value
+    recovery_message = "Exclusão não concluída; tente excluir novamente. Documento e chunks preservados."
+    if previous_error_message and previous_error_message.startswith(recovery_message):
+        document.error_message = previous_error_message
+    else:
+        previous_error = f" Erro anterior: {previous_error_message}" if previous_error_message else ""
+        document.error_message = (recovery_message + previous_error)[:1000]
+    try:
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        emit_event(
+            event="rag.document-delete", status="error", stage="delete-prepare",
+            tenant_id=current_user.id, error_code=safe_error_code(exc),
+        )
+        raise HTTPException(
+            status_code=500, detail="Não foi possível preparar a exclusão do documento.",
+        ) from exc
+
+    # O commit libera o lock. Resolve novamente antes de tocar os vetores.
+    document = get_document(
+        db, tenant_id=current_user.id, document_id=document_id, for_update=True,
+    )
+    if document is None:
+        raise HTTPException(status_code=404, detail="Documento não encontrado.")
+    if document.status in {DocumentStatus.PENDING.value, DocumentStatus.PROCESSING.value}:
+        raise HTTPException(
+            status_code=409,
+            detail="Documento pendente ou em processamento não pode ser excluído.",
+        )
+    if document.status != DocumentStatus.ERROR.value:
+        # Outra tentativa pode ter compensado e restaurado ready entre o
+        # commit do marcador e este lock. Nao remove vetores sem o marcador.
+        raise HTTPException(
+            status_code=409,
+            detail="O estado do documento mudou durante a exclusão; tente novamente.",
+        )
     chunks = list_document_chunks(
         db,
         tenant_id=current_user.id,
@@ -952,6 +1059,10 @@ def delete_stored_document(
             tenant_id=current_user.id,
             counts={"persisted_chunks": len(chunks)},
             error_code=safe_error_code(exc),
+        )
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
         )
         raise HTTPException(
             status_code=503,
@@ -969,15 +1080,21 @@ def delete_stored_document(
             raise HTTPException(status_code=404, detail="Documento não encontrado.")
         db.commit()
     except DocumentDeletionBlockedError as exc:
-        db.rollback()
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
+        )
         raise HTTPException(
             status_code=409,
             detail="Documento pendente ou em processamento não pode ser excluído.",
         ) from exc
     except HTTPException:
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
+        )
         raise
     except Exception as exc:
-        db.rollback()
         emit_event(
             event="rag.document-delete",
             status="error",
@@ -985,6 +1102,10 @@ def delete_stored_document(
             tenant_id=current_user.id,
             counts={"persisted_chunks": len(chunks)},
             error_code=safe_error_code(exc),
+        )
+        _compensate_failed_document_delete(
+            db, rag, tenant_id=current_user.id, document_id=document_id,
+            previous_status=previous_status, previous_error_message=previous_error_message,
         )
         raise HTTPException(
             status_code=500,
@@ -1026,6 +1147,7 @@ app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)
 app.include_router(router_documents)
+app.include_router(router_document_upload)
 app.include_router(router_feedback)
 app.include_router(router_public)
 app.include_router(router_campuses)
