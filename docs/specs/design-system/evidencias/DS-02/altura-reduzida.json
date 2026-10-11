@@ -1,0 +1,19 @@
+{
+  "cardTop": 165,
+  "scroll": [
+    375,
+    770
+  ],
+  "sectionTop": -11,
+  "viewport": [
+    390,
+    480
+  ],
+  "bottom": {
+    "focusVisible": true,
+    "focused": "Entrar",
+    "linkBottom": 423,
+    "linkTop": 379,
+    "scrollY": 290
+  }
+}

@@ -4,12 +4,13 @@
 
 ## Identificação e controle
 
-- Status: **Proposta — aguardando aprovação; não implementada**.
+- Status: **Aprovada; implementada, verificada no escopo e aceita pelo usuário**.
 - Fase original: 02 do roteiro, etapa 2 do plano.
 - Modelo recomendado: **GPT-6.1 Sol**, esforço **Medium** (`medium`).
 - Commit sugerido após revisão e autorização: `refactor(auth): aplica design system as telas de autenticacao`.
 - Dependências: DS-00 com identidade, temas e composição responsiva aprovados; DS-01 implementada e revisada com primitivas e notificações disponíveis.
-- A aprovação deste documento não foi registrada. A autorização futura abrange somente esta fase.
+- Aprovação de DS-02 v1.0 e contrato comum v1.0 recebida em 11/10/2026: o usuário identificou **Fase: 02** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” A autorização abrange somente esta fase, sem commit, push ou avanço automático.
+- Dependências conferidas: DS-00 aceita no commit `7e0dc9e`; DS-01 aceita no commit `f332c62`. Evidências desta execução em [DS-02](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-02.md>).
 
 O fluxo de execução está no [README](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/README.md>), as regras comuns no [CONTRATO](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/CONTRATO.md>) e as evidências/aprovações no [STATUS](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/STATUS.md>).
 
@@ -75,13 +76,13 @@ Uma composição adicional poderá ficar junto ao grupo de autenticação ou em 
 
 ## Plano de implementação
 
-- [ ] Conferir DS-00/01, aprovação, estado local e composição visual aprovada para autenticação.
-- [ ] Recuperar a referência de login pelo MCP ou registrar a referência verificada disponível e qualquer limitação.
-- [ ] Mapear a estrutura comum e manter os handlers dos formulários sob suas responsabilidades atuais.
-- [ ] Aplicar composição, marca, tipografia, campos e ações utilizando a base compartilhada.
-- [ ] Conferir sucesso, falha, carregamento e validação de cada fluxo com mocks ou dados de teste.
-- [ ] Inspecionar quatro páginas, temas, larguras, teclado, zoom e conteúdo extenso.
-- [ ] Executar verificações e registrar resultados/imagens no STATUS; entregar para revisão.
+- [x] Conferir DS-00/01, aprovação, estado local e composição visual aprovada para autenticação.
+- [x] Recuperar a referência de login pelo MCP ou registrar a referência verificada disponível e qualquer limitação.
+- [x] Mapear a estrutura comum e manter os handlers dos formulários sob suas responsabilidades atuais.
+- [x] Aplicar composição, marca, tipografia, campos e ações utilizando a base compartilhada.
+- [x] Conferir sucesso, falha, carregamento e validação de cada fluxo com mocks ou dados de teste.
+- [x] Inspecionar quatro páginas, temas, larguras, teclado e conteúdo extenso; reflow equivalente a 200% verificado, zoom real e teclado virtual registrados como limites.
+- [x] Executar verificações e registrar resultados/imagens no STATUS; entregar para revisão.
 
 ## Verificações e evidências esperadas
 
@@ -95,4 +96,4 @@ Uma composição adicional poderá ficar junto ao grupo de autenticação ou em 
 
 Concluída tecnicamente somente quando requisitos e critérios possuem evidência, verificações obrigatórias passam ou limitações são explicitamente encaminhadas, e o diff está restrito à fase. Implementação, verificação e revisão do usuário são registros distintos no STATUS.
 
-Não avançar de fase nem criar commit/push automaticamente. Mudanças materiais de identidade, composição ou comportamento exigem atualizar a proposta e obter aprovação antes da implementação dependente. Todas as caixas acima permanecem pendentes nesta entrega documental.
+Não avançar de fase nem criar commit/push automaticamente. Mudanças materiais de identidade, composição ou comportamento exigem atualizar a proposta e obter aprovação antes da implementação dependente. As tarefas técnicas foram concluídas em 11/10/2026; AC01–AC07 passaram no escopo descrito nas evidências. O resultado foi aceito em 11/10/2026 pelo pedido de commit após a apresentação da entrega: “faça commite das alterações (so commite, sem push)”. A autorização adicional permite somente o commit local desta fase.

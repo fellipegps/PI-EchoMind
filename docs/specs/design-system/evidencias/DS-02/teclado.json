@@ -1,0 +1,42 @@
+[
+  {
+    "focusVisible": true,
+    "href": null,
+    "name": "Email",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT"
+  },
+  {
+    "focusVisible": true,
+    "href": null,
+    "name": "Senha",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.455) 0px 0px 0px 0.911001px, rgba(147, 197, 253, 0.455) 0px 0px 0px 1.822px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT"
+  },
+  {
+    "focusVisible": true,
+    "href": null,
+    "name": "Entrar",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON"
+  },
+  {
+    "focusVisible": true,
+    "href": "/registrar-conta",
+    "name": "Criar conta",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "A"
+  },
+  {
+    "focusVisible": true,
+    "href": "/recuperar-senha",
+    "name": "Esqueci minha senha",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A"
+  }
+]

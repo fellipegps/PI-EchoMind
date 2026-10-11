@@ -1,0 +1,2610 @@
+[
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 406,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 385
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 529,
+        "y": 446
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 534
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 602
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 658
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 714
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 546,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 315
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 529,
+        "y": 376
+      },
+      {
+        "autocomplete": "name",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 529,
+        "y": 464
+      },
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 529,
+        "y": 552
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 640
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 708
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 784
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 262,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 457
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 529,
+        "y": 518
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 586
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 642
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 350,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 413
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 686
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 406,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 385
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 321,
+        "y": 446
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 534
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 602
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 658
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 714
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 546,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 315
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 321,
+        "y": 376
+      },
+      {
+        "autocomplete": "name",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 321,
+        "y": 464
+      },
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 321,
+        "y": 552
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 640
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 708
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 784
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 262,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 457
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 321,
+        "y": 518
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 586
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 642
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 350,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 413
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 686
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 406,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 385
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 193,
+        "y": 446
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 534
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 602
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 658
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 714
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 546,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 315
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 193,
+        "y": 376
+      },
+      {
+        "autocomplete": "name",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 193,
+        "y": 464
+      },
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 193,
+        "y": 552
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 640
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 708
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 784
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 262,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 457
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 193,
+        "y": 518
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 586
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 642
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 350,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 413
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 686
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "light",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 390,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 303
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 308,
+        "x": 41,
+        "y": 356
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 444
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 512
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 568
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 624
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "light",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 530,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 245
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 308,
+        "x": 41,
+        "y": 298
+      },
+      {
+        "autocomplete": "name",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 308,
+        "x": 41,
+        "y": 386
+      },
+      {
+        "autocomplete": "email",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 308,
+        "x": 41,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 706
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "light",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 246,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 375
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 308,
+        "x": 41,
+        "y": 428
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 496
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 552
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "light",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(255, 255, 255)",
+      "height": 334,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 331
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 384
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 472
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 540
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 596
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "light",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 406,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 385
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 529,
+        "y": 446
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 534
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 602
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 658
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 714
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 546,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 315
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 529,
+        "y": 376
+      },
+      {
+        "autocomplete": "name",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 529,
+        "y": 464
+      },
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 529,
+        "y": 552
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 640
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 708
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 784
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 262,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 457
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 529,
+        "y": 518
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 586
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 642
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 350,
+      "radius": "24px",
+      "width": 448,
+      "x": 496,
+      "y": 413
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 529,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 529,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 529,
+        "y": 686
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      1440,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1440,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 406,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 385
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 321,
+        "y": 446
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 534
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 602
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 658
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 714
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 546,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 315
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 321,
+        "y": 376
+      },
+      {
+        "autocomplete": "name",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 321,
+        "y": 464
+      },
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 321,
+        "y": 552
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 640
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 708
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 784
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 262,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 457
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 321,
+        "y": 518
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 586
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 642
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 350,
+      "radius": "24px",
+      "width": 448,
+      "x": 288,
+      "y": 413
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 321,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 321,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 321,
+        "y": 686
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      1024,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 406,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 385
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 193,
+        "y": 446
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 534
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 602
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 658
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 714
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 546,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 315
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 193,
+        "y": 376
+      },
+      {
+        "autocomplete": "name",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 382,
+        "x": 193,
+        "y": 464
+      },
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 193,
+        "y": 552
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 640
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 708
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 784
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 262,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 457
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 382,
+        "x": 193,
+        "y": 518
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 586
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 642
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 350,
+      "radius": "24px",
+      "width": 448,
+      "x": 160,
+      "y": 413
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 382,
+        "x": 193,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 382,
+        "x": 193,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 382,
+        "x": 193,
+        "y": 686
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      768,
+      1024
+    ],
+    "theme": "dark",
+    "viewport": [
+      768,
+      1024
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 390,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 303
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 308,
+        "x": 41,
+        "y": 356
+      },
+      {
+        "autocomplete": "current-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 444
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Entrar",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 512
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/registrar-conta",
+        "name": "Criar conta",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 568
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/recuperar-senha",
+        "name": "Esqueci minha senha",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 624
+      }
+    ],
+    "heading": "Entrar no EchoMind",
+    "route": "/login",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "dark",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 530,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 245
+    },
+    "controls": [
+      {
+        "autocomplete": "organization",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Nome da Empresa",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 308,
+        "x": 41,
+        "y": 298
+      },
+      {
+        "autocomplete": "name",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Seu Nome",
+        "required": true,
+        "tag": "INPUT",
+        "type": "text",
+        "width": 308,
+        "x": 41,
+        "y": 386
+      },
+      {
+        "autocomplete": "email",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 308,
+        "x": 41,
+        "y": 474
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 562
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Criar Conta",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 630
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Entrar",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 706
+      }
+    ],
+    "heading": "Criar Conta",
+    "route": "/registrar-conta",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "dark",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 246,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 375
+    },
+    "controls": [
+      {
+        "autocomplete": "email",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Email",
+        "required": true,
+        "tag": "INPUT",
+        "type": "email",
+        "width": 308,
+        "x": 41,
+        "y": 428
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Enviar Link",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 496
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 552
+      }
+    ],
+    "heading": "Recuperar Senha",
+    "route": "/recuperar-senha",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "dark",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "card": {
+      "background": "rgb(15, 23, 42)",
+      "height": 334,
+      "radius": "24px",
+      "width": 358,
+      "x": 16,
+      "y": 331
+    },
+    "controls": [
+      {
+        "autocomplete": "new-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Nova senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 384
+      },
+      {
+        "autocomplete": "new-password",
+        "font": "16px",
+        "height": 44,
+        "href": null,
+        "name": "Confirmar senha",
+        "required": true,
+        "tag": "INPUT",
+        "type": "password",
+        "width": 308,
+        "x": 41,
+        "y": 472
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": null,
+        "name": "Atualizar senha",
+        "required": false,
+        "tag": "BUTTON",
+        "type": "submit",
+        "width": 308,
+        "x": 41,
+        "y": 540
+      },
+      {
+        "autocomplete": "",
+        "font": "14px",
+        "height": 44,
+        "href": "/login",
+        "name": "Voltar para o login",
+        "required": false,
+        "tag": "A",
+        "type": "",
+        "width": 308,
+        "x": 41,
+        "y": 596
+      }
+    ],
+    "heading": "Redefinir senha",
+    "route": "/redefinir-senha",
+    "scroll": [
+      390,
+      844
+    ],
+    "theme": "dark",
+    "viewport": [
+      390,
+      844
+    ]
+  }
+]

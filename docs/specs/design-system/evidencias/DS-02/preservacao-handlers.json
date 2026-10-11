@@ -1,0 +1,18 @@
+[
+  {
+    "route": "login",
+    "statesAndHandlersUnchanged": true
+  },
+  {
+    "route": "registrar-conta",
+    "statesAndHandlersUnchanged": true
+  },
+  {
+    "route": "recuperar-senha",
+    "statesAndHandlersUnchanged": true
+  },
+  {
+    "route": "redefinir-senha",
+    "statesAndHandlersUnchanged": true
+  }
+]

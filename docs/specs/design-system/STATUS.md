@@ -1,14 +1,14 @@
 # Andamento — refatoração visual por especificação
 
-Data de criação e última atualização: 11/10/2026. Situação: DS-00 e DS-01 aceitas; commit local de DS-01 autorizado, sem push.
+Data de criação e última atualização: 11/10/2026. Situação: DS-00 e DS-01 aceitas e commitadas localmente; DS-02 implementada, verificada e aceita; commit local autorizado, sem push.
 
-DS-00 v1.0 foi aprovada explicitamente e sua entrega documental foi aceita. DS-01 v1.0 foi autorizada em mensagem própria, implementa os fundamentos da aplicação e teve seu resultado aceito pelo pedido de commit após a apresentação da entrega. DS-02–DS-16 continuam propostas e não iniciadas.
+DS-00 v1.0 foi aprovada explicitamente e sua entrega documental foi aceita. DS-01 v1.0 foi autorizada em mensagem própria, implementa os fundamentos da aplicação e teve seu resultado aceito pelo pedido de commit após a apresentação da entrega. DS-02 v1.0 foi autorizada em mensagem própria, implementada, verificada e aceita pelo pedido de commit após a apresentação da entrega. DS-03–DS-16 continuam propostas e não iniciadas.
 
 | Fase | Versão | Spec | Execução | Verificação | Aceite do resultado | Evidência / commit |
 | --- | --- | --- | --- | --- | --- | --- |
 | DS-00 | 1.0 | Aprovada em 11/10/2026 | Implementada (documentação) | Validada (documental) | Aceito em 11/10/2026 | [DS-00](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-00.md>) / 7e0dc9e |
-| DS-01 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-01](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-01.md>) / commit desta entrega, identificado no histórico Git |
-| DS-02 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
+| DS-01 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-01](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-01.md>) / f332c62 |
+| DS-02 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-02](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-02.md>) / commit desta entrega, identificado no histórico Git |
 | DS-03 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-04 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-05 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
@@ -29,9 +29,12 @@ DS-00 v1.0 foi aprovada explicitamente e sua entrega documental foi aceita. DS-0
 - Preparação deste conjunto: o usuário solicitou substituir os prompts por arquivos .md de especificação e permitiu remover o arquivo antigo de prompts.
 - DS-00 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 00** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Também restringiu a fase a revisão/documentação da direção visual e vedou avanço de fase, commit e push sem nova instrução.
 - DS-01 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 01** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Solicitou implementação, evidências e revisão, vedando avanço para outra fase, commit e push sem nova instrução.
-- DS-02–DS-16: nenhuma autorização de execução recebida.
+- DS-02 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 02** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Solicitou implementação, evidências e revisão; não autorizou avanço de fase, commit ou push. A referência à fase 00 continua sendo a restrição documental daquela fase.
+- DS-03–DS-16: nenhuma autorização de execução recebida.
 - Aceite do resultado de DS-00 e commit: em 11/10/2026, após a apresentação da entrega, o usuário declarou “Aprovado. Commite as alterações para seguirmos para o proximo passo (so commitar, sem push)”. Aceite registrado separadamente da aprovação da especificação.
 - Aceite do resultado e Git de DS-01: em 11/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações (apenas commitar, sem push) para seguirmos pra proxima fase”. O pedido registra o aceite desta entrega e autoriza somente seu commit local. DS-02 exige autorização própria; push ou publicação continuam não autorizados.
+
+- Aceite do resultado e Git de DS-02: em 11/10/2026, após a apresentação da entrega, o usuário solicitou “faça commite das alterações (so commite, sem push)”. O pedido registra o aceite da entrega e autoriza somente seu commit local; não autoriza outra fase ou push.
 
 ## Registro de execução
 
@@ -52,8 +55,20 @@ DS-00 v1.0 foi aprovada explicitamente e sua entrega documental foi aceita. DS-0
 - Verificação: AC01–AC05 passaram no escopo. Lint, tipos, 109 testes existentes em 15 arquivos e build completos aprovados. 74 cores computadas coincidem com DS-00; teclado, validação, seleção, diálogo e notificações verificados no navegador. Imagens de amostra, login, portal e painel em 1440/390 px, claro/escuro. Amostra retorna HTTP 404 em produção.
 - Limites: sessão/API fictícias em loopback, sem validação de infraestrutura real; viewport não comprova teclado virtual ou dispositivo físico. CSS próprio do portal e cores locais dos gráficos permanecem para fases posteriores. Suporte a redução de movimento inspecionado no código, sem emulação da preferência do sistema.
 - Ambiente: pnpm e servidores locais precisaram executar fora da restrição de rede/arquivo do sandbox; nenhuma rejeição de aprovação. Cache de desenvolvimento antigo foi removido somente em echomind-front/.next/dev, e as medições finais foram feitas após recompilação limpa.
-- Entrega: implementação e verificação concluídas; resultado aceito pelo pedido de commit após revisão da entrega apresentada. Nenhum requisito material foi revisado. DS-02 não iniciada.
-- Git: commit local autorizado pela mensagem de aceite, com a mensagem refactor(ui): unifica tokens e componentes do design system; identificação no histórico Git. Nenhum push autorizado ou realizado.
+- Entrega: implementação e verificação concluídas; resultado aceito pelo pedido de commit após revisão da entrega apresentada. Nenhum requisito material foi revisado. DS-02 recebeu autorização própria posteriormente.
+- Git: commit local f332c62989bdd87c41db6dd41bb6016835d328b4 autorizado pela mensagem de aceite, com a mensagem refactor(ui): unifica tokens e componentes do design system. Nenhum push autorizado ou realizado.
+
+### 11/10/2026 — DS-02 v1.0
+
+- Dependências: README.md, CONTRATO.md v1.0, STATUS.md, DS-02 v1.0, direção DS-00 e plano original lidos. Aceites de DS-00/01 confirmados nas mensagens e commits 7e0dc9e/f332c62. Árvore inicialmente limpa; autorização explícita limitada à fase 02.
+- Referência: get_design e get_design_preview do UX Pilot confirmaram EchoMind - Login, zWCKHDtCGxmxEmkSl0pe, página ThHPmFvVAyXGKTItA3AZ, completed; PNG 1440×1024 inspecionado. Nenhum design gerado ou modificado.
+- Implementação: layout externo com centralização flexível e rolagem; composição compartilhada de marca, título, card, campos, ações, carregamento e confirmação. Formulários mantêm estado, handlers, validações e destinos. Autocomplete complementar em cadastro/recuperação; título do login explicita o fluxo. APIs, sessão, backend, tokens, primitivas e dependências preservados.
+- Verificação: AC01–AC07 passaram no escopo; lint, tipos, 30 testes direcionados (19 novos das páginas, 10 existentes de API e 1 de Button) e build aprovados. Matriz de 32 cenários: quatro formulários × dois temas × 1440/1024/768/390 px. Sem overflow horizontal; card até 448 px, raio 24 px e controles de pelo menos 44 px.
+- Comportamento: login e recuperação exercitados no navegador contra fixture local; cadastro e redefinição exercitados por mocks nos testes. Ordem login → me → dashboard, validações, bloqueio/carregamento, mensagens, falhas e novas tentativas conferidos. Imagens dos quatro formulários e estados representativos registradas; erro extenso cabe em 390 px. Teclado, altura reduzida e reflow conferidos.
+- Limites: sem validação de conta, email, sessão ou infraestrutura reais; nenhuma senha real alterada. Reflow de 720×512 equivale à área CSS de 1440×1024 a 200%, mas não emula zoom real. Teclado virtual, dispositivo físico e preferência de movimento do sistema não emulados. A animação nova do loader respeita motion-reduce por inspeção.
+- Ambiente: verificações e servidores locais executados com permissão ampliada pelas restrições do sandbox, sem rejeição automática; configuração fictícia restrita ao processo, sem editar arquivos de ambiente. Uma incompatibilidade de tipos nas opções dos novos testes foi corrigida; tipos e testes finais passaram.
+- Entrega: implementação e verificação concluídas; resultado aceito pelo pedido de commit após a apresentação da entrega. Nenhum requisito ou critério material revisado; detalhes e imagens no registro DS-02. DS-03 não iniciada.
+- Git: commit local desta entrega autorizado pela mensagem de aceite, com a mensagem refactor(auth): aplica design system as telas de autenticacao; identificação no histórico Git. Nenhum push autorizado ou realizado.
 
 ## Divergências corrigidas na conversão
 

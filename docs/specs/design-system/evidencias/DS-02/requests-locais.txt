@@ -1,0 +1,13 @@
+POST /auth/v1/recover
+POST /auth/v1/recover
+POST /auth/v1/recover
+POST /auth/v1/token
+POST /auth/v1/token
+GET /auth/me
+GET /auth/me
+GET /auth/me
+GET /auth/me
+GET /dashboard
+GET /dashboard
+GET /dashboard/rag-metrics
+GET /dashboard/rag-metrics
