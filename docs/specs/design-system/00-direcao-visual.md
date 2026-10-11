@@ -4,8 +4,10 @@
 | --- | --- |
 | ID | DS-00 |
 | Versão | 1.0 |
-| Estado da especificação | Proposta — aguardando aprovação |
-| Estado da execução | Não iniciada |
+| Estado da especificação | Aprovada pelo usuário em 11/10/2026 — versão 1.0 |
+| Estado da execução | Implementada — somente documentação |
+| Estado da verificação | Validada no escopo documental; ver evidências DS-00 |
+| Aceite do resultado | Aceito pelo usuário em 11/10/2026 |
 | Origem no plano | Preparação |
 | Modelo / esforço sugeridos | GPT-6 Astra / Medium |
 | Commit sugerido | docs(design): consolida direcao visual da refatoracao |
@@ -15,6 +17,12 @@
 Aplicam-se [CONTRATO.md](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/CONTRATO.md>), [README.md](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/README.md>) e [STATUS.md](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/STATUS.md>).
 
 Dependências: Nenhuma fase de implementação. Usa o plano original e os seis designs recuperados do UX Pilot.
+
+Autorização conferida em 11/10/2026: mensagem do usuário identificando **Fase: 00** e declarando “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Abrange esta versão 1.0 e o contrato comum 1.0. Não autoriza DS-01–DS-16, commit ou push. O aceite desta entrega documental permanece separado da aprovação da especificação.
+
+Registro da revisão, referências observadas, método e resultados de contraste: [evidências DS-00](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-00.md>).
+
+Após a apresentação da entrega, em 11/10/2026, o usuário declarou “Aprovado. Commite as alterações para seguirmos para o proximo passo (so commitar, sem push)”. Esta mensagem registra o aceite do resultado e autoriza somente seu commit, sem push e sem execução de outra fase.
 
 ## Problema e resultado esperado
 
@@ -36,9 +44,9 @@ Paleta semântica, tipografia, espaçamento, raios, marca, estados, comportament
 - **DS-00-R06:** As referências do UX Pilot têm título, ID e página registrados. Atualizações que mudem materialmente esta direção geram proposta de revisão antes de implementar a parte dependente.
 - **DS-00-R07:** A saída da fase contém revisão documental, evidências e solicitação de aceite do resultado; nenhum arquivo da aplicação, design remoto, dependência ou dado real é alterado.
 
-## Proposta visual para aprovação
+## Direção visual da versão 1.0 — resultado aceito
 
-Os valores abaixo são uma proposta fechada para revisão, ainda não aplicada. #0B57D0 e a hierarquia 36/24/16/14 px vêm do conteúdo observado; o tema escuro, ajustes semânticos, dimensões e símbolos completam as lacunas.
+Os valores abaixo integram a especificação aprovada e o resultado documental aceito pelo usuário em 11/10/2026; ainda não foram aplicados à aplicação. #0B57D0 e a hierarquia 36/24/16/14 px vêm do conteúdo observado; o tema escuro, ajustes semânticos, dimensões e símbolos completam as lacunas.
 
 | Papel / token | Claro | Escuro |
 | --- | --- | --- |
@@ -66,6 +74,34 @@ Os valores abaixo são uma proposta fechada para revisão, ainda não aplicada. 
 | chart-4 / chart-5 | #7C3AED / #0369A1 | #C4B5FD / #7DD3FC |
 
 A imagem indica Emerald 500 e Amber 500 como amostras de sucesso/aviso. Os pares semânticos acima usam tons ajustados para leitura; isso é uma proposta complementar explícita. Tokens de gráfico representam séries e não mudam o significado dos indicadores.
+
+### Origem e uso das famílias
+
+Revisão em 11/10/2026, com os seis previews e metadados recuperados pelo MCP em leitura. Os valores da versão 1.0 foram mantidos. “Observado” abaixo significa conteúdo legível ou composição visível no PNG, não extração de CSS ou medição de pixels.
+
+| Família | Observação nas referências | Complemento da versão 1.0 e uso |
+| --- | --- | --- |
+| Ação principal | Styleguide imprime #0B57D0; ações primárias aparecem em azul. | primary-foreground, primary-hover, ring e toda a variante escura são escolhas semânticas documentadas; usar sempre o par do tema. |
+| Superfícies, texto e bordas | Styleguide identifica Foreground como Slate 950 e Muted/Surface como Slate 100; telas usam fundos claros, cards brancos e bordas discretas. | Os HEX de background, foreground, card/popover, secondary/muted/accent, muted-foreground e border/input são a normalização proposta. #0F172A é uma escolha do contrato, não uma transcrição do rótulo Slate 950. |
+| Sucesso, aviso e erro | Styleguide identifica Emerald 500, Amber 500 e Red 600. | Tons semânticos e respectivos foregrounds da tabela priorizam leitura; não copiar as amostras de sucesso/aviso como fundo de texto branco sem medir o par. |
+| Sidebar | Chat desktop e painel mostram navegação lateral e item ativo em azul. | sidebar, sidebar-accent, sidebar-primary, borda e foco usam os pares documentados; o tema escuro é complementar. |
+| Gráficos | Painel mostra séries em azul e hierarquia de métricas. | chart-1–chart-5 são a paleta complementar; rótulos usam foreground/muted-foreground sobre superfície, e as séries mantêm o significado dos dados reais. |
+| Tipografia | Styleguide imprime 36, 24, 16 e 14 px. Geist já é carregada pelo projeto. | Fonte preservada; entrelinhas, título móvel de 28 px e legenda de 12 px são complementos. Títulos usam a hierarquia abaixo, sem impor 36 px a todas as páginas. |
+| Espaço, raios, elevação e controles | Há respiro, cantos arredondados e relevo discreto, sem medidas editáveis no MCP. | Escalas, dimensões mínimas e sombras abaixo são propostas explícitas; não medidas do PNG. |
+| Marca e avatar | As telas alternam símbolo de onda/quadro, raio e brilho. | Activity no quadrado azul identifica EchoMind; Sparkles no círculo identifica o assistente. São escolhas unificadoras da spec, não assets recuperados. |
+| Estados e responsividade | Há estados normais/ativos e duas composições de chat; as seis imagens são claras. | Estados interativos, tema escuro, tablet, breakpoints e adaptação das demais telas seguem as regras abaixo; não há preview remoto que os comprove. |
+
+### Restrições de uso verificadas por contraste
+
+O cálculo em sRGB foi executado sobre os HEX da tabela, sem opacidade, usando luminância relativa e razão de contraste da WCAG. As 52 combinações avaliadas e o método reproduzível estão nas evidências. Das combinações avaliadas, 51 atingem 4,5:1; uma não deve ser adotada:
+
+- **destructive como texto sobre muted/secondary/accent no tema claro:** #DC2626 sobre #F1F5F9 resulta em **4,4083:1** e fica abaixo da meta. Apresentar a mensagem de erro sobre card/popover branco (**4,8294:1**) ou background (**4,6158:1**), mantendo o mesmo token e a associação textual ao campo/ação. Essa restrição esclarece o uso dos pares existentes; não muda a paleta nem os requisitos aprovados.
+- O menor contraste das combinações de texto permitidas avaliadas é warning sobre muted no tema claro: **4,5838:1**. Não reduzir opacidade de textos/placeholders/estados para obter aparência discreta sem recalcular o resultado composto.
+- Foco usa ring opaco com o afastamento sobre a superfície. border/input/sidebar-border não são cores de texto e não comprovam, isoladamente, contraste de limites de controles. A identificação de controles, o foco renderizado e a distinção das séries continuam sujeitos à verificação das fases de implementação; esta revisão não certifica a aplicação.
+
+Não foi identificada atualização material dos previews que exija uma nova versão. Alterar esses valores, a marca, o escopo funcional ou as regras de composição exige revisão da spec antes de executar a parte dependente.
+
+### Escalas e comportamento
 
 - Fonte de interface: Geist; mono apenas para conteúdo que já demande leitura monoespaçada.
 - Título de destaque: 36/40 px em desktop, 28/36 px em telas estreitas; cabeçalho comum de página: 24/32 px.
@@ -109,18 +145,22 @@ Estas são propostas de contrato visual; sua adoção não constitui certificaç
 
 São regras propostas, não dimensões extraídas do PNG. Coordenadas geográficas e esquemáticas mantêm seus modelos existentes. Nenhum breakpoint exige reescrita funcional.
 
+Para deixar os contextos de revisão explícitos: 390 px (celular) e 768 px (tablet) seguem a navegação inferior sem coluna auxiliar; 1024 px usa lateral sem coluna auxiliar; 1440 px admite lateral e coluna auxiliar condicional. São leituras das regras aprovadas, não novos breakpoints nem validações da aplicação. Teclado virtual, safe area e interação por toque só poderão ser verificados nas fases correspondentes.
+
 ## Referências
 
 Página UX Pilot: ThHPmFvVAyXGKTItA3AZ.
 
-| Referência | design_id |
-| --- | --- |
-| EchoMind - Styleguide | 1Y8TYWWcoY7N8NBOJS1n |
-| Chat Portal celular | 3Qj2y1kf1JY6tBztuJCd |
-| Chat Portal desktop | ktsYqLA8UvfGZe6riGsa |
-| Events and Locations | k5WjrM3paBG7rWH7cnmR |
-| Admin Dashboard Primal | hldl1brk4q4O5f5XT8Nm |
-| Login | zWCKHDtCGxmxEmkSl0pe |
+| Título retornado pelo MCP | design_id | Papel nesta revisão |
+| --- | --- | --- |
+| EchoMind - Styleguide | 1Y8TYWWcoY7N8NBOJS1n | Fundamentos e componentes |
+| EchoMind - Chat Portal | 3Qj2y1kf1JY6tBztuJCd | Composição de celular |
+| EchoMind - Chat Portal | ktsYqLA8UvfGZe6riGsa | Composição desktop |
+| EchoMind - Events and Locations | k5WjrM3paBG7rWH7cnmR | Cards de eventos e categorias de locais |
+| EchoMind - Admin Dashboard Primal | hldl1brk4q4O5f5XT8Nm | Densidade e hierarquia administrativa |
+| EchoMind - Login | zWCKHDtCGxmxEmkSl0pe | Composição de autenticação |
+
+Todos retornaram status completed e a página acima. Links dos seis previews, dimensões observadas no navegador e diferenças deliberadas em relação ao contrato estão no registro de evidências.
 
 Limites funcionais: perfil/conta do aluno, voz, anexos, atendimento humano, notas/horários acadêmicos, documentos públicos, sessão fixa de 30 dias, reinício do agente e métricas ilustrativas dependem de escopos separados.
 
@@ -142,11 +182,11 @@ A lista orienta a implementação; não exige alterar todos os arquivos e não l
 
 ## Tarefas de implementação
 
-- [ ] Conferir metadados/previews dos seis designs em leitura e registrar data/limitações da observação.
-- [ ] Revisar a proposta de valores e layouts desta spec, medindo pares de contraste e identificando os complementos ao Styleguide.
-- [ ] Registrar somente ajustes documentais necessários; solicitar aprovação de qualquer revisão material das propostas.
-- [ ] Criar o registro de evidências DS-00 e apresentar a direção para aceite do resultado.
-- [ ] Atualizar STATUS.md com autorização real, verificação documental e situação do aceite.
+- [x] Conferir metadados/previews dos seis designs em leitura e registrar data/limitações da observação.
+- [x] Revisar a proposta de valores e layouts desta spec, medindo pares de contraste e identificando os complementos ao Styleguide.
+- [x] Registrar somente ajustes documentais necessários; nenhuma revisão material foi necessária. Restrição de contraste documentada sem alterar tokens.
+- [x] Criar o registro de evidências DS-00 e apresentar a direção para aceite do resultado.
+- [x] Atualizar STATUS.md com autorização real, verificação documental e situação do aceite.
 
 ## Verificações e evidências
 
@@ -161,4 +201,6 @@ Requisitos obrigatórios atendidos, critérios verificáveis com evidências rea
 ## Histórico
 
 - 11/10/2026 — versão 1.0: proposta documental inicial; execução não iniciada; nenhuma aprovação atribuída ao usuário.
+- 11/10/2026 — execução autorizada pelo usuário para DS-00 v1.0. Revisados seis previews, origens, layouts e contraste; esclarecido uso de destructive sobre superfícies. Valores, requisitos e critérios mantidos. Entrega documental verificada; aceite do resultado aguardando revisão. Sem avanço de fase, commit ou push.
+- 11/10/2026 — resultado documental aceito explicitamente pelo usuário; commit da entrega autorizado, sem push. DS-01–DS-16 permanecem não iniciadas.
 

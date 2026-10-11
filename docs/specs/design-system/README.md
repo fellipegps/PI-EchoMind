@@ -4,14 +4,14 @@ Versão documental: 1.0 · Data: 11/10/2026.
 
 Este conjunto adota **Specification Driven Development (SDD)**: a especificação define o resultado e as condições de aceitação; as tarefas orientam sua implementação; as evidências mostram o que foi verificado. Os textos são contratos de alteração, não uma sequência de prompts extensos.
 
-**Situação inicial: todas as especificações são propostas e nenhuma fase foi implementada ou aprovada.** A solicitação para criar estes arquivos autoriza a documentação; não autoriza mudanças na aplicação.
+**Situação atual (11/10/2026): DS-00 v1.0 concluída documentalmente, verificada e aceita pelo usuário. DS-01–DS-16 continuam propostas e não iniciadas.** O usuário autorizou o commit desta entrega, sem push. Nenhuma alteração da aplicação foi executada. Consulte STATUS.md para os estados separados de aprovação, execução, verificação e aceite.
 
 ## Documentos de referência
 
 - [Contrato comum](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/CONTRATO.md>): regras compartilhadas, preservações e fluxo de aprovação.
 - [Andamento](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/STATUS.md>): status independente da especificação, implementação, evidências e revisão do usuário.
 - [Plano e análise originais](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/plano-refatoracao-design-echomind.md>): contexto, diagnóstico e referências do UX Pilot.
-- DS-00: direção visual proposta, incluindo decisões que não estavam resolvidas pelas imagens.
+- DS-00: direção visual revisada documentalmente, incluindo decisões que não estavam resolvidas pelas imagens; resultado aceito pelo usuário em 11/10/2026.
 - DS-01–DS-16: especificações de alteração e de verificação por área.
 
 ## Ordem das fases
