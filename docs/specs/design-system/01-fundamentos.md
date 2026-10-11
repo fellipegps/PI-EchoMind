@@ -4,8 +4,8 @@
 | --- | --- |
 | ID | DS-01 |
 | Versão | 1.0 |
-| Estado da especificação | Proposta — aguardando aprovação |
-| Estado da execução | Não iniciada |
+| Estado da especificação | Aprovada pelo usuário em 11/10/2026 |
+| Estado da execução | Implementada, verificada e aceita pelo usuário em 11/10/2026 |
 | Origem no plano | 1 |
 | Modelo / esforço sugeridos | GPT-6.1 Sol / Extra High |
 | Commit sugerido | refactor(ui): unifica tokens e componentes do design system |
@@ -62,18 +62,20 @@ A lista orienta a implementação; não exige alterar todos os arquivos e não l
 
 ## Tarefas de implementação
 
-- [ ] Mapear tokens existentes e aliases exigidos por DS-00, mantendo compatibilidade de nomes e consumidores.
-- [ ] Aplicar os valores aprovados e ajustes das primitivas sem migrar conteúdo de telas.
-- [ ] Implementar composição compartilhada de marca/avatar somente onde a fase permite, sem forçar uso global antes das migrações.
-- [ ] Corrigir o contexto de tema do Toaster preservando suas props.
-- [ ] Produzir a amostra visual e verificar consumidores principais em ambos os temas.
-- [ ] Registrar evidências e atualizar andamento para revisão.
+- [x] Mapear tokens existentes e aliases exigidos por DS-00, mantendo compatibilidade de nomes e consumidores.
+- [x] Aplicar os valores aprovados e ajustes das primitivas sem migrar conteúdo de telas.
+- [x] Implementar composição compartilhada de marca/avatar somente onde a fase permite, sem forçar uso global antes das migrações.
+- [x] Corrigir o contexto de tema do Toaster preservando suas props.
+- [x] Produzir a amostra visual e verificar consumidores principais em ambos os temas.
+- [x] Registrar evidências e atualizar andamento para revisão.
 
 ## Verificações e evidências
 
 pnpm lint; pnpm typecheck; teste existente components/ui/button.test.tsx. Inspeção visual de estados e consumidores em desktop/celular; build se a mudança de importação/renderização exigir. Não escrever testes que apenas enumerem classes.
 
 Criar o registro de evidências DS-01 apenas durante a execução, conforme o contrato comum. Mapear cada critério a um resultado observado ou pendência; não presumir verificação pela existência da spec.
+
+Execução de 11/10/2026: [evidências DS-01](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-01.md>). AC01–AC05 passaram no escopo desta fase: 74 valores computados conferidos, interações nos dois temas, 109 testes existentes, lint, tipos, build e imagens em 1440/390 px. Os limites dos consumidores ainda não migrados e da simulação de celular estão registrados. O resultado foi aceito pelo pedido de commit após a apresentação da entrega.
 
 ## Condição de conclusão e revisão
 
@@ -82,4 +84,6 @@ Requisitos obrigatórios atendidos, critérios verificáveis com evidências rea
 ## Histórico
 
 - 11/10/2026 — versão 1.0: proposta documental inicial; execução não iniciada; nenhuma aprovação atribuída ao usuário.
+- 11/10/2026 — usuário identificou Fase: 01 e aprovou a versão atual, autorizando somente seu escopo. DS-00 v1.0 e entrega documental aceita conferidas no commit 7e0dc9e. Implementação e verificação concluídas sem alteração material dos requisitos; resultado apresentado para revisão. Sem commit ou push desta fase.
+- 11/10/2026 — após a apresentação do resultado, o usuário pediu o commit das alterações para seguir à próxima fase, explicitamente sem push. Aceite do resultado e autorização de commit local registrados; DS-02 não iniciada.
 

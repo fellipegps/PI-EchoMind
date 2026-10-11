@@ -4,7 +4,7 @@ Versão documental: 1.0 · Data: 11/10/2026.
 
 Este conjunto adota **Specification Driven Development (SDD)**: a especificação define o resultado e as condições de aceitação; as tarefas orientam sua implementação; as evidências mostram o que foi verificado. Os textos são contratos de alteração, não uma sequência de prompts extensos.
 
-**Situação atual (11/10/2026): DS-00 v1.0 concluída documentalmente, verificada e aceita pelo usuário. DS-01–DS-16 continuam propostas e não iniciadas.** O usuário autorizou o commit desta entrega, sem push. Nenhuma alteração da aplicação foi executada. Consulte STATUS.md para os estados separados de aprovação, execução, verificação e aceite.
+**Situação atual (11/10/2026): DS-00 v1.0 aceita e registrada no commit 7e0dc9e. DS-01 v1.0 aprovada, implementada, verificada e aceita pelo pedido de commit local após a apresentação da entrega. DS-02–DS-16 continuam propostas e não iniciadas.** DS-01 altera somente os fundamentos compartilhados e sua amostra de desenvolvimento; não conclui a migração das telas. Seu commit local foi autorizado, sem push. Consulte STATUS.md para os estados separados de aprovação, execução, verificação e aceite.
 
 ## Documentos de referência
 
