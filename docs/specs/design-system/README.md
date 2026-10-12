@@ -4,7 +4,7 @@ Versão documental: 1.0 · Data: 11/10/2026.
 
 Este conjunto adota **Specification Driven Development (SDD)**: a especificação define o resultado e as condições de aceitação; as tarefas orientam sua implementação; as evidências mostram o que foi verificado. Os textos são contratos de alteração, não uma sequência de prompts extensos.
 
-**Situação atual (12/10/2026): DS-00–DS-03 v1.0 aceitas e registradas nos commits locais 7e0dc9e, f332c62, 33520f2 e 124a7eb. DS-04 v1.0 aprovada, implementada, verificada no escopo e aceita em 12/10/2026 pelo pedido de commit após a apresentação da entrega; commit local autorizado, sem push. DS-05–DS-16 continuam propostas e não iniciadas.** DS-04 aplica a base ao chat, às FAQs e ao conteúdo auxiliar com dados já consultados. Eventos completos e mapas permanecem para suas próprias fases. Consulte STATUS.md para os estados separados de aprovação, execução, verificação e aceite.
+**Situação atual (12/10/2026): DS-00–DS-04 v1.0 aceitas e registradas nos commits locais 7e0dc9e, f332c62, 33520f2, 124a7eb e f88a7fd. DS-05 v1.0 aprovada, implementada, verificada no escopo disponível e aceita em 12/10/2026 pelo pedido de commit após apresentação da entrega; commit local autorizado, sem push. DS-06–DS-16 continuam propostas e não iniciadas.** DS-05 aplica a base à agenda pública e compartilha a formatação com o resumo existente do chat. Consulte STATUS.md e as evidências para estados e limites de verificação. Não houve push.
 
 ## Documentos de referência
 

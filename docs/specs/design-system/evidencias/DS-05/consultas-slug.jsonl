@@ -1,0 +1,8 @@
+{"request":"GET /public/ds05-alternate/faqs","count":2}
+{"request":"GET /public/ds05-alternate/events","count":2}
+{"request":"GET /public/ds05-alternate/locations","count":2}
+{"request":"GET /public/ds05-alternate","count":2}
+{"request":"GET /public/ds05-fixture/faqs","count":4}
+{"request":"GET /public/ds05-fixture/events","count":4}
+{"request":"GET /public/ds05-fixture/locations","count":4}
+{"request":"GET /public/ds05-fixture","count":4}

@@ -1,0 +1,13 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(public)/components/public-events.test.tsx"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ app/(public)/components/public-events.test.tsx (17 tests) 706ms
+
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+   Start at  17:14:29
+   Duration  2.60s (transform 88ms, setup 288ms, collect 193ms, tests 706ms, environment 717ms, prepare 184ms)

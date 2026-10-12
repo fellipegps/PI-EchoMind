@@ -1,8 +1,8 @@
 # Andamento — refatoração visual por especificação
 
-Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-03 aceitas e commitadas localmente; DS-04 implementada, verificada no escopo e aceita; commit local autorizado, sem push.
+Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-04 aceitas e commitadas localmente; DS-05 implementada, verificada no escopo disponível e aceita; commit local autorizado. Nenhum push realizado.
 
-DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente. DS-04 v1.0 recebeu autorização própria e foi aceita pelo pedido de commit após a apresentação da entrega, com as limitações documentadas. DS-05–DS-16 continuam propostas e não iniciadas.
+DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente. DS-04 v1.0 recebeu autorização própria e foi aceita pelo pedido de commit após a apresentação da entrega, com as limitações documentadas. DS-05 v1.0 aprovada, implementada, verificada no escopo disponível e aceita em 12/10/2026; DS-06–DS-16 continuam propostas e não iniciadas.
 
 | Fase | Versão | Spec | Execução | Verificação | Aceite do resultado | Evidência / commit |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -10,8 +10,8 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 | DS-01 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-01](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-01.md>) / f332c62 |
 | DS-02 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-02](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-02.md>) / 33520f2 |
 | DS-03 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-03](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-03.md>) / 124a7eb |
-| DS-04 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo, com limites documentados | Aceito em 12/10/2026 | [DS-04](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-04.md>) / commit desta entrega, identificado no histórico Git |
-| DS-05 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
+| DS-04 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo, com limites documentados | Aceito em 12/10/2026 | [DS-04](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-04.md>) / f88a7fd |
+| DS-05 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível, com limites documentados | Aceito em 12/10/2026 | [DS-05](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-05.md>) / commit local identificado no histórico |
 | DS-06 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-07 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-08 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
@@ -32,7 +32,8 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 - DS-02 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 02** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Solicitou implementação, evidências e revisão; não autorizou avanço de fase, commit ou push. A referência à fase 00 continua sendo a restrição documental daquela fase.
 - DS-03 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 03** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Solicitou implementação, evidências e revisão; vedou avanço de fase, commit e push sem nova instrução. A referência à fase 00 preserva o limite documental daquela fase.
 - DS-04 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 04** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou execução e evidências para revisão; não autorizou outra fase, commit ou push.
-- DS-05–DS-16: nenhuma autorização de execução recebida.
+- DS-05 v1.0 e contrato comum v1.0: em 12/10/2026, o usuário identificou **Fase: 05** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou execução/evidências para revisão, sem outra fase, commit ou push.
+- DS-06–DS-16: nenhuma autorização de execução recebida.
 - Aceite do resultado de DS-00 e commit: em 11/10/2026, após a apresentação da entrega, o usuário declarou “Aprovado. Commite as alterações para seguirmos para o proximo passo (so commitar, sem push)”. Aceite registrado separadamente da aprovação da especificação.
 - Aceite do resultado e Git de DS-01: em 11/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações (apenas commitar, sem push) para seguirmos pra proxima fase”. O pedido registra o aceite desta entrega e autoriza somente seu commit local. DS-02 exige autorização própria; push ou publicação continuam não autorizados.
 
@@ -41,6 +42,8 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Aceite do resultado e Git de DS-03: em 11/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações”. O pedido registra o aceite da entrega e autoriza somente seu commit local; não autoriza push ou outra fase.
 
 - Aceite do resultado e Git de DS-04: em 12/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações”. O pedido registra o aceite da entrega e autoriza somente seu commit local; não autoriza push ou outra fase.
+
+- Aceite do resultado e Git de DS-05: em 12/10/2026, após apresentação da entrega, o usuário solicitou “faça commite das alterações”. O pedido registra o aceite da entrega com os limites documentados e autoriza somente seu commit local; não autoriza push ou outra fase.
 
 ## Registro de execução
 
@@ -101,6 +104,19 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Limites: fixtures em loopback; nenhum modelo, conta ou instituição reais. Sem dispositivo físico, teclado virtual, leitor de tela falado, safe area não nula ou preferência de movimento emulada; sem presumir sucesso. Janela 720×512 verifica reflow equivalente à área CSS de 1440×1024 a 200%, sem emular zoom real; 390×480 verifica altura reduzida. Semântica live/foco e motion-reduce inspecionados.
 - Ambiente/correções: pnpm e servidores locais executados com permissão ampliada; nenhuma rejeição automática. Segundo preview encontrou lock do Next; servidor conhecido anterior encerrado e preview reiniciado em 4100 com fixture 4105. Fixture inicialmente lia question em vez do campo message existente; corrigida antes dos cenários válidos. Importação ChevronRight ainda usada no mapa restaurada após o teste apontar a falta. Medição escura foi refeita com a aba correta. Variáveis fictícias só no processo; arquivos de ambiente preservados.
 - Entrega: implementação/verificação concluídas no escopo; resultado aceito pelo pedido de commit após a apresentação da entrega, em 12/10/2026. Requisitos e critérios materiais intactos. DS-05 não iniciada. Commit local autorizado com a mensagem refactor(chat): aplica design system ao chat publico; identificação no histórico Git. Sem push.
+
+### 12/10/2026 — DS-05 v1.0
+
+- Dependências: README, CONTRATO v1.0, STATUS, DS-05 v1.0 e direção DS-00 conferidos. Aceites DS-00/01/03/04 confirmados em 7e0dc9e/f332c62/124a7eb/f88a7fd. Árvore inicialmente limpa; autorização humana restrita à fase 05.
+- Referência: UX Pilot Events and Locations k5WjrM3paBG7rWH7cnmR recuperado por MCP em leitura, completed na página ThHPmFvVAyXGKTItA3AZ; preview 1440×1324 inspecionado. Nenhum design gerado/modificado.
+- Implementação: PublicEvents/EventCard com Card, Skeleton, tokens claro/escuro, capas opcionais, título, período completo, curso/local, descrição e link recebido. Estados de carga/vazio/erro distintos. EventSummary compartilha a mesma formatação com a coluna auxiliar, preservando sua composição e os dados existentes.
+- Preservação: helpers UTC/URL e lógica de funções/estados/efeitos/handlers de PublicPortal idênticos ao baseline. Sem consultas novas, filtros, categorias, destaques ou ordenação. Oito seletores exclusivos de eventos sem consumidores removidos; CSS restante, mapas, APIs, backend e dependências intactos.
+- Verificação: lint, tipos, 48 testes pertinentes em quatro arquivos e build final aprovados; 17 testes de eventos também passaram em Pacific/Honolulu (UTC−10). Oito combinações de tema/largura 1440/1024/768/390, cinco cards por combinação, sem overflow. Capas naturais 1200×675 e 300×600 carregadas, imagem quebrada retirada sem perda de dados. Doze cenários de carga/vazio/falha registrados em desktop/celular e ambos os temas.
+- Interação/dados: 48 focos por Tab em seis janelas e dois temas, todos visíveis; links de pelo menos 44 px, última ação acima da barra inferior. Navegação auxiliar→agenda→chat e resize mantiveram as 52 entradas de consulta idênticas. Slug alternativo exibiu somente seu evento. Link local aberto por Enter em nova aba, com target/rel seguros e referrer vazio.
+- Correção durante QA: último link em 390×1024 podia ficar sob a barra inferior ao receber foco. Margem de rolagem aplicada somente aos links de eventos, considerando safe area; matriz de teclado final passou. Nenhuma mudança material na spec.
+- Limites: dados/API fictícios em loopback; sem infraestrutura ou instituição reais. Reflow 720×512 equivale à área CSS de 1440×1024 a 200%, mas zoom real não comprovado (atalho não mudou dimensões/escala). Sem dispositivo físico, teclado virtual, leitor de tela falado, safe area não nula ou preferência de movimento emulada; motion-reduce inspecionado. A API de inspeção não expõe window.opener; proteção conferida por atributos/testes, sem afirmar medição direta desse valor.
+- Ambiente: servidores e verificações com permissão ampliada por restrições do sandbox; nenhuma rejeição automática. Variáveis fictícias restritas aos processos; nenhum arquivo de ambiente editado. Capturas e registros congelados no diretório DS-05; tráfego posterior do preview fica em .next, fora das evidências.
+- Entrega: implementação concluída, verificação no escopo disponível e limites registrados; resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega. Commit local autorizado com a mensagem refactor(events): padroniza apresentacao dos eventos publicos; identificação no histórico Git. Nenhum push; DS-06 não iniciada.
 
 ## Divergências corrigidas na conversão
 

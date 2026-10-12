@@ -1,0 +1,94 @@
+[
+  {
+    "state": "loading",
+    "scrollWidth": 1440,
+    "status": "Carregando eventos...",
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Carregando eventos...",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "state": "empty",
+    "scrollWidth": 1440,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Nenhum evento programado no momento.",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "state": "error",
+    "alert": "Não foi possível carregar os eventos agora.",
+    "scrollWidth": 1440,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Não foi possível carregar os eventos agora.",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "state": "loading",
+    "scrollWidth": 390,
+    "status": "Carregando eventos...",
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Carregando eventos...",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "state": "empty",
+    "scrollWidth": 390,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Nenhum evento programado no momento.",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "state": "error",
+    "alert": "Não foi possível carregar os eventos agora.",
+    "scrollWidth": 390,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Não foi possível carregar os eventos agora.",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "state": "loading",
+    "scrollWidth": 1440,
+    "status": "Carregando eventos...",
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Carregando eventos...",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "state": "empty",
+    "scrollWidth": 1440,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Nenhum evento programado no momento.",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "state": "error",
+    "alert": "Não foi possível carregar os eventos agora.",
+    "scrollWidth": 1440,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Não foi possível carregar os eventos agora.",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "state": "loading",
+    "scrollWidth": 390,
+    "status": "Carregando eventos...",
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Carregando eventos...",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "state": "empty",
+    "scrollWidth": 390,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Nenhum evento programado no momento.",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "state": "error",
+    "alert": "Não foi possível carregar os eventos agora.",
+    "scrollWidth": 390,
+    "text": "AgendaPróximos eventosAtividades para aprender, conectar e participar.Não foi possível carregar os eventos agora.",
+    "theme": "light",
+    "width": 390
+  }
+]

@@ -18,93 +18,13 @@ import { PortalSectionHeading, PortalShell, type PortalTabId as TabId } from "./
 import styles from "./public-portal.module.css";
 
 import { ChatAuxiliary, PublicChat, type ChatMessage } from "./public-chat";
+import { PublicEvents } from "./public-events";
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: 1,
   role: "assistant",
   content: "Olá! Sou o assistente acadêmico. Como posso ajudar você hoje?",
 };
-
-function eventDateParts(eventDate: string) {
-  const [year, month, day] = eventDate.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return {
-    day,
-    year,
-    month: new Intl.DateTimeFormat("pt-BR", {
-      month: "long",
-      timeZone: "UTC",
-    }).format(date).replace(".", ""),
-  };
-}
-
-function capitalize(value: string) {
-  return value.charAt(0).toLocaleUpperCase("pt-BR") + value.slice(1);
-}
-
-function formatEventPeriod(startDate: string, endDate: string) {
-  const start = eventDateParts(startDate);
-  const end = eventDateParts(endDate);
-  const startMonth = capitalize(start.month);
-  const endMonth = capitalize(end.month);
-  if (startDate === endDate) return `${start.day} de ${startMonth} de ${start.year}`;
-  if (start.month === end.month && start.year === end.year) {
-    return `${start.day} a ${end.day} de ${startMonth} de ${start.year}`;
-  }
-  if (start.year === end.year) {
-    return `${start.day} de ${startMonth} a ${end.day} de ${endMonth} de ${start.year}`;
-  }
-  return `${start.day} de ${startMonth} de ${start.year} a ${end.day} de ${endMonth} de ${end.year}`;
-}
-
-function safeEventUrl(value: string | null, protocols: string[]) {
-  if (!value || /\s|[\u0000-\u001f\u007f]/.test(value)) return null;
-  try {
-    const url = new URL(value);
-    return protocols.includes(url.protocol) && url.hostname && !url.username && !url.password
-      ? value
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-function EventCard({ event }: { event: PublicEvent }) {
-  const [imageFailed, setImageFailed] = useState(false);
-  const period = formatEventPeriod(event.event_date, event.event_end_date);
-  const imageUrl = safeEventUrl(event.image_url, ["https:"]);
-  const linkUrl = safeEventUrl(event.link_url, ["http:", "https:"]);
-
-  return (
-    <article className={styles.eventCard}>
-      {imageUrl && !imageFailed && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          className={styles.eventCover}
-          src={imageUrl}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          alt={event.title}
-          onError={() => setImageFailed(true)}
-        />
-      )}
-      <div className={styles.eventBody}>
-        <div className={styles.eventBodyContent}>
-          <h3>{event.title}</h3>
-          <p className={styles.eventInfo}><strong>Data:</strong> {period}</p>
-          <p className={styles.eventInfo}><strong>Curso:</strong> {event.course}</p>
-          <p className={styles.eventInfo}><strong>Local:</strong> {event.location}</p>
-          {event.description && <p className={styles.eventDescription}>{event.description}</p>}
-          {linkUrl && (
-            <a className={styles.eventLink} href={linkUrl} target="_blank" rel="noopener noreferrer">
-              {linkUrl}
-            </a>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-}
 
 function schematicDistanceInMeters(
   from: PublicCampusLocation,
@@ -295,7 +215,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
       <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName}
         auxiliary={<ChatAuxiliary faqs={faqs} events={events} eventsLoading={eventsLoading} eventsError={eventsError}
           disabled={sending || portalLoading || Boolean(portalError)} onQuestion={(question) => void sendQuestion(question)}
-          onEvents={() => setActiveTab("eventos")} formatPeriod={formatEventPeriod} />}>
+          onEvents={() => setActiveTab("eventos")} />}>
           {activeTab === "chat" && (
             <section className={styles.panel} aria-labelledby="chat-title">
               <PortalSectionHeading id="chat-title" eyebrow="Atendimento digital" title="Como podemos ajudar?" icon={<Sparkles className="size-5" />} />
@@ -311,20 +231,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
           {activeTab === "eventos" && (
             <section className={styles.panel} aria-labelledby="events-title">
               <PortalSectionHeading id="events-title" eyebrow="Agenda" title="Próximos eventos" description="Atividades para aprender, conectar e participar." />
-              <div className={styles.legacyContent}>
-              {eventsLoading && (
-                <div className={styles.alert} role="status">Carregando eventos...</div>
-              )}
-              {eventsError && (
-                <div className={styles.alert} role="alert">{eventsError}</div>
-              )}
-              {!eventsLoading && !eventsError && events.length === 0 && (
-                <p className={styles.emptyState}>Nenhum evento programado no momento.</p>
-              )}
-              <div className={styles.eventList}>
-                {events.map((event) => <EventCard event={event} key={event.id} />)}
-              </div>
-              </div>
+              <PublicEvents events={events} loading={eventsLoading} error={eventsError} />
             </section>
           )}
 

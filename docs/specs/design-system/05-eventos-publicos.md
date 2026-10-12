@@ -4,7 +4,7 @@
 
 ## Identificação e controle
 
-- Status: **Proposta — aguardando aprovação; não implementada**.
+- Status: **Aprovada em 12/10/2026 — implementada, verificada no escopo disponível e aceita em 12/10/2026**.
 - Fase original: 05 do roteiro, etapa 4 do plano.
 - Modelo recomendado: **GPT-6.1 Sol**, esforço **Medium** (`medium`).
 - Commit sugerido após revisão e autorização: `refactor(events): padroniza apresentacao dos eventos publicos`.
@@ -73,13 +73,13 @@ A composição de card pode ser extraída para consumo principal/resumido quando
 
 ## Plano de implementação
 
-- [ ] Conferir aprovações e dependências, estado local e consumidores de eventos/coluna auxiliar.
-- [ ] Consultar a referência visual e confrontar os dados completos do contrato atual.
-- [ ] Aplicar hierarquia/card/capa/estados com a base aprovada, preservando período e validação de URLs.
-- [ ] Compartilhar composição com resumo existente quando útil, sem novas consultas.
-- [ ] Conferir matrizes de período, URLs, imagem ausente/quebrada, textos extensos e estados assíncronos.
-- [ ] Remover somente seletores de eventos substituídos e sem consumidores.
-- [ ] Executar verificações e registrar imagens/evidências para revisão no STATUS.
+- [x] Conferir aprovações e dependências, estado local e consumidores de eventos/coluna auxiliar.
+- [x] Consultar a referência visual e confrontar os dados completos do contrato atual.
+- [x] Aplicar hierarquia/card/capa/estados com a base aprovada, preservando período e validação de URLs.
+- [x] Compartilhar composição com resumo existente quando útil, sem novas consultas.
+- [x] Conferir matrizes de período, URLs, imagem ausente/quebrada, textos extensos e estados assíncronos.
+- [x] Remover somente seletores de eventos substituídos e sem consumidores.
+- [x] Executar verificações e registrar imagens/evidências para revisão no STATUS.
 
 ## Verificações e evidências esperadas
 
@@ -94,4 +94,8 @@ A composição de card pode ser extraída para consumo principal/resumido quando
 
 Pronta para revisão quando os critérios têm evidência, as verificações obrigatórias estão resolvidas e a agenda preserva os dados/estados atuais. STATUS distingue implementação, verificação e aprovação pelo usuário.
 
-Não avançar, criar commit ou fazer push automaticamente. Novos filtros, ocultação de campos ou mudança material da direção visual exigem proposta revisada e aprovação antes da implementação dependente. Todas as tarefas desta spec estão pendentes.
+Não avançar, criar commit ou fazer push automaticamente. Novos filtros, ocultação de campos ou mudança material da direção visual exigem proposta revisada e aprovação antes da implementação dependente. Autorização explícita recebida para DS-05 v1.0 e contrato comum em 12/10/2026; aceite do resultado recebido em 12/10/2026 pelo pedido de commit após apresentação da entrega.
+
+## Resultado da execução — 12/10/2026
+
+Implementação concluída. Verificações de código, matriz visual, estados, períodos, URLs, teclado/reflow e auditoria de escopo registradas em [DS-05](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-05.md>). Zoom real, dispositivo físico e leitor de tela falado não foram comprovados; os limites permanecem explícitos no registro. Nenhum requisito ou critério material foi alterado. Resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega, com os limites registrados. Commit local autorizado com a mensagem refactor(events): padroniza apresentacao dos eventos publicos; identificação no histórico Git. Sem push; DS-06 não iniciada.

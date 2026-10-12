@@ -1,0 +1,14 @@
+{
+  "before": {
+    "height": 1024,
+    "ratio": 1,
+    "width": 1440
+  },
+  "after": {
+    "height": 1024,
+    "ratio": 1,
+    "width": 1440
+  },
+  "changed": false,
+  "reflowTested": "720x512 CSS, ambos os temas; zoom real não comprovado"
+}

@@ -67,80 +67,6 @@
   gap: 16px;
 }
 
-.eventList {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.eventCard {
-  overflow: hidden;
-  border: 1px solid var(--portal-line);
-  border-radius: 12px;
-  background: var(--portal-surface);
-  box-shadow: 0 8px 24px rgba(31, 42, 68, 0.045);
-}
-
-.eventCard h3 {
-  margin: 0 0 12px;
-  color: var(--portal-primary);
-  font-size: 18px;
-  letter-spacing: -0.025em;
-}
-
-.eventInfo {
-  margin: 5px 0;
-  color: var(--portal-muted);
-  font-size: 13px;
-}
-
-.eventInfo strong {
-  color: #4e586d;
-  font-weight: 600;
-}
-
-.eventDescription {
-  margin: 14px 0 0;
-  color: #30384a;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.eventBody {
-  padding: 20px;
-}
-
-.eventCover {
-  display: block;
-  width: calc(100% - 40px);
-  height: clamp(190px, 30vw, 290px);
-  margin: 20px 20px 0;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.eventBodyContent {
-  min-width: 0;
-  flex: 1;
-}
-
-.eventLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 14px;
-  color: var(--portal-primary);
-  font-size: 13px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.eventLink:hover {
-  text-decoration: underline;
-}
-
 .locationToolbar {
   display: grid;
   grid-template-columns: minmax(230px, 1.6fr) minmax(190px, 1fr);
@@ -496,18 +422,6 @@
 
   .routeControls button {
     min-height: 43px;
-  }
-}
-
-@media (max-width: 390px) {
-  .eventBody {
-    padding: 16px;
-  }
-
-  .eventCover {
-    width: calc(100% - 32px);
-    height: 170px;
-    margin: 16px 16px 0;
   }
 }
 

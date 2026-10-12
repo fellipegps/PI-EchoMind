@@ -1,10 +1,11 @@
 import type { ComponentProps, FormEvent, RefObject } from "react";
-import { CalendarDays, ChevronRight, Loader2, Send, Sparkles } from "lucide-react";
+import { ChevronRight, Loader2, Send, Sparkles } from "lucide-react";
 import Markdown from "react-markdown";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { PublicEvent, PublicFaq } from "@/lib/api";
+import { EventSummary } from "./public-events";
 
 export type ChatMessage = { id: number; role: "assistant" | "user"; content: string };
 
@@ -95,7 +96,7 @@ export function PublicChat({ messages, scrollRef, input, onInput, onSubmit, onQu
   );
 }
 
-export function ChatAuxiliary({ faqs, events, eventsLoading, eventsError, disabled, onQuestion, onEvents, formatPeriod }: {
+export function ChatAuxiliary({ faqs, events, eventsLoading, eventsError, disabled, onQuestion, onEvents }: {
   faqs: PublicFaq[];
   events: PublicEvent[];
   eventsLoading: boolean;
@@ -103,7 +104,6 @@ export function ChatAuxiliary({ faqs, events, eventsLoading, eventsError, disabl
   disabled: boolean;
   onQuestion: (question: string) => void;
   onEvents: () => void;
-  formatPeriod: (start: string, end: string) => string;
 }) {
   return (
     <div className="space-y-6 text-foreground">
@@ -116,14 +116,7 @@ export function ChatAuxiliary({ faqs, events, eventsLoading, eventsError, disabl
         {eventsLoading ? <p role="status" className="text-sm text-muted-foreground">Carregando eventos...</p>
           : eventsError ? <p role="alert" className="text-sm text-destructive">{eventsError}</p>
           : events.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum evento programado no momento.</p>
-          : <ul className="space-y-4">{events.map((event) => <li key={event.id} className="flex min-w-0 items-start gap-3 border-t border-border pt-4">
-            <CalendarDays aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
-            <div className="min-w-0 space-y-1 [overflow-wrap:anywhere]">
-              <p className="text-sm leading-5 font-medium">{event.title}</p>
-              <p className="text-xs leading-4 text-muted-foreground">{formatPeriod(event.event_date, event.event_end_date)}</p>
-              <p className="text-xs leading-4 text-muted-foreground">{event.location}</p>
-            </div>
-          </li>)}</ul>}
+          : <ul className="space-y-4">{events.map((event) => <EventSummary event={event} key={event.id} />)}</ul>}
       </section>
     </div>
   );

@@ -1,0 +1,1042 @@
+[
+  {
+    "cards": [
+      {
+        "clientWidth": 368,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 248,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 616.328125,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 640.328125,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 1008.65625,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 1032.65625,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 1401,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 248,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 616.328125,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "images": [],
+        "left": 640.328125,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 1008.65625,
+        "scrollWidth": 368
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 1425,
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 357,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 248,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 604.5,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 628.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 985,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 248,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 604.5,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 628.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 985,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "images": [],
+        "left": 248,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 604.5,
+        "scrollWidth": 357
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 1009,
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 341,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 24,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 364.5,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 388.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 729,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 24,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 364.5,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 388.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 729,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "images": [],
+        "left": 24,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 364.5,
+        "scrollWidth": 341
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 753,
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 343,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 16,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 16,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 16,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 16,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "images": [],
+        "left": 16,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 359,
+        "scrollWidth": 343
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 375,
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 368,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 248,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 616.328125,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 640.328125,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 1008.65625,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 1032.65625,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 1401,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 248,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 616.328125,
+        "scrollWidth": 368
+      },
+      {
+        "clientWidth": 368,
+        "images": [],
+        "left": 640.328125,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 1008.65625,
+        "scrollWidth": 368
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 1425,
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 357,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 248,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 604.5,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 628.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 985,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 248,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 604.5,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 628.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 985,
+        "scrollWidth": 357
+      },
+      {
+        "clientWidth": 357,
+        "images": [],
+        "left": 248,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 604.5,
+        "scrollWidth": 357
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 1009,
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 341,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 24,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 364.5,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 388.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 729,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 24,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 364.5,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 388.5,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 729,
+        "scrollWidth": 341
+      },
+      {
+        "clientWidth": 341,
+        "images": [],
+        "left": 24,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 364.5,
+        "scrollWidth": 341
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 753,
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "cards": [
+      {
+        "clientWidth": 343,
+        "description": "Exposição fictícia dos projetos desenvolvidos pelos estudantes.\nTodos os detalhes recebidos permanecem disponíveis na agenda.",
+        "images": [
+          {
+            "alt": "Semana de projetos acadêmicos · evento de teste",
+            "complete": true,
+            "naturalHeight": 675,
+            "naturalWidth": 1200,
+            "src": "https://placehold.co/1200x675/png?text=Capa+de+teste"
+          }
+        ],
+        "left": 16,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-1",
+            "name": "http://127.0.0.1:4107/info/evento-1",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 de Agosto de 2099",
+          "Engenharia de Software · Curso de teste",
+          "Auditório Central · Campus de teste"
+        ],
+        "name": "Semana de projetos acadêmicos · evento de teste",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "description": "Apresentação fictícia de trabalhos de pesquisa com uma capa de proporção vertical.",
+        "images": [
+          {
+            "alt": "Encontro de pesquisa · capa vertical de teste",
+            "complete": true,
+            "naturalHeight": 600,
+            "naturalWidth": 300,
+            "src": "https://placehold.co/300x600/png?text=Capa+vertical"
+          }
+        ],
+        "left": 16,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-2",
+            "name": "http://127.0.0.1:4107/info/evento-2",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "15 a 17 de Agosto de 2099",
+          "Ciências Biológicas · Curso de teste",
+          "Laboratório de teste"
+        ],
+        "name": "Encontro de pesquisa · capa vertical de teste",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "description": "Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. Descrição fictícia extensa. ",
+        "images": [],
+        "left": 16,
+        "links": [
+          {
+            "height": 156,
+            "href": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "name": "http://127.0.0.1:4107/info/enderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextensoenderecoextenso",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Agosto a 2 de Setembro de 2099",
+          "Curso institucional de teste com nome extenso para verificar a apresentação dos metadados",
+          "Espaço de teste com identificação longa e acesso pelo bloco acadêmico"
+        ],
+        "name": "Jornada institucional sem capa e com título extenso para conferir a leitura completa em todas as larguras · TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "description": "A capa deve falhar sem retirar este texto, os metadados ou o link.",
+        "images": [],
+        "left": 16,
+        "links": [
+          {
+            "height": 44,
+            "href": "http://127.0.0.1:4107/info/evento-4",
+            "name": "http://127.0.0.1:4107/info/evento-4",
+            "rel": "noopener noreferrer",
+            "target": "_blank"
+          }
+        ],
+        "metadata": [
+          "31 de Dezembro de 2099 a 2 de Janeiro de 2100",
+          "Administração · Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Virada acadêmica · capa quebrada de teste",
+        "right": 359,
+        "scrollWidth": 343
+      },
+      {
+        "clientWidth": 343,
+        "images": [],
+        "left": 16,
+        "links": [],
+        "metadata": [
+          "3 de Janeiro de 2100",
+          "Curso de teste",
+          "Sala de teste"
+        ],
+        "name": "Encontro com campos opcionais ausentes",
+        "right": 359,
+        "scrollWidth": 343
+      }
+    ],
+    "height": 1024,
+    "scrollWidth": 375,
+    "theme": "dark",
+    "width": 390
+  }
+]
