@@ -1,0 +1,18 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/campi/geo-campus-manager.test.tsx" "lib/geocampus-api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/geocampus-api.test.ts (2 tests) 5ms
+ ✓ app/(admin)/campi/geo-campus-manager.test.tsx (4 tests) 1708ms
+   ✓ GeoCampusManager > marca a entrada no mapa e liga o prédio a um ponto sem enviar tenant_id  477ms
+   ✓ GeoCampusManager > cadastra espaços internos vinculados ao prédio  714ms
+   ✓ GeoCampusManager > cadastra trecho não acessível entre pontos distintos  349ms
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  19:29:21
+   Duration  3.87s (transform 193ms, setup 561ms, collect 841ms, tests 1.71s, environment 1.22s, prepare 238ms)
+

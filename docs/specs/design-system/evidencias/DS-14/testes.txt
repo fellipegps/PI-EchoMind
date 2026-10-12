@@ -1,0 +1,28 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/campi/geo-campus-manager.test.tsx" "app/(admin)/campi/geo-campus-map.test.tsx" "lib/geocampus-api.test.ts" "app/(public)/components/campus-routing.test.ts" "app/(public)/components/public-campus-navigator.test.tsx"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/geocampus-api.test.ts (2 tests) 7ms
+ ✓ app/(public)/components/campus-routing.test.ts (5 tests) 7ms
+ ✓ app/(admin)/campi/geo-campus-map.test.tsx (3 tests) 253ms
+ ✓ app/(public)/components/public-campus-navigator.test.tsx (9 tests) 1904ms
+   ✓ PublicCampusNavigator > busca espaços e calcula o caminho acessível a partir de origem manual  508ms
+ ✓ app/(admin)/campi/geo-campus-manager.test.tsx (12 tests) 8088ms
+   ✓ GeoCampusManager > marca a entrada no mapa e liga o prédio a um ponto sem enviar tenant_id  738ms
+   ✓ GeoCampusManager > cadastra espaços internos vinculados ao prédio  697ms
+   ✓ GeoCampusManager > cadastra trecho não acessível entre pontos distintos  401ms
+   ✓ GeoCampusManager > preserva precisão manual, campos e vínculo ao editar prédio; falha mantém o formulário  1487ms
+   ✓ GeoCampusManager > bloqueia coordenadas fora da faixa, zoom fracionário, pontos iguais e distância não positiva  1378ms
+   ✓ GeoCampusManager > GPS accepted somente por ação e alternativa manual  833ms
+   ✓ GeoCampusManager > GPS denied somente por ação e alternativa manual  833ms
+   ✓ GeoCampusManager > GPS unavailable somente por ação e alternativa manual  834ms
+   ✓ GeoCampusManager > cancelar exclusão não chama API e vínculo impeditivo preserva entidade  318ms
+
+ Test Files  5 passed (5)
+      Tests  31 passed (31)
+   Start at  19:38:48
+   Duration  11.14s (transform 643ms, setup 2.05s, collect 2.68s, tests 10.26s, environment 4.18s, prepare 822ms)
+

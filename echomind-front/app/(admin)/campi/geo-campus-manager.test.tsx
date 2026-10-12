@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -18,6 +18,7 @@ vi.mock("./geo-campus-map", () => ({
 }));
 
 import { GeoCampusManager } from "./geo-campus-manager";
+import { toast } from "sonner";
 
 const campus = {
   id: "campus-1",
@@ -44,6 +45,7 @@ const nodeB = { id: "node-2", campus_id: campus.id, lat: -16.329, lng: -48.954, 
 
 describe("GeoCampusManager", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     for (const group of Object.values(api)) {
       for (const mock of Object.values(group)) mock.mockReset();
     }
@@ -132,5 +134,125 @@ describe("GeoCampusManager", () => {
     const dialog = screen.getByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "Excluir" }));
     await waitFor(() => expect(api.buildings.delete).toHaveBeenCalledWith("campus-1", "building-1"));
+  });
+
+  it("descarta resposta atrasada e limpa o editor ao trocar campus", async () => {
+    let resolveOld!: (value: typeof building[]) => void;
+    const old = new Promise<typeof building[]>((resolve) => { resolveOld = resolve; });
+    api.campuses.list.mockResolvedValue([campus, { ...campus, id: "campus-2", name: "Campus Norte" }]);
+    api.buildings.list.mockImplementation((id: string) => id === campus.id ? old : Promise.resolve([{ ...building, id: "north", campus_id: "campus-2", name: "Bloco Norte" }]));
+    const user = userEvent.setup();
+    render(<GeoCampusManager />);
+    await screen.findByRole("button", { name: "Editar campus" });
+    await user.click(screen.getByRole("button", { name: "Editar campus" }));
+    await user.selectOptions(screen.getByLabelText("Campus"), "campus-2");
+    expect(screen.queryByLabelText("Nome")).not.toBeInTheDocument();
+    await screen.findByText("Bloco Norte");
+    await act(async () => resolveOld([building]));
+    expect(screen.queryByText("Bloco A")).not.toBeInTheDocument();
+    expect(screen.getByText("Bloco Norte")).toBeInTheDocument();
+  });
+
+  it("preserva precisão manual, campos e vínculo ao editar prédio; falha mantém o formulário", async () => {
+    const user = userEvent.setup();
+    api.buildings.update.mockRejectedValueOnce(new Error("Falha sintética"));
+    api.buildings.update.mockResolvedValueOnce(building);
+    render(<GeoCampusManager />);
+    await user.click(await screen.findByRole("button", { name: "Editar Bloco A" }));
+    await user.clear(screen.getByLabelText("Latitude"));
+    await user.type(screen.getByLabelText("Latitude"), "-16.123456789");
+    await user.clear(screen.getByLabelText("Longitude"));
+    await user.type(screen.getByLabelText("Longitude"), "-48.987654321");
+    await user.selectOptions(screen.getByLabelText("Ponto do caminho na entrada"), nodeB.id);
+    await user.type(screen.getByLabelText("Descrição (opcional)"), "Descrição preservada");
+    await user.click(screen.getByRole("checkbox", { name: "Ativo para visitantes" }));
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Falha sintética"));
+    expect(screen.getByLabelText("Latitude")).toHaveValue(-16.123456789);
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(api.buildings.update).toHaveBeenLastCalledWith(campus.id, building.id, {
+      name: "Bloco A", description: "Descrição preservada", category: "prédio", entrance_lat: -16.123456789,
+      entrance_lng: -48.987654321, entrance_node_id: nodeB.id, active: false,
+    }));
+    await waitFor(() => expect(screen.queryByLabelText("Latitude")).not.toBeInTheDocument());
+  });
+
+  it("bloqueia coordenadas fora da faixa, zoom fracionário, pontos iguais e distância não positiva", async () => {
+    const user = userEvent.setup(); render(<GeoCampusManager />);
+    await screen.findByText("Bloco A");
+    await user.click(screen.getByRole("button", { name: "Novo campus" }));
+    await user.type(screen.getByLabelText("Nome"), "Campus inválido");
+    await user.type(screen.getByLabelText("Latitude"), "91");
+    await user.type(screen.getByLabelText("Longitude"), "0");
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(api.campuses.create).not.toHaveBeenCalled();
+    await user.clear(screen.getByLabelText("Latitude")); await user.type(screen.getByLabelText("Latitude"), "0");
+    await user.clear(screen.getByLabelText("Zoom inicial do mapa (1 a 19)")); await user.type(screen.getByLabelText("Zoom inicial do mapa (1 a 19)"), "2.5");
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(toast.error).toHaveBeenCalledWith("Informe um zoom de 1 a 19.");
+    expect(api.campuses.create).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+    await user.click(screen.getByRole("tab", { name: "Trechos" }));
+    await user.click(screen.getByRole("button", { name: "Novo trecho" }));
+    await user.selectOptions(screen.getByLabelText("Ponto final"), nodeA.id);
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(toast.error).toHaveBeenCalledWith("Selecione dois pontos diferentes para o trecho.");
+    await user.selectOptions(screen.getByLabelText("Ponto final"), nodeB.id);
+    await user.type(screen.getByLabelText("Comprimento real em metros (opcional)"), "0");
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(toast.error).toHaveBeenCalledWith("A distância deve ser maior que zero.");
+    expect(api.edges.create).not.toHaveBeenCalled();
+  });
+
+  it.each(["accepted", "denied", "unavailable"])("GPS %s somente por ação e alternativa manual", async (mode) => {
+    const descriptor = Object.getOwnPropertyDescriptor(navigator, "geolocation");
+    const getCurrentPosition = vi.fn((success: PositionCallback, error: PositionErrorCallback) => {
+      if (mode === "accepted") success({ coords: { latitude: -16.123456789, longitude: -48.987654321 } } as GeolocationPosition);
+      else error({ code: 1 } as GeolocationPositionError);
+    });
+    const watchPosition = vi.fn();
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: mode === "unavailable" ? undefined : { getCurrentPosition, watchPosition } });
+    try {
+      const user = userEvent.setup(); render(<GeoCampusManager />); await screen.findByText("Bloco A");
+      await user.click(screen.getByRole("tab", { name: "Pontos do caminho" }));
+      await user.click(screen.getByRole("button", { name: "Novo ponto" }));
+      expect(getCurrentPosition).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Marcar minha localização" }));
+      if (mode === "unavailable") expect(toast.error).toHaveBeenCalledWith("Este navegador não oferece localização.");
+      else {
+        expect(getCurrentPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), { enableHighAccuracy: true, timeout: 10000 });
+        if (mode === "accepted") expect(screen.getByLabelText("Latitude")).toHaveValue(-16.1234568);
+        else expect(toast.error).toHaveBeenCalledWith("Não foi possível acessar sua localização.");
+      }
+      expect(watchPosition).not.toHaveBeenCalled();
+      await user.clear(screen.getByLabelText("Latitude")); await user.type(screen.getByLabelText("Latitude"), "0.123456789");
+      await user.clear(screen.getByLabelText("Longitude")); await user.type(screen.getByLabelText("Longitude"), "0.987654321");
+      api.nodes.create.mockResolvedValue(nodeA);
+      await user.click(screen.getByRole("button", { name: "Salvar" }));
+      await waitFor(() => expect(api.nodes.create).toHaveBeenCalledWith(campus.id, { label: null, lat: 0.123456789, lng: 0.987654321 }));
+    } finally {
+      if (descriptor) Object.defineProperty(navigator, "geolocation", descriptor);
+      else Reflect.deleteProperty(navigator, "geolocation");
+    }
+  });
+
+  it("cancelar exclusão não chama API e vínculo impeditivo preserva entidade", async () => {
+    const user = userEvent.setup(); api.buildings.delete.mockRejectedValue(new Error("Prédio possui espaços vinculados."));
+    render(<GeoCampusManager />);
+    const trigger = await screen.findByRole("button", { name: "Excluir Bloco A" });
+    await user.click(trigger); await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar" }));
+    expect(api.buildings.delete).not.toHaveBeenCalled(); expect(trigger).toHaveFocus();
+    await user.click(trigger); await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Excluir" }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Prédio possui espaços vinculados."));
+    expect(screen.getByText("Bloco A")).toBeInTheDocument(); expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it("abas operam com setas e editor devolve foco ao cancelar", async () => {
+    const user = userEvent.setup(); render(<GeoCampusManager />); await screen.findByText("Bloco A");
+    screen.getByRole("tab", { name: "Prédios" }).focus(); await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Espaços internos" })).toHaveAttribute("aria-selected", "true");
+    const trigger = screen.getByRole("button", { name: "Novo espaço" });
+    await user.click(trigger); expect(screen.getByRole("heading", { name: "Cadastrar espaço interno" })).toHaveFocus();
+    await user.click(screen.getByRole("button", { name: "Cancelar" })); expect(trigger).toHaveFocus();
   });
 });

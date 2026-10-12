@@ -4,7 +4,7 @@
 
 ## Identificação e estado
 
-- **Status:** Proposta / aguardando aprovação. Não aprovada nem implementada.
+- **Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementada; resultado aceito em 12/10/2026 pelo pedido “faça o commite dessas alterações”, com a pendência documentada. Commit local autorizado; identificação no histórico Git. Verificação local realizada; R10/AC09 parcial por zoom nativo de 200% não comprovado. [Evidências DS-14](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-14.md>).
 - **Origem:** fase 14 do roteiro anterior; etapa 9C do plano de refatoração.
 - **Modelo sugerido:** GPT-6 Astra (`gpt-6-astra`), esforço High (`high`).
 - **Commit sugerido, após revisão e autorização:** `refactor(campus): aplica design system ao editor de campi`.
@@ -86,13 +86,14 @@ Fora do escopo: novo motor de rotas, geocodificação, reestruturação do banco
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação, decisões complementares do editor e dependências.
-- [ ] Ajustar cabeçalho, seletor e painéis sem alterar estado/consultas geográficas.
-- [ ] Padronizar formulário contextual, vínculos, abas/listas e feedback.
-- [ ] Alinhar marcadores/legenda e controles com tokens, conservando descrições e geometria.
-- [ ] Verificar GPS por ação, coordenadas, vínculos, validações e exclusões em fixtures.
-- [ ] Conferir reflow do Leaflet, pan/zoom, atribuição, camada e limpeza da instância.
-- [ ] Executar verificações, reunir evidências e atualizar STATUS para revisão.
+- [x] Confirmar aprovação, decisões complementares do editor e dependências.
+- [x] Ajustar cabeçalho, seletor e painéis sem alterar estado/consultas geográficas.
+- [x] Padronizar formulário contextual, vínculos, abas/listas e feedback.
+- [x] Alinhar marcadores/legenda e controles com tokens, conservando descrições e geometria.
+- [x] Verificar GPS por ação, coordenadas, vínculos, validações e exclusões em fixtures.
+- [x] Conferir reflow do Leaflet, pan/zoom, atribuição, camada e limpeza da instância.
+- [x] Executar verificações, reunir evidências e atualizar STATUS para revisão.
+- [ ] Comprovar zoom nativo de 200% em navegador que exponha esse controle; tentativa e limite registrados em R10/AC09. Viewport reduzido não substitui essa verificação.
 
 ## Verificações e evidências
 

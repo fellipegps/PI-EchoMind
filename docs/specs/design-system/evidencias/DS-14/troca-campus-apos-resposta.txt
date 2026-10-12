@@ -1,0 +1,62 @@
+- main:
+  - generic "Cabeçalho administrativo":
+    - button "Alternar navegação":
+      - generic: Alternar navegação
+    - generic: Painel administrativo
+    - button "Alternar tema":
+      - generic: Alternar tema
+  - paragraph: Navegação institucional
+  - heading "Mapa dos campi" [level=1]
+  - paragraph: Marque as entradas dos prédios e conecte os caminhos que podem ser percorridos. Os estudantes poderão consultar os espaços e seguir uma rota a partir da posição atual.
+  - region "Editor geográfico de campi":
+    - generic: Campus
+    - combobox "Campus":
+      - option "Campus Central sintético"
+      - option "Campus Norte sintético" [selected]
+    - button "Novo campus":
+      - text: Novo campus
+    - button "Editar campus" [active]:
+      - text: Editar campus
+    - button "Excluir campus Campus Norte sintético":
+    - heading "Campus Norte sintético" [level=2]
+    - paragraph: Consulte entradas, pontos e trechos do campus. Use os controles para aproximar ou afastar o mapa.
+    - application "Mapa geográfico do campus; clique para marcar um ponto durante o cadastro":
+      - button "Aproximar mapa": +
+      - button "Afastar mapa": −
+      - radio "Satélite" [checked]
+      - text: Satélite
+      - radio "Mapa"
+      - text: Mapa
+      - link "Leaflet":
+        - /url: https://leafletjs.com
+        - text: Leaflet
+      - text: "| Satélite sintético DS-14"
+    - list "Legenda do mapa":
+      - listitem: Entradas dos prédios
+      - listitem: Pontos do caminho
+      - listitem: Trecho acessível
+      - listitem: Trecho com barreira
+    - status: 1 prédio(s), 1 ponto(s), 0 trecho(s)
+    - button "Ir para minha localização"
+    - generic: Como preparar a navegação
+    - paragraph: 1. Cadastre o campus e ajuste o mapa na área da instituição.
+    - paragraph: 2. Marque a entrada de cada prédio e descreva seus auditórios, laboratórios e outros espaços.
+    - paragraph: 3. Marque cruzamentos e mudanças de direção. Ligue pontos vizinhos por trechos e indique se cada um é acessível.
+    - paragraph: 4. Edite os prédios para ligar suas entradas aos pontos da rede. A rota termina na entrada vinculada.
+    - heading "Dados de Campus Norte sintético" [level=2]
+    - paragraph: Organize os locais e o grafo que será usado pelas rotas.
+    - button "Novo prédio":
+      - text: Novo prédio
+    - tablist "Dados do campus":
+      - tab "Prédios" [selected]
+      - tab "Espaços internos"
+      - tab "Pontos do caminho"
+      - tab "Trechos"
+    - tabpanel "Prédios":
+      - article "Bloco exclusivo Norte":
+        - heading "Bloco exclusivo Norte" [level=3]
+        - paragraph: ensino · entrada -16.330000, -48.960000
+        - button "Editar Bloco exclusivo Norte":
+        - button "Excluir Bloco exclusivo Norte":
+- region "Notifications alt+T"
+- alert

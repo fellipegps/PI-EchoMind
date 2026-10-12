@@ -1,0 +1,22 @@
+[
+  {
+    "file": "echomind-front/lib/geocampus-api.ts",
+    "unchanged": true
+  },
+  {
+    "file": "echomind-front/app/(public)/components/campus-routing.ts",
+    "unchanged": true
+  },
+  {
+    "file": "echomind-front/app/(public)/components/public-campus-navigator.tsx",
+    "unchanged": true
+  },
+  {
+    "file": "echomind-front/package.json",
+    "unchanged": true
+  },
+  {
+    "file": "echomind-front/pnpm-lock.yaml",
+    "unchanged": true
+  }
+]

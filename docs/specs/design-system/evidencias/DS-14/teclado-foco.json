@@ -1,0 +1,152 @@
+[
+  {
+    "bottom": 642,
+    "id": "geo-name",
+    "name": "",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "top": 598,
+    "visible": true
+  },
+  {
+    "bottom": 784,
+    "id": "geo-description",
+    "name": "Acervo fictício",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "top": 688,
+    "visible": true
+  },
+  {
+    "bottom": 874,
+    "id": "geo-category",
+    "name": "",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "top": 830,
+    "visible": true
+  },
+  {
+    "bottom": 520,
+    "id": "geo-lat",
+    "name": "",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "top": 476,
+    "visible": true
+  },
+  {
+    "bottom": 606,
+    "id": "geo-lng",
+    "name": "",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "top": 562,
+    "visible": true
+  },
+  {
+    "bottom": 670,
+    "id": "",
+    "name": "Ir para este ponto no mapa",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "top": 626,
+    "visible": true
+  },
+  {
+    "bottom": 760,
+    "id": "geo-entrance-node",
+    "name": "Sem ligação com a rotaPortaria (-16.328000, -48.953000)Praça (-16.3283",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(147, 197, 253) 0px 0px 0px 2px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+    "tag": "SELECT",
+    "top": 716,
+    "visible": true
+  },
+  {
+    "bottom": 849,
+    "id": "",
+    "name": "",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(147, 197, 253) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "INPUT",
+    "top": 833,
+    "visible": true
+  },
+  {
+    "bottom": 900,
+    "id": "",
+    "name": "Salvar",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "top": 856,
+    "visible": true
+  },
+  {
+    "bottom": 520,
+    "id": "",
+    "name": "Cancelar",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "top": 476,
+    "visible": true
+  },
+  {
+    "bottom": 754,
+    "id": "",
+    "name": " Novo prédio",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "top": 710,
+    "visible": true
+  },
+  {
+    "bottom": 822,
+    "id": "radix-_r_8_-trigger-building",
+    "name": "Prédios",
+    "outline": "rgb(147, 197, 253) solid 3px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0 0 0 / 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+    "tag": "BUTTON",
+    "top": 778,
+    "visible": true
+  },
+  {
+    "bottom": 866,
+    "id": "radix-_r_8_-content-building",
+    "name": "Biblioteca sintéticaestudo · entrada -16.328000, -48.953000Bloco sem r",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(147, 197, 253) 0px 0px 0px 2px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "DIV",
+    "top": 34,
+    "visible": false
+  },
+  {
+    "bottom": 191,
+    "id": "",
+    "name": "Editar Biblioteca sintética",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "top": 147,
+    "visible": true
+  },
+  {
+    "bottom": 191,
+    "id": "",
+    "name": "Excluir Biblioteca sintética",
+    "outline": "rgb(147, 197, 253) none 1px",
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "top": 147,
+    "visible": true
+  }
+]

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Building2, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
+import { Building2, Loader2, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -33,6 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GeoCampusMap, type GeoPoint } from "./geo-campus-map";
 
 type Entity = "campus" | "building" | "space" | "node" | "edge";
@@ -82,6 +83,8 @@ const TAB_LABELS: Record<Tab, string> = {
   node: "Pontos do caminho",
   edge: "Trechos",
 };
+
+const SELECT_CLASS = "min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 
 function coordinate(value: string, min: number, max: number): number | null {
   if (!value.trim()) return null;
@@ -155,6 +158,17 @@ export function GeoCampusManager() {
   const [deleting, setDeleting] = useState<DeleteTarget>(null);
   const [focusPoint, setFocusPoint] = useState<GeoPoint | null>(null);
   const mapRequest = useRef(0);
+  const campusSelect = useRef<HTMLSelectElement>(null);
+  const editorHeading = useRef<HTMLHeadingElement>(null);
+  const editorTrigger = useRef<HTMLElement | null>(null);
+  const previousEditor = useRef<Editor>(null);
+  const deleteTrigger = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (editor) editorHeading.current?.focus();
+    else if (previousEditor.current) editorTrigger.current?.focus();
+    previousEditor.current = editor;
+  }, [editor]);
 
   const campus = campuses.find((item) => item.id === selectedCampusId) || null;
   const buildingNames = useMemo(() => new Map(buildings.map((item) => [item.id, item.name])), [buildings]);
@@ -233,6 +247,7 @@ export function GeoCampusManager() {
 
   const startCreate = (kind: Entity) => {
     if (kind !== "campus" && !campus) return;
+    editorTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setForm({
       ...EMPTY_FORM,
       building_id: kind === "space" ? buildings[0]?.id || "" : "",
@@ -244,6 +259,7 @@ export function GeoCampusManager() {
   };
 
   const startEdit = (kind: Entity, item: Campus | Building | IndoorSpace | PathNode | PathEdge) => {
+    editorTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setForm(formFor(item, kind));
     setFocusPoint(null);
     setEditor({ kind, id: item.id });
@@ -394,82 +410,90 @@ export function GeoCampusManager() {
   const list: Array<Building | IndoorSpace | PathNode | PathEdge> = tab === "building" ? buildings : tab === "space" ? spaces : tab === "node" ? nodes : edges;
 
   return (
-    <div className="space-y-5">
+    <section className="min-w-0 space-y-6 [&_button]:scroll-mt-24 [&_input]:scroll-mt-24 [&_select]:scroll-mt-24 [&_textarea]:scroll-mt-24" aria-label="Editor geográfico de campi">
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-3 p-4">
-          <div className="min-w-52 flex-1 space-y-1.5">
+        <CardContent className="flex min-w-0 flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-end md:p-6">
+          <div className="min-w-0 flex-1 space-y-2 sm:basis-64">
             <Label htmlFor="campus-select">Campus</Label>
-            <select id="campus-select" className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm" value={selectedCampusId} onChange={(event) => selectCampus(event.target.value)} disabled={loadingCampuses || saving || Boolean(deleting)}>
+            <select id="campus-select" ref={campusSelect} className={SELECT_CLASS} value={selectedCampusId} onChange={(event) => selectCampus(event.target.value)} disabled={loadingCampuses || saving || Boolean(deleting)}>
               {!campuses.length && <option value="">Nenhum campus cadastrado</option>}
               {campuses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select>
           </div>
-          <Button onClick={() => startCreate("campus")} disabled={saving || Boolean(deleting)}><Plus className="h-4 w-4" /> Novo campus</Button>
+          <Button onClick={() => startCreate("campus")} disabled={saving || Boolean(deleting)}><Plus aria-hidden="true" className="h-4 w-4" /> Novo campus</Button>
           {campus && <>
-            <Button variant="outline" onClick={() => startEdit("campus", campus)} disabled={saving || Boolean(deleting)}><Pencil className="h-4 w-4" /> Editar campus</Button>
-            <Button variant="outline" aria-label={`Excluir campus ${campus.name}`} onClick={() => setDeleting({ kind: "campus", id: campus.id, name: campus.name })} disabled={saving}><Trash2 className="h-4 w-4" /></Button>
+            <Button variant="outline" onClick={() => startEdit("campus", campus)} disabled={saving || Boolean(deleting)}><Pencil aria-hidden="true" className="h-4 w-4" /> Editar campus</Button>
+            <Button variant="outline" size="icon" className="text-destructive" aria-label={`Excluir campus ${campus.name}`} onClick={(event) => { deleteTrigger.current = event.currentTarget; setDeleting({ kind: "campus", id: campus.id, name: campus.name }); }} disabled={saving}><Trash2 aria-hidden="true" className="h-4 w-4" /></Button>
           </>}
         </CardContent>
       </Card>
+      {loadingCampuses && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />Carregando campi...</p>}
 
-      {error && <Card className="border-destructive/40"><CardContent className="flex flex-wrap items-center justify-between gap-2 p-4"><p role="alert" className="text-sm text-destructive">{error}</p><Button variant="outline" onClick={() => { setError(""); setLoadingCampuses(true); void loadCampuses(); if (campus) { setLoadingMap(true); void loadMap(campus.id); } }}>Tentar novamente</Button></CardContent></Card>}
+      {error && <Card className="border-destructive/40"><CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"><p role="alert" className="text-sm text-foreground">{error}</p><Button variant="outline" onClick={() => { setError(""); setLoadingCampuses(true); void loadCampuses(); if (campus) { setLoadingMap(true); void loadMap(campus.id); } }}>Tentar novamente</Button></CardContent></Card>}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(330px,1fr)]">
-        <Card className="overflow-hidden">
-          <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-lg"><MapPin className="h-5 w-5" /> {campus?.name || "Mapa mundial"}</CardTitle><p className="text-sm text-muted-foreground">{isPointEditor ? "Clique no mapa para definir o ponto. Você também pode arrastar o marcador vermelho." : "Entradas em roxo, pontos do caminho em azul, trechos acessíveis em verde e trechos com barreira em laranja."}</p></CardHeader>
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,1fr)]">
+        <Card className="min-w-0 overflow-hidden">
+          <CardHeader className="pb-3"><CardTitle className="flex min-w-0 items-start gap-2 text-lg"><MapPin aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" /> <h2 className="min-w-0 [overflow-wrap:anywhere]">{campus?.name || "Mapa mundial"}</h2></CardTitle><p id="geo-map-instructions" className="text-sm text-muted-foreground">{isPointEditor ? "Clique no mapa ou arraste o ponto em edição. Você também pode informar latitude e longitude no formulário." : "Consulte entradas, pontos e trechos do campus. Use os controles para aproximar ou afastar o mapa."}</p></CardHeader>
           <CardContent className="space-y-3 pb-4">
             <GeoCampusMap key={selectedCampusId || "new-campus"} center={mapCenter} zoom={campus?.zoom || 2} buildings={buildings} nodes={nodes} edges={edges} draftPoint={draftPoint} focusPoint={focusPoint} onPickPoint={isPointEditor ? handlePickPoint : undefined} />
+            <ul aria-label="Legenda do mapa" className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+              <li className="flex items-center gap-2"><span aria-hidden="true" className="size-3 rounded-full bg-chart-4" />Entradas dos prédios</li>
+              <li className="flex items-center gap-2"><span aria-hidden="true" className="size-2 rounded-full bg-primary" />Pontos do caminho</li>
+              <li className="flex items-center gap-2"><span aria-hidden="true" className="w-5 border-t-4 border-success" />Trecho acessível</li>
+              <li className="flex items-center gap-2"><span aria-hidden="true" className="w-5 border-t-4 border-dashed border-warning" />Trecho com barreira</li>
+              {isPointEditor && <li className="flex items-center gap-2"><span aria-hidden="true" className="size-3 rounded-full bg-destructive" />Ponto em edição</li>}
+            </ul>
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span>{loadingMap ? "Atualizando mapa..." : `${buildings.length} prédio(s), ${nodes.length} ponto(s), ${edges.length} trecho(s)`}</span>
+              <span role="status">{loadingMap ? "Atualizando mapa..." : `${buildings.length} prédio(s), ${nodes.length} ponto(s), ${edges.length} trecho(s)`}</span>
               <Button type="button" variant="outline" size="sm" onClick={locateAdmin}>{isPointEditor ? "Marcar minha localização" : "Ir para minha localização"}</Button>
             </div>
           </CardContent>
         </Card>
 
         {editor ? (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-lg">{editor.id ? "Editar" : "Cadastrar"} {editor.kind === "campus" ? "campus" : editor.kind === "building" ? "prédio" : editor.kind === "space" ? "espaço interno" : editor.kind === "node" ? "ponto do caminho" : "trecho"}</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              {(editor.kind === "campus" || editor.kind === "building" || editor.kind === "space") && <div className="space-y-1.5"><Label htmlFor="geo-name">Nome</Label><Input id="geo-name" value={form.name} onChange={(event) => updateForm("name", event.target.value)} placeholder={editor.kind === "campus" ? "Campus Central" : editor.kind === "building" ? "Bloco A" : "Auditório Principal"} /></div>}
+          <Card className="min-w-0" role="region" aria-labelledby="geo-editor-title">
+            <CardHeader className="pb-2"><CardTitle className="text-lg"><h2 id="geo-editor-title" ref={editorHeading} tabIndex={-1} className="scroll-mt-24 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{editor.id ? "Editar" : "Cadastrar"} {editor.kind === "campus" ? "campus" : editor.kind === "building" ? "prédio" : editor.kind === "space" ? "espaço interno" : editor.kind === "node" ? "ponto do caminho" : "trecho"}</h2></CardTitle><p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">{editor.kind === "campus" ? "Centro e configurações do campus." : `Campus: ${campus?.name}`}</p></CardHeader>
+            <CardContent className="min-w-0 space-y-5 [&>div]:min-w-0">
+              {(editor.kind === "campus" || editor.kind === "building" || editor.kind === "space") && <div className="space-y-1.5"><Label htmlFor="geo-name">Nome</Label><Input id="geo-name" aria-required="true" value={form.name} onChange={(event) => updateForm("name", event.target.value)} placeholder={editor.kind === "campus" ? "Campus Central" : editor.kind === "building" ? "Bloco A" : "Auditório Principal"} /></div>}
               {editor.kind === "node" && <div className="space-y-1.5"><Label htmlFor="geo-name">Identificação do ponto (opcional)</Label><Input id="geo-name" value={form.name} onChange={(event) => updateForm("name", event.target.value)} placeholder="Portão norte" /></div>}
-              {(editor.kind === "campus" || editor.kind === "building" || editor.kind === "space") && <div className="space-y-1.5"><Label htmlFor="geo-description">Descrição (opcional)</Label><Textarea id="geo-description" rows={2} value={form.description} onChange={(event) => updateForm("description", event.target.value)} /></div>}
+              {(editor.kind === "campus" || editor.kind === "building" || editor.kind === "space") && <div className="space-y-1.5"><Label htmlFor="geo-description">Descrição (opcional)</Label><Textarea id="geo-description" className="field-sizing-fixed min-h-24 max-h-48 resize-none overflow-y-auto" rows={3} value={form.description} onChange={(event) => updateForm("description", event.target.value)} /></div>}
               {editor.kind === "building" && <div className="space-y-1.5"><Label htmlFor="geo-category">Categoria</Label><Input id="geo-category" value={form.category} onChange={(event) => updateForm("category", event.target.value)} placeholder="Bloco, biblioteca, restaurante..." /></div>}
               {editor.kind === "space" && <>
-                <div className="space-y-1.5"><Label htmlFor="geo-building">Prédio</Label><select id="geo-building" className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm" value={form.building_id} onChange={(event) => updateForm("building_id", event.target.value)}><option value="">Selecione</option>{buildings.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>
-                <div className="grid grid-cols-2 gap-3"><div className="space-y-1.5"><Label htmlFor="geo-kind">Tipo de espaço</Label><Input id="geo-kind" value={form.kind} onChange={(event) => updateForm("kind", event.target.value)} placeholder="Auditório, laboratório..." /></div><div className="space-y-1.5"><Label htmlFor="geo-floor">Piso</Label><Input id="geo-floor" value={form.floor} onChange={(event) => updateForm("floor", event.target.value)} placeholder="Térreo, 2º..." /></div></div>
+                <div className="space-y-1.5"><Label htmlFor="geo-building">Prédio</Label><select id="geo-building" className={SELECT_CLASS} value={form.building_id} onChange={(event) => updateForm("building_id", event.target.value)}><option value="">Selecione</option>{buildings.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></div>
+                <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 [&>div]:min-w-0"><div className="space-y-1.5"><Label htmlFor="geo-kind">Tipo de espaço</Label><Input id="geo-kind" value={form.kind} onChange={(event) => updateForm("kind", event.target.value)} placeholder="Auditório, laboratório..." /></div><div className="space-y-1.5"><Label htmlFor="geo-floor">Piso</Label><Input id="geo-floor" value={form.floor} onChange={(event) => updateForm("floor", event.target.value)} placeholder="Térreo, 2º..." /></div></div>
               </>}
               {isPointEditor && <>
                 <p className="text-sm text-muted-foreground">{editor.kind === "building" ? "Marque a entrada usada pelos visitantes, não o centro do prédio." : editor.kind === "node" ? "Marque um cruzamento ou mudança de direção do caminho." : "Marque o centro aproximado do campus. Pode ajustar as coordenadas manualmente."}</p>
-                <div className="grid grid-cols-2 gap-3"><div className="space-y-1.5"><Label htmlFor="geo-lat">Latitude</Label><Input id="geo-lat" type="number" step="any" min="-90" max="90" value={form.lat} onChange={(event) => updateForm("lat", event.target.value)} /></div><div className="space-y-1.5"><Label htmlFor="geo-lng">Longitude</Label><Input id="geo-lng" type="number" step="any" min="-180" max="180" value={form.lng} onChange={(event) => updateForm("lng", event.target.value)} /></div></div>
+                <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 [&>div]:min-w-0"><div className="space-y-1.5"><Label htmlFor="geo-lat">Latitude</Label><Input id="geo-lat" type="number" step="any" min="-90" max="90" value={form.lat} onChange={(event) => updateForm("lat", event.target.value)} /></div><div className="space-y-1.5"><Label htmlFor="geo-lng">Longitude</Label><Input id="geo-lng" type="number" step="any" min="-180" max="180" value={form.lng} onChange={(event) => updateForm("lng", event.target.value)} /></div></div>
                 {draftPoint && <Button type="button" size="sm" variant="outline" onClick={() => setFocusPoint({ ...draftPoint })}>Ir para este ponto no mapa</Button>}
               </>}
               {editor.kind === "campus" && <div className="space-y-1.5"><Label htmlFor="geo-zoom">Zoom inicial do mapa (1 a 19)</Label><Input id="geo-zoom" type="number" min="1" max="19" value={form.zoom} onChange={(event) => updateForm("zoom", event.target.value)} /></div>}
-              {editor.kind === "building" && <div className="space-y-1.5"><Label htmlFor="geo-entrance-node">Ponto do caminho na entrada</Label><select id="geo-entrance-node" className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm" value={form.entrance_node_id} onChange={(event) => updateForm("entrance_node_id", event.target.value)}><option value="">Sem ligação com a rota</option>{nodes.map((item, index) => <option key={item.id} value={item.id}>{item.label || `Ponto ${index + 1}`} ({formatCoordinate(item.lat)}, {formatCoordinate(item.lng)})</option>)}</select><p className="text-xs text-muted-foreground">Para traçar uma rota até esta entrada, crie um ponto do caminho próximo dela e selecione-o aqui.</p></div>}
+              {editor.kind === "building" && <div className="space-y-1.5"><Label htmlFor="geo-entrance-node">Ponto do caminho na entrada</Label><select id="geo-entrance-node" className={SELECT_CLASS} value={form.entrance_node_id} onChange={(event) => updateForm("entrance_node_id", event.target.value)}><option value="">Sem ligação com a rota</option>{nodes.map((item, index) => <option key={item.id} value={item.id}>{item.label || `Ponto ${index + 1}`} ({formatCoordinate(item.lat)}, {formatCoordinate(item.lng)})</option>)}</select><p className="text-xs text-muted-foreground">Para traçar uma rota até esta entrada, crie um ponto do caminho próximo dela e selecione-o aqui.</p></div>}
               {editor.kind === "edge" && <>
-                <div className="space-y-1.5"><Label htmlFor="geo-from">Ponto inicial</Label><select id="geo-from" className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm" value={form.from_node_id} onChange={(event) => updateForm("from_node_id", event.target.value)}><option value="">Selecione</option>{nodes.map((item, index) => <option key={item.id} value={item.id}>{item.label || `Ponto ${index + 1}`}</option>)}</select></div>
-                <div className="space-y-1.5"><Label htmlFor="geo-to">Ponto final</Label><select id="geo-to" className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm" value={form.to_node_id} onChange={(event) => updateForm("to_node_id", event.target.value)}><option value="">Selecione</option>{nodes.map((item, index) => <option key={item.id} value={item.id}>{item.label || `Ponto ${index + 1}`}</option>)}</select></div>
+                <div className="space-y-1.5"><Label htmlFor="geo-from">Ponto inicial</Label><select id="geo-from" className={SELECT_CLASS} value={form.from_node_id} onChange={(event) => updateForm("from_node_id", event.target.value)}><option value="">Selecione</option>{nodes.map((item, index) => <option key={item.id} value={item.id}>{item.label || `Ponto ${index + 1}`}</option>)}</select></div>
+                <div className="space-y-1.5"><Label htmlFor="geo-to">Ponto final</Label><select id="geo-to" className={SELECT_CLASS} value={form.to_node_id} onChange={(event) => updateForm("to_node_id", event.target.value)}><option value="">Selecione</option>{nodes.map((item, index) => <option key={item.id} value={item.id}>{item.label || `Ponto ${index + 1}`}</option>)}</select></div>
                 <div className="space-y-1.5"><Label htmlFor="geo-distance">Comprimento real em metros (opcional)</Label><Input id="geo-distance" type="number" min="0" step="any" value={form.distance_m} onChange={(event) => updateForm("distance_m", event.target.value)} placeholder="Calculado pelas coordenadas" /><p className="text-xs text-muted-foreground">Use um valor medido se o trecho não for reto.</p></div>
-                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.accessible} onChange={(event) => updateForm("accessible", event.target.checked)} />Trecho acessível (sem escadas ou barreiras)</label>
+                <label className="flex min-h-11 items-center gap-3 rounded-lg border border-border bg-muted/40 p-3 text-sm"><input className="size-4 shrink-0 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" type="checkbox" checked={form.accessible} onChange={(event) => updateForm("accessible", event.target.checked)} />Trecho acessível (sem escadas ou barreiras)</label>
               </>}
-              {(editor.kind === "campus" || editor.kind === "building" || editor.kind === "space" || editor.kind === "edge") && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.active} onChange={(event) => updateForm("active", event.target.checked)} />Ativo para visitantes</label>}
-              <div className="flex flex-wrap gap-2 pt-2"><Button onClick={() => void save()} disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button><Button variant="outline" onClick={() => setEditor(null)} disabled={saving}>Cancelar</Button></div>
+              {(editor.kind === "campus" || editor.kind === "building" || editor.kind === "space" || editor.kind === "edge") && <label className="flex min-h-11 items-center gap-3 rounded-lg border border-border bg-muted/40 p-3 text-sm"><input className="size-4 shrink-0 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" type="checkbox" checked={form.active} onChange={(event) => updateForm("active", event.target.checked)} />Ativo para visitantes</label>}
+              <div className="flex flex-col gap-2 pt-2 sm:flex-row"><Button onClick={() => void save()} disabled={saving} aria-busy={saving}>{saving && <Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />}{saving ? "Salvando..." : "Salvar"}</Button><Button variant="outline" onClick={() => setEditor(null)} disabled={saving}>Cancelar</Button></div>
             </CardContent>
           </Card>
         ) : <Card><CardHeader><CardTitle className="text-lg">Como preparar a navegação</CardTitle></CardHeader><CardContent className="space-y-3 text-sm text-muted-foreground"><p>1. Cadastre o campus e ajuste o mapa na área da instituição.</p><p>2. Marque a entrada de cada prédio e descreva seus auditórios, laboratórios e outros espaços.</p><p>3. Marque cruzamentos e mudanças de direção. Ligue pontos vizinhos por trechos e indique se cada um é acessível.</p><p>4. Edite os prédios para ligar suas entradas aos pontos da rede. A rota termina na entrada vinculada.</p>{!campus && <Button onClick={() => startCreate("campus")}><Plus className="h-4 w-4" /> Cadastrar primeiro campus</Button>}</CardContent></Card>}
       </div>
 
-      {campus && <Card>
-        <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle className="text-lg">Dados de {campus.name}</CardTitle><p className="mt-1 text-sm text-muted-foreground">Organize os locais e o grafo que será usado pelas rotas.</p></div><Button onClick={() => startCreate(tab)} disabled={(tab === "space" && !buildings.length) || (tab === "edge" && nodes.length < 2)}><Plus className="h-4 w-4" /> {tab === "building" ? "Novo prédio" : tab === "space" ? "Novo espaço" : tab === "node" ? "Novo ponto" : "Novo trecho"}</Button></CardHeader>
-        <CardContent className="space-y-4"><div className="flex flex-wrap gap-2" role="tablist" aria-label="Dados do campus">{(Object.keys(TAB_LABELS) as Tab[]).map((key) => <Button key={key} role="tab" aria-selected={tab === key} variant={tab === key ? "default" : "outline"} size="sm" onClick={() => setTab(key)}>{TAB_LABELS[key]}</Button>)}</div>
-          {!list.length ? <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{tab === "space" && !buildings.length ? "Cadastre um prédio antes de adicionar espaços internos." : tab === "edge" && nodes.length < 2 ? "Cadastre pelo menos dois pontos antes de conectá-los." : `Nenhum item em ${TAB_LABELS[tab].toLowerCase()}.`}</p> : <div className="grid gap-3 md:grid-cols-2">{list.map((item, index) => {
+      {campus && <Card className="min-w-0">
+        <CardHeader className="min-w-0 gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><CardTitle className="text-lg [overflow-wrap:anywhere]"><h2>Dados de {campus.name}</h2></CardTitle><p className="mt-1 text-sm text-muted-foreground">Organize os locais e o grafo que será usado pelas rotas.</p></div><Button className="shrink-0" onClick={() => startCreate(tab)} disabled={(tab === "space" && !buildings.length) || (tab === "edge" && nodes.length < 2)}><Plus aria-hidden="true" className="h-4 w-4" /> {tab === "building" ? "Novo prédio" : tab === "space" ? "Novo espaço" : tab === "node" ? "Novo ponto" : "Novo trecho"}</Button></CardHeader>
+        <CardContent className="min-w-0"><Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="min-w-0 gap-4"><TabsList aria-label="Dados do campus" className="grid w-full grid-cols-2 gap-2 rounded-none bg-transparent p-0 group-data-[orientation=horizontal]/tabs:h-auto sm:grid-cols-4">{(Object.keys(TAB_LABELS) as Tab[]).map((key) => <TabsTrigger key={key} value={key} className="min-h-11 whitespace-normal rounded-lg border border-border bg-card px-3 py-2 text-foreground data-[state=active]:border-primary data-[state=active]:bg-primary/10 data-[state=active]:text-primary dark:data-[state=active]:border-primary dark:data-[state=active]:bg-primary/10 dark:data-[state=active]:text-primary">{TAB_LABELS[key]}</TabsTrigger>)}</TabsList>
+          <TabsContent value={tab} className="min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{loadingMap ? <p role="status" className="flex items-center gap-2 rounded-lg border border-dashed p-6 text-sm text-muted-foreground"><Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />Carregando dados do campus...</p> : !list.length ? <p role="status" className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">{tab === "space" && !buildings.length ? "Cadastre um prédio antes de adicionar espaços internos." : tab === "edge" && nodes.length < 2 ? "Cadastre pelo menos dois pontos antes de conectá-los." : `Nenhum item em ${TAB_LABELS[tab].toLowerCase()}.`}</p> : <div className="grid min-w-0 gap-4 xl:grid-cols-2">{list.map((item, index) => {
             const title = tab === "building" ? (item as Building).name : tab === "space" ? (item as IndoorSpace).name : tab === "node" ? (item as PathNode).label || `Ponto ${index + 1}` : `${nodeNames.get((item as PathEdge).from_node_id) || "Ponto"} → ${nodeNames.get((item as PathEdge).to_node_id) || "Ponto"}`;
             const subtitle = tab === "building" ? `${(item as Building).category} · entrada ${formatCoordinate((item as Building).entrance_lat)}, ${formatCoordinate((item as Building).entrance_lng)}` : tab === "space" ? `${(item as IndoorSpace).kind} · ${buildingNames.get((item as IndoorSpace).building_id) || "Prédio removido"}${(item as IndoorSpace).floor ? ` · ${(item as IndoorSpace).floor}` : ""}` : tab === "node" ? `${formatCoordinate((item as PathNode).lat)}, ${formatCoordinate((item as PathNode).lng)}` : `${(item as PathEdge).accessible ? "Acessível" : "Com barreira"}${(item as PathEdge).distance_m ? ` · ${(item as PathEdge).distance_m} m` : ""}`;
-            return <div key={item.id} className="flex items-start gap-3 rounded-lg border p-3"><div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">{tab === "building" ? <Building2 className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}</div><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="font-medium">{title}</span>{tab === "building" && !(item as Building).entrance_node_id && <Badge variant="outline">Sem rota</Badge>}{"active" in item && !item.active && <Badge variant="secondary">Inativo</Badge>}</div><p className="mt-1 break-words text-xs text-muted-foreground">{subtitle}</p></div><Button variant="ghost" size="icon" aria-label={`Editar ${title}`} onClick={() => startEdit(tab, item)} disabled={saving}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="icon" aria-label={`Excluir ${title}`} onClick={() => setDeleting({ kind: tab, id: item.id, name: title, campusId: campus.id })} disabled={saving}><Trash2 className="h-4 w-4" /></Button></div>;
-          })}</div>}
+            return <article key={item.id} aria-labelledby={`geo-item-${item.id}`} className="flex min-w-0 flex-col gap-4 rounded-lg border border-border bg-card p-4"><div className="flex min-w-0 items-start gap-3"><div aria-hidden="true" className="shrink-0 rounded-lg bg-primary/10 p-2 text-primary">{tab === "building" ? <Building2 className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}</div><div className="min-w-0 flex-1"><h3 id={`geo-item-${item.id}`} className="font-medium [overflow-wrap:anywhere]">{title}</h3><div className="mt-2 flex flex-wrap gap-2">{tab === "building" && !(item as Building).entrance_node_id && <Badge variant="outline">Sem rota</Badge>}{"active" in item && !item.active && <Badge variant="secondary">Inativo</Badge>}</div><p className="mt-2 text-sm text-muted-foreground [overflow-wrap:anywhere]">{subtitle}</p></div></div><div className="mt-auto flex justify-end gap-2"><Button variant="outline" size="icon" aria-label={`Editar ${title}`} onClick={() => startEdit(tab, item)} disabled={saving}><Pencil aria-hidden="true" className="h-4 w-4" /></Button><Button variant="outline" size="icon" className="text-destructive" aria-label={`Excluir ${title}`} onClick={(event) => { deleteTrigger.current = event.currentTarget; setDeleting({ kind: tab, id: item.id, name: title, campusId: campus.id }); }} disabled={saving}><Trash2 aria-hidden="true" className="h-4 w-4" /></Button></div></article>;
+          })}</div>}</TabsContent></Tabs>
         </CardContent>
       </Card>}
 
-      <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => { if (!open) setDeleting(null); }}><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir {deleting?.name}?</AlertDialogTitle><AlertDialogDescription>Esta ação remove o cadastro. Se ele estiver ligado a outros itens, talvez seja necessário remover essas ligações primeiro.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => void remove()}>Excluir</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
-    </div>
+      <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => { if (!open) setDeleting(null); }}><AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto" onCloseAutoFocus={(event) => { event.preventDefault(); (deleteTrigger.current?.isConnected ? deleteTrigger.current : campusSelect.current)?.focus(); }}><AlertDialogHeader className="text-left"><AlertDialogTitle className="max-h-[35dvh] overflow-y-auto [overflow-wrap:anywhere]" tabIndex={0}>Excluir {deleting?.name}?</AlertDialogTitle><AlertDialogDescription>Esta ação remove o cadastro. Se ele estiver ligado a outros itens, talvez seja necessário remover essas ligações primeiro.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter className="flex-col gap-2 sm:flex-row"><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => void remove()}>Excluir</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+    </section>
   );
 }
