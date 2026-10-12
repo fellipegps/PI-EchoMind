@@ -1,0 +1,14 @@
+{
+  "baseline": "44b52aebfc24544c5d2c609cdf07f25ad8eabb81",
+  "unchanged": {
+    "echomind-front/app/(admin)/base-de-conhecimento/hooks/use-faqs.ts": true,
+    "echomind-front/app/(admin)/base-de-conhecimento/components/document-tab.tsx": true,
+    "echomind-front/lib/api.ts": true,
+    "echomind-front/lib/supabase.ts": true,
+    "echomind-front/app/(admin)/layout.tsx": true,
+    "echomind-front/app/globals.css": true,
+    "echomind-front/package.json": true,
+    "echomind-front/pnpm-lock.yaml": true
+  },
+  "backendDiff": []
+}

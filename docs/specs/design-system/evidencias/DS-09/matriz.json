@@ -1,0 +1,1234 @@
+[
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(255, 255, 255)",
+    "client": 1425,
+    "document": 1425,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 1024,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(71, 85, 105)",
+    "texts": [
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "state": "dialogo",
+    "client": 1440,
+    "dialog": {
+      "bottom": 789,
+      "height": 552,
+      "scroll": 510,
+      "scrollHeight": 552,
+      "top": 235,
+      "width": 510
+    },
+    "document": 1440,
+    "fields": [
+      {
+        "client": 460,
+        "height": 94,
+        "name": "Pergunta",
+        "scroll": 460,
+        "scrollHeight": 94,
+        "valueLength": 182
+      },
+      {
+        "client": 460,
+        "height": 176,
+        "name": "Resposta",
+        "scroll": 460,
+        "scrollHeight": 176,
+        "valueLength": 435
+      }
+    ],
+    "height": 1024,
+    "opacity": "1",
+    "viewport": 1440
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(255, 255, 255)",
+    "client": 1009,
+    "document": 1009,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 1024,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(71, 85, 105)",
+    "texts": [
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "state": "dialogo",
+    "client": 1024,
+    "dialog": {
+      "bottom": 789,
+      "height": 552,
+      "scroll": 510,
+      "scrollHeight": 552,
+      "top": 235,
+      "width": 510
+    },
+    "document": 1024,
+    "fields": [
+      {
+        "client": 460,
+        "height": 94,
+        "name": "Pergunta",
+        "scroll": 460,
+        "scrollHeight": 94,
+        "valueLength": 182
+      },
+      {
+        "client": 460,
+        "height": 176,
+        "name": "Resposta",
+        "scroll": 460,
+        "scrollHeight": 176,
+        "valueLength": 435
+      }
+    ],
+    "height": 1024,
+    "opacity": "1",
+    "viewport": 1024
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(255, 255, 255)",
+    "client": 753,
+    "document": 753,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 1024,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(71, 85, 105)",
+    "texts": [
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "state": "dialogo",
+    "client": 768,
+    "dialog": {
+      "bottom": 789,
+      "height": 552,
+      "scroll": 510,
+      "scrollHeight": 552,
+      "top": 235,
+      "width": 510
+    },
+    "document": 768,
+    "fields": [
+      {
+        "client": 460,
+        "height": 94,
+        "name": "Pergunta",
+        "scroll": 460,
+        "scrollHeight": 94,
+        "valueLength": 182
+      },
+      {
+        "client": 460,
+        "height": 176,
+        "name": "Resposta",
+        "scroll": 460,
+        "scrollHeight": 176,
+        "valueLength": 435
+      }
+    ],
+    "height": 1024,
+    "opacity": "1",
+    "viewport": 768
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(255, 255, 255)",
+    "client": 375,
+    "document": 375,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 844,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(71, 85, 105)",
+    "texts": [
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "state": "dialogo",
+    "client": 390,
+    "dialog": {
+      "bottom": 774.5,
+      "height": 703,
+      "scroll": 356,
+      "scrollHeight": 703,
+      "top": 69.5,
+      "width": 356
+    },
+    "document": 390,
+    "fields": [
+      {
+        "client": 306,
+        "height": 160,
+        "name": "Pergunta",
+        "scroll": 306,
+        "scrollHeight": 160,
+        "valueLength": 182
+      },
+      {
+        "client": 291,
+        "height": 209,
+        "name": "Resposta",
+        "scroll": 291,
+        "scrollHeight": 352,
+        "valueLength": 435
+      }
+    ],
+    "height": 844,
+    "opacity": "1",
+    "viewport": 390
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(15, 23, 42)",
+    "client": 1425,
+    "document": 1425,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 1024,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(203, 213, 225)",
+    "texts": [
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 892,
+        "width": 892,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 1440
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "state": "dialogo",
+    "client": 1440,
+    "dialog": {
+      "bottom": 789,
+      "height": 552,
+      "scroll": 510,
+      "scrollHeight": 552,
+      "top": 235,
+      "width": 510
+    },
+    "document": 1440,
+    "fields": [
+      {
+        "client": 460,
+        "height": 94,
+        "name": "Pergunta",
+        "scroll": 460,
+        "scrollHeight": 94,
+        "valueLength": 182
+      },
+      {
+        "client": 460,
+        "height": 176,
+        "name": "Resposta",
+        "scroll": 460,
+        "scrollHeight": 176,
+        "valueLength": 435
+      }
+    ],
+    "height": 1024,
+    "opacity": "1",
+    "viewport": 1440
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(15, 23, 42)",
+    "client": 1009,
+    "document": 1009,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 1024,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(203, 213, 225)",
+    "texts": [
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 655,
+        "width": 655,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 1024
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "state": "dialogo",
+    "client": 1024,
+    "dialog": {
+      "bottom": 789,
+      "height": 552,
+      "scroll": 510,
+      "scrollHeight": 552,
+      "top": 235,
+      "width": 510
+    },
+    "document": 1024,
+    "fields": [
+      {
+        "client": 460,
+        "height": 94,
+        "name": "Pergunta",
+        "scroll": 460,
+        "scrollHeight": 94,
+        "valueLength": 182
+      },
+      {
+        "client": 460,
+        "height": 176,
+        "name": "Resposta",
+        "scroll": 460,
+        "scrollHeight": 176,
+        "valueLength": 435
+      }
+    ],
+    "height": 1024,
+    "opacity": "1",
+    "viewport": 1024
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(15, 23, 42)",
+    "client": 753,
+    "document": 753,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 1024,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(203, 213, 225)",
+    "texts": [
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 399,
+        "width": 399,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 768
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "state": "dialogo",
+    "client": 768,
+    "dialog": {
+      "bottom": 789,
+      "height": 552,
+      "scroll": 510,
+      "scrollHeight": 552,
+      "top": 235,
+      "width": 510
+    },
+    "document": 768,
+    "fields": [
+      {
+        "client": 460,
+        "height": 94,
+        "name": "Pergunta",
+        "scroll": 460,
+        "scrollHeight": 94,
+        "valueLength": 182
+      },
+      {
+        "client": 460,
+        "height": 176,
+        "name": "Resposta",
+        "scroll": 460,
+        "scrollHeight": 176,
+        "valueLength": 435
+      }
+    ],
+    "height": 1024,
+    "opacity": "1",
+    "viewport": 768
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "state": "lista",
+    "actions": [
+      {
+        "height": 44,
+        "name": "Nova FAQ"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Qual é o horário da biblioteca?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como solicitar atendimento acadêmico?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Onde consultar os documentos institucionais?"
+      },
+      {
+        "height": 44,
+        "name": "Editar FAQ: Como localizar os espaços do campus?"
+      },
+      {
+        "height": 44,
+        "name": "Excluir FAQ: Como localizar os espaços do campus?"
+      }
+    ],
+    "background": "rgb(15, 23, 42)",
+    "client": 375,
+    "document": 375,
+    "font": "Geist, \"Geist Fallback\"",
+    "height": 844,
+    "labels": [
+      44,
+      44,
+      44,
+      44,
+      44
+    ],
+    "questions": 5,
+    "textColor": "rgb(203, 213, 225)",
+    "texts": [
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      },
+      {
+        "scroll": 309,
+        "width": 309,
+        "wrap": "anywhere"
+      }
+    ],
+    "viewport": 390
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "state": "dialogo",
+    "client": 390,
+    "dialog": {
+      "bottom": 774.5,
+      "height": 703,
+      "scroll": 356,
+      "scrollHeight": 703,
+      "top": 69.5,
+      "width": 356
+    },
+    "document": 390,
+    "fields": [
+      {
+        "client": 306,
+        "height": 160,
+        "name": "Pergunta",
+        "scroll": 306,
+        "scrollHeight": 160,
+        "valueLength": 182
+      },
+      {
+        "client": 291,
+        "height": 209,
+        "name": "Resposta",
+        "scroll": 291,
+        "scrollHeight": 352,
+        "valueLength": 435
+      }
+    ],
+    "height": 844,
+    "opacity": "1",
+    "viewport": 390
+  }
+]

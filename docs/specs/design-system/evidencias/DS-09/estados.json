@@ -1,0 +1,142 @@
+[
+  {
+    "state": "carregando",
+    "theme": "Claro",
+    "width": 1440,
+    "client": 1440,
+    "document": 1440,
+    "feedback": [],
+    "height": 1024,
+    "status": "Carregando FAQs...",
+    "viewport": 1440
+  },
+  {
+    "state": "carregando",
+    "theme": "Claro",
+    "width": 390,
+    "client": 390,
+    "document": 390,
+    "feedback": [],
+    "height": 844,
+    "status": "Carregando FAQs...",
+    "viewport": 390
+  },
+  {
+    "state": "carregando",
+    "theme": "Escuro",
+    "width": 1440,
+    "client": 1440,
+    "document": 1440,
+    "feedback": [],
+    "height": 1024,
+    "status": "Carregando FAQs...",
+    "viewport": 1440
+  },
+  {
+    "state": "carregando",
+    "theme": "Escuro",
+    "width": 390,
+    "client": 390,
+    "document": 390,
+    "feedback": [],
+    "height": 844,
+    "status": "Carregando FAQs...",
+    "viewport": 390
+  },
+  {
+    "state": "vazio",
+    "theme": "Claro",
+    "width": 1440,
+    "client": 1440,
+    "document": 1440,
+    "feedback": [],
+    "height": 1024,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 1440
+  },
+  {
+    "state": "vazio",
+    "theme": "Claro",
+    "width": 390,
+    "client": 390,
+    "document": 390,
+    "feedback": [],
+    "height": 844,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 390
+  },
+  {
+    "state": "vazio",
+    "theme": "Escuro",
+    "width": 1440,
+    "client": 1440,
+    "document": 1440,
+    "feedback": [],
+    "height": 1024,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 1440
+  },
+  {
+    "state": "vazio",
+    "theme": "Escuro",
+    "width": 390,
+    "client": 390,
+    "document": 390,
+    "feedback": [],
+    "height": 844,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 390
+  },
+  {
+    "state": "erro-lista",
+    "theme": "Claro",
+    "width": 1440,
+    "client": 1440,
+    "document": 1440,
+    "feedback": [
+      "Erro ao carregar FAQs."
+    ],
+    "height": 1024,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 1440
+  },
+  {
+    "state": "erro-lista",
+    "theme": "Claro",
+    "width": 390,
+    "client": 390,
+    "document": 390,
+    "feedback": [
+      "Erro ao carregar FAQs."
+    ],
+    "height": 844,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 390
+  },
+  {
+    "state": "erro-lista",
+    "theme": "Escuro",
+    "width": 1440,
+    "client": 1440,
+    "document": 1440,
+    "feedback": [
+      "Erro ao carregar FAQs."
+    ],
+    "height": 1024,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 1440
+  },
+  {
+    "state": "erro-lista",
+    "theme": "Escuro",
+    "width": 390,
+    "client": 390,
+    "document": 390,
+    "feedback": [
+      "Erro ao carregar FAQs."
+    ],
+    "height": 844,
+    "status": "Nenhuma FAQ disponível nesta listaQuando FAQs forem carregadas, elas aparecerão aqui.",
+    "viewport": 390
+  }
+]

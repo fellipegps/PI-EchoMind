@@ -1,0 +1,186 @@
+[
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "stage": "switch after search",
+    "focusVisible": true,
+    "name": "Exibir no chatbot: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "switch"
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "stage": "edit after switch",
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "stage": "return after Escape",
+    "focusVisible": true,
+    "name": "Editar FAQ: Como consultar os procedimentos institucionais de MATRÍCULA, transferência e bolsas de estudo, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?",
+    "role": "BUTTON"
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "body": "",
+    "client": 1440,
+    "document": 1440,
+    "files": [
+      {
+        "multiple": false
+      }
+    ],
+    "tabs": [
+      {
+        "height": 44,
+        "name": " FAQs",
+        "selected": "false"
+      },
+      {
+        "height": 44,
+        "name": " Documentos",
+        "selected": "true"
+      }
+    ]
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "body": "",
+    "client": 375,
+    "document": 375,
+    "files": [
+      {
+        "multiple": false
+      }
+    ],
+    "tabs": [
+      {
+        "height": 44,
+        "name": " FAQs",
+        "selected": "false"
+      },
+      {
+        "height": 44,
+        "name": " Documentos",
+        "selected": "true"
+      }
+    ]
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "body": "",
+    "client": 1440,
+    "document": 1440,
+    "files": [
+      {
+        "multiple": false
+      }
+    ],
+    "tabs": [
+      {
+        "height": 44,
+        "name": " FAQs",
+        "selected": "false"
+      },
+      {
+        "height": 44,
+        "name": " Documentos",
+        "selected": "true"
+      }
+    ]
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "body": "",
+    "client": 375,
+    "document": 375,
+    "files": [
+      {
+        "multiple": false
+      }
+    ],
+    "tabs": [
+      {
+        "height": 44,
+        "name": " FAQs",
+        "selected": "false"
+      },
+      {
+        "height": 44,
+        "name": " Documentos",
+        "selected": "true"
+      }
+    ]
+  }
+]

@@ -9,16 +9,16 @@ import { PageContainer } from "@/components/page-container";
 
 export default function KnowledgeBasePage() {
   return (
-    <PageContainer variant="wide">
+    <PageContainer variant="standard">
       <PageHeader title="Base de Conhecimento" description="Gerencie as FAQs e os documentos usados pelo chatbot." />
 
       <Tabs defaultValue="faqs" className="w-full space-y-6">
-        <TabsList className="bg-muted/50 p-1">
-          <TabsTrigger value="faqs" className="gap-2 px-4 py-2 text-sm font-medium transition-all">
-            <BookOpen className="h-4 w-4" /> FAQs
+        <TabsList aria-label="Áreas da base de conhecimento" className="w-full p-1 group-data-[orientation=horizontal]/tabs:h-auto sm:w-fit">
+          <TabsTrigger value="faqs" className="min-h-11 gap-2 px-4 text-sm font-medium text-muted-foreground">
+            <BookOpen aria-hidden="true" className="h-4 w-4" /> FAQs
           </TabsTrigger>
-          <TabsTrigger value="documents" className="gap-2 px-4 py-2 text-sm font-medium transition-all">
-            <FileText className="h-4 w-4" /> Documentos
+          <TabsTrigger value="documents" className="min-h-11 gap-2 px-4 text-sm font-medium text-muted-foreground">
+            <FileText aria-hidden="true" className="h-4 w-4" /> Documentos
           </TabsTrigger>
         </TabsList>
 

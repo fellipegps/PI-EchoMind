@@ -2,7 +2,7 @@
 
 **Versão:** 1.0.
 
-**Status:** Proposta — aguardando aprovação. Nenhuma implementação autorizada por este arquivo.
+**Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementação concluída e verificação validada no escopo local disponível. Aceite do resultado aguardando revisão.
 **Fase original:** Prompt 09; etapa 8A do plano.
 **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`) · Medium (`medium`).
 **Commit sugerido, somente após revisão e autorização:** `refactor(knowledge): padroniza gestao de perguntas frequentes`.
@@ -67,13 +67,13 @@ O resultado deve manter a gestão de FAQs e seu limite de exibição pública, c
 
 ## Plano de implementação
 
-- [ ] Conferir aprovação, dependências, baseline e contratos atuais.
-- [ ] Aplicar cabeçalho/abas comuns e compor a área de FAQs sobre a base aprovada.
-- [ ] Expor `loading` existente e mensagens de vazio/busca, conservando feedback de erro atual.
-- [ ] Padronizar tabela/cards e diálogo sem mudar operações nem exclusão direta.
-- [ ] Associar nomes/rótulos acessíveis a campos, switches e ações.
-- [ ] Validar regressões da aba Documentos e operações com fixtures/mocks.
-- [ ] Executar verificações e registrar evidências, limitações e arquivos no STATUS.
+- [x] Conferir aprovação, dependências, baseline e contratos atuais.
+- [x] Aplicar cabeçalho/abas comuns e compor a área de FAQs sobre a base aprovada.
+- [x] Expor `loading` existente e mensagens de vazio/busca, conservando feedback de erro atual.
+- [x] Padronizar tabela/cards e diálogo sem mudar operações nem exclusão direta.
+- [x] Associar nomes/rótulos acessíveis a campos, switches e ações.
+- [x] Validar regressões da aba Documentos e operações com fixtures/mocks.
+- [x] Executar verificações e registrar evidências, limitações e arquivos no STATUS.
 
 ## Verificação e evidências esperadas
 
@@ -88,4 +88,6 @@ O resultado deve manter a gestão de FAQs e seu limite de exibição pública, c
 Os critérios, evidências e limitações devem ser registrados antes de declarar implementação/verificação concluídas.
 Revisão e aprovação do usuário continuam separadas; confirmação futura de exclusão não é pré-requisito desta fase.
 Mudanças materiais de escopo/spec exigem aprovação antes da implementação dependente.
-Não avançar, criar commit ou publicar automaticamente. Estado inicial: **Proposta — aguardando aprovação**.
+Não avançar, criar commit ou publicar automaticamente. Estado atual: **Implementada e verificada no escopo local disponível — aguardando revisão do resultado**.
+
+Autorização explícita recebida na mensagem Fase: 09 de 12/10/2026. Dependências e limites conferidos; nenhuma revisão material da v1.0 necessária. Consulte [evidências DS-09](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-09.md>) para os sete critérios, registros reais e limitações. Sem commit/push ou avanço de fase.

@@ -1,8 +1,8 @@
 # Andamento — refatoração visual por especificação
 
-Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-07 aceitas e commitadas localmente; DS-08 implementada e verificada no escopo local disponível, resultado aceito pelo pedido de commit em 12/10/2026. Commit local autorizado. Nenhum push realizado.
+Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-08 aceitas e commitadas localmente; DS-08 em 44b52ae. DS-09 v1.0 aprovada, implementada e verificada no escopo local disponível; resultado aguardando revisão. DS-10–DS-16 não iniciadas. Nenhum push realizado.
 
-DS-00–DS-07 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente, com limites nas evidências; DS-07 registrada em 1fed6e2. DS-08 v1.0 aprovada e aceita em 12/10/2026 após apresentação da entrega e limitações; commit local autorizado. DS-09–DS-16 continuam propostas e não iniciadas.
+DS-00–DS-08 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente, com limites nas evidências. DS-09 v1.0 aprovada em 12/10/2026; execução concluída, verificação validada no escopo local disponível e aceite aguardando revisão. DS-10–DS-16 continuam propostas e não iniciadas.
 
 | Fase | Versão | Spec | Execução | Verificação | Aceite do resultado | Evidência / commit |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -14,8 +14,8 @@ DS-00–DS-07 v1.0 possuem aprovação, implementação, verificação e aceite 
 | DS-05 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível, com limites documentados | Aceito em 12/10/2026 | [DS-05](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-05.md>) / 1ddcb87 |
 | DS-06 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível; zoom real pendente e demais limites documentados | Aceito em 12/10/2026 | [DS-06](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-06.md>) / 0eab36b |
 | DS-07 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível; falha anterior do editor geográfico e limites documentados | Aceito em 12/10/2026 | [DS-07](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-07.md>) / commit local autorizado; identificação no histórico Git |
-| DS-08 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-08](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-08.md>) / commit local autorizado; identificação no histórico Git |
-| DS-09 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
+| DS-08 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-08](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-08.md>) / 44b52ae |
+| DS-09 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aguardando revisão | [DS-09](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-09.md>) / sem commit |
 | DS-10 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-11 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-12 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
@@ -50,6 +50,8 @@ DS-00–DS-07 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Aceite do resultado e Git de DS-04: em 12/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações”. O pedido registra o aceite da entrega e autoriza somente seu commit local; não autoriza push ou outra fase.
 
 - Aceite do resultado e Git de DS-05: em 12/10/2026, após apresentação da entrega, o usuário solicitou “faça commite das alterações”. O pedido registra o aceite da entrega com os limites documentados e autoriza somente seu commit local; não autoriza push ou outra fase.
+
+- DS-09 v1.0 e contrato comum v1.0: em 12/10/2026, o usuário identificou **Fase: 09** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou implementação/verificações/evidências para revisão, sem outra fase, commit ou push. Aceite do resultado ainda não recebido.
 
 ## Registro de execução
 
@@ -161,6 +163,18 @@ DS-00–DS-07 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Correções de QA: tooltip móvel inicialmente excedia a largura; fixado no início da área do gráfico e medido dentro da janela nas oito combinações. Título/descrição de SVG aplicados pelas props suportadas do Recharts. Tipos do tooltip alinhados à versão instalada. Teste jsdom passou a abrir details por clique, pois seu foco/ativação nativa por teclado não era simulada; teclado real conferido no navegador. Nenhuma mudança material da spec.
 - Limites/ambiente: dados e sessão sintéticos em loopback; sem backend, instituição, credenciais ou infraestrutura reais. Reflow 720×512 não comprova zoom nativo; sem dispositivo físico, teclado virtual ou leitor de tela falado. Movimento dos gráficos desativado; preferência do sistema não emulada. pnpm/servidores executados com permissão ampliada pelas restrições do sandbox, sem rejeição automática. Build limpou arquivos temporários .next da fixture, que foi reiniciada antes da rodada final; perda transitória de sessão/conexão registrada, sem mudança de autenticação. Variáveis fictícias só nos processos, sem editar arquivos de ambiente.
 - Entrega: implementação concluída e verificação validada no escopo local disponível; resultado aceito em 12/10/2026 pelo pedido “faça commite das alterações” após apresentação da entrega e limitações. Evidências detalhadas em evidencias/DS-08.md. DS-09–DS-16 não iniciadas. Commit local autorizado com a mensagem refactor(dashboard): padroniza metricas graficos e estados; identificação no histórico Git. Nenhum push.
+
+### 12/10/2026 — DS-09 v1.0
+
+- Dependências: README, CONTRATO v1.0, STATUS, DS-09 e direção DS-00 conferidos. DS-00/01/07 aprovadas, implementadas, verificadas e aceitas em 7e0dc9e/f332c62/1fed6e2. DS-08 aceita/commitada em 44b52ae. Baseline 44b52aebfc24544c5d2c609cdf07f25ad8eabb81, árvore inicialmente limpa. Autorização humana limitada à fase 09.
+- Referência: não existe preview específico de FAQs no arquivo UX Pilot auditado, conforme spec. Direção/tokens/primitivas aprovados herdados, sem afirmar equivalência a tela inexistente. Sem alteração/geração de design ou avaliação paga.
+- Implementação: duas abas nomeadas com 44 px e FAQs inicial, PageContainer standard; lista responsiva com textos completos, busca rotulada, loading existente, mensagens neutras de vazio/busca, badges/ações identificadas por item. Diálogo com descrição/rótulos, saída bloqueada ao salvar, proteção imediata contra envios duplicados, rolagem e retorno do foco à origem.
+- Preservação: useFaqs, APIs, sessão, document-tab.tsx, layout administrativo, tokens, dependências e backend intactos. Busca só por pergunta sem distinção de capitalização; criação oculta, edição pelo mesmo ID, switch usa retorno confirmado, exclusão direta só remove após sucesso. Sem confirmação, retry, filtros, categorias ou paginação novos.
+- Verificação: AC01–AC07 passaram no escopo local disponível. Lint, tipos, 76 testes em quatro arquivos (1 abas, 11 FAQs, 54 documentos, 10 API) e build final passaram. Lista/diálogo em 1440/1024/768/390 claro/escuro: 16 medições sem overflow. 24 registros de teclado e 20 focos visíveis em reflow 720×512/390×480. 45 PNGs e medições reais no registro DS-09.
+- Operações: busca por capitalização e termo só na resposta; validação/bloqueio com um único POST e show_in_chatbot:false; edição com falha preserva conteúdo e sucesso altera ID correto; conflito 409 mantém estado, sucesso aplica resposta; exclusão pendente/falha conserva item, 204 remove. Documentos abriu por teclado nos dois temas/tamanhos; seus fluxos assíncronos/arquivos protegidos pelos 54 testes existentes.
+- Correção de QA: campos longos receberam máximo de 25dvh e rolagem interna; após refinamento, os cinco controles ficaram integralmente visíveis ao receber foco nas quatro janelas reduzidas. Capturas atualizadas após transições concluídas; nenhuma revisão material da spec.
+- Limites: falha e vazio da lista continuam sem estado persistente distinto após o toast; mensagem neutra evita afirmar ausência cadastral. Camada API preexistente traduz 409 em erro genérico e 5xx em erro seguro, preservada. Sem infraestrutura remota, dispositivo físico, teclado virtual, leitor de tela falado, zoom nativo ou preferência de movimento emulada. Reflow não comprova zoom real. Dados/sessão sintéticos em loopback, variáveis só nos processos e nenhum arquivo de ambiente editado. Servidores/verificações com permissão ampliada, sem rejeição automática.
+- Entrega: implementação concluída; verificação validada no escopo local disponível; **aceite do resultado aguardando revisão do usuário**. Evidências detalhadas em evidencias/DS-09.md. Sem commit, push ou avanço à DS-10.
 
 ## Divergências corrigidas na conversão
 
