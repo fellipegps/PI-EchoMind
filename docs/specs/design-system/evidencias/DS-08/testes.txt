@@ -1,0 +1,15 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/dashboard/rag-metrics-section.test.tsx" "app/(admin)/dashboard/page.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 29ms
+ ✓ app/(admin)/dashboard/rag-metrics-section.test.tsx (5 tests) 299ms
+ ✓ app/(admin)/dashboard/page.test.tsx (3 tests) 273ms
+
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+   Start at  11:45:39
+   Duration  2.96s (transform 269ms, setup 1.07s, collect 1.97s, tests 600ms, environment 2.19s, prepare 404ms)

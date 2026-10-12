@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-12",
+  "spec": "DS-08 v1.0",
+  "criteria": {
+    "DS-08-AC01": "passou no escopo local disponível",
+    "DS-08-AC02": "passou no escopo local disponível",
+    "DS-08-AC03": "passou no escopo local disponível",
+    "DS-08-AC04": "passou no escopo local disponível",
+    "DS-08-AC05": "passou no escopo local disponível",
+    "DS-08-AC06": "passou no escopo local disponível"
+  },
+  "checks": {
+    "lint": 0,
+    "typecheck": 0,
+    "tests": {
+      "passed": 18,
+      "files": 3
+    },
+    "build": 0
+  },
+  "visual": {
+    "widths": [
+      1440,
+      1024,
+      768,
+      390
+    ],
+    "themes": [
+      "claro",
+      "escuro"
+    ],
+    "standard": 8,
+    "large": 8,
+    "states": 16,
+    "reflow": 4,
+    "pngs": 50
+  },
+  "implementation": "concluída",
+  "verification": "validada no escopo local disponível",
+  "acceptance": "aceito pelo usuário em 12/10/2026 pelo pedido de commit",
+  "commit": "local autorizado; identificação no histórico Git",
+  "push": false,
+  "next_phase_started": false
+}

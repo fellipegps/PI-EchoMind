@@ -1,0 +1,502 @@
+[
+  {
+    "theme": "claro",
+    "color": "#0b57d0",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 877.5,
+        "right": 1376.5,
+        "top": 387,
+        "width": 499,
+        "x": 877.5,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 1425,
+    "tooltip": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(15, 23, 42)",
+        "rect": {
+          "bottom": 457,
+          "height": 70,
+          "left": 877.5,
+          "right": 1165.5,
+          "top": 387,
+          "width": 288,
+          "x": 877.5,
+          "y": 387
+        },
+        "text": "Qual é o horário da biblioteca?Consultas: 1.060"
+      }
+    ],
+    "width": 1440
+  },
+  {
+    "theme": "claro",
+    "axes": [
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "7/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "9/10"
+      }
+    ],
+    "color": "#0b57d0",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 305,
+        "right": 960,
+        "top": 387,
+        "width": 655,
+        "x": 305,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 1009,
+    "tooltip": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(15, 23, 42)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 305,
+          "right": 593,
+          "top": 387,
+          "width": 288,
+          "x": 305,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 1024
+  },
+  {
+    "theme": "claro",
+    "axes": [
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "7/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "9/10"
+      }
+    ],
+    "color": "#0b57d0",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 305,
+        "right": 704,
+        "top": 387,
+        "width": 399,
+        "x": 305,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 753,
+    "tooltip": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(15, 23, 42)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 305,
+          "right": 593,
+          "top": 387,
+          "width": 288,
+          "x": 305,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 768
+  },
+  {
+    "theme": "claro",
+    "axes": [
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "10/10"
+      },
+      {
+        "color": "rgb(71, 85, 105)",
+        "text": "12/10"
+      }
+    ],
+    "color": "#0b57d0",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 41,
+        "right": 334,
+        "top": 387,
+        "width": 293,
+        "x": 41,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 375,
+    "tooltip": [
+      {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(15, 23, 42)",
+        "rect": {
+          "bottom": 1,
+          "height": 70,
+          "left": 41,
+          "right": 329,
+          "top": -69,
+          "width": 288,
+          "x": 41,
+          "y": -69
+        },
+        "text": "11/10Perguntas: 390"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(15, 23, 42)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 41,
+          "right": 329,
+          "top": 387,
+          "width": 288,
+          "x": 41,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 390
+  },
+  {
+    "theme": "escuro",
+    "axes": [
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "7/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "9/10"
+      }
+    ],
+    "color": "#60a5fa",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 877.5,
+        "right": 1376.5,
+        "top": 387,
+        "width": 499,
+        "x": 877.5,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 1425,
+    "tooltip": [
+      {
+        "background": "rgb(15, 23, 42)",
+        "foreground": "rgb(248, 250, 252)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 877.5,
+          "right": 1165.5,
+          "top": 387,
+          "width": 288,
+          "x": 877.5,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 1440
+  },
+  {
+    "theme": "escuro",
+    "axes": [
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "7/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "9/10"
+      }
+    ],
+    "color": "#60a5fa",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 305,
+        "right": 960,
+        "top": 387,
+        "width": 655,
+        "x": 305,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 1009,
+    "tooltip": [
+      {
+        "background": "rgb(15, 23, 42)",
+        "foreground": "rgb(248, 250, 252)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 305,
+          "right": 593,
+          "top": 387,
+          "width": 288,
+          "x": 305,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 1024
+  },
+  {
+    "theme": "escuro",
+    "axes": [
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "7/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "9/10"
+      }
+    ],
+    "color": "#60a5fa",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 305,
+        "right": 704,
+        "top": 387,
+        "width": 399,
+        "x": 305,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 753,
+    "tooltip": [
+      {
+        "background": "rgb(15, 23, 42)",
+        "foreground": "rgb(248, 250, 252)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 305,
+          "right": 593,
+          "top": 387,
+          "width": 288,
+          "x": 305,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 768
+  },
+  {
+    "theme": "escuro",
+    "axes": [
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "6/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "8/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "10/10"
+      },
+      {
+        "color": "rgb(203, 213, 225)",
+        "text": "12/10"
+      }
+    ],
+    "color": "#60a5fa",
+    "focus": {
+      "outlineWidth": "2px",
+      "rect": {
+        "bottom": 637,
+        "height": 250,
+        "left": 41,
+        "right": 334,
+        "top": 387,
+        "width": 293,
+        "x": 41,
+        "y": 387
+      }
+    },
+    "font": "Geist, \"Geist Fallback\"",
+    "metrics": [
+      "1.234.567",
+      "12.345",
+      "1,25 s",
+      "92,5%"
+    ],
+    "scrollWidth": 375,
+    "tooltip": [
+      {
+        "background": "rgb(15, 23, 42)",
+        "foreground": "rgb(248, 250, 252)",
+        "rect": {
+          "bottom": 1,
+          "height": 70,
+          "left": 41,
+          "right": 329,
+          "top": -69,
+          "width": 288,
+          "x": 41,
+          "y": -69
+        },
+        "text": "11/10Perguntas: 390"
+      },
+      {
+        "background": "rgb(15, 23, 42)",
+        "foreground": "rgb(248, 250, 252)",
+        "rect": {
+          "bottom": 557,
+          "height": 170,
+          "left": 41,
+          "right": 329,
+          "top": 387,
+          "width": 288,
+          "x": 41,
+          "y": 387
+        },
+        "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+      }
+    ],
+    "width": 390
+  }
+]

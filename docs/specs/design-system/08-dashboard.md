@@ -2,7 +2,7 @@
 
 **Versão:** 1.0.
 
-**Status:** Proposta — aguardando aprovação. Nenhuma implementação autorizada por este arquivo.
+**Status:** Especificação v1.0 aprovada em 12/10/2026; implementação concluída e verificação validada no escopo local disponível. Resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega e limitações. Commit local autorizado; sem push.
 **Fase original:** Prompt 08; etapa 7 do plano.
 **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`) · High (`high`).
 **Commit sugerido, somente após revisão e autorização:** `refactor(dashboard): padroniza metricas graficos e estados`.
@@ -13,6 +13,8 @@ Seguir o [índice](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/
 Depende de DS-00 aprovada, DS-01 e DS-07 implementadas, verificadas e revisadas: tokens de gráficos, cards, estados e estrutura administrativa.
 Referência: UX Pilot **EchoMind - Admin Dashboard Primal**, design `hldl1brk4q4O5f5XT8Nm`, página `ThHPmFvVAyXGKTItA3AZ`.
 O mockup orienta hierarquia e densidade; os contratos `DashboardData` e `RagMetricsData` determinam os dados exibidos.
+
+Autorização recebida em 12/10/2026: o usuário identificou **Fase: 08** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Abrange esta versão e o contrato comum v1.0. Dependências DS-00/01/07 aceitas, com commits locais 7e0dc9e/f332c62/1fed6e2. [Evidências e limites](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-08.md>). Nenhum requisito ou critério material revisado.
 
 ## Problema e resultado esperado
 
@@ -65,12 +67,12 @@ Essa diferença é uma limitação preexistente: esta fase preserva a política 
 
 ## Plano de implementação
 
-- [ ] Conferir aprovação, dependências, baseline e alterações preexistentes.
-- [ ] Conferir preview pertinente e mapear cada região visual às métricas atuais.
-- [ ] Aplicar composição de cards/gráficos e tokens, mantendo contratos e consultas.
-- [ ] Padronizar apresentação dos estados existentes, preservando a diferença de fallback entre as áreas.
-- [ ] Adaptar tooltips, rótulos e disposição móvel a conteúdo longo/sem dados.
-- [ ] Executar verificações, registrar evidências por critério e limitações no STATUS.
+- [x] Conferir aprovação, dependências, baseline e alterações preexistentes.
+- [x] Conferir preview pertinente e mapear cada região visual às métricas atuais.
+- [x] Aplicar composição de cards/gráficos e tokens, mantendo contratos e consultas.
+- [x] Padronizar apresentação dos estados existentes, preservando a diferença de fallback entre as áreas.
+- [x] Adaptar tooltips, rótulos e disposição móvel a conteúdo longo/sem dados.
+- [x] Executar verificações, registrar evidências por critério e limitações no STATUS.
 
 ## Verificação e evidências esperadas
 
@@ -86,4 +88,4 @@ Essa diferença é uma limitação preexistente: esta fase preserva a política 
 Concluir implementação/verificação exige evidências dos critérios e preservação dos contratos; revisar aparência é uma etapa separada.
 A aprovação não é inferida de screenshots, execução de testes ou ausência de resposta.
 Alterações materiais desta spec exigem aprovação antes da implementação dependente.
-Não avançar, criar commit ou publicar automaticamente. Estado inicial: **Proposta — aguardando aprovação**.
+Não avançar, criar commit ou publicar automaticamente. Estado da entrega em 12/10/2026: **implementada, verificada no escopo local disponível e aceita pelo usuário**. Aceite recebido em 12/10/2026 pela mensagem “faça commite das alterações”. Commit local autorizado com a mensagem sugerida; identificação no histórico Git. Sem push ou avanço de fase; detalhes e limites no registro DS-08.

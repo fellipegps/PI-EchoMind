@@ -1,0 +1,15 @@
+{
+  "baseline": "1fed6e2a5f61cf90e2973e06baebd6261bdf9dc3",
+  "rag_logic_including_retry_and_active_guard_identical": true,
+  "principal_effect_identical_except_documentation_comment": true,
+  "unchanged": {
+    "echomind-front/lib/api.ts": true,
+    "echomind-front/lib/supabase.ts": true,
+    "echomind-front/app/globals.css": true,
+    "echomind-front/app/(admin)/layout.tsx": true,
+    "echomind-front/package.json": true,
+    "echomind-front/pnpm-lock.yaml": true
+  },
+  "backend_diff": "",
+  "chart_literal_removed": true
+}

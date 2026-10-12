@@ -1,0 +1,8 @@
+[
+  {
+    "level": "error",
+    "message": "TypeError: Failed to fetch\n    at http://127.0.0.1:4120/_next/static/chunks/96ccea3236616ce3.js:24:38099\n    at rr (http://127.0.0.1:4120/_next/static/chunks/96ccea3236616ce3.js:24:43486)\n    at rt (http://127.0.0.1:4120/_next/static/chunks/96ccea3236616ce3.js:24:43014)\n    at rJ.signInWithPassword (http://127.0.0.1:4120/_next/static/chunks/96ccea3236616ce3.js:24:73666)\n    at Object.login (http://127.0.0.1:4120/_next/static/chunks/e00f58ac8f7cf1ea.js:1:19065)\n    at g (http://127.0.0.1:4120/_next/static/chunks/7f7fca776231e40d.js:1:22651)\n    at sY (http://127.0.0.1:4120/_next/static/chunks/3449bbcef77bb04a.js:1:161794)\n    at http://127.0.0.1:4120/_next/static/chunks/3449bbcef77bb04a.js:1:167682\n    at tD (http://127.0.0.1:4120/_next/static/chunks/3449bbcef77bb04a.js:1:30289)\n    at s3 (http://127.0.0.1:4120/_next/static/chunks/3449bbcef77bb04a.js:1:163027)",
+    "timestamp": "2026-10-12T14:49:23.161Z",
+    "url": "http://127.0.0.1:4120/_next/static/chunks/96ccea3236616ce3.js"
+  }
+]

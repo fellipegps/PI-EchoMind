@@ -1,0 +1,78 @@
+[
+  {
+    "theme": "claro",
+    "focus": "Ver perguntas completas e consultas",
+    "height": 512,
+    "open": 1,
+    "outline": "2px",
+    "rect": {
+      "bottom": 278,
+      "height": 44,
+      "left": 41,
+      "right": 664,
+      "top": 234,
+      "width": 623,
+      "x": 41,
+      "y": 234
+    },
+    "scrollWidth": 705,
+    "width": 720
+  },
+  {
+    "theme": "claro",
+    "focus": "Ver perguntas completas e consultas",
+    "height": 480,
+    "open": 1,
+    "outline": "2px",
+    "rect": {
+      "bottom": 262,
+      "height": 44,
+      "left": 41,
+      "right": 334,
+      "top": 218,
+      "width": 293,
+      "x": 41,
+      "y": 218
+    },
+    "scrollWidth": 375,
+    "width": 390
+  },
+  {
+    "theme": "escuro",
+    "focus": "Ver perguntas completas e consultas",
+    "height": 512,
+    "open": 1,
+    "outline": "2px",
+    "rect": {
+      "bottom": 278,
+      "height": 44,
+      "left": 41,
+      "right": 664,
+      "top": 234,
+      "width": 623,
+      "x": 41,
+      "y": 234
+    },
+    "scrollWidth": 705,
+    "width": 720
+  },
+  {
+    "theme": "escuro",
+    "focus": "Ver perguntas completas e consultas",
+    "height": 480,
+    "open": 1,
+    "outline": "2px",
+    "rect": {
+      "bottom": 254,
+      "height": 44,
+      "left": 41,
+      "right": 334,
+      "top": 210,
+      "width": 293,
+      "x": 41,
+      "y": 210
+    },
+    "scrollWidth": 375,
+    "width": 390
+  }
+]

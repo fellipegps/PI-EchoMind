@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -116,8 +116,26 @@ describe("RagMetricsSection", () => {
     expect(screen.getByText("Taxa sem resposta: 4,25%")).toBeInTheDocument();
     expect(screen.getByText("Latência média de ingestão: 150,75 ms")).toBeInTheDocument();
     expect(screen.getByText("Contextos expandidos").nextElementSibling).toHaveTextContent("7");
-    expect(screen.getByText("Retrieval").parentElement).toHaveTextContent(
-      "Total: 20Sucesso: 19Erro: 1"
-    );
+    for (const [label, values] of [["Retrieval", [20, 19, 1]], ["Ingestão", [5, 4, 1]]] as const) {
+      const operation = screen.getByRole("heading", { name: label }).parentElement!;
+      ["Total", "Sucesso", "Erro"].forEach((name, index) => {
+        expect(within(operation).getByText(name).nextElementSibling).toHaveTextContent(String(values[index]));
+      });
+    }
+    for (const [label, value] of [["FAQs", 8], ["Eventos", 3], ["Trechos de documentos", 12], ["Contextos expandidos", 7], ["Outros", 0]] as const) {
+      expect(screen.getByText(label).nextElementSibling).toHaveTextContent(String(value));
+    }
+  });
+
+  it("ignora a consulta inicial encerrada após desmontagem sem contaminar uma nova montagem", async () => {
+    const pending = deferred<RagMetricsData>();
+    dashboardApiMock.getRagMetrics.mockReturnValueOnce(pending.promise).mockResolvedValueOnce({ ...metrics, has_data: false });
+    const first = render(<RagMetricsSection />);
+    first.unmount();
+    render(<RagMetricsSection />);
+    expect(await screen.findByText("Nenhuma métrica operacional nos últimos 30 dias.")).toBeInTheDocument();
+    await act(async () => pending.resolve(metrics));
+    expect(screen.queryByText("1.234")).not.toBeInTheDocument();
+    expect(dashboardApiMock.getRagMetrics).toHaveBeenNthCalledWith(2, 30);
   });
 });

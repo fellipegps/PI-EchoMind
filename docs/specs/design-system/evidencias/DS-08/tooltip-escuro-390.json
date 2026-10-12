@@ -1,0 +1,26 @@
+{
+  "focus": {
+    "outline": "rgb(147, 197, 253)",
+    "outlineWidth": "2px",
+    "tag": "svg"
+  },
+  "scrollWidth": 375,
+  "tooltip": [
+    {
+      "background": "rgb(15, 23, 42)",
+      "foreground": "rgb(248, 250, 252)",
+      "rect": {
+        "bottom": 535,
+        "height": 170,
+        "left": 41,
+        "right": 329,
+        "top": 365,
+        "width": 288,
+        "x": 41,
+        "y": 365
+      },
+      "text": "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre, incluindo prazos, documentos obrigatórios e atendimento aos estudantes de outros campi?Consultas: 1.250"
+    }
+  ],
+  "width": 390
+}
