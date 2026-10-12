@@ -705,4 +705,47 @@ describe("DocumentTab", () => {
     await act(async () => limits.reject(new Error("erro após unmount")));
     expect(documentApiMock.uploadLimits).toHaveBeenCalledOnce();
   });
+  it("abre seleção uma única vez por Enter ou Espaço no botão nativo", async () => {
+    const user = userEvent.setup();
+    await renderLoaded();
+    const input = screen.getByLabelText("Selecionar documento");
+    const open = vi.spyOn(input, "click").mockImplementation(() => {});
+    const button = screen.getByRole("button", { name: "Selecionar documento" });
+    button.focus();
+    await user.keyboard("{Enter}");
+    expect(open).toHaveBeenCalledTimes(1);
+    await user.keyboard(" ");
+    expect(open).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId("document-dropzone")).toHaveAttribute("role", "group");
+    open.mockRestore();
+  });
+
+  it("bloqueia campos, seleção, cancelamento e envio repetido enquanto upload está pendente", async () => {
+    const user = userEvent.setup();
+    const upload = deferred<KnowledgeDocument>();
+    documentApiMock.upload.mockReturnValueOnce(upload.promise);
+    await renderLoaded();
+    const file = new File(["documento sintético"], "teste.txt", { type: "text/plain" });
+    await user.upload(screen.getByLabelText("Selecionar documento"), file);
+    await user.type(screen.getByLabelText("Tipo do documento"), "  norma  ");
+    await user.type(screen.getByLabelText("Departamento"), "   ");
+    const form = screen.getByRole("form", { name: "Metadados do documento" });
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+    expect(documentApiMock.upload).toHaveBeenCalledTimes(1);
+    expect(documentApiMock.upload).toHaveBeenCalledWith(file, { document_type: "norma" });
+    expect(form).toHaveAttribute("aria-busy", "true");
+    expect(within(form).getByRole("status")).toHaveTextContent("Enviando documento. Aguarde a conclusão.");
+    for (const label of ["Tipo do documento", "Número do documento", "Departamento", "Data de publicação", "Válido até"]) {
+      expect(screen.getByLabelText(label)).toBeDisabled();
+    }
+    expect(screen.getByLabelText("Selecionar documento")).toBeDisabled();
+    expect(within(form).getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    expect(within(form).getByRole("button", { name: "Enviando..." })).toBeDisabled();
+    await act(async () => upload.resolve(makeDocument("pending", "new-pending")));
+    expect(await screen.findByText("new-pending.pdf")).toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(documentApiMock.list).toHaveBeenCalledTimes(1);
+  });
+
 });

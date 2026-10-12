@@ -2,7 +2,7 @@
 
 **Versão:** 1.0.
 
-**Status:** Proposta — aguardando aprovação. Nenhuma implementação autorizada por este arquivo.
+**Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementação concluída e verificação validada no escopo local disponível. Resultado aceito explicitamente em 12/10/2026.
 **Fase original:** Prompt 10; etapa 8B do plano.
 **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`) · High (`high`).
 **Commit sugerido, somente após revisão e autorização:** `refactor(documents): padroniza upload e acompanhamento de documentos`.
@@ -67,12 +67,12 @@ Status e erros devem representar resultados reais, inclusive quando listagens an
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação/dependências e registrar baseline dos testes assíncronos existentes.
-- [ ] Mapear composição atual a componentes/tokens, mantendo efeitos e referências intactos.
-- [ ] Adaptar seleção, formulário, mensagens e lista sem mudar limites/status/ações.
-- [ ] Revisar nomes acessíveis, foco e alternativa de teclado ao arraste.
-- [ ] Executar a suíte de documentos, inclusive corridas, polling, desmontagem e StrictMode.
-- [ ] Inspecionar os estados visuais com fixtures e registrar evidências/limitações no STATUS.
+- [x] Confirmar aprovação/dependências e registrar baseline dos testes assíncronos existentes.
+- [x] Mapear composição atual a componentes/tokens, mantendo efeitos e referências intactos.
+- [x] Adaptar seleção, formulário, mensagens e lista sem mudar limites/status/ações.
+- [x] Revisar nomes acessíveis, foco e alternativa de teclado ao arraste.
+- [x] Executar a suíte de documentos, inclusive corridas, polling, desmontagem e StrictMode.
+- [x] Inspecionar os estados visuais com fixtures e registrar evidências/limitações no STATUS.
 
 ## Verificação e evidências esperadas
 
@@ -86,4 +86,6 @@ Status e erros devem representar resultados reais, inclusive quando listagens an
 
 Implementação/verificação só termina com critérios evidenciados e sem perda dos contratos assíncronos; aparência deve ser apresentada para revisão separada.
 Adição futura de confirmação não condiciona esta fase. Mudanças materiais de escopo/spec exigem aprovação antes da implementação dependente.
-Não avançar, criar commit ou publicar automaticamente. Estado inicial: **Proposta — aguardando aprovação**.
+Não avançar, criar commit ou publicar automaticamente. Estado atual: **Implementada, verificada no escopo local disponível e aceita pelo usuário em 12/10/2026**.
+
+Autorização explícita recebida na mensagem Fase: 10 de 12/10/2026. A dependência DS-09 foi confirmada antes de implementar: “Confirmo o aceite da DS-09 e prossiga com a DS-10”. Nenhuma revisão material da v1.0 necessária. Consulte [evidências DS-10](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-10.md>) para os oito critérios, registros reais e limites. Após apresentação da entrega e limitações, o usuário declarou “aprovado. faça commite das alterações”. Aceite registrado; commit local autorizado com a mensagem sugerida, identificação no histórico Git. Sem push ou avanço à DS-11.

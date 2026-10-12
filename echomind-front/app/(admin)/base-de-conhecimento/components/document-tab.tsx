@@ -47,12 +47,12 @@ const STATUS_DETAILS: Record<
   DocumentStatus,
   {
     label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
+    variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning";
   }
 > = {
-  pending: { label: "Pendente", variant: "secondary" },
+  pending: { label: "Pendente", variant: "warning" },
   processing: { label: "Processando", variant: "outline" },
-  ready: { label: "Pronto", variant: "default" },
+  ready: { label: "Pronto", variant: "success" },
   error: { label: "Erro", variant: "destructive" },
 };
 
@@ -343,9 +343,13 @@ export function DocumentTab() {
   const canSelectFile = !isUploading && maxFileSizeBytes !== null;
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="space-y-4 p-6">
+    <section className="min-w-0 space-y-6" aria-label="Gestão de documentos">
+      <Card className="min-w-0">
+        <CardHeader className="gap-2">
+          <CardTitle><h2 className="text-lg font-semibold">Adicionar documento</h2></CardTitle>
+          <p className="text-sm text-muted-foreground">Selecione um documento para alimentar a base de conhecimento do agente.</p>
+        </CardHeader>
+        <CardContent className="min-w-0 space-y-6">
           <div
             data-testid="document-dropzone"
             onDragOver={(event) => {
@@ -355,258 +359,191 @@ export function DocumentTab() {
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             className={cn(
-              "flex min-h-64 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/20 px-6 py-10 text-center transition-colors",
-              isDragging
-                ? "border-primary bg-primary/5"
-                : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
-              !canSelectFile && "cursor-not-allowed opacity-60"
+              "flex min-h-56 min-w-0 flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors motion-reduce:transition-none md:px-6",
+              isDragging ? "border-primary bg-accent" : "border-border bg-card",
+              canSelectFile ? "cursor-pointer hover:border-primary focus-within:border-ring" : "cursor-not-allowed bg-muted"
             )}
-            role="button"
-            tabIndex={canSelectFile ? 0 : -1}
-            aria-disabled={!canSelectFile}
+            role="group"
+            aria-label="Seleção de documento"
+            aria-describedby="document-upload-help"
             aria-busy={isUploading || limitsLoading}
-            onClick={() => {
-              if (canSelectFile) inputRef.current?.click();
-            }}
-            onKeyDown={(event) => {
-              if (canSelectFile && (event.key === "Enter" || event.key === " ")) {
-                event.preventDefault();
-                inputRef.current?.click();
-              }
+            onClick={(event) => {
+              if (canSelectFile && event.target !== inputRef.current) inputRef.current?.click();
             }}
           >
-            <input
-              ref={inputRef}
-              type="file"
-              accept={ACCEPTED_FILES}
-              className="hidden"
-              aria-label="Selecionar documento"
-              disabled={!canSelectFile}
-              onChange={handleInputChange}
-            />
-            <div className="mb-4 rounded-full bg-primary/10 p-4 text-primary">
-              <UploadCloud className="h-8 w-8" />
+            <input ref={inputRef} type="file" accept={ACCEPTED_FILES} className="hidden"
+              aria-label="Selecionar documento" disabled={!canSelectFile} onChange={handleInputChange} />
+            <div className="mb-4 rounded-full bg-accent p-3 text-primary">
+              <UploadCloud aria-hidden="true" className="size-7" />
             </div>
-            <h2 className="text-lg font-semibold">Arraste documentos para alimentar o agente</h2>
-            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            <h3 className="text-base font-semibold">Arraste um documento para esta área</h3>
+            <p id="document-upload-help" className="mt-2 max-w-md text-sm leading-6 text-muted-foreground" aria-live="polite">
               Solte um arquivo PDF, TXT ou DOCX aqui ou clique para selecionar.{" "}
-              {maxFileSizeBytes !== null
-                ? `Limite de ${formatUploadLimit(maxFileSizeBytes)} MB.`
+              {maxFileSizeBytes !== null ? `Limite de ${formatUploadLimit(maxFileSizeBytes)} MB.`
                 : limitsLoading ? "Consultando limite de upload..." : "Envio indisponível até carregar o limite."}
             </p>
-            <Button type="button" className="mt-5" disabled={!canSelectFile}>
+            <Button type="button" className="mt-4" disabled={!canSelectFile}
+              aria-describedby="document-upload-help"
+              onClick={(event) => {
+                event.stopPropagation();
+                if (canSelectFile) inputRef.current?.click();
+              }}>
               {isUploading ? "Enviando..." : limitsLoading ? "Carregando limite..." : "Selecionar documento"}
             </Button>
           </div>
 
           {selectedFile && (
-            <form
-              aria-label="Metadados do documento"
-              className="space-y-4 rounded-lg border bg-muted/10 p-4"
-              onSubmit={handleUpload}
-            >
-              <div>
-                <p className="text-sm font-medium">Arquivo selecionado</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedFile.name} · {formatFileSize(selectedFile.size)}
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="document-type">Tipo do documento</Label>
-                  <Input
-                    id="document-type"
-                    value={metadata.document_type ?? ""}
-                    onChange={(event) => updateMetadata("document_type", event.target.value)}
-                    disabled={isUploading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="document-number">Número do documento</Label>
-                  <Input
-                    id="document-number"
-                    value={metadata.document_number ?? ""}
-                    onChange={(event) => updateMetadata("document_number", event.target.value)}
-                    disabled={isUploading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="document-department">Departamento</Label>
-                  <Input
-                    id="document-department"
-                    value={metadata.department ?? ""}
-                    onChange={(event) => updateMetadata("department", event.target.value)}
-                    disabled={isUploading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="document-published-at">Data de publicação</Label>
-                  <Input
-                    id="document-published-at"
-                    type="date"
-                    value={metadata.published_at ?? ""}
-                    onChange={(event) => updateMetadata("published_at", event.target.value)}
-                    disabled={isUploading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="document-valid-until">Válido até</Label>
-                  <Input
-                    id="document-valid-until"
-                    type="date"
-                    value={metadata.valid_until ?? ""}
-                    onChange={(event) => updateMetadata("valid_until", event.target.value)}
-                    disabled={isUploading}
-                  />
+            <form aria-label="Metadados do documento" aria-busy={isUploading}
+              className="min-w-0 space-y-6 rounded-xl border bg-card p-4 md:p-6" onSubmit={handleUpload}>
+              <div className="flex min-w-0 gap-3">
+                <FileText aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-medium">Arquivo selecionado</p>
+                  <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">
+                    {selectedFile.name} · {formatFileSize(selectedFile.size)}
+                  </p>
                 </div>
               </div>
-
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={cancelSelection} disabled={isUploading}>
-                  Cancelar
-                </Button>
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold">Metadados opcionais</h3>
+                <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="min-w-0 space-y-2">
+                    <Label htmlFor="document-type">Tipo do documento</Label>
+                    <Input id="document-type" value={metadata.document_type ?? ""}
+                      onChange={(event) => updateMetadata("document_type", event.target.value)} disabled={isUploading} />
+                  </div>
+                  <div className="min-w-0 space-y-2">
+                    <Label htmlFor="document-number">Número do documento</Label>
+                    <Input id="document-number" value={metadata.document_number ?? ""}
+                      onChange={(event) => updateMetadata("document_number", event.target.value)} disabled={isUploading} />
+                  </div>
+                  <div className="min-w-0 space-y-2">
+                    <Label htmlFor="document-department">Departamento</Label>
+                    <Input id="document-department" value={metadata.department ?? ""}
+                      onChange={(event) => updateMetadata("department", event.target.value)} disabled={isUploading} />
+                  </div>
+                  <div className="min-w-0 space-y-2">
+                    <Label htmlFor="document-published-at">Data de publicação</Label>
+                    <Input id="document-published-at" type="date" value={metadata.published_at ?? ""}
+                      onChange={(event) => updateMetadata("published_at", event.target.value)} disabled={isUploading} />
+                  </div>
+                  <div className="min-w-0 space-y-2">
+                    <Label htmlFor="document-valid-until">Válido até</Label>
+                    <Input id="document-valid-until" type="date" value={metadata.valid_until ?? ""}
+                      onChange={(event) => updateMetadata("valid_until", event.target.value)} disabled={isUploading} />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="outline" onClick={cancelSelection} disabled={isUploading}>Cancelar</Button>
                 <Button type="submit" disabled={!canSelectFile}>
-                  {isUploading && <Loader2 className="animate-spin" aria-hidden="true" />}
+                  {isUploading && <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                   {isUploading ? "Enviando..." : "Enviar documento"}
                 </Button>
               </div>
+              {isUploading && <p role="status" className="text-sm text-muted-foreground">Enviando documento. Aguarde a conclusão.</p>}
             </form>
           )}
 
           {limitsError && (
-            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+            <div className="space-y-3 rounded-lg border border-destructive bg-card p-4 text-sm text-destructive [overflow-wrap:anywhere]" role="alert">
               <p>Não foi possível carregar o limite de upload. Recarregue o limite para habilitar o envio.</p>
-              <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => {
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => {
                 setMaxFileSizeBytes(null);
                 setLimitsLoading(true);
                 setLimitsError(false);
                 void loadUploadLimits();
-              }}>
-                <RefreshCw aria-hidden="true" />
-                Recarregar limite
-              </Button>
+              }}><RefreshCw aria-hidden="true" />Recarregar limite</Button>
             </div>
           )}
-
           {errorMessage && (
-            <div
-              className="flex flex-col gap-3 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between"
-              role="alert"
-            >
-              <span>{errorMessage}</span>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  void loadDocuments();
-                }}
-              >
-                <RefreshCw aria-hidden="true" />
-                Tentar novamente
+            <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-destructive bg-card p-4 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between" role="alert">
+              <span className="min-w-0 [overflow-wrap:anywhere]">{errorMessage}</span>
+              <Button type="button" variant="outline" onClick={() => { void loadDocuments(); }}>
+                <RefreshCw aria-hidden="true" />Tentar novamente
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-base">Documentos enviados</CardTitle>
+      <Card className="min-w-0">
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle><h2 className="text-lg font-semibold">Documentos enviados</h2></CardTitle>
           <Badge variant="secondary">{documents.length} arquivo(s)</Badge>
         </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Arquivo</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden sm:table-cell">Tamanho</TableHead>
-                <TableHead>Chunks</TableHead>
-                <TableHead className="hidden md:table-cell">Enviado em</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+        <CardContent className="min-w-0 p-0">
+          <Table aria-label="Documentos enviados" className="block xl:table xl:table-fixed">
+            <TableHeader className="hidden xl:table-header-group">
+              <TableRow className="hover:bg-card">
+                <TableHead className="w-[30%] px-6">Arquivo</TableHead>
+                <TableHead className="w-[15%]">Status</TableHead>
+                <TableHead className="w-[12%]">Tamanho</TableHead>
+                <TableHead className="w-[10%]">Chunks</TableHead>
+                <TableHead className="w-[21%]">Enviado em</TableHead>
+                <TableHead className="w-[12%] px-6 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="block xl:table-row-group">
               {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                    <span className="inline-flex items-center gap-2" role="status">
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                      Carregando documentos...
+                <TableRow className="block hover:bg-card xl:table-row">
+                  <TableCell colSpan={6} className="block p-6 text-center whitespace-normal text-muted-foreground xl:table-cell">
+                    <span className="inline-flex min-h-24 items-center gap-2" role="status">
+                      <Loader2 className="size-5 animate-spin motion-reduce:animate-none" aria-hidden="true" />Carregando documentos...
                     </span>
                   </TableCell>
                 </TableRow>
               ) : documents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                    Nenhum documento enviado.
+                <TableRow className="block hover:bg-card xl:table-row">
+                  <TableCell colSpan={6} className="block p-6 text-center whitespace-normal text-muted-foreground xl:table-cell">
+                    <div className="flex min-h-24 flex-col items-center justify-center gap-3">
+                      <FileText aria-hidden="true" className="size-6" />Nenhum documento enviado.
+                    </div>
                   </TableCell>
                 </TableRow>
-              ) : (
-                documents.map((document) => {
-                  const status = STATUS_DETAILS[document.status];
-                  const isActive = ACTIVE_STATUSES.has(document.status);
-                  const isDeleting = deletingId === document.id;
-
-                  return (
-                    <TableRow key={document.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <FileText
-                            className={cn(
-                              "h-4 w-4 shrink-0 text-primary",
-                              document.status === "error" && "text-destructive"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <div className="min-w-0">
-                            <span className="block max-w-52 truncate">{document.filename}</span>
-                            {document.status === "error" && (
-                              <span className="block text-xs font-normal text-destructive">
-                                Falha no processamento
-                              </span>
-                            )}
-                          </div>
+              ) : documents.map((document) => {
+                const status = STATUS_DETAILS[document.status];
+                const isActive = ACTIVE_STATUSES.has(document.status);
+                const isDeleting = deletingId === document.id;
+                return (
+                  <TableRow key={document.id} className="grid grid-cols-2 gap-4 p-4 hover:bg-card md:p-6 xl:table-row xl:p-0">
+                    <TableCell className="col-span-2 block min-w-0 p-0 whitespace-normal font-medium xl:table-cell xl:px-6 xl:py-4">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <FileText aria-hidden="true" className={cn("mt-0.5 size-5 shrink-0 text-primary", document.status === "error" && "text-destructive")} />
+                        <div className="min-w-0 space-y-1">
+                          <span className="block [overflow-wrap:anywhere]">{document.filename}</span>
+                          {document.status === "error" && <span className="block text-xs font-normal text-destructive">Falha no processamento</span>}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={status.variant}>{status.label}</Badge>
-                      </TableCell>
-                      <TableCell className="hidden text-muted-foreground sm:table-cell">
-                        {formatFileSize(document.size_bytes)}
-                      </TableCell>
-                      <TableCell>{document.chunk_count}</TableCell>
-                      <TableCell className="hidden text-muted-foreground md:table-cell">
-                        {formatDateTime(document.created_at)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={() => void deleteDocument(document)}
-                          disabled={isActive || deletingId !== null}
-                          title={isActive ? "Aguarde o processamento para excluir" : undefined}
-                          aria-label={`Excluir ${document.filename}`}
-                        >
-                          {isDeleting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          ) : (
-                            <X className="h-4 w-4" aria-hidden="true" />
-                          )}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="block min-w-0 p-0 whitespace-normal xl:table-cell xl:p-2">
+                      <span className="mb-1 block text-xs text-muted-foreground xl:sr-only">Status</span>
+                      <Badge variant={status.variant}>{status.label}</Badge>
+                    </TableCell>
+                    <TableCell className="block min-w-0 p-0 whitespace-normal text-muted-foreground xl:table-cell xl:p-2">
+                      <span className="mb-1 block text-xs xl:sr-only">Tamanho</span>{formatFileSize(document.size_bytes)}
+                    </TableCell>
+                    <TableCell className="block min-w-0 p-0 whitespace-normal [overflow-wrap:anywhere] xl:table-cell xl:p-2">
+                      <span className="mb-1 block text-xs text-muted-foreground xl:sr-only">Chunks</span><span>{document.chunk_count}</span>
+                    </TableCell>
+                    <TableCell className="block min-w-0 p-0 whitespace-normal text-muted-foreground xl:table-cell xl:p-2">
+                      <span className="mb-1 block text-xs xl:sr-only">Enviado em</span>{formatDateTime(document.created_at)}
+                    </TableCell>
+                    <TableCell className="col-span-2 block min-w-0 p-0 whitespace-normal xl:table-cell xl:px-6 xl:py-4 xl:text-right">
+                      {isActive && <p className="mb-2 text-xs text-muted-foreground xl:sr-only">Aguarde o processamento para excluir</p>}
+                      <Button type="button" variant="outline" size="icon" className="text-destructive"
+                        onClick={() => void deleteDocument(document)} disabled={isActive || deletingId !== null}
+                        title={isActive ? "Aguarde o processamento para excluir" : undefined} aria-label={`Excluir ${document.filename}`}>
+                        {isDeleting ? <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <X className="size-4" aria-hidden="true" />}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }

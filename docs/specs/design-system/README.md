@@ -4,7 +4,7 @@ Versão documental: 1.0 · Data: 11/10/2026.
 
 Este conjunto adota **Specification Driven Development (SDD)**: a especificação define o resultado e as condições de aceitação; as tarefas orientam sua implementação; as evidências mostram o que foi verificado. Os textos são contratos de alteração, não uma sequência de prompts extensos.
 
-**Situação atual (12/10/2026): DS-00–DS-08 v1.0 aceitas e registradas em commits locais; DS-08 em 44b52ae. DS-09 v1.0 aprovada, implementada e verificada no escopo local disponível; resultado aguardando revisão. DS-10–DS-16 continuam propostas e não iniciadas.** A DS-09 padroniza a gestão de FAQs, estados, textos longos, ações e diálogo acessíveis, preservando contratos e os limites preexistentes de erro. Consulte STATUS.md e [evidências DS-09](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-09.md>) para os sete critérios, capturas e limitações. Sem commit da DS-09 ou push.
+**Situação atual (12/10/2026): DS-00–DS-10 v1.0 aceitas; DS-09 registrada no commit local c9c8fc2, já presente no baseline desta execução. DS-10 v1.0 aprovada, implementada e verificada no escopo local disponível; resultado aceito em 12/10/2026, com commit local autorizado após a apresentação da entrega. DS-11–DS-16 continuam propostas e não iniciadas.** A DS-10 padroniza seleção, metadados, lista e acompanhamento de documentos, preservando validações e proteções assíncronas. Consulte STATUS.md e [evidências DS-10](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-10.md>) para os oito critérios, capturas e limitações. Commit local DS-10 autorizado; identificação no histórico Git. Nenhum push.
 
 ## Documentos de referência
 

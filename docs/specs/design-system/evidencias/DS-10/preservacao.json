@@ -1,0 +1,19 @@
+{
+  "baseline": "c9c8fc2594cd459eb0c67fbc436b3bf5df8d2b98",
+  "helpersAndAsyncLogicIdentical": true,
+  "baselineSha256": "e984e04e766120477ec8e0b0f70cbafbfccff43616675e8df4f93b1d384d810c",
+  "currentSha256": "e984e04e766120477ec8e0b0f70cbafbfccff43616675e8df4f93b1d384d810c",
+  "unchanged": {
+    "echomind-front/lib/api.ts": true,
+    "echomind-front/lib/supabase.ts": true,
+    "echomind-front/app/(admin)/base-de-conhecimento/page.tsx": true,
+    "echomind-front/app/(admin)/base-de-conhecimento/components/faq-tab.tsx": true,
+    "echomind-front/app/globals.css": true,
+    "echomind-front/package.json": true,
+    "echomind-front/pnpm-lock.yaml": true
+  },
+  "backendDiff": [],
+  "existingTestsUnchanged": true,
+  "baselineExistingDocumentCases": 54,
+  "finalDocumentCases": 56
+}

@@ -1,0 +1,72 @@
+{
+  "progressEnd10": 1791825455605,
+  "checkedAt": 1791825472246,
+  "requests": [
+    {
+      "id": 62,
+      "method": "GET",
+      "path": "/documents",
+      "mode": "ready",
+      "hold": "list",
+      "authenticated": true,
+      "startedAt": 1791825433561
+    },
+    {
+      "id": 62,
+      "method": "GET",
+      "path": "/documents",
+      "mode": "ready",
+      "hold": "list",
+      "authenticated": true,
+      "startedAt": 1791825433561,
+      "completed": true,
+      "status": 200,
+      "endedAt": 1791825450279,
+      "activeLists": 0
+    },
+    {
+      "id": 64,
+      "method": "GET",
+      "path": "/documents",
+      "mode": "progress",
+      "hold": null,
+      "authenticated": true,
+      "startedAt": 1791825452305
+    },
+    {
+      "id": 64,
+      "method": "GET",
+      "path": "/documents",
+      "mode": "progress",
+      "hold": null,
+      "authenticated": true,
+      "startedAt": 1791825452305,
+      "completed": true,
+      "status": 200,
+      "endedAt": 1791825452305,
+      "activeLists": 0
+    },
+    {
+      "id": 65,
+      "method": "GET",
+      "path": "/documents",
+      "mode": "progress",
+      "hold": null,
+      "authenticated": true,
+      "startedAt": 1791825454313
+    },
+    {
+      "id": 65,
+      "method": "GET",
+      "path": "/documents",
+      "mode": "progress",
+      "hold": null,
+      "authenticated": true,
+      "startedAt": 1791825454313,
+      "completed": true,
+      "status": 200,
+      "endedAt": 1791825454314,
+      "activeLists": 0
+    }
+  ]
+}

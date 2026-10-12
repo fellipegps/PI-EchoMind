@@ -2,7 +2,7 @@
 
 **Versão:** 1.0.
 
-**Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementação concluída e verificação validada no escopo local disponível. Aceite do resultado aguardando revisão.
+**Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementação concluída e verificação validada no escopo local disponível. Resultado aceito explicitamente em 12/10/2026.
 **Fase original:** Prompt 09; etapa 8A do plano.
 **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`) · Medium (`medium`).
 **Commit sugerido, somente após revisão e autorização:** `refactor(knowledge): padroniza gestao de perguntas frequentes`.
@@ -88,6 +88,6 @@ O resultado deve manter a gestão de FAQs e seu limite de exibição pública, c
 Os critérios, evidências e limitações devem ser registrados antes de declarar implementação/verificação concluídas.
 Revisão e aprovação do usuário continuam separadas; confirmação futura de exclusão não é pré-requisito desta fase.
 Mudanças materiais de escopo/spec exigem aprovação antes da implementação dependente.
-Não avançar, criar commit ou publicar automaticamente. Estado atual: **Implementada e verificada no escopo local disponível — aguardando revisão do resultado**.
+Não avançar, criar commit ou publicar automaticamente. Estado atual: **Implementada, verificada no escopo local disponível e aceita pelo usuário em 12/10/2026**.
 
-Autorização explícita recebida na mensagem Fase: 09 de 12/10/2026. Dependências e limites conferidos; nenhuma revisão material da v1.0 necessária. Consulte [evidências DS-09](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-09.md>) para os sete critérios, registros reais e limitações. Sem commit/push ou avanço de fase.
+Autorização explícita recebida na mensagem Fase: 09 de 12/10/2026. Dependências e limites conferidos; nenhuma revisão material da v1.0 necessária. Consulte [evidências DS-09](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-09.md>) para os sete critérios, registros reais e limitações. Aceite recebido posteriormente: “Confirmo o aceite da DS-09 e prossiga com a DS-10”. O commit local c9c8fc2594cd459eb0c67fbc436b3bf5df8d2b98 já estava presente ao iniciar a DS-10; ele não foi usado como prova de aceite. Nenhum novo commit/push nesta execução.
