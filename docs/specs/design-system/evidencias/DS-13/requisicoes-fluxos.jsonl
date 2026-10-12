@@ -1,0 +1,22 @@
+{"id":1,"method":"POST","path":"/auth/v1/token","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842368888}
+{"id":2,"method":"GET","path":"/auth/me","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842368901}
+{"id":3,"method":"GET","path":"/auth/me","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842368946}
+{"id":4,"method":"GET","path":"/auth/me","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842368949}
+{"id":5,"method":"GET","path":"/dashboard","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842368995}
+{"id":6,"method":"GET","path":"/dashboard/rag-metrics","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842369020}
+{"id":7,"method":"GET","path":"/locations","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842372209}
+{"id":7,"method":"GET","path":"/locations","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842372209,"completed":true,"status":200,"endedAt":1791842372211}
+{"id":8,"method":"PUT","path":"/locations/location-alpha","mode":"update-error","hold":null,"authenticated":true,"startedAt":1791842486718}
+{"id":8,"method":"PUT","path":"/locations/location-alpha","mode":"update-error","hold":null,"authenticated":true,"startedAt":1791842486718,"completed":true,"status":500,"endedAt":1791842486719,"payload":{"name":"Biblioteca revisada","description":"Acervo fictício para teste.","category":"estudo","floor":"Térreo","building":"Bloco B","x":30.7,"y":40.3,"active":true}}
+{"id":9,"method":"PUT","path":"/locations/location-alpha","mode":"ready","hold":"update","authenticated":true,"startedAt":1791842487115}
+{"id":9,"method":"PUT","path":"/locations/location-alpha","mode":"ready","hold":"update","authenticated":true,"startedAt":1791842487115,"completed":true,"status":200,"endedAt":1791842487635,"payload":{"name":"Biblioteca revisada","description":"Acervo fictício para teste.","category":"estudo","floor":"Térreo","building":"Bloco B","x":30.7,"y":40.3,"active":true}}
+{"id":10,"method":"PUT","path":"/locations/location-alpha","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842489783}
+{"id":10,"method":"PUT","path":"/locations/location-alpha","mode":"ready","hold":null,"authenticated":true,"startedAt":1791842489783,"completed":true,"status":200,"endedAt":1791842489784,"payload":{"name":"Biblioteca revisada","description":"Acervo fictício para teste.","category":"estudo","floor":"Térreo","building":"Bloco B","x":30.7,"y":40.3,"active":false}}
+{"id":11,"method":"POST","path":"/locations","mode":"create-error","hold":null,"authenticated":true,"startedAt":1791842506340}
+{"id":11,"method":"POST","path":"/locations","mode":"create-error","hold":null,"authenticated":true,"startedAt":1791842506340,"completed":true,"status":500,"endedAt":1791842506341,"payload":{"name":"Local novo sintético","description":null,"category":"estudo","floor":null,"building":null,"x":50,"y":50,"active":false}}
+{"id":12,"method":"POST","path":"/locations","mode":"ready","hold":"create","authenticated":true,"startedAt":1791842506472}
+{"id":12,"method":"POST","path":"/locations","mode":"ready","hold":"create","authenticated":true,"startedAt":1791842506472,"completed":true,"status":201,"endedAt":1791842506737,"payload":{"name":"Local novo sintético","description":null,"category":"estudo","floor":null,"building":null,"x":50,"y":50,"active":false}}
+{"id":13,"method":"DELETE","path":"/locations/location-created-12","mode":"delete-error","hold":null,"authenticated":true,"startedAt":1791842521649}
+{"id":13,"method":"DELETE","path":"/locations/location-created-12","mode":"delete-error","hold":null,"authenticated":true,"startedAt":1791842521649,"completed":true,"status":500,"endedAt":1791842521650,"payload":{}}
+{"id":14,"method":"DELETE","path":"/locations/location-created-12","mode":"ready","hold":"delete","authenticated":true,"startedAt":1791842523004}
+{"id":14,"method":"DELETE","path":"/locations/location-created-12","mode":"ready","hold":"delete","authenticated":true,"startedAt":1791842523004,"completed":true,"status":204,"endedAt":1791842524292,"payload":{}}

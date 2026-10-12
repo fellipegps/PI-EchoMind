@@ -1,0 +1,14 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/locais/campus-locations-manager.test.tsx"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ app/(admin)/locais/campus-locations-manager.test.tsx (3 tests) 2443ms
+   ✓ CampusLocationsManager > lista, pesquisa e cadastra um local sem aceitar tenant informado pelo cliente  2297ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  18:54:44
+   Duration  31.25s (transform 208ms, setup 6.93s, collect 4.33s, tests 2.44s, environment 13.59s, prepare 949ms)

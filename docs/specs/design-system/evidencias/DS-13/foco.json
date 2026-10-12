@@ -1,0 +1,962 @@
+[
+  {
+    "theme": "Claro",
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.835) 0px 0px 0px 1.67046px, rgba(11, 87, 208, 0.835) 0px 0px 0px 3.34091px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 199.6075439453125,
+      "height": 43.347991943359375,
+      "left": 47.22273635864258,
+      "right": 327.9995307922363,
+      "top": 156.25955200195312,
+      "width": 280.77679443359375,
+      "x": 47.22273635864258,
+      "y": 156.25955200195312
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914433px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-category",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 290.9570617675781,
+      "height": 43.96295166015625,
+      "left": 45.12629699707031,
+      "right": 329.8863067626953,
+      "top": 246.99411010742188,
+      "width": 284.760009765625,
+      "x": 45.12629699707031,
+      "y": 246.99411010742188
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914713px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82943px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-building",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-floor",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.694) 0px 0px 0px 1.39129px, rgba(11, 87, 208, 0.694) 0px 0px 0px 2.78258px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-x",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 181.5,
+      "top": 283,
+      "width": 136.5,
+      "x": 45,
+      "y": 283
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914433px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-y",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 193.5,
+      "right": 330,
+      "top": 203,
+      "width": 136.5,
+      "x": 193.5,
+      "y": 203
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.916812px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.83362px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-description",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 96,
+      "left": 45,
+      "right": 330,
+      "top": 231,
+      "width": 285,
+      "x": 45,
+      "y": 231
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.494866 -0.0325106 -0.196479 / 0.0875886) 0px 0px 0px 0.525532px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-active",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 283.1875,
+      "height": 18.390625,
+      "left": 281,
+      "right": 313,
+      "top": 264.796875,
+      "width": 32,
+      "x": 281,
+      "y": 264.796875
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 8,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.455) 0px 0px 0px 0.912193px, rgba(11, 87, 208, 0.455) 0px 0px 0px 1.82439px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "",
+    "inside": true,
+    "name": "Cancelar",
+    "rect": {
+      "bottom": 387,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 343,
+      "width": 308,
+      "x": 41,
+      "y": 343
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 9,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.467) 0px 0px 0px 0.931927px, rgba(11, 87, 208, 0.467) 0px 0px 0px 1.86385px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 480,
+    "id": "",
+    "inside": true,
+    "name": "Salvar",
+    "rect": {
+      "bottom": 439,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 395,
+      "width": 308,
+      "x": 41,
+      "y": 395
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 10,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 480,
+    "id": "",
+    "inside": true,
+    "name": "Close",
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 321,
+      "right": 365,
+      "top": 25,
+      "width": 44,
+      "x": 321,
+      "y": 25
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 11,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.694) 0px 0px 0px 1.39041px, rgba(11, 87, 208, 0.694) 0px 0px 0px 2.78082px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 167,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 123,
+      "width": 285,
+      "x": 45,
+      "y": 123
+    },
+    "width": 390
+  },
+  {
+    "theme": "Claro",
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.45) 0px 0px 0px 0.90398px, rgba(11, 87, 208, 0.45) 0px 0px 0px 1.80796px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 181.29000854492188,
+      "height": 42.691436767578125,
+      "left": 62.13026428222656,
+      "right": 643.3158721923828,
+      "top": 138.59857177734375,
+      "width": 581.1856079101562,
+      "x": 62.13026428222656,
+      "y": 138.59857177734375
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914503px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82901px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-category",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 270.94317626953125,
+      "height": 43.83329772949219,
+      "left": 54.16318893432617,
+      "right": 342.5663261413574,
+      "top": 227.10987854003903,
+      "width": 288.40313720703125,
+      "x": 54.16318893432617,
+      "y": 227.10987854003903
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-building",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 271,
+      "height": 44,
+      "left": 362.5,
+      "right": 652,
+      "top": 227,
+      "width": 289.5,
+      "x": 362.5,
+      "y": 227
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350462px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700924px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-floor",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 363,
+      "height": 44,
+      "left": 53,
+      "right": 342.5,
+      "top": 319,
+      "width": 289.5,
+      "x": 53,
+      "y": 319
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-x",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 362.5,
+      "right": 501.25,
+      "top": 235,
+      "width": 138.75,
+      "x": 362.5,
+      "y": 235
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-y",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 513.25,
+      "right": 652,
+      "top": 235,
+      "width": 138.75,
+      "x": 513.25,
+      "y": 235
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914433px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-description",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 411,
+      "height": 96,
+      "left": 53,
+      "right": 652,
+      "top": 315,
+      "width": 599,
+      "x": 53,
+      "y": 315
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.494866 -0.0325106 -0.196479 / 0.0876424) 0px 0px 0px 0.525855px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-active",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 377.1875,
+      "height": 18.390625,
+      "left": 603,
+      "right": 635,
+      "top": 358.796875,
+      "width": 32,
+      "x": 603,
+      "y": 358.796875
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 8,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350355px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700709px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "",
+    "inside": true,
+    "name": "Cancelar",
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 496.5625,
+      "right": 589.5,
+      "top": 427,
+      "width": 92.9375,
+      "x": 496.5625,
+      "y": 427
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 9,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.35127px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.702539px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 512,
+    "id": "",
+    "inside": true,
+    "name": "Salvar",
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 597.5,
+      "right": 671,
+      "top": 427,
+      "width": 73.5,
+      "x": 597.5,
+      "y": 427
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 10,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 512,
+    "id": "",
+    "inside": true,
+    "name": "Close",
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 643,
+      "right": 687,
+      "top": 25,
+      "width": 44,
+      "x": 643,
+      "y": 25
+    },
+    "width": 720
+  },
+  {
+    "theme": "Claro",
+    "step": 11,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914433px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 147,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 103,
+      "width": 599,
+      "x": 53,
+      "y": 103
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.835) 0px 0px 0px 1.67422px, rgba(147, 197, 253, 0.835) 0px 0px 0px 3.34844px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 199.60354614257812,
+      "height": 43.352294921875,
+      "left": 47.20808410644531,
+      "right": 328.01271057128906,
+      "top": 156.25125122070312,
+      "width": 280.80462646484375,
+      "x": 47.20808410644531,
+      "y": 156.25125122070312
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.455) 0px 0px 0px 0.91002px, rgba(147, 197, 253, 0.455) 0px 0px 0px 1.82004px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-category",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 290.9574890136719,
+      "height": 43.96331787109375,
+      "left": 45.12499237060547,
+      "right": 329.8875045776367,
+      "top": 246.99417114257812,
+      "width": 284.76251220703125,
+      "x": 45.12499237060547,
+      "y": 246.99417114257812
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.455) 0px 0px 0px 0.912193px, rgba(147, 197, 253, 0.455) 0px 0px 0px 1.82439px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-building",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.916812px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83362px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-floor",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.698) 0px 0px 0px 1.39269px, rgba(147, 197, 253, 0.698) 0px 0px 0px 2.78539px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-x",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 181.5,
+      "top": 283,
+      "width": 136.5,
+      "x": 45,
+      "y": 283
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.91807px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83614px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-y",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 193.5,
+      "right": 330,
+      "top": 203,
+      "width": 136.5,
+      "x": 193.5,
+      "y": 203
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-description",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 327,
+      "height": 96,
+      "left": 45,
+      "right": 330,
+      "top": 231,
+      "width": 285,
+      "x": 45,
+      "y": 231
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.809058 -0.0298029 -0.0908049 / 0.228661) 0px 0px 0px 1.37197px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-active",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 283.1875,
+      "height": 18.390625,
+      "left": 281,
+      "right": 313,
+      "top": 264.796875,
+      "width": 32,
+      "x": 281,
+      "y": 264.796875
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 8,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.353915px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.70783px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "",
+    "inside": true,
+    "name": "Cancelar",
+    "rect": {
+      "bottom": 387,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 343,
+      "width": 308,
+      "x": 41,
+      "y": 343
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 9,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 480,
+    "id": "",
+    "inside": true,
+    "name": "Salvar",
+    "rect": {
+      "bottom": 439,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 395,
+      "width": 308,
+      "x": 41,
+      "y": 395
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 10,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 480,
+    "id": "",
+    "inside": true,
+    "name": "Close",
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 321,
+      "right": 365,
+      "top": 25,
+      "width": 44,
+      "x": 321,
+      "y": 25
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 11,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.915903px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83181px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 480,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 167,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 123,
+      "width": 285,
+      "x": 45,
+      "y": 123
+    },
+    "width": 390
+  },
+  {
+    "theme": "Escuro",
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.694) 0px 0px 0px 1.39041px, rgba(147, 197, 253, 0.694) 0px 0px 0px 2.78082px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 180.63302612304688,
+      "height": 43.06684875488281,
+      "left": 59.51087188720703,
+      "right": 645.807258605957,
+      "top": 137.56617736816406,
+      "width": 586.29638671875,
+      "x": 59.51087188720703,
+      "y": 137.56617736816406
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-category",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 270.943603515625,
+      "height": 43.83457946777344,
+      "left": 54.15416717529297,
+      "right": 342.56578826904297,
+      "top": 227.10902404785156,
+      "width": 288.41162109375,
+      "x": 54.15416717529297,
+      "y": 227.10902404785156
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-building",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 271,
+      "height": 44,
+      "left": 362.5,
+      "right": 652,
+      "top": 227,
+      "width": 289.5,
+      "x": 362.5,
+      "y": 227
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-floor",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 363,
+      "height": 44,
+      "left": 53,
+      "right": 342.5,
+      "top": 319,
+      "width": 289.5,
+      "x": 53,
+      "y": 319
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-x",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 362.5,
+      "right": 501.25,
+      "top": 235,
+      "width": 138.75,
+      "x": 362.5,
+      "y": 235
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-y",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 513.25,
+      "right": 652,
+      "top": 235,
+      "width": 138.75,
+      "x": 513.25,
+      "y": 235
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-description",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 411,
+      "height": 96,
+      "left": 53,
+      "right": 652,
+      "top": 315,
+      "width": 599,
+      "x": 53,
+      "y": 315
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.809058 -0.0298029 -0.0908049 / 0.0875752) 0px 0px 0px 0.525451px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-active",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 377.1875,
+      "height": 18.390625,
+      "left": 603,
+      "right": 635,
+      "top": 358.796875,
+      "width": 32,
+      "x": 603,
+      "y": 358.796875
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 8,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "",
+    "inside": true,
+    "name": "Cancelar",
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 496.5625,
+      "right": 589.5,
+      "top": 427,
+      "width": 92.9375,
+      "x": 496.5625,
+      "y": 427
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 9,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 512,
+    "id": "",
+    "inside": true,
+    "name": "Salvar",
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 597.5,
+      "right": 671,
+      "top": 427,
+      "width": 73.5,
+      "x": 597.5,
+      "y": 427
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 10,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "height": 512,
+    "id": "",
+    "inside": true,
+    "name": "Close",
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 643,
+      "right": 687,
+      "top": 25,
+      "width": 44,
+      "x": 643,
+      "y": 25
+    },
+    "width": 720
+  },
+  {
+    "theme": "Escuro",
+    "step": 11,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "height": 512,
+    "id": "location-name",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 147,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 103,
+      "width": 599,
+      "x": 53,
+      "y": 103
+    },
+    "width": 720
+  }
+]

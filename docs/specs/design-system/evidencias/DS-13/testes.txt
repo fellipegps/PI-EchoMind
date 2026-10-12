@@ -1,0 +1,26 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/locais/campus-locations-manager.test.tsx" "app/(public)/components/public-portal.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 30ms
+ ✓ app/(public)/components/public-portal.test.tsx (17 tests) 5066ms
+   ✓ PublicPortal > envia a pergunta ao chat real e acumula os tokens da resposta  457ms
+   ✓ PublicPortal > formata o negrito da resposta mesmo quando os marcadores chegam em partes  521ms
+   ✓ PublicPortal > preserva conversa pendente, tokens e rascunho ao navegar, sem repetir as consultas institucionais  1162ms
+   ✓ PublicPortal > pesquisa locais, seleciona origem e calcula rota aproximada  476ms
+   ✓ PublicPortal > anuncia espera, bloqueia envio simultâneo e termina uma única resposta incremental  595ms
+ ✓ app/(admin)/locais/campus-locations-manager.test.tsx (9 tests) 6391ms
+   ✓ CampusLocationsManager > pesquisa nome, categoria, bloco e piso sem diferença de caixa  1093ms
+   ✓ CampusLocationsManager > edita somente nome preservando coordenadas fracionárias e valores opcionais  763ms
+   ✓ CampusLocationsManager > bloqueia obrigatórios e normaliza opcionais sem exigir cadastro geográfico  934ms
+   ✓ CampusLocationsManager > mantém formulário durante envio e após falha, fechando somente no sucesso  551ms
+   ✓ CampusLocationsManager > cancela exclusão sem chamada, conserva item na falha e remove após sucesso  397ms
+   ✓ CampusLocationsManager > lista, pesquisa e cadastra um local sem aceitar tenant informado pelo cliente  2334ms
+
+ Test Files  3 passed (3)
+      Tests  36 passed (36)
+   Start at  18:59:14
+   Duration  9.08s (transform 509ms, setup 914ms, collect 2.60s, tests 11.49s, environment 2.05s, prepare 479ms)

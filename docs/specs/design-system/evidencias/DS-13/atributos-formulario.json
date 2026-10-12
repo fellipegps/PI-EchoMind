@@ -1,0 +1,114 @@
+[
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-name",
+    "labels": [
+      "Nome"
+    ],
+    "max": "",
+    "maxLength": 200,
+    "min": "",
+    "step": "",
+    "type": "text",
+    "value": "Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos"
+  },
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-category",
+    "labels": [
+      "Categoria"
+    ],
+    "max": "",
+    "maxLength": 100,
+    "min": "",
+    "step": "",
+    "type": "text",
+    "value": "CategoriaCategoriaCategoriaCategoriaCategoriaCategoriaCategoriaCategoriaCategoriaCategoria"
+  },
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-building",
+    "labels": [
+      "Bloco"
+    ],
+    "max": "",
+    "maxLength": 100,
+    "min": "",
+    "step": "",
+    "type": "text",
+    "value": "BlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBlocoBloco"
+  },
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-floor",
+    "labels": [
+      "Piso"
+    ],
+    "max": "",
+    "maxLength": 50,
+    "min": "",
+    "step": "",
+    "type": "text",
+    "value": "PisoPisoPisoPisoPisoPisoPisoPisoPisoPisoPisoPiso"
+  },
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-x",
+    "labels": [
+      "Posição X"
+    ],
+    "max": "100",
+    "maxLength": -1,
+    "min": "0",
+    "step": "0.1",
+    "type": "number",
+    "value": "88.8"
+  },
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-y",
+    "labels": [
+      "Posição Y"
+    ],
+    "max": "100",
+    "maxLength": -1,
+    "min": "0",
+    "step": "0.1",
+    "type": "number",
+    "value": "1.2"
+  },
+  {
+    "checked": null,
+    "describedBy": null,
+    "id": "location-description",
+    "labels": [
+      "Descrição"
+    ],
+    "max": "",
+    "maxLength": 2000,
+    "min": "",
+    "step": "",
+    "type": "textarea",
+    "value": "Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. Descrição sintética longa. "
+  },
+  {
+    "checked": "true",
+    "describedBy": "location-active-hint",
+    "id": "location-active",
+    "labels": [
+      "Exibir no portal"
+    ],
+    "max": "",
+    "maxLength": -1,
+    "min": "",
+    "step": "",
+    "type": "button",
+    "value": "on"
+  }
+]

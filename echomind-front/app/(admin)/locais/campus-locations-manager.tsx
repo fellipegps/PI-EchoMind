@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Loader2, MapPin, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -56,6 +56,9 @@ export function CampusLocationsManager() {
   const [editing, setEditing] = useState<CampusLocation | null>(null);
   const [deleting, setDeleting] = useState<CampusLocation | null>(null);
   const [form, setForm] = useState<CampusLocationInput>(EMPTY_FORM);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const formTrigger = useRef<HTMLElement | null>(null);
+  const deleteTrigger = useRef<HTMLElement | null>(null);
 
   const loadLocations = useCallback(async () => {
     setLoading(true);
@@ -102,6 +105,7 @@ export function CampusLocationsManager() {
   }, [locations, search]);
 
   const openForm = (location?: CampusLocation) => {
+    formTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setEditing(location ?? null);
     setForm(
       location
@@ -177,27 +181,31 @@ export function CampusLocationsManager() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <label className="relative flex-1">
-          <span className="sr-only">Pesquisar locais</span>
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <section className="min-w-0 space-y-6" aria-label="Gestão de locais">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1 space-y-2">
+          <Label htmlFor="location-search">Pesquisar locais</Label>
+          <div className="relative">
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            id="location-search"
+            ref={searchInput}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Pesquisar por nome, bloco, piso ou categoria..."
             className="pl-9"
           />
-        </label>
+          </div>
+        </div>
         <Button onClick={() => openForm()}>
-          <Plus className="h-4 w-4" /> Novo local
+          <Plus aria-hidden="true" className="h-4 w-4" /> Novo local
         </Button>
       </div>
 
       {error && (
         <Card className="border-destructive/40">
-          <CardContent className="flex items-center justify-between gap-3 p-4">
-            <p className="text-sm text-destructive" role="alert">{error}</p>
+          <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between md:p-6">
+            <p className="min-w-0 text-sm text-foreground [overflow-wrap:anywhere]" role="alert">{error}</p>
             <Button variant="outline" onClick={() => void loadLocations()}>
               Tentar novamente
             </Button>
@@ -206,76 +214,84 @@ export function CampusLocationsManager() {
       )}
 
       {loading ? (
-        <p className="py-10 text-center text-muted-foreground" role="status">
+        <Card><CardContent className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground" role="status" aria-label="Carregando locais">
+          <Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
           Carregando locais...
-        </p>
+        </CardContent></Card>
       ) : filteredLocations.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground" role="status">
+            <MapPin aria-hidden="true" className="size-6" />
             Nenhum local encontrado.
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <ul className="grid min-w-0 gap-4 xl:grid-cols-2" aria-label="Locais cadastrados">
           {filteredLocations.map((location) => (
-            <Card key={location.id}>
-              <CardContent className="flex gap-3 p-4">
-                <div className="mt-1 rounded-lg bg-primary/10 p-2 text-primary">
-                  <MapPin className="h-5 w-5" />
+            <li key={location.id} className="min-w-0">
+            <article className="h-full" aria-labelledby={`location-heading-${location.id}`}>
+            <Card className="h-full min-w-0">
+              <CardContent className="flex min-w-0 flex-col gap-4 p-4 md:p-6">
+                <div className="flex items-start gap-3">
+                <div className="shrink-0 rounded-lg bg-primary/10 p-2 text-primary">
+                  <MapPin aria-hidden="true" className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-semibold">{location.name}</h2>
-                    <Badge variant={location.active ? "default" : "secondary"}>
+                    <h2 id={`location-heading-${location.id}`} className="min-w-0 text-base font-semibold [overflow-wrap:anywhere]">{location.name}</h2>
+                    <Badge variant={location.active ? "success" : "secondary"}>
                       {location.active ? "Ativo" : "Inativo"}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground [overflow-wrap:anywhere]">
                     {[location.category, location.building, location.floor]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
                   {location.description && (
-                    <p className="mt-2 line-clamp-2 text-sm">{location.description}</p>
+                    <p className="mt-3 line-clamp-2 text-sm [overflow-wrap:anywhere]">{location.description}</p>
                   )}
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Mapa: x {location.x} · y {location.y}
+                    Mapa esquemático: x {location.x} · y {location.y}
                   </p>
                 </div>
-                <div className="flex flex-col gap-1">
+                </div>
+                <div className="flex justify-end gap-2 border-t pt-4">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     onClick={() => openForm(location)}
                     aria-label={`Editar ${location.name}`}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil aria-hidden="true" className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     className="text-destructive"
-                    onClick={() => setDeleting(location)}
+                    onClick={(event) => { deleteTrigger.current = event.currentTarget; setDeleting(location); }}
                     aria-label={`Excluir ${location.name}`}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
             </Card>
+            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="grid max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-2xl" onCloseAutoFocus={(event) => { event.preventDefault(); formTrigger.current?.focus(); }}>
+          <DialogHeader className="pr-8 text-left">
             <DialogTitle>{editing ? "Editar local" : "Novo local"}</DialogTitle>
             <DialogDescription>
               As coordenadas de 0 a 100 posicionam o ponto no mapa esquemático.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid min-h-0 min-w-0 gap-5 overflow-y-auto px-1 py-1 sm:grid-cols-2 [&>div]:min-w-0" onFocusCapture={(event) => { if (event.target instanceof HTMLElement) event.target.scrollIntoView?.({ block: "nearest", inline: "nearest" }); }}>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="location-name">Nome</Label>
               <Input
@@ -283,6 +299,7 @@ export function CampusLocationsManager() {
                 value={form.name}
                 onChange={(event) => setForm({ ...form, name: event.target.value })}
                 maxLength={200}
+                aria-required="true"
               />
             </div>
             <div className="space-y-2">
@@ -293,6 +310,7 @@ export function CampusLocationsManager() {
                 onChange={(event) => setForm({ ...form, category: event.target.value })}
                 placeholder="Ex: laboratório"
                 maxLength={100}
+                aria-required="true"
               />
             </div>
             <div className="space-y-2">
@@ -349,27 +367,31 @@ export function CampusLocationsManager() {
                 onChange={(event) => setForm({ ...form, description: event.target.value })}
                 maxLength={2000}
                 rows={3}
+                className="field-sizing-fixed max-h-48 min-h-24 resize-none overflow-y-auto"
               />
             </div>
-            <div className="flex items-center justify-between rounded-lg border p-3 sm:col-span-2">
-              <div>
+            <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted p-4 sm:col-span-2">
+              <div className="min-w-0 space-y-1">
                 <Label htmlFor="location-active">Exibir no portal</Label>
-                <p className="text-sm text-muted-foreground">
+                <p id="location-active-hint" className="text-sm text-muted-foreground">
                   Locais inativos ficam ocultos dos estudantes.
                 </p>
               </div>
               <Switch
                 id="location-active"
+                aria-describedby="location-active-hint"
+                className="shrink-0"
                 checked={form.active}
                 onCheckedChange={(active) => setForm({ ...form, active })}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => void saveLocation()} disabled={saving}>
+            <Button onClick={() => void saveLocation()} disabled={saving} aria-busy={saving}>
+              {saving && <Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />}
               {saving ? "Salvando..." : "Salvar"}
             </Button>
           </DialogFooter>
@@ -377,14 +399,14 @@ export function CampusLocationsManager() {
       </Dialog>
 
       <AlertDialog open={Boolean(deleting)} onOpenChange={(open) => !open && setDeleting(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
+        <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto" onCloseAutoFocus={(event) => { event.preventDefault(); (deleteTrigger.current?.isConnected ? deleteTrigger.current : searchInput.current)?.focus(); }}>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Excluir local?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription tabIndex={0} aria-label="Efeito da exclusão" className="max-h-[40dvh] overflow-y-auto rounded-sm [overflow-wrap:anywhere] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               O local {deleting?.name} será removido do portal e da administração.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -395,6 +417,6 @@ export function CampusLocationsManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </section>
   );
 }

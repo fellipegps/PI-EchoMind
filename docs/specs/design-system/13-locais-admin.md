@@ -4,7 +4,7 @@
 
 ## Identificação e estado
 
-- **Status:** Proposta / aguardando aprovação. Não aprovada nem implementada.
+- **Status:** v1.0 aprovada em 12/10/2026; implementação concluída; verificação parcial por zoom nativo de 200% pendente em R08/AC08. Resultado aceito em 12/10/2026 pelo pedido “faça commite das alterações”, com a pendência documentada.
 - **Origem:** fase 13 do roteiro anterior; etapa 9B do plano de refatoração.
 - **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`), esforço Medium (`medium`).
 - **Commit sugerido, após revisão e autorização:** `refactor(locations): padroniza gestao administrativa de locais`.
@@ -80,13 +80,15 @@ Fora do escopo: substituir o cadastro pelo editor de campi, converter X/Y para l
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação e dependências, conferir contratos e dados de teste.
-- [ ] Ajustar cabeçalho/container e busca ao padrão administrativo.
-- [ ] Padronizar cards, badges, botões de ícone e estados, mantendo informações e pesquisa.
-- [ ] Reorganizar formulário e visibilidade, preservando campos/valores e significado de X/Y.
-- [ ] Conferir confirmação, cancelamento, falha, nova tentativa e payloads em mocks.
-- [ ] Validar teclado, foco, textos longos, zoom, temas e larguras; adaptar testes pertinentes.
-- [ ] Registrar verificações e pendências no STATUS e entregar para revisão.
+- [x] Confirmar aprovação e dependências, conferir contratos e dados de teste.
+- [x] Ajustar cabeçalho/container e busca ao padrão administrativo.
+- [x] Padronizar cards, badges, botões de ícone e estados, mantendo informações e pesquisa.
+- [x] Reorganizar formulário e visibilidade, preservando campos/valores e significado de X/Y.
+- [x] Conferir confirmação, cancelamento, falha, nova tentativa e payloads em mocks.
+- [x] Validar teclado, foco, textos longos, zoom, temas e larguras; adaptar testes pertinentes.
+- [x] Registrar verificações e pendências no STATUS e entregar para revisão.
+
+- [ ] Validar zoom nativo de 200% (R08/AC08) em navegador com controle disponível; viewport reduzido não substitui a verificação.
 
 ## Verificações e evidências
 
@@ -101,3 +103,5 @@ Fora do escopo: substituir o cadastro pelo editor de campi, converter X/Y para l
 Concluir tecnicamente após verificar requisitos e registrar limitações sem regressão conhecida. Manter implementação, verificação e aceite visual separados no STATUS; a revisão do usuário permanece pendente até manifestação explícita.
 
 Executar somente DS-13 quando autorizada. Mudanças materiais de regra, escopo ou decisão visual exigem aprovação antes da implementação dependente. Não iniciar DS-14, criar commit ou fazer push automaticamente.
+
+Autorização recebida para Fase: 13 em 12/10/2026: “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Dependências conferidas antes da implementação. [Evidências DS-13](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-13.md>) registram testes, critérios e pendência de zoom. Requisitos/escopo v1.0 mantidos. Após a entrega, o usuário solicitou “faça commite das alterações”: aceite do resultado com a pendência documentada e autorização somente para commit local. Identificação no histórico Git; sem push ou avanço de fase.

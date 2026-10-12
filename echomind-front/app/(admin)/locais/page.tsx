@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 
 export default function CampusLocationsPage() {
   return (
-    <PageContainer variant="wide">
+    <PageContainer variant="standard">
       <PageHeader title="Locais do Campus" description="Cadastre os pontos que serão exibidos no mapa público da instituição." eyebrow="Mapa institucional" />
       <CampusLocationsManager />
     </PageContainer>

@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const apiMocks = vi.hoisted(() => ({
@@ -38,11 +39,123 @@ const location = {
 
 describe("CampusLocationsManager", () => {
   beforeEach(() => {
+    vi.mocked(toast.error).mockClear();
     apiMocks.list.mockReset();
     apiMocks.create.mockReset();
     apiMocks.update.mockReset();
     apiMocks.delete.mockReset();
     apiMocks.list.mockResolvedValue([location]);
+  });
+
+  it("pesquisa nome, categoria, bloco e piso sem diferença de caixa", async () => {
+    const user = userEvent.setup();
+    apiMocks.list.mockResolvedValue([location, { ...location, id: "other", name: "Cantina", category: "alimentação", building: "Bloco A", floor: "Superior" }]);
+    render(<CampusLocationsManager />);
+    await screen.findByText(location.name);
+    const search = screen.getByLabelText("Pesquisar locais");
+    for (const term of ["BIBLIOTECA", "ESTUDO", "BLOCO B", "TÉRREO"]) {
+      await user.clear(search);
+      await user.type(search, term);
+      expect(screen.getByText(location.name)).toBeInTheDocument();
+      expect(screen.queryByText("Cantina")).not.toBeInTheDocument();
+    }
+    await user.clear(search);
+    await user.type(search, "ausente");
+    expect(screen.getByText("Nenhum local encontrado.")).toBeInTheDocument();
+  });
+
+  it("edita somente nome preservando coordenadas fracionárias e valores opcionais", async () => {
+    const user = userEvent.setup();
+    const fractional = { ...location, x: 30.7, y: 40.3, active: false };
+    apiMocks.list.mockResolvedValue([fractional]);
+    apiMocks.update.mockResolvedValue({ ...fractional, name: "Biblioteca revisada" });
+    render(<CampusLocationsManager />);
+    await user.click(await screen.findByRole("button", { name: `Editar ${location.name}` }));
+    const dialog = screen.getByRole("dialog", { name: "Editar local" });
+    expect(within(dialog).getByLabelText("Posição X")).toHaveValue(30.7);
+    expect(within(dialog).getByRole("switch", { name: "Exibir no portal" })).not.toBeChecked();
+    await user.clear(within(dialog).getByLabelText("Nome"));
+    await user.type(within(dialog).getByLabelText("Nome"), "  Biblioteca revisada  ");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(apiMocks.update).toHaveBeenCalledExactlyOnceWith(location.id, { name: "Biblioteca revisada", description: location.description, category: location.category, floor: location.floor, building: location.building, x: 30.7, y: 40.3, active: false }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("bloqueia obrigatórios e normaliza opcionais sem exigir cadastro geográfico", async () => {
+    const user = userEvent.setup();
+    apiMocks.create.mockResolvedValue({ ...location, id: "new", name: "Local novo", active: false });
+    render(<CampusLocationsManager />);
+    await screen.findByText(location.name);
+    await user.click(screen.getByRole("button", { name: "Novo local" }));
+    const dialog = screen.getByRole("dialog", { name: "Novo local" });
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    expect(apiMocks.create).not.toHaveBeenCalled();
+    await user.type(within(dialog).getByLabelText("Nome"), " Local novo ");
+    await user.clear(within(dialog).getByLabelText("Categoria"));
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    expect(apiMocks.create).not.toHaveBeenCalled();
+    await user.type(within(dialog).getByLabelText("Categoria"), " estudo ");
+    await user.type(within(dialog).getByLabelText("Descrição"), "   ");
+    await user.click(within(dialog).getByRole("switch", { name: "Exibir no portal" }));
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(apiMocks.create).toHaveBeenCalledExactlyOnceWith({ name: "Local novo", category: "estudo", description: null, floor: null, building: null, x: 50, y: 50, active: false }));
+  });
+
+  it("mantém formulário durante envio e após falha, fechando somente no sucesso", async () => {
+    const user = userEvent.setup();
+    let reject!: (error: Error) => void;
+    apiMocks.create.mockReturnValueOnce(new Promise((_, fail) => { reject = fail; }));
+    render(<CampusLocationsManager />);
+    await screen.findByText(location.name);
+    await user.click(screen.getByRole("button", { name: "Novo local" }));
+    const dialog = screen.getByRole("dialog", { name: "Novo local" });
+    await user.type(within(dialog).getByLabelText("Nome"), "Nome conservado");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    expect(within(dialog).getByRole("button", { name: "Salvando..." })).toBeDisabled();
+    expect(dialog).toBeInTheDocument();
+    reject(new Error("Não foi possível concluir a solicitação."));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Não foi possível concluir a solicitação."));
+    expect(within(dialog).getByLabelText("Nome")).toHaveValue("Nome conservado");
+    apiMocks.create.mockResolvedValue({ ...location, id: "created", name: "Nome conservado" });
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("cancela exclusão sem chamada, conserva item na falha e remove após sucesso", async () => {
+    const user = userEvent.setup();
+    apiMocks.delete.mockRejectedValueOnce(new Error("Falha segura"));
+    render(<CampusLocationsManager />);
+    const trigger = await screen.findByRole("button", { name: `Excluir ${location.name}` });
+    await user.click(trigger);
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Cancelar" }));
+    expect(apiMocks.delete).not.toHaveBeenCalled();
+    await waitFor(() => expect(trigger).toHaveFocus());
+    await user.click(trigger);
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Excluir" }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Falha segura"));
+    expect(screen.getByText(location.name)).toBeInTheDocument();
+    let finish!: () => void;
+    apiMocks.delete.mockReturnValueOnce(new Promise<void>((resolve) => { finish = resolve; }));
+    await user.click(trigger);
+    await user.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Excluir" }));
+    expect(screen.getByText(location.name)).toBeInTheDocument();
+    finish();
+    await waitFor(() => expect(screen.queryByText(location.name)).not.toBeInTheDocument());
+  });
+
+  it("repete leitura após erro seguro e fecha formulário por Escape devolvendo foco", async () => {
+    const user = userEvent.setup();
+    apiMocks.list.mockRejectedValueOnce(new Error("SEGREDO_INTERNO"));
+    render(<CampusLocationsManager />);
+    expect(await screen.findByRole("alert")).not.toHaveTextContent("SEGREDO_INTERNO");
+    await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
+    await screen.findByText(location.name);
+    expect(apiMocks.list).toHaveBeenCalledTimes(2);
+    const trigger = screen.getByRole("button", { name: "Novo local" });
+    await user.click(trigger);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(apiMocks.create).not.toHaveBeenCalled();
   });
 
   it("lista, pesquisa e cadastra um local sem aceitar tenant informado pelo cliente", async () => {

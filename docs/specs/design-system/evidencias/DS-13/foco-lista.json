@@ -1,0 +1,1218 @@
+[
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 280,
+      "right": 1272.1875,
+      "top": 232,
+      "width": 992.1875,
+      "x": 280,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.45) 0px 0px 0px 0.900602px, rgba(11, 87, 208, 0.45) 0px 0px 0px 1.8012px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 1284.1875,
+      "right": 1401,
+      "top": 232,
+      "width": 116.8125,
+      "x": 1284.1875,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.351216px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 711.5,
+      "right": 755.5,
+      "top": 490,
+      "width": 44,
+      "x": 711.5,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 763.5,
+      "right": 807.5,
+      "top": 490,
+      "width": 44,
+      "x": 763.5,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.35489px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.70978px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 502,
+      "height": 44,
+      "left": 1280,
+      "right": 1324,
+      "top": 458,
+      "width": 44,
+      "x": 1280,
+      "y": 458
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.351216px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 502,
+      "height": 44,
+      "left": 1332,
+      "right": 1376,
+      "top": 458,
+      "width": 44,
+      "x": 1332,
+      "y": 458
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.916882px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.83376px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 711.5,
+      "right": 755.5,
+      "top": 907,
+      "width": 44,
+      "x": 711.5,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1440,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.915693px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.83139px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 763.5,
+      "right": 807.5,
+      "top": 907,
+      "width": 44,
+      "x": 763.5,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 280,
+      "right": 856.1875,
+      "top": 232,
+      "width": 576.1875,
+      "x": 280,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.45) 0px 0px 0px 0.899545px, rgba(11, 87, 208, 0.45) 0px 0px 0px 1.79909px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 868.1875,
+      "right": 985,
+      "top": 232,
+      "width": 116.8125,
+      "x": 868.1875,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.916812px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.83362px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 864,
+      "right": 908,
+      "top": 490,
+      "width": 44,
+      "x": 864,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.455) 0px 0px 0px 0.913383px, rgba(11, 87, 208, 0.455) 0px 0px 0px 1.82677px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 916,
+      "right": 960,
+      "top": 490,
+      "width": 44,
+      "x": 916,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350355px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700709px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 801,
+      "height": 44,
+      "left": 864,
+      "right": 908,
+      "top": 757,
+      "width": 44,
+      "x": 864,
+      "y": 757
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.35305px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.7061px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 916,
+      "right": 960,
+      "top": 490,
+      "width": 44,
+      "x": 916,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.919118px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.83824px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 1024,
+      "height": 44,
+      "left": 864,
+      "right": 908,
+      "top": 980,
+      "width": 44,
+      "x": 864,
+      "y": 980
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 1024,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914433px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 916,
+      "right": 960,
+      "top": 907,
+      "width": 44,
+      "x": 916,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 300,
+      "height": 44,
+      "left": 280,
+      "right": 600.1875,
+      "top": 256,
+      "width": 320.1875,
+      "x": 280,
+      "y": 256
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.69) 0px 0px 0px 1.38401px, rgba(11, 87, 208, 0.69) 0px 0px 0px 2.76801px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 300,
+      "height": 44,
+      "left": 612.1875,
+      "right": 729,
+      "top": 256,
+      "width": 116.8125,
+      "x": 612.1875,
+      "y": 256
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 558,
+      "height": 44,
+      "left": 608,
+      "right": 652,
+      "top": 514,
+      "width": 44,
+      "x": 608,
+      "y": 514
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 660,
+      "right": 704,
+      "top": 490,
+      "width": 44,
+      "x": 660,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 801,
+      "height": 44,
+      "left": 608,
+      "right": 652,
+      "top": 757,
+      "width": 44,
+      "x": 608,
+      "y": 757
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.353915px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.70783px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 660,
+      "right": 704,
+      "top": 490,
+      "width": 44,
+      "x": 660,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.351216px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 608,
+      "right": 652,
+      "top": 907,
+      "width": 44,
+      "x": 608,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 768,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 660,
+      "right": 704,
+      "top": 907,
+      "width": 44,
+      "x": 660,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 292,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 248,
+      "width": 343,
+      "x": 16,
+      "y": 248
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914643px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82929px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 348,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 304,
+      "width": 343,
+      "x": 16,
+      "y": 304
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.35305px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.7061px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 598,
+      "height": 44,
+      "left": 246,
+      "right": 290,
+      "top": 554,
+      "width": 44,
+      "x": 246,
+      "y": 554
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.354863px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.709726px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 298,
+      "right": 342,
+      "top": 490,
+      "width": 44,
+      "x": 298,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 785,
+      "height": 44,
+      "left": 246,
+      "right": 290,
+      "top": 741,
+      "width": 44,
+      "x": 246,
+      "y": 741
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.35224px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.70448px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 298,
+      "right": 342,
+      "top": 490,
+      "width": 44,
+      "x": 298,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 967,
+      "height": 44,
+      "left": 246,
+      "right": 290,
+      "top": 923,
+      "width": 44,
+      "x": 246,
+      "y": 923
+    }
+  },
+  {
+    "theme": "Claro",
+    "width": 390,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.351323px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.702647px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 967,
+      "height": 44,
+      "left": 298,
+      "right": 342,
+      "top": 923,
+      "width": 44,
+      "x": 298,
+      "y": 923
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 280,
+      "right": 1272.1875,
+      "top": 232,
+      "width": 992.1875,
+      "x": 280,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.45) 0px 0px 0px 0.899475px, rgba(147, 197, 253, 0.45) 0px 0px 0px 1.79895px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 1284.1875,
+      "right": 1401,
+      "top": 232,
+      "width": 116.8125,
+      "x": 1284.1875,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.351216px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 711.5,
+      "right": 755.5,
+      "top": 490,
+      "width": 44,
+      "x": 711.5,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.351216px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 763.5,
+      "right": 807.5,
+      "top": 490,
+      "width": 44,
+      "x": 763.5,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.351216px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 502,
+      "height": 44,
+      "left": 1280,
+      "right": 1324,
+      "top": 458,
+      "width": 44,
+      "x": 1280,
+      "y": 458
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.351216px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 502,
+      "height": 44,
+      "left": 1332,
+      "right": 1376,
+      "top": 458,
+      "width": 44,
+      "x": 1332,
+      "y": 458
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.35127px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702539px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 711.5,
+      "right": 755.5,
+      "top": 907,
+      "width": 44,
+      "x": 711.5,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1440,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 763.5,
+      "right": 807.5,
+      "top": 907,
+      "width": 44,
+      "x": 763.5,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 280,
+      "right": 856.1875,
+      "top": 232,
+      "width": 576.1875,
+      "x": 280,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.45) 0px 0px 0px 0.900672px, rgba(147, 197, 253, 0.45) 0px 0px 0px 1.80134px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 276,
+      "height": 44,
+      "left": 868.1875,
+      "right": 985,
+      "top": 232,
+      "width": 116.8125,
+      "x": 868.1875,
+      "y": 232
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 864,
+      "right": 908,
+      "top": 490,
+      "width": 44,
+      "x": 864,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.916952px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.8339px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 916,
+      "right": 960,
+      "top": 490,
+      "width": 44,
+      "x": 916,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350355px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700709px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 801,
+      "height": 44,
+      "left": 864,
+      "right": 908,
+      "top": 757,
+      "width": 44,
+      "x": 864,
+      "y": 757
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.35127px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702539px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 916,
+      "right": 960,
+      "top": 490,
+      "width": 44,
+      "x": 916,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.351216px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 1024,
+      "height": 44,
+      "left": 864,
+      "right": 908,
+      "top": 980,
+      "width": 44,
+      "x": 864,
+      "y": 980
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 1024,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 916,
+      "right": 960,
+      "top": 907,
+      "width": 44,
+      "x": 916,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 300,
+      "height": 44,
+      "left": 280,
+      "right": 600.1875,
+      "top": 256,
+      "width": 320.1875,
+      "x": 280,
+      "y": 256
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.45) 0px 0px 0px 0.901799px, rgba(147, 197, 253, 0.45) 0px 0px 0px 1.8036px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 300,
+      "height": 44,
+      "left": 612.1875,
+      "right": 729,
+      "top": 256,
+      "width": 116.8125,
+      "x": 612.1875,
+      "y": 256
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.915693px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83139px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 558,
+      "height": 44,
+      "left": 608,
+      "right": 652,
+      "top": 514,
+      "width": 44,
+      "x": 608,
+      "y": 514
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.463) 0px 0px 0px 0.922606px, rgba(147, 197, 253, 0.463) 0px 0px 0px 1.84521px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 660,
+      "right": 704,
+      "top": 490,
+      "width": 44,
+      "x": 660,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 801,
+      "height": 44,
+      "left": 608,
+      "right": 652,
+      "top": 757,
+      "width": 44,
+      "x": 608,
+      "y": 757
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914643px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82929px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 660,
+      "right": 704,
+      "top": 490,
+      "width": 44,
+      "x": 660,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.915693px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83139px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 608,
+      "right": 652,
+      "top": 907,
+      "width": 44,
+      "x": 608,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 768,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.351216px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.702431px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 951,
+      "height": 44,
+      "left": 660,
+      "right": 704,
+      "top": 907,
+      "width": 44,
+      "x": 660,
+      "y": 907
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 0,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "location-search",
+    "inside": true,
+    "name": "",
+    "rect": {
+      "bottom": 292,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 248,
+      "width": 343,
+      "x": 16,
+      "y": 248
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 1,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Novo local",
+    "rect": {
+      "bottom": 348,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 304,
+      "width": 343,
+      "x": 16,
+      "y": 304
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 2,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 598,
+      "height": 44,
+      "left": 246,
+      "right": 290,
+      "top": 554,
+      "width": 44,
+      "x": 246,
+      "y": 554
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 3,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Biblioteca revisada",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 298,
+      "right": 342,
+      "top": 490,
+      "width": 44,
+      "x": 298,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 4,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Cantina sintética",
+    "rect": {
+      "bottom": 785,
+      "height": 44,
+      "left": 246,
+      "right": 290,
+      "top": 741,
+      "width": 44,
+      "x": 246,
+      "y": 741
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 5,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Cantina sintética",
+    "rect": {
+      "bottom": 534,
+      "height": 44,
+      "left": 298,
+      "right": 342,
+      "top": 490,
+      "width": 44,
+      "x": 298,
+      "y": 490
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 6,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Editar Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 967,
+      "height": 44,
+      "left": 246,
+      "right": 290,
+      "top": 923,
+      "width": 44,
+      "x": 246,
+      "y": 923
+    }
+  },
+  {
+    "theme": "Escuro",
+    "width": 390,
+    "step": 7,
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "id": "",
+    "inside": true,
+    "name": "Excluir Local extenso: NomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacosNomeSemEspacos",
+    "rect": {
+      "bottom": 967,
+      "height": 44,
+      "left": 298,
+      "right": 342,
+      "top": 923,
+      "width": 44,
+      "x": 298,
+      "y": 923
+    }
+  }
+]

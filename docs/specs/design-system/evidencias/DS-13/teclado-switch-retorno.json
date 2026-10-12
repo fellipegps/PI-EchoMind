@@ -1,0 +1,35 @@
+{
+  "before": "false",
+  "after": "true",
+  "discardedByEscape": true,
+  "focus": {
+    "height": 720,
+    "name": "Editar Biblioteca revisada",
+    "rect": {
+      "bottom": 198,
+      "height": 44,
+      "left": 631.5,
+      "right": 675.5,
+      "top": 154,
+      "width": 44,
+      "x": 631.5,
+      "y": 154
+    },
+    "width": 1280
+  },
+  "focusDuringClosing": {
+    "height": 480,
+    "name": null,
+    "rect": {
+      "bottom": 282.70709228515625,
+      "height": 18.186065673828125,
+      "left": 280.0433349609375,
+      "right": 311.6873474121094,
+      "top": 264.5210266113281,
+      "width": 31.644012451171875,
+      "x": 280.0433349609375,
+      "y": 264.5210266113281
+    },
+    "width": 390
+  }
+}
