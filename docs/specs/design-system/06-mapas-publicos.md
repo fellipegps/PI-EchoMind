@@ -4,7 +4,7 @@
 
 ## Identificação e controle
 
-- Status: **Proposta — aguardando aprovação; não implementada**.
+- Status: **Aprovada em 12/10/2026 — implementada, verificada no escopo disponível e aceita em 12/10/2026**.
 - Fase original: 06 do roteiro, etapa 5 do plano.
 - Modelo recomendado: **GPT-6 Astra**, esforço **High** (`high`).
 - Commit sugerido após revisão e autorização: `refactor(maps): padroniza controles e estados dos mapas publicos`.
@@ -52,7 +52,7 @@ Fora do escopo: reescrita de roteamento, novos limiares de GPS, geocodificação
 
 ## Arquivos candidatos e limites
 
-- [Navegador público](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/public-campus-navigator.tsx>) e [CSS do navegador](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/public-campus-navigator.module.css>).
+- [Navegador público](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/public-campus-navigator.tsx>) e [controles compartilhados](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/public-map-controls.tsx>). O CSS exclusivo anterior foi substituído nesta fase.
 - [Mapa geográfico](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/campus-map-view.tsx>) — apresentação e integração Leaflet, mantendo seu ciclo de vida.
 - [Portal/mapa esquemático](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/public-portal.tsx>) e [CSS do portal](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/public-portal.module.css>).
 - [Algoritmo de rota](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/app/(public)/components/campus-routing.ts>) e [contrato geográfico](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front/lib/geocampus-api.ts>) — referências de leitura, sem mudança prevista.
@@ -72,13 +72,13 @@ Fora do escopo: reescrita de roteamento, novos limiares de GPS, geocodificação
 
 ## Plano de implementação
 
-- [ ] Conferir aprovações, composição complementar aprovada, dependências e estado local.
-- [ ] Mapear controles, estados, CSS Leaflet e ciclo de vida antes de alterar apresentação.
-- [ ] Aplicar tokens/primitivas aos controles/listas/resumo e integrar mapa nos dois temas.
-- [ ] Migrar o esquemático e manter coordenadas/dimensões dinâmicas e identificação de estimativa.
-- [ ] Conferir origem manual, marcação, campus, espaço, acessibilidade e ausência de rota.
-- [ ] Exercitar GPS exclusivamente com mocks/simulação, incluindo erro, precisão, parada e limpeza.
-- [ ] Remover somente CSS substituído, executar verificações e registrar imagens/evidências.
+- [x] Conferir aprovações, composição complementar aprovada, dependências e estado local.
+- [x] Mapear controles, estados, CSS Leaflet e ciclo de vida antes de alterar apresentação.
+- [x] Aplicar tokens/primitivas aos controles/listas/resumo e integrar mapa nos dois temas.
+- [x] Migrar o esquemático e manter coordenadas/dimensões dinâmicas e identificação de estimativa.
+- [x] Conferir origem manual, marcação, campus, espaço, acessibilidade e ausência de rota.
+- [x] Exercitar GPS exclusivamente com mocks/simulação, incluindo erro, precisão, parada e limpeza.
+- [x] Remover somente CSS substituído, executar verificações e registrar imagens/evidências.
 
 ## Verificações e evidências esperadas
 
@@ -94,4 +94,9 @@ Fora do escopo: reescrita de roteamento, novos limiares de GPS, geocodificação
 
 Pronta para revisão quando critérios possuem evidência, verificações obrigatórias estão resolvidas e mapas/controles mantêm comportamento e alternativas atuais. STATUS distingue implementação, verificação e aprovação; execução de testes não equivale ao aceite visual.
 
-Não avançar para o painel nem criar commit/push automaticamente. Mudança de algoritmo, limiares, política de localização ou direção visual exige proposta e aprovação antes da implementação dependente. Todas as tarefas permanecem pendentes nesta entrega documental.
+Não avançar para o painel nem criar commit/push automaticamente. Mudança de algoritmo, limiares, política de localização ou direção visual exige proposta e aprovação antes da implementação dependente. Implementação concluída em 12/10/2026; verificações e limitações registradas nas evidências. Resultado aceito em 12/10/2026 pelo pedido de commit após a apresentação da entrega.
+
+
+## Resultado da execução — 12/10/2026
+
+42 testes pertinentes, lint, tipos e build passaram. Mapas reais inspecionados nos dois temas e nas quatro larguras; GPS somente simulado. Zoom real permanece pendente; reflow, teclado e altura reduzida conferidos. [Registro de evidências DS-06](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-06.md>) detalha critérios, imagens e limites. Nenhum requisito material alterado; commit local autorizado após revisão, sem push e sem iniciar DS-07.

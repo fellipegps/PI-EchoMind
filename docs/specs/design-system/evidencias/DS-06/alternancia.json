@@ -1,0 +1,10 @@
+[
+  {
+    "step": "abrir",
+    "visible": true
+  },
+  {
+    "step": "ocultar",
+    "count": 0
+  }
+]

@@ -4,7 +4,7 @@ Versão documental: 1.0 · Data: 11/10/2026.
 
 Este conjunto adota **Specification Driven Development (SDD)**: a especificação define o resultado e as condições de aceitação; as tarefas orientam sua implementação; as evidências mostram o que foi verificado. Os textos são contratos de alteração, não uma sequência de prompts extensos.
 
-**Situação atual (12/10/2026): DS-00–DS-04 v1.0 aceitas e registradas nos commits locais 7e0dc9e, f332c62, 33520f2, 124a7eb e f88a7fd. DS-05 v1.0 aprovada, implementada, verificada no escopo disponível e aceita em 12/10/2026 pelo pedido de commit após apresentação da entrega; commit local autorizado, sem push. DS-06–DS-16 continuam propostas e não iniciadas.** DS-05 aplica a base à agenda pública e compartilha a formatação com o resumo existente do chat. Consulte STATUS.md e as evidências para estados e limites de verificação. Não houve push.
+**Situação atual (12/10/2026): DS-00–DS-05 v1.0 aceitas e registradas nos commits locais 7e0dc9e, f332c62, 33520f2, 124a7eb, f88a7fd e 1ddcb87. DS-06 v1.0 aprovada, implementada e verificada no escopo disponível, com limites documentados; resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega. DS-07–DS-16 continuam propostas e não iniciadas.** DS-06 aplica a base aos mapas públicos e preserva origem manual, GPS, rotas e alternativa esquemática. Consulte STATUS.md e as evidências para critérios e pendências, incluindo zoom real. Commit local da DS-06 autorizado; nenhum push.
 
 ## Documentos de referência
 
@@ -75,4 +75,3 @@ Atualize as tarefas, as evidências e o STATUS.md, distinguindo implementação,
 Aprovar uma especificação permite iniciar sua implementação, mas não comprova que o resultado foi verificado. “Validada” exige evidência para os critérios obrigatórios; “aceita” exige revisão explícita do usuário. A conclusão do conjunto depende das entregas e critérios obrigatórios, não de todas as caixas de tarefas estarem marcadas.
 
 Detalhes de status, versionamento e evidência estão no CONTRATO.md. O plano original mantém o contexto histórico; em caso de divergência, prevalecem as especificações aprovadas mais recentes.
-

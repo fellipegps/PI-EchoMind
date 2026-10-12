@@ -1,0 +1,28 @@
+[
+  {
+    "scenario": "entrada inválida",
+    "text": "Destino: Prédio sem entrada vinculada\n\nA instituição ainda não vinculou a entrada deste prédio a um ponto do caminho."
+  },
+  {
+    "scenario": "entrada distante",
+    "text": "Destino: Prédio com entrada distante\n\nO ponto do caminho vinculado está distante da entrada. Consulte a instituição antes de seguir."
+  },
+  {
+    "scenario": "origem distante",
+    "text": "Destino: Laboratório de Química\n\nBloco A · 1º andar · Ala leste · espaço fictício\n\nSua origem está longe dos caminhos cadastrados. Aproxime-se do campus ou escolha uma origem no mapa."
+  },
+  {
+    "scenario": "busca espaço",
+    "names": [
+      "Laboratório de Química · 1º andar"
+    ]
+  },
+  {
+    "scenario": "busca sem resultado",
+    "text": "Nenhum prédio ou espaço encontrado."
+  },
+  {
+    "scenario": "grafo desconectado",
+    "text": "Destino: Laboratório de Química\n\nBloco A · 1º andar · Ala leste · espaço fictício\n\nNão há caminho conectado cadastrado entre esses pontos. Escolha outra origem ou consulte a instituição."
+  }
+]

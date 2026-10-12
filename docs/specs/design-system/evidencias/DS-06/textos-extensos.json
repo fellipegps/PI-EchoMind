@@ -1,0 +1,2978 @@
+[
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 1120,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 1376,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Usar minha localização",
+          "right": 576,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 576,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 290,
+          "name": "",
+          "right": 310,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom in",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom out",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 1056,
+          "name": "",
+          "right": 1376,
+          "tag": "INPUT"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 118,
+          "left": 849.5,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 248,
+          "name": "Ocultar mapa esquemático",
+          "right": 458.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 273,
+          "name": "",
+          "right": 816.5,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 832.5,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1376,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 472.1875,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 516.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 692.390625,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 736.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 912.59375,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 956.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 1132.796875,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 1176.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 472.1875,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 516.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 692.390625,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 736.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 912.59375,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 956.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 1132.796875,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 1176.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 1256.921875,
+          "name": "Traçar rota",
+          "right": 1376,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 368,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 757
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1425,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "light",
+      "width": 1440
+    },
+    "schematic": {
+      "map": {
+        "bottom": -691,
+        "height": 380,
+        "left": 273,
+        "right": 1376,
+        "top": -1071,
+        "width": 1103,
+        "x": 273,
+        "y": -1071
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1425,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "light",
+      "width": 1440
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 704,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 960,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Usar minha localização",
+          "right": 576,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 576,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 290,
+          "name": "",
+          "right": 310,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom in",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom out",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 640,
+          "name": "",
+          "right": 960,
+          "tag": "INPUT"
+        },
+        {
+          "height": 240,
+          "left": 290,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 240,
+          "left": 641.5,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 178,
+          "left": 641.5,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 290,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 248,
+          "name": "Ocultar mapa esquemático",
+          "right": 458.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 273,
+          "name": "",
+          "right": 608.5,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 624.5,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 960,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 389,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 433,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 526,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 570,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 663,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 707,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 800,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 844,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 389,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 433,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 526,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 570,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 663,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 707,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 800,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 844,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 840.921875,
+          "name": "Traçar rota",
+          "right": 960,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 368,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 341
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1009,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "light",
+      "width": 1024
+    },
+    "schematic": {
+      "map": {
+        "bottom": -1023,
+        "height": 380,
+        "left": 273,
+        "right": 960,
+        "top": -1403,
+        "width": 687,
+        "x": 273,
+        "y": -1403
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1009,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "light",
+      "width": 1024
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 448,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 704,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 66,
+          "name": "Usar minha localização",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 66,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 66,
+          "name": "",
+          "right": 86,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 61,
+          "name": "Zoom in",
+          "right": 105,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 61,
+          "name": "Zoom out",
+          "right": 105,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 384,
+          "name": "",
+          "right": 704,
+          "tag": "INPUT"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 198,
+          "left": 401.5,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 66,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 401.5,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 24,
+          "name": "Ocultar mapa esquemático",
+          "right": 234.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 49,
+          "name": "",
+          "right": 368.5,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 384.5,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 704,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 158.59375,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 202.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 289.1875,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 333.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 419.796875,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 463.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 550.390625,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 594.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 158.59375,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 202.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 289.1875,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 333.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 419.796875,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 463.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 550.390625,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 594.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 584.921875,
+          "name": "Traçar rota",
+          "right": 704,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 318,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 653
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 753,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "light",
+      "width": 768
+    },
+    "schematic": {
+      "map": {
+        "bottom": -595,
+        "height": 340,
+        "left": 49,
+        "right": 704,
+        "top": -935,
+        "width": 655,
+        "x": 49,
+        "y": -935
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 753,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "light",
+      "width": 768
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 33,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 342,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 50,
+          "name": "Usar minha localização",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 50,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 50,
+          "name": "",
+          "right": 70,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 45,
+          "name": "Zoom in",
+          "right": 89,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 45,
+          "name": "Zoom out",
+          "right": 89,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "",
+          "right": 342,
+          "tag": "INPUT"
+        },
+        {
+          "height": 288,
+          "left": 50,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 50,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 198,
+          "left": 50,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 16,
+          "name": "Ocultar mapa esquemático",
+          "right": 226.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "",
+          "right": 342,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 342,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 73.390625,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 117.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 134.796875,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 178.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 196.1875,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 240.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 257.59375,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 301.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 73.390625,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 117.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 134.796875,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 178.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 196.1875,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 240.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 257.59375,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 301.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "Traçar rota",
+          "right": 342,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 318,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 307
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 375,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "light",
+      "width": 390
+    },
+    "schematic": {
+      "map": {
+        "bottom": 1029,
+        "height": 340,
+        "left": 33,
+        "right": 342,
+        "top": 689,
+        "width": 309,
+        "x": 33,
+        "y": 689
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 375,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "light",
+      "width": 390
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 1120,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 1376,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Usar minha localização",
+          "right": 576,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 576,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 290,
+          "name": "",
+          "right": 310,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom in",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom out",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 1056,
+          "name": "",
+          "right": 1376,
+          "tag": "INPUT"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 118,
+          "left": 849.5,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 248,
+          "name": "Ocultar mapa esquemático",
+          "right": 458.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 273,
+          "name": "",
+          "right": 816.5,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 832.5,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1376,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 472.1875,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 516.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 692.390625,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 736.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 912.59375,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 956.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 1132.796875,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 1176.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 472.1875,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 516.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 692.390625,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 736.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 912.59375,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 956.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 1132.796875,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 1176.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 1256.921875,
+          "name": "Traçar rota",
+          "right": 1376,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 290,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 799.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 144,
+          "left": 849.5,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 1359,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 368,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 757
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1425,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "dark",
+      "width": 1440
+    },
+    "schematic": {
+      "map": {
+        "bottom": -691,
+        "height": 380,
+        "left": 273,
+        "right": 1376,
+        "top": -1071,
+        "width": 1103,
+        "x": 273,
+        "y": -1071
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1425,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "dark",
+      "width": 1440
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 704,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 960,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Usar minha localização",
+          "right": 576,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 290,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 576,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 290,
+          "name": "",
+          "right": 310,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom in",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 629,
+          "name": "Zoom out",
+          "right": 673,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 640,
+          "name": "",
+          "right": 960,
+          "tag": "INPUT"
+        },
+        {
+          "height": 240,
+          "left": 290,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 240,
+          "left": 641.5,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 178,
+          "left": 641.5,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 290,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 248,
+          "name": "Ocultar mapa esquemático",
+          "right": 458.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 273,
+          "name": "",
+          "right": 608.5,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 624.5,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 960,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 389,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 433,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 526,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 570,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 663,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 707,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 800,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 844,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 389,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 433,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 526,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 570,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 663,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 707,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 800,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 844,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 840.921875,
+          "name": "Traçar rota",
+          "right": 960,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 290,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 591.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 641.5,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 943,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 368,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 341
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1009,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "dark",
+      "width": 1024
+    },
+    "schematic": {
+      "map": {
+        "bottom": -1023,
+        "height": 380,
+        "left": 273,
+        "right": 960,
+        "top": -1403,
+        "width": 687,
+        "x": 273,
+        "y": -1403
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 1009,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "dark",
+      "width": 1024
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 448,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 704,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 66,
+          "name": "Usar minha localização",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 66,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 66,
+          "name": "",
+          "right": 86,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 61,
+          "name": "Zoom in",
+          "right": 105,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 61,
+          "name": "Zoom out",
+          "right": 105,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 384,
+          "name": "",
+          "right": 704,
+          "tag": "INPUT"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 198,
+          "left": 401.5,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 66,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 401.5,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 24,
+          "name": "Ocultar mapa esquemático",
+          "right": 234.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 49,
+          "name": "",
+          "right": 368.5,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 384.5,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 704,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 158.59375,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 202.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 289.1875,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 333.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 419.796875,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 463.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 550.390625,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 594.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 158.59375,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 202.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 289.1875,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 333.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 419.796875,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 463.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 550.390625,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 594.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 584.921875,
+          "name": "Traçar rota",
+          "right": 704,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 66,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 351.5,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 264,
+          "left": 401.5,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 687,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 318,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 653
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 753,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "dark",
+      "width": 768
+    },
+    "schematic": {
+      "map": {
+        "bottom": -595,
+        "height": 340,
+        "left": 49,
+        "right": 704,
+        "top": -935,
+        "width": 655,
+        "x": 49,
+        "y": -935
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 753,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "dark",
+      "width": 768
+    }
+  },
+  {
+    "geo": {
+      "controls": [
+        {
+          "height": 44,
+          "left": 33,
+          "name": "Campus de teste CentroCampus de teste Norte",
+          "right": 342,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 50,
+          "name": "Usar minha localização",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 50,
+          "name": "Escolha uma origem ou toque no mapaPortaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoPrédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "SELECT"
+        },
+        {
+          "height": 20,
+          "left": 50,
+          "name": "",
+          "right": 70,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 45,
+          "name": "Zoom in",
+          "right": 89,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 45,
+          "name": "Zoom out",
+          "right": 89,
+          "tag": "A"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "",
+          "right": 342,
+          "tag": "INPUT"
+        },
+        {
+          "height": 288,
+          "left": 50,
+          "name": "Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso acesso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 288,
+          "left": 50,
+          "name": "Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 198,
+          "left": 50,
+          "name": "Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 16,
+          "name": "Ocultar mapa esquemático",
+          "right": 226.484375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "",
+          "right": 342,
+          "tag": "INPUT"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "Selecione a origemLocal de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoLocal de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 342,
+          "tag": "SELECT"
+        },
+        {
+          "height": 44,
+          "left": 73.390625,
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 117.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 134.796875,
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 178.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 196.1875,
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 240.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 257.59375,
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 301.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 73.390625,
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 117.390625,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 134.796875,
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 178.796875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 196.1875,
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 240.1875,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 257.59375,
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "right": 301.59375,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 44,
+          "left": 33,
+          "name": "Traçar rota",
+          "right": 342,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        },
+        {
+          "height": 312,
+          "left": 50,
+          "name": "Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso ensino · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso",
+          "right": 325,
+          "tag": "BUTTON"
+        }
+      ],
+      "height": 1024,
+      "institution": "Campus fictício · DS-06",
+      "map": [
+        {
+          "height": 318,
+          "markers": [
+            {
+              "name": "Selecionar Portaria · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "true"
+            },
+            {
+              "name": "Selecionar Prédio sem entrada vinculada · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            },
+            {
+              "name": "Selecionar Prédio com entrada distante · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+              "selected": "false"
+            }
+          ],
+          "tiles": [
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            },
+            {
+              "complete": true,
+              "naturalWidth": 256
+            }
+          ],
+          "width": 307
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 375,
+      "route": "Destino: Laboratório de Química · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoBloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso · Andar de teste com identificação extensa · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso20 m · cerca de 1 min a péSiga cerca de 10 m até Praça.Siga cerca de 10 m até Bloco A.Dirija-se à entrada de Bloco A · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso.O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+      "theme": "dark",
+      "width": 390
+    },
+    "schematic": {
+      "map": {
+        "bottom": 1029,
+        "height": 340,
+        "left": 33,
+        "right": 342,
+        "top": 689,
+        "width": 309,
+        "x": 33,
+        "y": 689
+      },
+      "markers": [
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 2 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 3 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 4 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "30%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "20%",
+          "name": "Selecionar Local de teste 5 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "40%",
+          "name": "Selecionar Local de teste 6 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "60%",
+          "name": "Selecionar Local de teste 7 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        },
+        {
+          "height": 44,
+          "left": "80%",
+          "name": "Selecionar Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso como destino",
+          "top": "65%",
+          "width": 44
+        }
+      ],
+      "overflow": [],
+      "pageWidth": 375,
+      "status": [
+        "Local de teste 1 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtenso → Local de teste 8 · Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles TextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoTextoExtensoAproximadamente 834 m · 12 min a péEstimativa temporária baseada no mapa esquemático."
+      ],
+      "theme": "dark",
+      "width": 390
+    }
+  }
+]

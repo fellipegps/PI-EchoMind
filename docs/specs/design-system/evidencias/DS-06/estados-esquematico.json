@@ -1,0 +1,150 @@
+[
+  {
+    "slug": "ds06-error",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Não foi possível carregar os locais agora.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 1440,
+    "status": [
+      {
+        "role": "alert",
+        "text": "Não foi possível carregar os locais agora."
+      }
+    ],
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "slug": "ds06-error",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Não foi possível carregar os locais agora.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 375,
+    "status": [
+      {
+        "role": "alert",
+        "text": "Não foi possível carregar os locais agora."
+      }
+    ],
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "slug": "ds06-empty",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Nenhum local disponível no momento.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 1425,
+    "status": [],
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "slug": "ds06-empty",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Nenhum local disponível no momento.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 375,
+    "status": [],
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "slug": "ds06-loading",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Carregando locais...Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 1440,
+    "status": [
+      {
+        "role": "status",
+        "text": "Carregando locais..."
+      }
+    ],
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "slug": "ds06-loading",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Carregando locais...Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 375,
+    "status": [
+      {
+        "role": "status",
+        "text": "Carregando locais..."
+      }
+    ],
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "slug": "ds06-error",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Não foi possível carregar os locais agora.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 1440,
+    "status": [
+      {
+        "role": "alert",
+        "text": "Não foi possível carregar os locais agora."
+      }
+    ],
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "slug": "ds06-error",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Não foi possível carregar os locais agora.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 375,
+    "status": [
+      {
+        "role": "alert",
+        "text": "Não foi possível carregar os locais agora."
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "slug": "ds06-empty",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Nenhum local disponível no momento.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 1425,
+    "status": [],
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "slug": "ds06-empty",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Nenhum local disponível no momento.Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 375,
+    "status": [],
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "slug": "ds06-loading",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Carregando locais...Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 1440,
+    "status": [
+      {
+        "role": "status",
+        "text": "Carregando locais..."
+      }
+    ],
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "slug": "ds06-loading",
+    "geo": 0,
+    "map": "Mapa esquemáticoEstimativa temporária baseada no mapa esquemático.Carregando locais...Buscar localPonto de origemSelecione a origemCampusToque em um marcador para escolher o destino.Traçar rota",
+    "pageWidth": 375,
+    "status": [
+      {
+        "role": "status",
+        "text": "Carregando locais..."
+      }
+    ],
+    "theme": "dark",
+    "width": 390
+  }
+]

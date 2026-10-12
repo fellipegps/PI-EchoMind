@@ -2,11 +2,6 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
-  Building2,
-  ChevronRight,
-  MapPin,
-  Navigation,
-  Search,
   Sparkles,
 } from "lucide-react";
 
@@ -19,6 +14,9 @@ import styles from "./public-portal.module.css";
 
 import { ChatAuxiliary, PublicChat, type ChatMessage } from "./public-chat";
 import { PublicEvents } from "./public-events";
+import { Button } from "@/components/ui/button";
+import { PublicSchematicMap } from "./public-schematic-map";
+import { mapControlFocus } from "./public-map-controls";
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: 1,
@@ -211,7 +209,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
   );
 
   return (
-    <div className={styles.portalRoot}>
+    <div>
       <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName}
         auxiliary={<ChatAuxiliary faqs={faqs} events={events} eventsLoading={eventsLoading} eventsError={eventsError}
           disabled={sending || portalLoading || Boolean(portalError)} onQuestion={(question) => void sendQuestion(question)}
@@ -239,130 +237,18 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
             <section className={styles.panel} aria-labelledby="places-title">
               <PortalSectionHeading id="places-title" eyebrow="Encontre seu caminho" title="Locais do campus" description="Pesquise os espaços cadastrados pela instituição." />
 
-              <div className={styles.legacyContent}>
-              <PublicCampusNavigator
-                publicSlug={normalizedSlug}
-                onAvailabilityChange={setGeoAvailable}
-              />
-              {geoAvailable && (
-                <button
-                  className={styles.legacyMapToggle}
-                  type="button"
-                  onClick={() => setShowLegacyMap((visible) => !visible)}
-                  aria-expanded={showLegacyMap}
-                >
+              <div className="space-y-6">
+                <PublicCampusNavigator publicSlug={normalizedSlug} onAvailabilityChange={setGeoAvailable} />
+                {geoAvailable && <Button variant="outline" type="button" className={mapControlFocus}
+                  onClick={() => setShowLegacyMap((visible) => !visible)} aria-expanded={showLegacyMap}>
                   {showLegacyMap ? "Ocultar mapa esquemático" : "Ver mapa esquemático"}
-                </button>
-              )}
-
-              {(!geoAvailable || showLegacyMap) && <>
-
-              {locationsLoading && (
-                <div className={styles.alert} role="status">Carregando locais...</div>
-              )}
-              {locationsError && (
-                <div className={styles.alert} role="alert">{locationsError}</div>
-              )}
-              {!locationsLoading && !locationsError && locations.length === 0 && (
-                <p className={styles.emptyState}>Nenhum local disponível no momento.</p>
-              )}
-
-              <div className={styles.locationToolbar}>
-                <label className={styles.searchField}>
-                  <Search aria-hidden="true" />
-                  <span className={styles.srOnly}>Buscar local</span>
-                  <input
-                    value={locationSearch}
-                    onChange={(event) => setLocationSearch(event.target.value)}
-                    placeholder="Buscar bloco ou laboratório..."
-                  />
-                </label>
-                <label>
-                  <span className={styles.srOnly}>Ponto de origem</span>
-                  <select
-                    aria-label="Ponto de origem"
-                    value={originId}
-                    onChange={(event) => {
-                      setOriginId(event.target.value);
-                      setRoute(null);
-                    }}
-                  >
-                    <option value="">Selecione a origem</option>
-                    {locations.map((location) => (
-                      <option key={location.id} value={location.id}>{location.name}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div className={styles.campusMap} aria-label="Mapa esquemático do campus">
-                <span className={styles.mapLabel}><Building2 aria-hidden="true" />Campus</span>
-                <span className={styles.mapPathOne} aria-hidden="true" />
-                <span className={styles.mapPathTwo} aria-hidden="true" />
-                {originLocation && destinationLocation && route && (
-                  <svg className={styles.routeLine} aria-hidden="true">
-                    <line
-                      x1={`${originLocation.x}%`}
-                      y1={`${originLocation.y}%`}
-                      x2={`${destinationLocation.x}%`}
-                      y2={`${destinationLocation.y}%`}
-                    />
-                  </svg>
-                )}
-                {filteredLocations.map((location) => (
-                  <button
-                    type="button"
-                    key={location.id}
-                    className={`${styles.mapMarker} ${
-                      destinationId === location.id ? styles.mapMarkerActive : ""
-                    }`}
-                    style={{ left: `${location.x}%`, top: `${location.y}%` }}
-                    onClick={() => selectDestination(location)}
-                    aria-label={`Selecionar ${location.name} como destino`}
-                  >
-                    <MapPin aria-hidden="true" /><span>{location.name}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className={styles.routeControls}>
-                <p aria-live="polite">{locationStatus || "Toque em um marcador para escolher o destino."}</p>
-                <button type="button" onClick={traceRoute} disabled={!originId || !destinationId}>
-                  <Navigation aria-hidden="true" /> Traçar rota
-                </button>
-              </div>
-
-              {route && (
-                <div className={styles.routeSummary} role="status">
-                  <Navigation aria-hidden="true" />
-                  <div>
-                    <strong>{route.originName} → {route.destination.name}</strong>
-                    <span>Aproximadamente {route.distance} m · {route.minutes} min a pé</span>
-                    <small>Estimativa temporária baseada no mapa esquemático.</small>
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.locationList}>
-                {filteredLocations.map((location) => (
-                  <button type="button" key={location.id} onClick={() => selectDestination(location)}>
-                    <span className={styles.locationPin}><MapPin aria-hidden="true" /></span>
-                    <span>
-                      <strong>{location.name}</strong>
-                      <small>
-                        {[location.category, location.building, location.floor]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </small>
-                    </span>
-                    <ChevronRight aria-hidden="true" />
-                  </button>
-                ))}
-                {filteredLocations.length === 0 && (
-                  <p className={styles.emptyState}>Nenhum local encontrado para essa busca.</p>
-                )}
-              </div>
-              </>}
+                </Button>}
+                {(!geoAvailable || showLegacyMap) && <PublicSchematicMap
+                  locations={locations} filteredLocations={filteredLocations} loading={locationsLoading} error={locationsError}
+                  search={locationSearch} onSearch={setLocationSearch} originId={originId}
+                  onOrigin={(value) => { setOriginId(value); setRoute(null); }} destinationId={destinationId}
+                  onDestination={selectDestination} originLocation={originLocation} destinationLocation={destinationLocation}
+                  route={route} status={locationStatus} onTrace={traceRoute} />}
               </div>
             </section>
           )}

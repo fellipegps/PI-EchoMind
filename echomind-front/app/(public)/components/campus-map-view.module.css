@@ -1,0 +1,37 @@
+.map {
+  height: 370px;
+  min-height: 320px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: inherit;
+  z-index: 0;
+  scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+.map:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.map :global(.leaflet-bar) { border: 1px solid var(--border); box-shadow: none; border-radius: var(--radius-sm); overflow: hidden; }
+.map :global(.leaflet-bar a) {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+.map :global(.leaflet-bar a:hover) { background: var(--accent); }
+.map :global(.leaflet-bar a.leaflet-disabled) { background: var(--muted); color: var(--muted-foreground); }
+.map :global(.leaflet-bar a:focus-visible) { outline: 2px solid var(--ring); outline-offset: -3px; }
+.map :global(.leaflet-control-attribution) { max-width: 100%; background: var(--card); color: var(--muted-foreground); font: inherit; font-size: 12px; line-height: 16px; }
+.map :global(.leaflet-control-attribution a) { color: var(--primary); text-decoration: underline; }
+.map :global(.leaflet-control-attribution a:focus-visible) { outline: 2px solid var(--ring); outline-offset: 1px; }
+.map :global(.leaflet-tooltip) { max-width: 240px; white-space: normal; overflow-wrap: anywhere; border-color: var(--border); background: var(--card); color: var(--foreground); font-size: 12px; line-height: 16px; }
+.map :global(.leaflet-tooltip-top:before) { border-top-color: var(--border); }
+.map :global(path[role="button"]:focus-visible) { outline: none; stroke: var(--ring); stroke-width: 5px; }
+@media (max-width: 1023px) { .map { height: 320px; } }
+@media (prefers-reduced-motion: reduce) { .map :global(.leaflet-zoom-animated) { transition: none; } }
+
+.map :global(a), .map :global(path[role="button"]) { scroll-margin-top: 16px; scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
+@media (min-width: 1024px) { .map :global(a), .map :global(path[role="button"]) { scroll-margin-bottom: 16px; } }

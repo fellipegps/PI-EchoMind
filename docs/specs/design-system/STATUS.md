@@ -1,8 +1,8 @@
 # Andamento — refatoração visual por especificação
 
-Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-04 aceitas e commitadas localmente; DS-05 implementada, verificada no escopo disponível e aceita; commit local autorizado. Nenhum push realizado.
+Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-05 aceitas e commitadas localmente; DS-06 implementada, verificada no escopo disponível e aceita; commit local autorizado. Nenhum push realizado.
 
-DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente. DS-04 v1.0 recebeu autorização própria e foi aceita pelo pedido de commit após a apresentação da entrega, com as limitações documentadas. DS-05 v1.0 aprovada, implementada, verificada no escopo disponível e aceita em 12/10/2026; DS-06–DS-16 continuam propostas e não iniciadas.
+DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente. DS-04 v1.0 recebeu autorização própria e foi aceita pelo pedido de commit após a apresentação da entrega, com as limitações documentadas. DS-05 v1.0 aprovada, implementada, verificada no escopo disponível e aceita em 12/10/2026; DS-06 v1.0 aprovada, implementada, verificada no escopo disponível e aceita em 12/10/2026; DS-07–DS-16 continuam propostas e não iniciadas.
 
 | Fase | Versão | Spec | Execução | Verificação | Aceite do resultado | Evidência / commit |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -11,8 +11,8 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 | DS-02 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-02](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-02.md>) / 33520f2 |
 | DS-03 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo | Aceito em 11/10/2026 | [DS-03](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-03.md>) / 124a7eb |
 | DS-04 | 1.0 | Aprovada em 11/10/2026 | Implementada | Validada no escopo, com limites documentados | Aceito em 12/10/2026 | [DS-04](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-04.md>) / f88a7fd |
-| DS-05 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível, com limites documentados | Aceito em 12/10/2026 | [DS-05](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-05.md>) / commit local identificado no histórico |
-| DS-06 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
+| DS-05 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível, com limites documentados | Aceito em 12/10/2026 | [DS-05](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-05.md>) / 1ddcb87 |
+| DS-06 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível; zoom real pendente e demais limites documentados | Aceito em 12/10/2026 | [DS-06](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-06.md>) / commit local autorizado |
 | DS-07 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-08 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-09 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
@@ -33,7 +33,9 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 - DS-03 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 03** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Solicitou implementação, evidências e revisão; vedou avanço de fase, commit e push sem nova instrução. A referência à fase 00 preserva o limite documental daquela fase.
 - DS-04 v1.0 e contrato comum v1.0: em 11/10/2026, o usuário identificou **Fase: 04** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou execução e evidências para revisão; não autorizou outra fase, commit ou push.
 - DS-05 v1.0 e contrato comum v1.0: em 12/10/2026, o usuário identificou **Fase: 05** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou execução/evidências para revisão, sem outra fase, commit ou push.
-- DS-06–DS-16: nenhuma autorização de execução recebida.
+- DS-06 v1.0 e contrato comum v1.0: em 12/10/2026, o usuário identificou Fase: 06 e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou implementação/verificação para revisão, sem outra fase, commit ou push.
+- DS-07–DS-16: nenhuma autorização de execução recebida.
+- Aceite DS-06 e commit local: em 12/10/2026, após apresentação da entrega e de suas limitações, o usuário solicitou “commite as mudanças”. Push e próxima fase não autorizados.
 - Aceite do resultado de DS-00 e commit: em 11/10/2026, após a apresentação da entrega, o usuário declarou “Aprovado. Commite as alterações para seguirmos para o proximo passo (so commitar, sem push)”. Aceite registrado separadamente da aprovação da especificação.
 - Aceite do resultado e Git de DS-01: em 11/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações (apenas commitar, sem push) para seguirmos pra proxima fase”. O pedido registra o aceite desta entrega e autoriza somente seu commit local. DS-02 exige autorização própria; push ou publicação continuam não autorizados.
 
@@ -118,9 +120,22 @@ DS-00–DS-03 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Ambiente: servidores e verificações com permissão ampliada por restrições do sandbox; nenhuma rejeição automática. Variáveis fictícias restritas aos processos; nenhum arquivo de ambiente editado. Capturas e registros congelados no diretório DS-05; tráfego posterior do preview fica em .next, fora das evidências.
 - Entrega: implementação concluída, verificação no escopo disponível e limites registrados; resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega. Commit local autorizado com a mensagem refactor(events): padroniza apresentacao dos eventos publicos; identificação no histórico Git. Nenhum push; DS-06 não iniciada.
 
+### 12/10/2026 — DS-06 v1.0
+
+- Dependências: README, CONTRATO v1.0, STATUS, DS-06 e composição complementar DS-00 lidos; DS-00/01/03 aceitas e DS-05 aceita/commitada em 1ddcb87. Árvore inicialmente limpa; autorização restrita à fase 06.
+- Referência: UX Pilot Events and Locations k5WjrM3paBG7rWH7cnmR recuperado por MCP em leitura, completed na página ThHPmFvVAyXGKTItA3AZ; preview 1440×1324. Nenhum design modificado ou avaliação paga solicitada.
+- Implementação: controles/lista/resumo com primitivas e tokens, origem manual junto do GPS, painel até 320 px ao lado do mapa em desktop e composição empilhada no celular. Leaflet real com zoom/tooltip/linhas/marcadores temáticos e teclado. Apresentação esquemática extraída, coordenadas dinâmicas e estimativa temporária preservadas. CSS substituído removido sem consumidores; estilos locais e CSS Leaflet necessários mantidos.
+- Preservação: lógica anterior ao JSX de PublicPortal e PublicCampusNavigator idêntica ao HEAD de DS-05; algoritmo, contratos/API, dados geográficos, limiares, callbacks/limpeza, tokens, dependências e backend inalterados. Sem consultas ou ações de produto novas.
+- Verificação: lint, tipos, 42 testes pertinentes em cinco arquivos e build passaram. Página de simulação retorna 404 em produção. Geográfico/esquemático e textos extensos em oito combinações 1440/1024/768/390 claro/escuro, sem overflow; 36 focos de teclado e 12 de nome extenso visíveis, incluindo 720×512 e 390×480. 53 PNGs e medições reais no registro DS-06.
+- Comportamento: campus isolado, busca de espaço, origem cadastrada/marcada, entrada e detalhes preservados; rotas 20 m/32 m, ausência de caminho, entrada inválida/distante e origem distante conferidas. Fallback/alternância e 12 estados de carregamento/vazio/falha nos dois temas. Leaflet com oito tiles carregados, zoom 44×44 e teste de uma montagem/uma limpeza. Resize mantém 6 entradas de consulta antes/depois.
+- GPS: 17 estados simulados, incluindo abertura sem observador, ação explícita, precisão baixa/aceita, salto, recálculo, erros 1/2/3, alternativa manual, parada, chegada e desmontagem. Tema/resize mantiveram um observador e um mapa. Nenhuma posição real solicitada ou transmitida; harness só em desenvolvimento com API fictícia, descritor restaurado ao sair.
+- Correções: preflight da fixture e posições de teste ajustados sem mudar regras; guarda de evento SVG corrigiu tipos. Metadados separados dos botões evitaram foco maior que a janela com texto extenso; margens de rolagem consideram barra inferior. Nenhuma mudança material de spec.
+- Limites: zoom real pendente; reflow equivalente não comprova zoom nativo. Sem infraestrutura/instituição, GPS/sensores, permissão nativa, aparelho físico, teclado virtual, leitor de tela falado, safe area não nula ou preferência de movimento emulada. Marcadores geográficos compactos mantêm geometria e possuem equivalentes de 44 px na lista. Registros e limites detalhados nas evidências.
+- Ambiente: servidores e verificações com permissão ampliada pelas restrições do sandbox, sem rejeição automática; consulta HTTP inicial bloqueada pela rede foi repetida com permissão e confirmou 404. Aba antiga de erro de conexão indisponível por política do navegador; retomada em aba HTTP local permitida. Variáveis fictícias só nos processos, sem editar arquivos de ambiente. Servidores reiniciados na retomada; registro congelado antes do build.
+- Entrega: implementação concluída; verificação no escopo disponível com limites/pendência explícitos; resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega. Commit local autorizado com a mensagem refactor(maps): padroniza controles e estados dos mapas publicos; identificação no histórico Git. Sem push. DS-07 não iniciada.
+
 ## Divergências corrigidas na conversão
 
 - O roteiro anterior generalizava confirmação de exclusão. FAQs e documentos atualmente excluem diretamente; as respectivas specs preservam o comportamento e deixam novas confirmações fora do escopo.
 - O dashboard principal possui fallback de falha para valores vazios/zero, enquanto a seção RAG já diferencia erro e ausência de dados. A migração não promete corrigir a política de dados do dashboard principal sem escopo específico.
 - O antigo roteiro de prompts foi substituído por este conjunto. O plano original foi atualizado para apontar para as specs, sem perder o diagnóstico.
-
