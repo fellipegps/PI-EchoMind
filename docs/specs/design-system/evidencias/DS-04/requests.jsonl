@@ -1,0 +1,4 @@
+{"request":"GET /public/ds04-fixture/faqs","count":1}
+{"request":"GET /public/ds04-fixture/events","count":1}
+{"request":"GET /public/ds04-fixture/locations","count":1}
+{"request":"GET /public/ds04-fixture","count":1}

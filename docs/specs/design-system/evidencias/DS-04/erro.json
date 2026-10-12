@@ -1,0 +1,169 @@
+{
+  "desktop": {
+    "aux": {
+      "bottom": 824,
+      "height": 715,
+      "width": 288,
+      "x": 1128,
+      "y": 109
+    },
+    "auxVisible": true,
+    "busy": "false",
+    "form": {
+      "bottom": 797,
+      "height": 93,
+      "width": 854,
+      "x": 249,
+      "y": 704
+    },
+    "height": 1024,
+    "input": "",
+    "inputDisabled": false,
+    "log": {
+      "bottom": 618,
+      "height": 428,
+      "width": 854,
+      "x": 249,
+      "y": 190
+    },
+    "logClientHeight": 428,
+    "logScrollHeight": 428,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêComo acessar a biblioteca?"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura."
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêSimular falha local"
+      }
+    ],
+    "nav": {
+      "bottom": 1024,
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "pageWidth": 1440,
+    "rawHtmlCount": 0,
+    "scrollWidth": 1440,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 1440
+  },
+  "alert": "Não foi possível obter uma resposta agora. Tente novamente em instantes.",
+  "mobile": {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "form": {
+      "bottom": 739,
+      "height": 77,
+      "width": 341,
+      "x": 17,
+      "y": 662
+    },
+    "height": 844,
+    "input": "",
+    "inputDisabled": false,
+    "log": {
+      "bottom": 243,
+      "height": 508,
+      "width": 341,
+      "x": 17,
+      "y": -265
+    },
+    "logClientHeight": 508,
+    "logScrollHeight": 508,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêComo acessar a biblioteca?"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura."
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêSimular falha local"
+      }
+    ],
+    "nav": {
+      "bottom": 844,
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "pageWidth": 375,
+    "rawHtmlCount": 0,
+    "scrollWidth": 375,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 390
+  }
+}

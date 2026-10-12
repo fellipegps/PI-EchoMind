@@ -2,17 +2,13 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
-  Bot,
   Building2,
   ChevronRight,
-  Loader2,
   MapPin,
   Navigation,
   Search,
-  Send,
   Sparkles,
 } from "lucide-react";
-import Markdown from "react-markdown";
 
 import { publicPortalApi, streamPublicChat } from "@/lib/api";
 import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
@@ -21,11 +17,7 @@ import { PublicCampusNavigator } from "./public-campus-navigator";
 import { PortalSectionHeading, PortalShell, type PortalTabId as TabId } from "./public-portal-shell";
 import styles from "./public-portal.module.css";
 
-type ChatMessage = {
-  id: number;
-  role: "assistant" | "user";
-  content: string;
-};
+import { ChatAuxiliary, PublicChat, type ChatMessage } from "./public-chat";
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: 1,
@@ -208,7 +200,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
 
   const sendQuestion = async (suggestedQuestion?: string) => {
     const question = (suggestedQuestion ?? input).trim();
-    if (!question || sending) return;
+    if (!question || sending || portalLoading) return;
     if (!normalizedSlug || portalError) {
       setChatError("Link inválido. Solicite à instituição o endereço correto do portal.");
       return;
@@ -300,99 +292,19 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
 
   return (
     <div className={styles.portalRoot}>
-      <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName}>
+      <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName}
+        auxiliary={<ChatAuxiliary faqs={faqs} events={events} eventsLoading={eventsLoading} eventsError={eventsError}
+          disabled={sending || portalLoading || Boolean(portalError)} onQuestion={(question) => void sendQuestion(question)}
+          onEvents={() => setActiveTab("eventos")} formatPeriod={formatEventPeriod} />}>
           {activeTab === "chat" && (
             <section className={styles.panel} aria-labelledby="chat-title">
               <PortalSectionHeading id="chat-title" eyebrow="Atendimento digital" title="Como podemos ajudar?" icon={<Sparkles className="size-5" />} />
 
-              {portalLoading && (
-                <div className={styles.alert} role="status">
-                  Carregando portal da instituição...
-                </div>
-              )}
-
-              {portalError && (
-                <div className={styles.alert} role="alert">
-                  {portalError}
-                </div>
-              )}
-
-              <div className={styles.chatCard}>
-                <div className={styles.messages} ref={chatScroll} aria-live="polite">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`${styles.messageRow} ${
-                        message.role === "user" ? styles.messageRowUser : ""
-                      }`}
-                    >
-                      {message.role === "assistant" && (
-                        <span className={styles.avatar}><Bot aria-hidden="true" /></span>
-                      )}
-                      {message.role === "assistant" ? (
-                        <div className={`${styles.message} ${styles.assistantMessage}`}>
-                          <Markdown
-                            skipHtml
-                            allowedElements={["p", "strong", "em", "a", "br", "ul", "ol", "li", "code", "pre", "blockquote"]}
-                            unwrapDisallowed
-                          >
-                            {message.content}
-                          </Markdown>
-                        </div>
-                      ) : (
-                        <p className={`${styles.message} ${styles.userMessage}`}>
-                          {message.content}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                  {sending && waitingForFirstToken && (
-                    <div className={styles.typing} role="status">
-                      <Loader2 aria-hidden="true" /> Buscando a melhor resposta...
-                    </div>
-                  )}
-                </div>
-
-                {faqs.length > 0 && (
-                  <div className={styles.suggestions} aria-label="Perguntas frequentes">
-                    {faqs.map((faq) => (
-                      <button
-                        type="button"
-                        key={faq.id}
-                        onClick={() => void sendQuestion(faq.question)}
-                        disabled={sending}
-                      >
-                        {faq.question}<ChevronRight aria-hidden="true" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {chatError && <p className={styles.chatError} role="alert">{chatError}</p>}
-                <form className={styles.chatForm} onSubmit={submitChat}>
-                  <label className={styles.srOnly} htmlFor="portal-question">Digite sua pergunta</label>
-                  <input
-                    id="portal-question"
-                    value={input}
-                    onChange={(event) => setInput(event.target.value)}
-                    placeholder="Digite sua dúvida..."
-                    disabled={sending || portalLoading || Boolean(portalError)}
-                    autoComplete="off"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Enviar pergunta"
-                    disabled={
-                      sending ||
-                      portalLoading ||
-                      Boolean(portalError) ||
-                      !input.trim()
-                    }
-                  >
-                    {sending ? <Loader2 className={styles.spin} aria-hidden="true" /> : <Send aria-hidden="true" />}
-                  </button>
-                </form>
-              </div>
+              <PublicChat messages={messages} scrollRef={chatScroll} input={input} onInput={setInput}
+                onSubmit={submitChat} onQuestion={(question) => void sendQuestion(question)} faqs={faqs}
+                sending={sending} waitingForFirstToken={waitingForFirstToken}
+                blocked={sending || portalLoading || Boolean(portalError)} portalLoading={portalLoading}
+                portalError={portalError} chatError={chatError} />
             </section>
           )}
 

@@ -4,7 +4,7 @@
 
 ## Identificação e controle
 
-- Status: **Proposta — aguardando aprovação; não implementada**.
+- Status: **Aprovada em 11/10/2026 — implementada e verificada no escopo; resultado aceito em 12/10/2026**.
 - Fase original: 04 do roteiro, etapa 3B do plano.
 - Modelo recomendado: **GPT-6.1 Sol**, esforço **High** (`high`).
 - Commit sugerido após revisão e autorização: `refactor(chat): aplica design system ao chat publico`.
@@ -73,13 +73,13 @@ Composições especializadas de mensagem/compositor podem ser extraídas se pres
 
 ## Plano de implementação
 
-- [ ] Conferir aprovação, DS-00/01/03, estado local e referências desktop/celular.
-- [ ] Mapear estado, callbacks, lista permitida de Markdown e classes ainda compartilhadas.
-- [ ] Aplicar mensagem/avatar/compositor/FAQ com a base existente, mantendo fluxo de tokens.
-- [ ] Compor conteúdo auxiliar com os dados já carregados e regras de recolhimento aprovadas.
-- [ ] Conferir espera, falha, bloqueios, slug, conteúdo longo e proteção do Markdown/URLs.
-- [ ] Remover apenas seletores comprovadamente substituídos e sem consumidores.
-- [ ] Executar verificações; registrar imagens, resultados e limitações para revisão.
+- [x] Conferir aprovação, DS-00/01/03, estado local e referências desktop/celular.
+- [x] Mapear estado, callbacks, lista permitida de Markdown e classes ainda compartilhadas.
+- [x] Aplicar mensagem/avatar/compositor/FAQ com a base existente, mantendo fluxo de tokens.
+- [x] Compor conteúdo auxiliar com os dados já carregados e regras de recolhimento aprovadas.
+- [x] Conferir espera, falha, bloqueios, slug, conteúdo longo e proteção do Markdown/URLs.
+- [x] Remover apenas seletores comprovadamente substituídos e sem consumidores.
+- [x] Executar verificações; registrar imagens, resultados e limitações para revisão.
 
 ## Verificações e evidências esperadas
 
@@ -94,4 +94,6 @@ Composições especializadas de mensagem/compositor podem ser extraídas se pres
 
 Pronta para revisão quando os critérios têm evidência e a suíte pertinente/verificações obrigatórias estão resolvidas, sem funções novas ou perdas do fluxo atual. STATUS mantém implementação, verificação e aprovação em campos distintos.
 
-Não executar fase seguinte ou commit/push automaticamente. Alteração material do comportamento do compositor, conteúdo ou direção visual deve ser registrada na spec e aprovada antes da implementação dependente. Nenhuma tarefa está concluída nesta preparação.
+Não executar fase seguinte ou commit/push automaticamente. Alteração material do comportamento do compositor, conteúdo ou direção visual deve ser registrada na spec e aprovada antes da implementação dependente. Autorização explícita recebida para DS-04 v1.0 e contrato comum em 11/10/2026; resultado aceito pelo pedido de commit após a apresentação da entrega, em 12/10/2026.
+
+Evidências desta execução: [DS-04](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-04.md>). Critérios verificados no escopo, com limitações de dispositivo/tecnologias assistivas registradas; aceite registrado em 12/10/2026; commit local autorizado, sem push.

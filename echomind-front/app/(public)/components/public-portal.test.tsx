@@ -357,5 +357,94 @@ describe("PublicPortal", () => {
       );
     });
     expect(screen.getByRole("alert")).not.toHaveTextContent("segredo interno");
+    expect(screen.queryByText("Buscando a melhor resposta...")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Digite sua pergunta")).toBeEnabled();
+  });
+
+  it("bloqueia sugestões durante carga institucional e não envia campo vazio", async () => {
+    const user = userEvent.setup();
+    let resolveInstitution!: (value: { company_name: string }) => void;
+    apiMocks.getInstitution.mockReturnValue(new Promise((resolve) => { resolveInstitution = resolve; }));
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    const suggestion = await screen.findByRole("button", { name: faq.question });
+    expect(suggestion).toBeDisabled();
+    expect(screen.getByRole("button", { name: `Perguntar: ${faq.question}` })).toBeDisabled();
+    expect(screen.getByLabelText("Digite sua pergunta")).toBeDisabled();
+    await user.click(suggestion);
+    fireEvent.submit(screen.getByRole("button", { name: "Enviar pergunta" }).closest("form")!);
+    expect(apiMocks.streamPublicChat).not.toHaveBeenCalled();
+    await act(async () => resolveInstitution({ company_name: "UniEVANGÉLICA" }));
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "   ");
+    fireEvent.submit(screen.getByRole("button", { name: "Enviar pergunta" }).closest("form")!);
+    expect(apiMocks.streamPublicChat).not.toHaveBeenCalled();
+  });
+
+  it("anuncia espera, bloqueia envio simultâneo e termina uma única resposta incremental", async () => {
+    const user = userEvent.setup();
+    let token!: (value: string) => void;
+    let done!: () => void;
+    apiMocks.streamPublicChat.mockImplementation((_question, _slug, onToken, onDone) => {
+      token = onToken; done = onDone; return Promise.resolve();
+    });
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "  Pergunta de teste  ");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Buscando a melhor resposta...");
+    expect(screen.getByRole("button", { name: faq.question })).toBeDisabled();
+    expect(screen.getByLabelText("Digite sua pergunta")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Enviar pergunta" }).closest("form")).toHaveAttribute("aria-busy", "true");
+    await user.click(screen.getByRole("button", { name: `Perguntar: ${faq.question}` }));
+    await act(async () => token(""));
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    await act(async () => token("Primeiro "));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    const response = screen.getAllByRole("article", { name: "Resposta do assistente" }).at(-1);
+    await act(async () => { token("segundo."); done(); });
+    expect(screen.getAllByRole("article", { name: "Resposta do assistente" })).toHaveLength(2);
+    expect(response).toHaveTextContent("Primeiro segundo.");
+    expect(screen.getByLabelText("Digite sua pergunta")).toBeEnabled();
+    expect(apiMocks.streamPublicChat).toHaveBeenCalledOnce();
+    expect(apiMocks.streamPublicChat.mock.calls[0].slice(0, 2)).toEqual(["Pergunta de teste", "unievangelica-anapolis"]);
+  });
+
+  it("mantém listas e código em Markdown e descarta HTML e destinos executáveis", async () => {
+    const user = userEvent.setup();
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => {
+      token("**Ne");
+      token("grito**\n\n- Item seguro\n\n```js\nconst texto = '");
+      token("teste';\n```\n\n[Seguro](https://example.com) [Inseguro](javascript:alert%281%29)\n\n<script>alert('interno')</script><img src=x onerror=alert(1)>");
+      done();
+    });
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Markdown");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    const log = screen.getByRole("log", { name: "Conversa com o assistente" });
+    expect(within(log).getByText("Negrito").tagName).toBe("STRONG");
+    expect(within(log).getByRole("listitem")).toHaveTextContent("Item seguro");
+    expect(log.querySelector("pre code")).toHaveTextContent("const texto = 'teste';");
+    expect(within(log).getByRole("region", { name: "Código da resposta" })).toHaveAttribute("tabindex", "0");
+    expect(within(log).getByRole("link", { name: "Seguro" })).toHaveAttribute("href", "https://example.com");
+    expect(within(log).getByText("Inseguro")).not.toHaveAttribute("href", expect.stringMatching(/javascript:/i));
+    expect(log.querySelector("script, img, iframe")).toBeNull();
+  });
+
+  it("usa os dados já consultados no auxiliar e a FAQ envia pelo contrato comum", async () => {
+    const user = userEvent.setup();
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => { token("Resposta da instituição."); done(); });
+    apiMocks.listFaqs.mockResolvedValue(Array.from({ length: 6 }, (_, index) => ({ ...faq, id: `faq-${index}`, question: `Pergunta institucional ${index}` })));
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    const auxiliary = screen.getByRole("complementary", { name: "Informações da instituição" });
+    expect(within(auxiliary).getAllByRole("button", { name: /^Perguntar:/ })).toHaveLength(4);
+    expect(within(auxiliary).getByText(publicEvent.title)).toBeInTheDocument();
+    await user.click(within(auxiliary).getByRole("button", { name: "Perguntar: Pergunta institucional 0" }));
+    expect(apiMocks.streamPublicChat.mock.calls[0].slice(0, 2)).toEqual(["Pergunta institucional 0", "unievangelica-anapolis"]);
+    await user.click(within(auxiliary).getByRole("button", { name: "Ver eventos" }));
+    expect(screen.getByRole("region", { name: "Próximos eventos" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Chat" }));
+    for (const query of [apiMocks.getInstitution, apiMocks.listFaqs, apiMocks.listEvents, apiMocks.listLocations]) expect(query).toHaveBeenCalledOnce();
+    expect(screen.queryByText("Pergunta institucional 4")).not.toBeInTheDocument();
   });
 });

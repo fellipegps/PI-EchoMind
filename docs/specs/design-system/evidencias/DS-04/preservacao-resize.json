@@ -1,0 +1,169 @@
+{
+  "before": {
+    "aux": {
+      "bottom": 924,
+      "height": 815,
+      "width": 288,
+      "x": 1128,
+      "y": 109
+    },
+    "auxVisible": true,
+    "busy": "false",
+    "codeClientWidth": 713,
+    "codeScrollWidth": 4720,
+    "form": {
+      "bottom": 923,
+      "height": 93,
+      "width": 854,
+      "x": 249,
+      "y": 830
+    },
+    "height": 1024,
+    "input": "Rascunho preservado textoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextenso",
+    "inputDisabled": false,
+    "log": {
+      "bottom": 830,
+      "height": 640,
+      "width": 854,
+      "x": 249,
+      "y": 190
+    },
+    "logClientHeight": 640,
+    "logScrollHeight": 896,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêConversa longa de teste"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura.\nParágrafo 1: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 2: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 3: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 4: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 5: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 6: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 7: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 8: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 9: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 10: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\n\nItem permitido\nSegundo item\n\nLink extenso\nconst exemplo = 'codigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigo';\n\nLink inseguro alert('teste')"
+      }
+    ],
+    "nav": {
+      "bottom": 1024,
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "pageWidth": 1440,
+    "rawHtmlCount": 0,
+    "scrollWidth": 1440,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 1440
+  },
+  "requestsBefore": "{\"request\":\"GET /public/ds03-fixture/faqs\",\"count\":1}\n{\"request\":\"GET /public/ds03-fixture/events\",\"count\":1}\n{\"request\":\"GET /public/ds03-fixture/locations\",\"count\":1}\n{\"request\":\"GET /public/ds03-fixture\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/faqs\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/events\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/locations\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture\",\"count\":1}\n{\"request\":\"POST /public/ds04-fixture/chat\",\"count\":1}\n{\"slug\":\"ds04-fixture\"}\n{\"request\":\"GET /public/ds04-fixture/faqs\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/events\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/locations\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture\",\"count\":1}\n{\"request\":\"POST /public/ds04-fixture/chat\",\"count\":1}\n{\"slug\":\"ds04-fixture\",\"question\":\"Conversa longa de teste\"}\n",
+  "after": {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "codeClientWidth": 216,
+    "codeScrollWidth": 4720,
+    "form": {
+      "bottom": 1184.59375,
+      "height": 77,
+      "width": 341,
+      "x": 17,
+      "y": 1107.59375
+    },
+    "height": 844,
+    "input": "Rascunho preservado textoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextensotextoextenso",
+    "inputDisabled": false,
+    "log": {
+      "bottom": 794.59375,
+      "height": 548.59375,
+      "width": 341,
+      "x": 17,
+      "y": 246
+    },
+    "logClientHeight": 549,
+    "logScrollHeight": 1696,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêConversa longa de teste"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura.\nParágrafo 1: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 2: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 3: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 4: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 5: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 6: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 7: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 8: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 9: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 10: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\n\nItem permitido\nSegundo item\n\nLink extenso\nconst exemplo = 'codigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigo';\n\nLink inseguro alert('teste')"
+      }
+    ],
+    "nav": {
+      "bottom": 844,
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "pageWidth": 375,
+    "rawHtmlCount": 0,
+    "scrollWidth": 375,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 390
+  },
+  "requestsAfter": "{\"request\":\"GET /public/ds03-fixture/faqs\",\"count\":1}\n{\"request\":\"GET /public/ds03-fixture/events\",\"count\":1}\n{\"request\":\"GET /public/ds03-fixture/locations\",\"count\":1}\n{\"request\":\"GET /public/ds03-fixture\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/faqs\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/events\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/locations\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture\",\"count\":1}\n{\"request\":\"POST /public/ds04-fixture/chat\",\"count\":1}\n{\"slug\":\"ds04-fixture\"}\n{\"request\":\"GET /public/ds04-fixture/faqs\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/events\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture/locations\",\"count\":1}\n{\"request\":\"GET /public/ds04-fixture\",\"count\":1}\n{\"request\":\"POST /public/ds04-fixture/chat\",\"count\":1}\n{\"slug\":\"ds04-fixture\",\"question\":\"Conversa longa de teste\"}\n",
+  "sameConversation": true,
+  "sameDraft": true,
+  "noNewQueries": true
+}

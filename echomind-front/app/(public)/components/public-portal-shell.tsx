@@ -12,11 +12,12 @@ const NAV_ITEMS = [
 
 export type PortalTabId = (typeof NAV_ITEMS)[number]["id"];
 
-export function PortalShell({ activeTab, onTabChange, companyName, children }: {
+export function PortalShell({ activeTab, onTabChange, companyName, children, auxiliary }: {
   activeTab: PortalTabId;
   onTabChange: (tab: PortalTabId) => void;
   companyName: string;
   children: ReactNode;
+  auxiliary?: ReactNode;
 }) {
   return (
     <div data-slot="portal-shell" className="min-h-svh bg-background pb-[calc(80px+env(safe-area-inset-bottom))] text-foreground lg:pb-0">
@@ -55,8 +56,7 @@ export function PortalShell({ activeTab, onTabChange, companyName, children }: {
 
         <main className={cn("grid min-w-0 gap-6 py-6 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))]", activeTab === "chat" && "xl:grid-cols-[minmax(0,1fr)_288px]")}>
           <div className="min-w-0">{children}</div>
-          {/* DS-03 reserves this space. Real auxiliary content belongs to DS-04. */}
-          {activeTab === "chat" ? <div data-slot="portal-auxiliary" aria-hidden="true" className="hidden min-w-0 xl:block" /> : null}
+          {activeTab === "chat" ? <aside data-slot="portal-auxiliary" aria-label="Informações da instituição" className="hidden min-w-0 xl:block">{auxiliary}</aside> : null}
         </main>
       </div>
     </div>

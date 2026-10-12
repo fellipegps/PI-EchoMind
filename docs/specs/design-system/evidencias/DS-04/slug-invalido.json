@@ -1,0 +1,102 @@
+{
+  "dark": {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "form": {
+      "bottom": 685,
+      "height": 77,
+      "width": 356,
+      "x": 17,
+      "y": 608
+    },
+    "height": 844,
+    "input": "",
+    "inputDisabled": true,
+    "log": {
+      "bottom": 608,
+      "height": 256,
+      "width": 356,
+      "x": 17,
+      "y": 352
+    },
+    "logClientHeight": 256,
+    "logScrollHeight": 256,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      }
+    ],
+    "nav": {
+      "bottom": 844,
+      "height": 77,
+      "width": 390,
+      "x": 0,
+      "y": 767
+    },
+    "pageWidth": 390,
+    "rawHtmlCount": 0,
+    "scrollWidth": 390,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [],
+    "width": 390
+  },
+  "light": {
+    "aux": {
+      "bottom": 626,
+      "height": 517,
+      "width": 288,
+      "x": 1128,
+      "y": 109
+    },
+    "auxVisible": true,
+    "busy": "false",
+    "form": {
+      "bottom": 625,
+      "height": 93,
+      "width": 854,
+      "x": 249,
+      "y": 532
+    },
+    "height": 1024,
+    "input": "",
+    "inputDisabled": true,
+    "log": {
+      "bottom": 532,
+      "height": 256,
+      "width": 854,
+      "x": 249,
+      "y": 276
+    },
+    "logClientHeight": 256,
+    "logScrollHeight": 256,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      }
+    ],
+    "nav": {
+      "bottom": 1024,
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "pageWidth": 1440,
+    "rawHtmlCount": 0,
+    "scrollWidth": 1440,
+    "theme": "light",
+    "unsafeHref": false,
+    "visibleFaqs": [],
+    "width": 1440
+  }
+}

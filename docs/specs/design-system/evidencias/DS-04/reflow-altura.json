@@ -1,0 +1,394 @@
+[
+  {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "codeClientWidth": 514,
+    "codeScrollWidth": 4720,
+    "form": {
+      "bottom": 406.796875,
+      "height": 93,
+      "width": 655,
+      "x": 25,
+      "y": 313.796875
+    },
+    "height": 512,
+    "input": "Rascunho para envio após resposta",
+    "inputDisabled": false,
+    "log": {
+      "bottom": 24.796875,
+      "height": 332.796875,
+      "width": 655,
+      "x": 25,
+      "y": -308
+    },
+    "logClientHeight": 333,
+    "logScrollHeight": 1750,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêOnde encontro os horários de atendimento?"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura."
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêSimular falha local"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêConversa longa https://example.com/caminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextenso"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura.\nParágrafo 1: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 2: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 3: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 4: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 5: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 6: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 7: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 8: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 9: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 10: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\n\nItem permitido\nSegundo item\n\nhttps://example.com/caminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminho\nconst exemplo = 'codigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigo';\n\nLink inseguro alert('teste')"
+      }
+    ],
+    "nav": {
+      "bottom": 512,
+      "height": 77,
+      "width": 705,
+      "x": 0,
+      "y": 435
+    },
+    "pageWidth": 705,
+    "rawHtmlCount": 0,
+    "scrollWidth": 705,
+    "theme": "light",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 720,
+    "longLink": {
+      "logWidth": 655,
+      "textLength": 265,
+      "width": 511.703125
+    }
+  },
+  {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "codeClientWidth": 216,
+    "codeScrollWidth": 4720,
+    "form": {
+      "bottom": 375,
+      "height": 77,
+      "width": 341,
+      "x": 17,
+      "y": 298
+    },
+    "height": 480,
+    "input": "Rascunho para envio após resposta",
+    "inputDisabled": false,
+    "log": {
+      "bottom": -15,
+      "height": 312,
+      "width": 341,
+      "x": 17,
+      "y": -327
+    },
+    "logClientHeight": 312,
+    "logScrollHeight": 2742,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêOnde encontro os horários de atendimento?"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura."
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêSimular falha local"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêConversa longa https://example.com/caminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextenso"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura.\nParágrafo 1: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 2: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 3: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 4: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 5: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 6: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 7: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 8: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 9: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 10: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\n\nItem permitido\nSegundo item\n\nhttps://example.com/caminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminho\nconst exemplo = 'codigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigo';\n\nLink inseguro alert('teste')"
+      }
+    ],
+    "nav": {
+      "bottom": 480,
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 403
+    },
+    "pageWidth": 375,
+    "rawHtmlCount": 0,
+    "scrollWidth": 375,
+    "theme": "light",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 390,
+    "longLink": {
+      "logWidth": 341,
+      "textLength": 265,
+      "width": 215.875
+    }
+  },
+  {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "codeClientWidth": 514,
+    "codeScrollWidth": 4720,
+    "form": {
+      "bottom": 406.796875,
+      "height": 93,
+      "width": 655,
+      "x": 25,
+      "y": 313.796875
+    },
+    "height": 512,
+    "input": "Rascunho para envio após resposta",
+    "inputDisabled": false,
+    "log": {
+      "bottom": 24.796875,
+      "height": 332.796875,
+      "width": 655,
+      "x": 25,
+      "y": -308
+    },
+    "logClientHeight": 333,
+    "logScrollHeight": 1750,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêOnde encontro os horários de atendimento?"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura."
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêSimular falha local"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêConversa longa https://example.com/caminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextenso"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura.\nParágrafo 1: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 2: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 3: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 4: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 5: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 6: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 7: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 8: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 9: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 10: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\n\nItem permitido\nSegundo item\n\nhttps://example.com/caminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminho\nconst exemplo = 'codigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigo';\n\nLink inseguro alert('teste')"
+      }
+    ],
+    "nav": {
+      "bottom": 512,
+      "height": 77,
+      "width": 705,
+      "x": 0,
+      "y": 435
+    },
+    "pageWidth": 705,
+    "rawHtmlCount": 0,
+    "scrollWidth": 705,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 720,
+    "longLink": {
+      "logWidth": 655,
+      "textLength": 265,
+      "width": 511.703125
+    }
+  },
+  {
+    "aux": {
+      "bottom": 0,
+      "height": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0
+    },
+    "auxVisible": false,
+    "busy": "false",
+    "codeClientWidth": 216,
+    "codeScrollWidth": 4720,
+    "form": {
+      "bottom": 375,
+      "height": 77,
+      "width": 341,
+      "x": 17,
+      "y": 298
+    },
+    "height": 480,
+    "input": "Rascunho para envio após resposta",
+    "inputDisabled": false,
+    "log": {
+      "bottom": -15,
+      "height": 312,
+      "width": 341,
+      "x": 17,
+      "y": -327
+    },
+    "logClientHeight": 312,
+    "logScrollHeight": 2742,
+    "messages": [
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêOnde encontro os horários de atendimento?"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura."
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêSimular falha local"
+      },
+      {
+        "author": "Sua pergunta",
+        "text": "VocêConversa longa https://example.com/caminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextensocaminhoextenso"
+      },
+      {
+        "author": "Resposta do assistente",
+        "text": "EchoMindResposta local preservada após a navegação e a troca de largura.\nParágrafo 1: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 2: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 3: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 4: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 5: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 6: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 7: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 8: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 9: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\nParágrafo 10: Conteúdo local extenso para conferir leitura, rolagem e envio após a resposta.\n\nItem permitido\nSegundo item\n\nhttps://example.com/caminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminhocaminho\nconst exemplo = 'codigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigocodigo';\n\nLink inseguro alert('teste')"
+      }
+    ],
+    "nav": {
+      "bottom": 480,
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 403
+    },
+    "pageWidth": 375,
+    "rawHtmlCount": 0,
+    "scrollWidth": 375,
+    "theme": "dark",
+    "unsafeHref": false,
+    "visibleFaqs": [
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como acessar a biblioteca?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Onde encontro os horários de atendimento?"
+      },
+      {
+        "disabled": false,
+        "height": 66,
+        "text": "Como consultar os eventos do campus?"
+      },
+      {
+        "disabled": false,
+        "height": 46,
+        "text": "Como encontrar um local no campus?"
+      }
+    ],
+    "width": 390,
+    "longLink": {
+      "logWidth": 341,
+      "textLength": 265,
+      "width": 215.875
+    }
+  }
+]

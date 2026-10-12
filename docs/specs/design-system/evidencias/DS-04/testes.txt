@@ -1,0 +1,21 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(public)/components/public-portal.test.tsx" "app/(public)/components/public-campus-navigator.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 41ms
+ ✓ app/(public)/components/public-campus-navigator.test.tsx (4 tests) 1000ms
+   ✓ PublicCampusNavigator > busca espaços e calcula o caminho acessível a partir de origem manual  548ms
+ ✓ app/(public)/components/public-portal.test.tsx (17 tests) 5475ms
+   ✓ PublicPortal > envia a pergunta ao chat real e acumula os tokens da resposta  525ms
+   ✓ PublicPortal > formata o negrito da resposta mesmo quando os marcadores chegam em partes  577ms
+   ✓ PublicPortal > preserva conversa pendente, tokens e rascunho ao navegar, sem repetir as consultas institucionais  1245ms
+   ✓ PublicPortal > pesquisa locais, seleciona origem e calcula rota aproximada  499ms
+   ✓ PublicPortal > anuncia espera, bloqueia envio simultâneo e termina uma única resposta incremental  577ms
+
+ Test Files  3 passed (3)
+      Tests  31 passed (31)
+   Start at  23:51:19
+   Duration  8.87s (transform 483ms, setup 1.13s, collect 1.98s, tests 6.52s, environment 2.59s, prepare 667ms)

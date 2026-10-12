@@ -1,0 +1,40 @@
+{
+  "stateEffectsAndHandlersPreservedExceptLoadingGuard": true,
+  "eventsAndMapsJsxUnchanged": true,
+  "legacyContentCssUnchanged": true,
+  "legacyResponsiveCssUnchanged": true,
+  "sharedRouteButtonsUnchanged": true,
+  "removedChatSelectors": [
+    "chatCard",
+    "messages",
+    "messageRow",
+    "messageRowUser",
+    "avatar",
+    "message",
+    "assistantMessage",
+    "userMessage",
+    "typing",
+    "spin",
+    "suggestions",
+    "chatError",
+    "chatForm"
+  ],
+  "remainingConsumers": [],
+  "apiAndBackendUnchanged": true,
+  "requirementsUnchanged": true,
+  "acceptanceCriteriaUnchanged": true,
+  "changedTrackedFiles": [
+    "docs/specs/design-system/04-chat-publico.md",
+    "docs/specs/design-system/README.md",
+    "docs/specs/design-system/STATUS.md",
+    "echomind-front/app/(public)/components/public-portal-shell.tsx",
+    "echomind-front/app/(public)/components/public-portal.module.css",
+    "echomind-front/app/(public)/components/public-portal.test.tsx",
+    "echomind-front/app/(public)/components/public-portal.tsx"
+  ],
+  "newApplicationFiles": [
+    "echomind-front/app/(public)/components/public-chat.tsx",
+    "echomind-front/test/fixtures/chat-server.mjs"
+  ],
+  "missingLocalLinks": []
+}

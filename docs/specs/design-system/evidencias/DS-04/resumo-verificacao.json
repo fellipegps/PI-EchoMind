@@ -1,0 +1,61 @@
+{
+  "responsiveCases": 8,
+  "extendedCases": 4,
+  "reflowCases": 4,
+  "themesAndWidths": [
+    [
+      "dark",
+      390
+    ],
+    [
+      "dark",
+      768
+    ],
+    [
+      "dark",
+      1024
+    ],
+    [
+      "dark",
+      1440
+    ],
+    [
+      "light",
+      390
+    ],
+    [
+      "light",
+      768
+    ],
+    [
+      "light",
+      1024
+    ],
+    [
+      "light",
+      1440
+    ]
+  ],
+  "noPageOverflow": true,
+  "composerReachableAndOutsideNavigation": true,
+  "oneVisibleFaqSet": true,
+  "visibleFaqTargetsAtLeast44": true,
+  "auxiliaryOnlyWide": true,
+  "codeOverflowContained": true,
+  "noExecutableMarkupOrHref": true,
+  "longLinkTextTested": true,
+  "resizeConversationAndDraftPreserved": true,
+  "resizeAddedNoQueries": true,
+  "auxiliaryFaqAddedOnlyChatRequest": true,
+  "institutionLoadingDisablesInputAndFaqs": true,
+  "invalidSlugDisablesInput": true,
+  "screenshots": 30,
+  "limits": [
+    "No physical device or virtual keyboard",
+    "Reflow viewport only; no real browser zoom",
+    "No screen-reader speech validation",
+    "No nonzero safe-area emulation",
+    "No system reduced-motion emulation; code inspected",
+    "Only isolated loopback fixtures, not real backend"
+  ]
+}
