@@ -1,0 +1,26 @@
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/nao-respondidas/page.test.tsx" "app/(admin)/base-de-conhecimento/components/faq-tab.test.tsx" "app/(admin)/base-de-conhecimento/page.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 45ms
+ ✓ app/(admin)/base-de-conhecimento/page.test.tsx (1 test) 284ms
+ ✓ app/(admin)/base-de-conhecimento/components/faq-tab.test.tsx (11 tests) 4228ms
+   ✓ FaqTab com useFaqs e API simulada > busca só a pergunta, sem distinguir capitalização, e diferencia busca sem resultado  593ms
+   ✓ FaqTab com useFaqs e API simulada > valida ambos os campos não vazios sem enviar à API  556ms
+   ✓ FaqTab com useFaqs e API simulada > bloqueia envios, campos e saídas enquanto salva; cria oculta e fecha após sucesso  841ms
+   ✓ FaqTab com useFaqs e API simulada > mantém edição e conteúdo em falha; atualiza somente o ID correto no sucesso  720ms
+   ✓ FaqTab com useFaqs e API simulada > mantém diálogo/conteúdo em falha de criação  791ms
+ ✓ app/(admin)/nao-respondidas/page.test.tsx (11 tests) 5397ms
+   ✓ Perguntas Não Respondidas > separa revisão das pendentes e permite aprovação humana  508ms
+   ✓ Perguntas Não Respondidas > busca canônica e variações sem capitalização dentro do status e expande detalhes por teclado  543ms
+   ✓ Perguntas Não Respondidas > valida campos não vazios antes da conversão  674ms
+   ✓ Perguntas Não Respondidas > conversão com falha mantém contexto e sucesso usa contrato e destino existentes  1557ms
+   ✓ Perguntas Não Respondidas > bloqueia botão de salvamento enquanto a conversão aguarda resposta  625ms
+   ✓ Perguntas Não Respondidas > limpar repõe pergunta canônica e fechar limpa campos sem converter  473ms
+
+ Test Files  4 passed (4)
+      Tests  33 passed (33)
+   Start at  17:54:14
+   Duration  9.27s (transform 717ms, setup 2.28s, collect 4.55s, tests 9.95s, environment 4.20s, prepare 841ms)

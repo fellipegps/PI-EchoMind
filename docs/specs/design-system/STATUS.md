@@ -1,8 +1,8 @@
 # Andamento — refatoração visual por especificação
 
-Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-09 aceitas; commit DS-09 c9c8fc2 já existente no baseline. DS-10 v1.0 aprovada, implementada e verificada no escopo local disponível; resultado aceito em 12/10/2026, com commit local autorizado. DS-11–DS-16 não iniciadas. Commit local DS-10 autorizado; identificação no histórico Git. Nenhum push.
+Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-11 aceitas; commit local DS-10 0764295 presente no baseline. DS-11 v1.0 aprovada, implementada e verificada no escopo local disponível; resultado aceito em 12/10/2026 pelo pedido de commit. DS-12–DS-16 não iniciadas. Commit local DS-11 autorizado; identificação no histórico Git. Nenhum push ou avanço de fase.
 
-DS-00–DS-09 v1.0 possuem aprovação, implementação, verificação e aceite registrados separadamente, com limites nas evidências. Aceite explícito da DS-09 recebido antes da implementação da DS-10. DS-10 v1.0 aprovada em 12/10/2026; execução concluída, verificação validada no escopo local disponível e resultado aceito explicitamente em 12/10/2026. DS-11–DS-16 continuam propostas e não iniciadas.
+Aprovação da spec, implementação, verificação e aceite do resultado permanecem distintos. DS-11 foi executada após conferir os aceites obrigatórios de DS-00, DS-01, DS-07 e DS-09. Seu aceite foi recebido após a apresentação da entrega, pelo pedido “commite as alterações”.
 
 | Fase | Versão | Spec | Execução | Verificação | Aceite do resultado | Evidência / commit |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -16,8 +16,8 @@ DS-00–DS-09 v1.0 possuem aprovação, implementação, verificação e aceite 
 | DS-07 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo disponível; falha anterior do editor geográfico e limites documentados | Aceito em 12/10/2026 | [DS-07](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-07.md>) / commit local autorizado; identificação no histórico Git |
 | DS-08 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-08](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-08.md>) / 44b52ae |
 | DS-09 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-09](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-09.md>) / c9c8fc2 (preexistente nesta execução) |
-| DS-10 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-10](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-10.md>) / commit local autorizado; identificação no histórico Git |
-| DS-11 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
+| DS-10 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-10](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-10.md>) / 0764295 (preexistente nesta execução) |
+| DS-11 | 1.0 | Aprovada em 12/10/2026 | Implementada | Validada no escopo local disponível; limites documentados | Aceito em 12/10/2026 | [DS-11](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-11.md>) / commit local autorizado; identificação no histórico Git |
 | DS-12 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-13 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
 | DS-14 | 1.0 | Proposta | Não iniciada | Não iniciada | Não solicitado | — |
@@ -38,7 +38,8 @@ DS-00–DS-09 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Aceite DS-07 e commit local: em 12/10/2026, após apresentação da entrega e limitações, o usuário solicitou “commite as altereações”. O pedido registra o aceite e autoriza somente o commit local; sem push ou avanço de fase.
 - DS-08 v1.0 e contrato comum v1.0: em 12/10/2026, o usuário identificou **Fase: 08** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou implementação e verificação com evidências para sua revisão. Não autorizou outra fase, commit ou push. Aceite do resultado recebido posteriormente pelo pedido de commit abaixo.
 - Aceite DS-08 e commit local: em 12/10/2026, após apresentação da entrega e limitações, o usuário solicitou “faça commite das alterações”. O pedido registra o aceite e autoriza somente o commit local; sem push ou avanço de fase.
-- DS-11–DS-16: nenhuma autorização de execução recebida.
+- DS-12–DS-16: nenhuma autorização de execução recebida.
+- DS-11 v1.0 e CONTRATO v1.0: em 12/10/2026 o usuário identificou **Fase: 11** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Autorizou implementação/verificação/evidências para revisão; não autorizou próxima fase, commit ou push. Aceite do resultado recebido posteriormente conforme registro abaixo.
 - Aceite DS-06 e commit local: em 12/10/2026, após apresentação da entrega e de suas limitações, o usuário solicitou “commite as mudanças”. Push e próxima fase não autorizados.
 - Aceite do resultado de DS-00 e commit: em 11/10/2026, após a apresentação da entrega, o usuário declarou “Aprovado. Commite as alterações para seguirmos para o proximo passo (so commitar, sem push)”. Aceite registrado separadamente da aprovação da especificação.
 - Aceite do resultado e Git de DS-01: em 11/10/2026, após a apresentação da entrega, o usuário solicitou “commite as alterações (apenas commitar, sem push) para seguirmos pra proxima fase”. O pedido registra o aceite desta entrega e autoriza somente seu commit local. DS-02 exige autorização própria; push ou publicação continuam não autorizados.
@@ -57,6 +58,8 @@ DS-00–DS-09 v1.0 possuem aprovação, implementação, verificação e aceite 
 - Aceite DS-09: após a conferência da dependência obrigatória, o usuário confirmou “Confirmo o aceite da DS-09 e prossiga com a DS-10”. A implementação dependente começou após essa confirmação. O commit c9c8fc2 já estava presente na árvore inicialmente limpa e não foi tratado como aceite nem como autorização para outro commit.
 
 - Aceite DS-10 e commit local: em 12/10/2026, após apresentação da entrega e limitações, o usuário declarou “aprovado. faça commite das alterações”. O pedido registra o aceite e autoriza somente o commit local; sem push ou avanço à DS-11.
+
+- Aceite DS-11 e commit local: em 12/10/2026, após a apresentação da entrega e limitações, o usuário solicitou “commite as alterações”. O pedido registra o aceite e autoriza somente o commit local, sem push ou avanço de fase.
 
 ## Registro de execução
 
@@ -198,3 +201,12 @@ DS-00–DS-09 v1.0 possuem aprovação, implementação, verificação e aceite 
 - O roteiro anterior generalizava confirmação de exclusão. FAQs e documentos atualmente excluem diretamente; as respectivas specs preservam o comportamento e deixam novas confirmações fora do escopo.
 - O dashboard principal possui fallback de falha para valores vazios/zero, enquanto a seção RAG já diferencia erro e ausência de dados. A migração não promete corrigir a política de dados do dashboard principal sem escopo específico.
 - O antigo roteiro de prompts foi substituído por este conjunto. O plano original foi atualizado para apontar para as specs, sem perder o diagnóstico.
+
+### 12/10/2026 — DS-11 v1.0
+
+- Autorização explícita para Fase: 11 recebida. README, CONTRATO, STATUS e DS-11 lidos; baseline limpo 0764295. Direção DS-00 aprovada/aceita; DS-01, DS-07 e DS-09 implementadas, verificadas e aceitas conforme registros. DS-10 também aceita, sem tornar polling/upload dependência técnica desta fase.
+- Implementação concluída: cabeçalho/container, filtros selecionados, busca rotulada, cartões/status/datas/motivos, expansão de variações, formulário e confirmação de ignorar com texto longo e foco. Somente composição local da página; sem alteração dos handlers, filtros, carga, datas, APIs, sessão, backend, primitivas, dependências ou publicação da FAQ.
+- Verificação: baseline 2/2; entrega 33/33 testes relacionados (11 triagem), lint final, tipos e build passaram. Navegador na compilação de produção com fixture sintética local: busca por variações, validação/limpeza, conversão com falha/espera/sucesso e destino real da UI; aprovação, cancelamento/ignorar e restauração com falha/espera/sucesso. Matriz 1440/1024/768/390 nos dois temas sem overflow horizontal; teclado/foco documentados.
+- Evidências: [DS-11](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-11.md>), registros por critério, capturas, requisições sem credenciais, auditoria e preservações. Nenhuma modificação material da spec foi necessária.
+- Limitação preexistente preservada: falha de carga usa toast e depois vazio, sem estado de erro persistente/retry novo. Limites de ambiente: fixture não valida backend/RAG/isolamento real; viewport não valida teclado virtual, zoom nativo ou leitor de tela. Verificação concluída no escopo local disponível.
+- Aceite: **resultado aceito em 12/10/2026** pela mensagem “commite as alterações”, após a apresentação da entrega e limites. Commit local autorizado com a mensagem `refactor(triage): padroniza perguntas nao respondidas e revisao`; identificação no histórico Git. Sem push ou início da DS-12.

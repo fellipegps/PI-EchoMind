@@ -1,0 +1,17 @@
+{
+  "baseline": "0764295f618dfb899e9aad5ed5f20850bf47d176",
+  "logicIdentical": true,
+  "logicSha256": "46d53b0ad77f41d9dd0dc362f1e803816fc4fbcc952340deddde13666425acf6",
+  "unchanged": {
+    "echomind-front/lib/api.ts": true,
+    "echomind-front/lib/supabase.ts": true,
+    "echomind-front/app/globals.css": true,
+    "echomind-front/package.json": true,
+    "echomind-front/pnpm-lock.yaml": true,
+    "echomind-front/components/ui/dialog.tsx": true,
+    "echomind-front/components/ui/alert-dialog.tsx": true,
+    "echomind-front/app/(admin)/base-de-conhecimento/components/faq-tab.tsx": true,
+    "echomind-front/app/(admin)/base-de-conhecimento/components/document-tab.tsx": true
+  },
+  "backendDiff": []
+}

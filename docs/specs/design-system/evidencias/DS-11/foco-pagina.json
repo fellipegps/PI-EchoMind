@@ -1,0 +1,914 @@
+[
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 410.078125,
+      "right": 513.15625,
+      "top": 176,
+      "width": 103.078125,
+      "x": 410.078125,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 521.15625,
+      "right": 640.375,
+      "top": 176,
+      "width": 119.21875,
+      "x": 521.15625,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 316,
+      "height": 44,
+      "left": 280,
+      "right": 856,
+      "top": 272,
+      "width": 576,
+      "x": 280,
+      "y": 272
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 663,
+      "height": 44,
+      "left": 305,
+      "right": 531.609375,
+      "top": 619,
+      "width": 226.609375,
+      "x": 305,
+      "y": 619
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 433,
+      "height": 44,
+      "left": 1204.984375,
+      "right": 1324,
+      "top": 389,
+      "width": 119.015625,
+      "x": 1204.984375,
+      "y": 389
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 433,
+      "height": 44,
+      "left": 1332,
+      "right": 1376,
+      "top": 389,
+      "width": 44,
+      "x": 1332,
+      "y": 389
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "light",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 410.078125,
+      "right": 513.15625,
+      "top": 176,
+      "width": 103.078125,
+      "x": 410.078125,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 521.15625,
+      "right": 640.375,
+      "top": 176,
+      "width": 119.21875,
+      "x": 521.15625,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 316,
+      "height": 44,
+      "left": 280,
+      "right": 856,
+      "top": 272,
+      "width": 576,
+      "x": 280,
+      "y": 272
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 663,
+      "height": 44,
+      "left": 305,
+      "right": 531.609375,
+      "top": 619,
+      "width": 226.609375,
+      "x": 305,
+      "y": 619
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 731,
+      "height": 44,
+      "left": 305,
+      "right": 424.015625,
+      "top": 687,
+      "width": 119.015625,
+      "x": 305,
+      "y": 687
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 731,
+      "height": 44,
+      "left": 432.015625,
+      "right": 476.015625,
+      "top": 687,
+      "width": 44,
+      "x": 432.015625,
+      "y": 687
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "light",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 244,
+      "height": 44,
+      "left": 410.078125,
+      "right": 513.15625,
+      "top": 200,
+      "width": 103.078125,
+      "x": 410.078125,
+      "y": 200
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 244,
+      "height": 44,
+      "left": 521.15625,
+      "right": 640.375,
+      "top": 200,
+      "width": 119.21875,
+      "x": 521.15625,
+      "y": 200
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 340,
+      "height": 44,
+      "left": 280,
+      "right": 729,
+      "top": 296,
+      "width": 449,
+      "x": 280,
+      "y": 296
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 799,
+      "height": 44,
+      "left": 305,
+      "right": 531.609375,
+      "top": 755,
+      "width": 226.609375,
+      "x": 305,
+      "y": 755
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 867,
+      "height": 44,
+      "left": 305,
+      "right": 424.015625,
+      "top": 823,
+      "width": 119.015625,
+      "x": 305,
+      "y": 823
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 867,
+      "height": 44,
+      "left": 432.015625,
+      "right": 476.015625,
+      "top": 823,
+      "width": 44,
+      "x": 432.015625,
+      "y": 823
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "light",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 288,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 244,
+      "width": 343,
+      "x": 16,
+      "y": 244
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 340,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 296,
+      "width": 343,
+      "x": 16,
+      "y": 296
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 436,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 392,
+      "width": 343,
+      "x": 16,
+      "y": 392
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 483,
+      "height": 44,
+      "left": 33,
+      "right": 259.609375,
+      "top": 439,
+      "width": 226.609375,
+      "x": 33,
+      "y": 439
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 551,
+      "height": 44,
+      "left": 33,
+      "right": 152.015625,
+      "top": 507,
+      "width": 119.015625,
+      "x": 33,
+      "y": 507
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 551,
+      "height": 44,
+      "left": 160.015625,
+      "right": 204.015625,
+      "top": 507,
+      "width": 44,
+      "x": 160.015625,
+      "y": 507
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 410.078125,
+      "right": 513.15625,
+      "top": 176,
+      "width": 103.078125,
+      "x": 410.078125,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 521.15625,
+      "right": 640.375,
+      "top": 176,
+      "width": 119.21875,
+      "x": 521.15625,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 316,
+      "height": 44,
+      "left": 280,
+      "right": 856,
+      "top": 272,
+      "width": 576,
+      "x": 280,
+      "y": 272
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 663,
+      "height": 44,
+      "left": 305,
+      "right": 531.609375,
+      "top": 619,
+      "width": 226.609375,
+      "x": 305,
+      "y": 619
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 433,
+      "height": 44,
+      "left": 1204.984375,
+      "right": 1324,
+      "top": 389,
+      "width": 119.015625,
+      "x": 1204.984375,
+      "y": 389
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 433,
+      "height": 44,
+      "left": 1332,
+      "right": 1376,
+      "top": 389,
+      "width": 44,
+      "x": 1332,
+      "y": 389
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "dark",
+    "width": 1440
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 410.078125,
+      "right": 513.15625,
+      "top": 176,
+      "width": 103.078125,
+      "x": 410.078125,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 220,
+      "height": 44,
+      "left": 521.15625,
+      "right": 640.375,
+      "top": 176,
+      "width": 119.21875,
+      "x": 521.15625,
+      "y": 176
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 316,
+      "height": 44,
+      "left": 280,
+      "right": 856,
+      "top": 272,
+      "width": 576,
+      "x": 280,
+      "y": 272
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 663,
+      "height": 44,
+      "left": 305,
+      "right": 531.609375,
+      "top": 619,
+      "width": 226.609375,
+      "x": 305,
+      "y": 619
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 731,
+      "height": 44,
+      "left": 305,
+      "right": 424.015625,
+      "top": 687,
+      "width": 119.015625,
+      "x": 305,
+      "y": 687
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 731,
+      "height": 44,
+      "left": 432.015625,
+      "right": 476.015625,
+      "top": 687,
+      "width": 44,
+      "x": 432.015625,
+      "y": 687
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "dark",
+    "width": 1024
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 244,
+      "height": 44,
+      "left": 410.078125,
+      "right": 513.15625,
+      "top": 200,
+      "width": 103.078125,
+      "x": 410.078125,
+      "y": 200
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 244,
+      "height": 44,
+      "left": 521.15625,
+      "right": 640.375,
+      "top": 200,
+      "width": 119.21875,
+      "x": 521.15625,
+      "y": 200
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 340,
+      "height": 44,
+      "left": 280,
+      "right": 729,
+      "top": 296,
+      "width": 449,
+      "x": 280,
+      "y": 296
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 799,
+      "height": 44,
+      "left": 305,
+      "right": 531.609375,
+      "top": 755,
+      "width": 226.609375,
+      "x": 305,
+      "y": 755
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 867,
+      "height": 44,
+      "left": 305,
+      "right": 424.015625,
+      "top": 823,
+      "width": 119.015625,
+      "x": 305,
+      "y": 823
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 867,
+      "height": 44,
+      "left": 432.015625,
+      "right": 476.015625,
+      "top": 823,
+      "width": 44,
+      "x": 432.015625,
+      "y": 823
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "dark",
+    "width": 768
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 288,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 244,
+      "width": 343,
+      "x": 16,
+      "y": 244
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Revisar (6)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 340,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 296,
+      "width": 343,
+      "x": 16,
+      "y": 296
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Ignoradas (2)",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 436,
+      "height": 44,
+      "left": 16,
+      "right": 359,
+      "top": 392,
+      "width": 343,
+      "x": 16,
+      "y": 392
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 483,
+      "height": 44,
+      "left": 33,
+      "right": 259.609375,
+      "top": 439,
+      "width": 226.609375,
+      "x": 33,
+      "y": 439
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Ver 2 variações detectadas",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": null,
+    "rect": {
+      "bottom": 551,
+      "height": 44,
+      "left": 33,
+      "right": 152.015625,
+      "top": 507,
+      "width": 119.015625,
+      "x": 33,
+      "y": 507
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Responder",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 900,
+    "label": "Ignorar pergunta",
+    "rect": {
+      "bottom": 551,
+      "height": 44,
+      "left": 160.015625,
+      "right": 204.015625,
+      "top": 507,
+      "width": 44,
+      "x": 160.015625,
+      "y": 507
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "",
+    "theme": "dark",
+    "width": 390
+  }
+]

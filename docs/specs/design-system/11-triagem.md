@@ -2,7 +2,7 @@
 
 **Versão:** 1.0.
 
-**Status:** Proposta — aguardando aprovação. Nenhuma implementação autorizada por este arquivo.
+**Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementada e verificada no escopo local disponível, com limites registrados. Resultado aceito pelo usuário em 12/10/2026.
 **Fase original:** Prompt 11; etapa 8C do plano.
 **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`) · Medium (`medium`).
 **Commit sugerido, somente após revisão e autorização:** `refactor(triage): padroniza perguntas nao respondidas e revisao`.
@@ -66,12 +66,12 @@ Falha de carga atualmente usa toast e não mantém estado persistente distinto d
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação, dependências e baseline de rotas/ações.
-- [ ] Aplicar cabeçalho, filtros, busca e composição dos cards ao design system.
-- [ ] Padronizar detalhes, expansão e diálogos mantendo condições de disponibilidade por status.
-- [ ] Revisar feedback, nomes acessíveis, foco e layout com textos longos.
-- [ ] Verificar transições e conversão usando mocks/dados de teste, sem mutar registros reais.
-- [ ] Executar verificações e registrar evidências/limitações no STATUS.
+- [x] Confirmar aprovação, dependências e baseline de rotas/ações.
+- [x] Aplicar cabeçalho, filtros, busca e composição dos cards ao design system.
+- [x] Padronizar detalhes, expansão e diálogos mantendo condições de disponibilidade por status.
+- [x] Revisar feedback, nomes acessíveis, foco e layout com textos longos.
+- [x] Verificar transições e conversão usando mocks/dados de teste, sem mutar registros reais.
+- [x] Executar verificações e registrar evidências/limitações no STATUS.
 
 ## Verificação e evidências esperadas
 
@@ -86,4 +86,6 @@ Falha de carga atualmente usa toast e não mantém estado persistente distinto d
 
 Implementação/verificação exige critérios evidenciados e efeitos de triagem preservados; aprovação visual do usuário é registrada separadamente.
 Mudanças materiais de escopo/spec exigem aprovação antes da implementação dependente.
-Não avançar, criar commit ou publicar automaticamente. Estado inicial: **Proposta — aguardando aprovação**.
+Não avançar, criar commit ou publicar automaticamente. Estado atual: **implementada; verificada no escopo local disponível; resultado aceito pelo usuário em 12/10/2026**.
+
+Autorização explícita recebida para Fase: 11 em 12/10/2026: “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Dependências aceitas conferidas antes da execução. [Evidências DS-11](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-11.md>) registram os sete critérios, testes, imagens, preservações e limites. Sem nova versão de requisitos/escopo. Após a apresentação da entrega e limites, o usuário solicitou “commite as alterações” em 12/10/2026, registrando o aceite e autorizando somente o commit local. Identificação no histórico Git; sem push ou avanço de fase.

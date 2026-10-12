@@ -39,6 +39,7 @@ import {
   Pencil,
   Check,
   RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
@@ -169,305 +170,143 @@ export default function UnansweredQuestions() {
 
   if (loading) {
     return (
-      <PageContainer variant="wide">
-        <Skeleton className="h-10 w-80" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
+      <PageContainer variant="standard">
+        <PageHeader title="Perguntas Não Respondidas" description="Analise o que o EchoMind ainda não sabe e transforme em conhecimento oficial." />
+        <div role="status" aria-label="Carregando perguntas" className="space-y-4">
+          <span className="sr-only">Carregando perguntas...</span>
+          <Skeleton className="h-11 w-full max-w-md" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
       </PageContainer>
     );
   }
 
   return (
-    <PageContainer variant="wide">
+    <PageContainer variant="standard">
       <PageHeader title="Perguntas Não Respondidas" description="Analise o que o EchoMind ainda não sabe e transforme em conhecimento oficial." />
 
-      <div className="flex gap-2" aria-label="Filtrar perguntas">
-        <Button
-          variant={selectedStatus === "pending" ? "default" : "outline"}
-          onClick={() => setSelectedStatus("pending")}
-          aria-pressed={selectedStatus === "pending"}
-        >
-          Pendentes ({questions.filter((q) => q.triage_status === "pending").length})
-        </Button>
-        <Button
-          variant={selectedStatus === "review" ? "default" : "outline"}
-          onClick={() => setSelectedStatus("review")}
-          aria-pressed={selectedStatus === "review"}
-        >
-          Revisar ({questions.filter((q) => q.triage_status === "review").length})
-        </Button>
-        <Button
-          variant={selectedStatus === "ignored" ? "default" : "outline"}
-          onClick={() => setSelectedStatus("ignored")}
-          aria-pressed={selectedStatus === "ignored"}
-        >
-          Ignoradas ({questions.filter((q) => q.triage_status === "ignored").length})
-        </Button>
-      </div>
+      <section aria-label="Triagem de perguntas" className="min-w-0 space-y-6">
+        <div role="group" className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap" aria-label="Filtrar perguntas">
+          <Button variant={selectedStatus === "pending" ? "default" : "outline"} onClick={() => setSelectedStatus("pending")} aria-pressed={selectedStatus === "pending"}>
+            Pendentes ({questions.filter((q) => q.triage_status === "pending").length})
+          </Button>
+          <Button variant={selectedStatus === "review" ? "default" : "outline"} onClick={() => setSelectedStatus("review")} aria-pressed={selectedStatus === "review"}>
+            Revisar ({questions.filter((q) => q.triage_status === "review").length})
+          </Button>
+          <Button variant={selectedStatus === "ignored" ? "default" : "outline"} onClick={() => setSelectedStatus("ignored")} aria-pressed={selectedStatus === "ignored"}>
+            Ignoradas ({questions.filter((q) => q.triage_status === "ignored").length})
+          </Button>
+        </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Pesquisar perguntas..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 bg-card border-border"
-        />
-      </div>
+        <div className="max-w-xl space-y-2">
+          <Label htmlFor="triage-search">Buscar por pergunta ou variação</Label>
+          <div className="relative">
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input id="triage-search" placeholder="Pesquisar perguntas..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+          </div>
+        </div>
 
-      <div className="grid gap-4">
-        {filtered.map((q) => (
-          <Card
-            key={q.id}
-            className="border-border bg-card hover:shadow-sm transition-shadow"
-          >
-            <CardContent className="px-4 py-3">
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                {/* ── Conteúdo da pergunta ── */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <p className="text-lg font-semibold text-foreground">
-                      {q.canonical_question}
-                    </p>
-                    <Badge
-                      variant="secondary"
-                      className="bg-primary/10 text-primary border-none"
-                    >
-                      {q.count}{" "}
-                      {q.count === 1 ? "ocorrência" : "ocorrências"}
-                    </Badge>
-                  </div>
+        <div className="grid min-w-0 gap-4">
+          {filtered.map((q) => (
+            <article key={q.id} aria-labelledby={`triage-question-${q.id}`} className="min-w-0">
+              <Card className="min-w-0">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex min-w-0 flex-col justify-between gap-6 xl:flex-row xl:items-start">
+                    <div className="min-w-0 flex-1 space-y-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="secondary">{q.count} {q.count === 1 ? "ocorrência" : "ocorrências"}</Badge>
+                        <Badge variant={q.triage_status === "review" ? "warning" : q.triage_status === "ignored" ? "secondary" : "outline"}>
+                          {q.triage_status === "pending" ? "Pendente" : q.triage_status === "review" ? "Em revisão" : "Ignorada"}
+                        </Badge>
+                      </div>
+                      <h2 id={`triage-question-${q.id}`} className="text-lg leading-7 font-semibold [overflow-wrap:anywhere]">{q.canonical_question}</h2>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                        <span>Primeira vez: {formatDate(q.first_asked)}</span>
+                        <span>Última vez: {formatDate(q.last_asked)}</span>
+                      </div>
+                      {q.triage_status === "review" && <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">Revisão necessária: {REVIEW_REASON_LABELS[q.triage_reason ?? ""] ?? "avaliação manual"}.</p>}
+                      {q.triage_status === "ignored" && <p className="text-sm text-muted-foreground">{q.triage_reason === "ignored_by_admin" ? "Ignorada pelo administrador." : "Filtrada como mensagem sem pergunta aproveitável."}</p>}
 
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                    <span>Primeira vez: {formatDate(q.first_asked)}</span>
-                    <span>•</span>
-                    <span>Última vez: {formatDate(q.last_asked)}</span>
-                  </div>
-                  {q.triage_status === "review" && (
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Revisão necessária: {REVIEW_REASON_LABELS[q.triage_reason ?? ""] ?? "avaliação manual"}.
-                    </p>
-                  )}
-                  {q.triage_status === "ignored" && (
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {q.triage_reason === "ignored_by_admin"
-                        ? "Ignorada pelo administrador."
-                        : "Filtrada como mensagem sem pergunta aproveitável."}
-                    </p>
-                  )}
-
-                  {q.similar_questions.length > 0 && (
-                    <div className="mt-4">
-                      <button
-                        onClick={() =>
-                          setExpanded(expanded === q.id ? null : q.id)
-                        }
-                        className="text-sm text-primary flex items-center gap-1 font-medium hover:opacity-80"
-                      >
-                        {expanded === q.id ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                        Ver {q.similar_questions.length} variações detectadas
-                      </button>
-
-                      {expanded === q.id && (
-                        <div className="mt-3 space-y-2 pl-4 border-l-2 border-primary/20 bg-muted/30 p-3 rounded-r-lg">
-                          {q.similar_questions.map((sq, i) => (
-                            <p
-                              key={i}
-                              className="text-sm text-muted-foreground italic"
-                            >
-                              &quot;{sq}&quot;
-                            </p>
-                          ))}
+                      {q.similar_questions.length > 0 && (
+                        <div className="space-y-3">
+                          <Button type="button" variant="ghost" aria-expanded={expanded === q.id} aria-controls={`triage-variants-${q.id}`} aria-describedby={`triage-question-${q.id}`} onClick={() => setExpanded(expanded === q.id ? null : q.id)} className="h-auto min-h-11 max-w-full justify-start px-3 py-2 text-left whitespace-normal text-primary">
+                            {expanded === q.id ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
+                            Ver {q.similar_questions.length} variações detectadas
+                          </Button>
+                          {expanded === q.id && (
+                            <ul id={`triage-variants-${q.id}`} aria-label="Variações detectadas" className="space-y-3 rounded-lg border border-border bg-muted p-4 text-sm text-muted-foreground">
+                              {q.similar_questions.map((sq, i) => <li key={i} className="[overflow-wrap:anywhere]">&quot;{sq}&quot;</li>)}
+                            </ul>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
 
-                {/* ── Ações ── */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {q.triage_status === "ignored" && (
-                    <Button variant="outline" onClick={() => restoreQuestion(q.id)}>
-                      <RotateCcw className="h-4 w-4" /> Restaurar
-                    </Button>
-                  )}
-                  {q.triage_status === "review" && (
-                    <Button variant="outline" onClick={() => approveQuestion(q.id)}>
-                      <Check className="h-4 w-4" /> Enviar para pendentes
-                    </Button>
-                  )}
-                  {/* Botão Criar FAQ (Dialog direto, sem abas) */}
-                  {q.triage_status === "pending" && <Dialog
-                    onOpenChange={(open) => {
-                      if (open) {
-                        setEditedQuestion(q.canonical_question);
-                      } else {
-                        setAnswer("");
-                        setEditedQuestion("");
-                      }
-                    }}
-                  >
-                    <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <MessageSquarePlus className="h-4 w-4" />
-                        Responder
-                      </Button>
-                    </DialogTrigger>
-
-                    <DialogContent className="sm:max-w-xl">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl">
-                          Criar FAQ Oficial
-                        </DialogTitle>
-                        <DialogDescription className="pt-2">
-                          Revise a pergunta e escreva a resposta para criar
-                          uma <strong>FAQ oficial</strong> visível no painel
-                          de Base de Conhecimento.
-                        </DialogDescription>
-                      </DialogHeader>
-
-                      {/* Campo editável da pergunta */}
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor={`question-${q.id}`}
-                          className="text-sm font-semibold flex items-center gap-1"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                          Pergunta (editável)
-                        </Label>
-                        <Input
-                          id={`question-${q.id}`}
-                          value={editedQuestion}
-                          onChange={(e) => setEditedQuestion(e.target.value)}
-                          placeholder="Pergunta do usuário..."
-                          className="bg-muted/40"
-                        />
-                        {editedQuestion !== q.canonical_question && (
-                          <p className="text-xs text-muted-foreground">
-                            Original:{" "}
-                            <span className="italic">
-                              &quot;{q.canonical_question}&quot;
-                            </span>
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Campo de resposta */}
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor={`answer-${q.id}`}
-                          className="text-sm font-semibold"
-                        >
-                          Resposta
-                        </Label>
-                        <Textarea
-                          id={`answer-${q.id}`}
-                          placeholder="Digite aqui a resposta que a IA deve fornecer..."
-                          value={answer}
-                          onChange={(e) => setAnswer(e.target.value)}
-                          rows={5}
-                          className="resize-none"
-                        />
-                      </div>
-
-                      <p className="text-sm text-muted-foreground">
-                        A FAQ será indexada no RAG e ficará visível no
-                        painel de{" "}
-                        <span className="font-medium text-foreground">
-                          Base de Conhecimento
-                        </span>
-                        . Ideal para respostas que a instituição quer expor
-                        publicamente.
-                      </p>
-
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setAnswer("");
-                            setEditedQuestion(q.canonical_question);
-                          }}
-                        >
-                          Limpar
-                        </Button>
-                        <Button
-                          onClick={() => convertToFaq(q.id)}
-                          disabled={converting === q.id}
-                          className="gap-2"
-                        >
-                          <BookOpen className="h-4 w-4" />
-                          {converting === q.id ? "Salvando…" : "Salvar no FAQ"}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>}
-
-                  {/* Ignorar com confirmação */}
-                  {q.triage_status !== "ignored" && <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        aria-label="Ignorar pergunta"
-                        disabled={deleting === q.id}
-                      >
-                        <Ban className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Ignorar pergunta?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          A pergunta{" "}
-                          <span className="font-semibold text-foreground">
-                            &quot;{q.canonical_question}&quot;
-                          </span>{" "}
-                          deixará de aparecer nesta lista. Repetições iguais e
-                          as variações já identificadas também serão ignoradas.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => ignoreQuestion(q.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
-                        >
-                          Ignorar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-
-        {filtered.length === 0 && (
-          <Card className="border-dashed border-2 bg-transparent">
-            <CardContent className="py-16 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <HelpCircle className="h-10 w-10 text-muted-foreground/50" />
-                <p className="text-muted-foreground text-lg">
-                  {search
-                    ? "Nenhum resultado para esta busca."
-                    : selectedStatus === "pending"
-                      ? "Nenhuma pergunta pendente."
-                      : selectedStatus === "review"
-                        ? "Nenhuma pergunta para revisar."
-                        : "Nenhuma pergunta ignorada."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                    <div className="flex min-w-0 flex-wrap items-center gap-2 xl:max-w-64 xl:justify-end">
+                      {q.triage_status === "ignored" && <Button variant="outline" aria-describedby={`triage-question-${q.id}`} onClick={() => restoreQuestion(q.id)}><RotateCcw aria-hidden="true" />Restaurar</Button>}
+                      {q.triage_status === "review" && <Button variant="outline" aria-describedby={`triage-question-${q.id}`} onClick={() => approveQuestion(q.id)}><Check aria-hidden="true" />Enviar para pendentes</Button>}
+                      {q.triage_status === "pending" && (
+                        <Dialog onOpenChange={(open) => { if (open) { setEditedQuestion(q.canonical_question); } else { setAnswer(""); setEditedQuestion(""); } }}>
+                          <DialogTrigger asChild><Button aria-describedby={`triage-question-${q.id}`}><MessageSquarePlus aria-hidden="true" />Responder</Button></DialogTrigger>
+                          <DialogContent className="max-h-[calc(100dvh-2rem)] min-w-0 overflow-y-auto sm:max-w-xl">
+                            <DialogHeader className="pr-8 text-left">
+                              <DialogTitle className="text-xl leading-7">Criar FAQ Oficial</DialogTitle>
+                              <DialogDescription>Revise a pergunta e escreva a resposta para criar uma <strong>FAQ oficial</strong> visível no painel de Base de Conhecimento.</DialogDescription>
+                            </DialogHeader>
+                            <div className="min-w-0 space-y-2">
+                              <Label htmlFor={`question-${q.id}`}><Pencil aria-hidden="true" className="size-4" />Pergunta (editável)</Label>
+                              <Input id={`question-${q.id}`} value={editedQuestion} onChange={(e) => setEditedQuestion(e.target.value)} placeholder="Pergunta do usuário..." />
+                              {editedQuestion !== q.canonical_question && <p tabIndex={0} aria-label="Pergunta original" className="max-h-[20dvh] overflow-y-auto rounded-sm text-xs text-muted-foreground [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">Original: &quot;{q.canonical_question}&quot;</p>}
+                            </div>
+                            <div className="min-w-0 space-y-2">
+                              <Label htmlFor={`answer-${q.id}`}>Resposta</Label>
+                              <Textarea id={`answer-${q.id}`} placeholder="Digite aqui a resposta que a IA deve fornecer..." value={answer} onChange={(e) => setAnswer(e.target.value)} rows={5} className="max-h-[25dvh] min-h-24 resize-none overflow-y-auto [field-sizing:fixed]" />
+                            </div>
+                            <p className="text-sm text-muted-foreground">A FAQ será indexada no RAG e ficará visível no painel de <span className="font-medium text-foreground">Base de Conhecimento</span>. Ideal para respostas que a instituição quer expor publicamente.</p>
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => { setAnswer(""); setEditedQuestion(q.canonical_question); }}>Limpar</Button>
+                              <Button onClick={() => convertToFaq(q.id)} disabled={converting === q.id} aria-busy={converting === q.id}>
+                                {converting === q.id ? <Loader2 aria-hidden="true" className="animate-spin motion-reduce:animate-none" /> : <BookOpen aria-hidden="true" />}
+                                {converting === q.id ? "Salvando…" : "Salvar no FAQ"}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                      {q.triage_status !== "ignored" && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild><Button variant="outline" size="icon" aria-label="Ignorar pergunta" aria-describedby={`triage-question-${q.id}`} disabled={deleting === q.id}><Ban aria-hidden="true" /></Button></AlertDialogTrigger>
+                          <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+                            <AlertDialogHeader className="text-left">
+                              <AlertDialogTitle>Ignorar pergunta?</AlertDialogTitle>
+                              <AlertDialogDescription tabIndex={0} aria-label="Efeito de ignorar" className="max-h-[40dvh] overflow-y-auto rounded-sm [overflow-wrap:anywhere] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+                                A pergunta <span className="font-semibold text-foreground">&quot;{q.canonical_question}&quot;</span> deixará de aparecer nesta lista. Repetições iguais e as variações já identificadas também serão ignoradas.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="gap-2 sm:space-x-0">
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => ignoreQuestion(q.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive hover:shadow-sm">Ignorar</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </article>
+          ))}
+          {filtered.length === 0 && (
+            <Card className="min-w-0 border-dashed">
+              <CardContent className="flex flex-col items-center gap-3 px-4 py-12 text-center" role="status">
+                <HelpCircle aria-hidden="true" className="size-10 text-muted-foreground" />
+                <p className="text-base text-muted-foreground [overflow-wrap:anywhere]">{search ? "Nenhum resultado para esta busca." : selectedStatus === "pending" ? "Nenhuma pergunta pendente." : selectedStatus === "review" ? "Nenhuma pergunta para revisar." : "Nenhuma pergunta ignorada."}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </section>
     </PageContainer>
   );
 }

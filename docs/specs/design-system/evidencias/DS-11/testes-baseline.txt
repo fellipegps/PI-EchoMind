@@ -1,0 +1,13 @@
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/nao-respondidas/page.test.tsx"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ app/(admin)/nao-respondidas/page.test.tsx (2 tests) 586ms
+   ✓ Perguntas Não Respondidas > separa revisão das pendentes e permite aprovação humana  318ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  17:51:03
+   Duration  22.46s (transform 289ms, setup 5.22s, collect 4.25s, tests 586ms, environment 9.39s, prepare 692ms)
