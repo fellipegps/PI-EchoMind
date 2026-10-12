@@ -1,0 +1,32 @@
+{
+  "baseline": "99b35144cc9ad78aea6e9f93cafe5c4e6bad150f",
+  "managerBusinessLogicIdenticalIgnoringFocusOrigin": true,
+  "helpersIdentical": true,
+  "originalTestsPreserved": true,
+  "unchanged": {
+    "echomind-front/app/(admin)/eventos/use-events.ts": true,
+    "echomind-front/app/(admin)/eventos/types.ts": true,
+    "echomind-front/app/(admin)/eventos/constants.ts": true,
+    "echomind-front/lib/api.ts": true,
+    "echomind-front/lib/supabase.ts": true,
+    "echomind-front/app/globals.css": true,
+    "echomind-front/package.json": true,
+    "echomind-front/pnpm-lock.yaml": true,
+    "echomind-front/components/ui/calendar.tsx": true,
+    "echomind-front/components/ui/dialog.tsx": true,
+    "echomind-front/components/ui/select.tsx": true,
+    "echomind-front/app/(public)/components/public-events.tsx": true
+  },
+  "screenshots": 93,
+  "measurements": 93,
+  "documentOverflow": 0,
+  "dialogOverflow": 0,
+  "formFocusObservations": 48,
+  "pageFocusObservations": 48,
+  "focusOutsideViewport": 0,
+  "pageFocusBehindHeader": 0,
+  "rawErrorVisible": false,
+  "payloadFieldsPreserved": true,
+  "nativeZoom200Verified": false,
+  "normalConsole": []
+}

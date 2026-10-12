@@ -1,0 +1,914 @@
+[
+  {
+    "height": 480,
+    "label": "Período: 31/12/2026 – 02/01/2027",
+    "rect": {
+      "bottom": 291,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 247,
+      "width": 285,
+      "x": 45,
+      "y": 247
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " 31/12/2026 – 02/01/2027",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 203,
+      "width": 285,
+      "x": 45,
+      "y": 203
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Evento Social",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Curso institucional de referência: CursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtenso",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 203,
+      "width": 285,
+      "x": 45,
+      "y": 203
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " Criar curso",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 327,
+      "height": 192,
+      "left": 45,
+      "right": 330,
+      "top": 135,
+      "width": 285,
+      "x": 45,
+      "y": 135
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "text": "Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. ",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 203,
+      "width": 285,
+      "x": 45,
+      "y": 203
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 323,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 279,
+      "width": 285,
+      "x": 45,
+      "y": 279
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 387,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 343,
+      "width": 308,
+      "x": 41,
+      "y": 343
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Cancelar",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 439,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 395,
+      "width": 308,
+      "x": 41,
+      "y": 395
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Salvar",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 321,
+      "right": 365,
+      "top": 25,
+      "width": 44,
+      "x": 321,
+      "y": 25
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Close",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 167,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 123,
+      "width": 285,
+      "x": 45,
+      "y": 123
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "height": 512,
+    "label": "Período: 31/12/2026 – 02/01/2027",
+    "rect": {
+      "bottom": 271,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 227,
+      "width": 599,
+      "x": 53,
+      "y": 227
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " 31/12/2026 – 02/01/2027",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 387,
+      "height": 44,
+      "left": 53,
+      "right": 342.5,
+      "top": 343,
+      "width": 289.5,
+      "x": 53,
+      "y": 343
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Evento Social",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 53,
+      "right": 522.265625,
+      "top": 235,
+      "width": 469.265625,
+      "x": 53,
+      "y": 235
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Curso institucional de referência: CursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtenso",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 530.265625,
+      "right": 652,
+      "top": 235,
+      "width": 121.734375,
+      "x": 530.265625,
+      "y": 235
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " Criar curso",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 371,
+      "height": 44,
+      "left": 53,
+      "right": 342.5,
+      "top": 327,
+      "width": 289.5,
+      "x": 53,
+      "y": 327
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 411,
+      "height": 192,
+      "left": 53,
+      "right": 652,
+      "top": 219,
+      "width": 599,
+      "x": 53,
+      "y": 219
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "text": "Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. ",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 235,
+      "width": 599,
+      "x": 53,
+      "y": 235
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 411,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 367,
+      "width": 599,
+      "x": 53,
+      "y": 367
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 496.5625,
+      "right": 589.5,
+      "top": 427,
+      "width": 92.9375,
+      "x": 496.5625,
+      "y": 427
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Cancelar",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 597.5,
+      "right": 671,
+      "top": 427,
+      "width": 73.5,
+      "x": 597.5,
+      "y": 427
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Salvar",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 643,
+      "right": 687,
+      "top": 25,
+      "width": 44,
+      "x": 643,
+      "y": 25
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Close",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 147,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 103,
+      "width": 599,
+      "x": 53,
+      "y": 103
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "light",
+    "width": 720
+  },
+  {
+    "height": 480,
+    "label": "Período: 31/12/2026 – 02/01/2027",
+    "rect": {
+      "bottom": 291,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 247,
+      "width": 285,
+      "x": 45,
+      "y": 247
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " 31/12/2026 – 02/01/2027",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 203,
+      "width": 285,
+      "x": 45,
+      "y": 203
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Evento Social",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Curso institucional de referência: CursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtenso",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 203,
+      "width": 285,
+      "x": 45,
+      "y": 203
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " Criar curso",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 327,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 283,
+      "width": 285,
+      "x": 45,
+      "y": 283
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 327,
+      "height": 192,
+      "left": 45,
+      "right": 330,
+      "top": 135,
+      "width": 285,
+      "x": 45,
+      "y": 135
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "text": "Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. ",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 247,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 203,
+      "width": 285,
+      "x": 45,
+      "y": 203
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 323,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 279,
+      "width": 285,
+      "x": 45,
+      "y": 279
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 387,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 343,
+      "width": 308,
+      "x": 41,
+      "y": 343
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Cancelar",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 439,
+      "height": 44,
+      "left": 41,
+      "right": 349,
+      "top": 395,
+      "width": 308,
+      "x": 41,
+      "y": 395
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Salvar",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 321,
+      "right": 365,
+      "top": 25,
+      "width": 44,
+      "x": 321,
+      "y": 25
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Close",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 480,
+    "label": null,
+    "rect": {
+      "bottom": 167,
+      "height": 44,
+      "left": 45,
+      "right": 330,
+      "top": 123,
+      "width": 285,
+      "x": 45,
+      "y": 123
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "height": 512,
+    "label": "Período: 31/12/2026 – 02/01/2027",
+    "rect": {
+      "bottom": 271,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 227,
+      "width": 599,
+      "x": 53,
+      "y": 227
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " 31/12/2026 – 02/01/2027",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 387,
+      "height": 44,
+      "left": 53,
+      "right": 342.5,
+      "top": 343,
+      "width": 289.5,
+      "x": 53,
+      "y": 343
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Evento Social",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 53,
+      "right": 522.265625,
+      "top": 235,
+      "width": 469.265625,
+      "x": 53,
+      "y": 235
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Curso institucional de referência: CursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtensoCursoExtenso",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 530.265625,
+      "right": 652,
+      "top": 235,
+      "width": 121.734375,
+      "x": 530.265625,
+      "y": 235
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": " Criar curso",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 371,
+      "height": 44,
+      "left": 53,
+      "right": 342.5,
+      "top": 327,
+      "width": 289.5,
+      "x": 53,
+      "y": 327
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 411,
+      "height": 192,
+      "left": 53,
+      "right": 652,
+      "top": 219,
+      "width": 599,
+      "x": 53,
+      "y": 219
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "text": "Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. Descrição sintética extensa. ",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 279,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 235,
+      "width": 599,
+      "x": 53,
+      "y": 235
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 411,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 367,
+      "width": 599,
+      "x": 53,
+      "y": 367
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 496.5625,
+      "right": 589.5,
+      "top": 427,
+      "width": 92.9375,
+      "x": 496.5625,
+      "y": 427
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "text": "Cancelar",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 471,
+      "height": 44,
+      "left": 597.5,
+      "right": 671,
+      "top": 427,
+      "width": 73.5,
+      "x": 597.5,
+      "y": 427
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Salvar",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 69,
+      "height": 44,
+      "left": 643,
+      "right": 687,
+      "top": 25,
+      "width": 44,
+      "x": 643,
+      "y": 25
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "text": "Close",
+    "theme": "dark",
+    "width": 720
+  },
+  {
+    "height": 512,
+    "label": null,
+    "rect": {
+      "bottom": 147,
+      "height": 44,
+      "left": 53,
+      "right": 652,
+      "top": 103,
+      "width": 599,
+      "x": 53,
+      "y": 103
+    },
+    "ring": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "INPUT",
+    "text": "",
+    "theme": "dark",
+    "width": 720
+  }
+]

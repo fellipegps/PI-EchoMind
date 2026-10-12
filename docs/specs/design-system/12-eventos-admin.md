@@ -4,7 +4,7 @@
 
 ## Identificação e estado
 
-- **Status:** Proposta / aguardando aprovação. Não aprovada nem implementada.
+- **Status:** v1.0 aprovada pelo usuário em 12/10/2026; implementação concluída; verificação parcial (AC08: zoom nativo de 200% pendente). Resultado aceito em 12/10/2026 pelo pedido “faça commite das alterações”, com a pendência documentada.
 - **Origem:** fase 12 do roteiro anterior; etapa 9A do plano de refatoração.
 - **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`), esforço Medium (`medium`).
 - **Commit sugerido, após revisão e autorização:** `refactor(events): padroniza gestao administrativa de eventos`.
@@ -83,13 +83,15 @@ O conjunto final depende da implementação; caminhos de contrato são referênc
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação, dependências e referência visual acessível; registrar lacunas.
-- [ ] Ajustar página/cabeçalho e barra de pesquisa ao padrão administrativo.
-- [ ] Padronizar listagem, badges, ações e feedback sem reescrever o hook de negócio.
-- [ ] Reorganizar formulário, calendário, curso e prévia com rolagem e foco adequados.
-- [ ] Conferir payloads, datas, URLs, exclusão e falhas com fixtures.
-- [ ] Adaptar testes de comportamento apenas quando a mudança acessível exigir; executar verificações.
-- [ ] Registrar evidências, desvios, limitações e resultado no STATUS; entregar para revisão.
+- [x] Confirmar aprovação, dependências e referência visual acessível; registrar lacunas.
+- [x] Ajustar página/cabeçalho e barra de pesquisa ao padrão administrativo.
+- [x] Padronizar listagem, badges, ações e feedback sem reescrever o hook de negócio.
+- [x] Reorganizar formulário, calendário, curso e prévia com rolagem e foco adequados.
+- [x] Conferir payloads, datas, URLs, exclusão e falhas com fixtures.
+- [x] Adaptar testes de comportamento apenas quando a mudança acessível exigir; executar verificações.
+- [x] Registrar evidências, desvios, limitações e resultado no STATUS; entregar para revisão.
+
+- [ ] Validar zoom nativo de 200% de AC08 em navegador/dispositivo com controle disponível; não inferir esse resultado de viewport reduzido.
 
 ## Verificações e evidências
 
@@ -104,3 +106,5 @@ O conjunto final depende da implementação; caminhos de contrato são referênc
 Concluída tecnicamente quando os requisitos estiverem verificados ou as limitações estiverem documentadas, sem regressão funcional conhecida. Implementação, verificação e aprovação visual são estados separados no STATUS. A fase permanece aguardando revisão até aceite explícito.
 
 A autorização desta spec permite somente DS-12. Mudança material de escopo ou decisão visual deve ser revisada antes da implementação dependente. Não avançar, criar commit ou fazer push automaticamente.
+
+Autorização explícita recebida para Fase: 12 em 12/10/2026: “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” Dependências e aceites conferidos antes da implementação. [Evidências DS-12](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-12.md>) registram os critérios, verificações e a pendência de zoom. Requisitos/escopo da v1.0 mantidos. Após a entrega, o usuário solicitou “faça commite das alterações”: aceite do resultado com a pendência documentada e autorização somente para commit local. Identificação no histórico Git; sem push ou avanço de fase.

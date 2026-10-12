@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -174,4 +175,105 @@ describe("EventsManager", () => {
     await waitFor(() => expect(mocks.create).toHaveBeenCalledOnce());
     expect(mocks.create.mock.calls[0][0]).toMatchObject({ course: "Medicina" });
   });
+  it("filtra os quatro campos sem capitalização e conserva ordenação por data e título", async () => {
+    mocks.list.mockResolvedValue([
+      { ...createdEvent, id: "late", title: "Zeta", event_date: "2099-09-01" },
+      { ...createdEvent, id: "beta", title: "Beta", event_type: "workshop", course: "Engenharia", location: "Laboratório" },
+      { ...createdEvent, id: "alpha", title: "Alpha", course: "Geral" },
+    ]);
+    render(<EventsManager />);
+    await screen.findByRole("article", { name: "Alpha" });
+    const titles = () => screen.queryAllByRole("article").map(item => within(item).getByRole("heading").textContent);
+    expect(titles()).toEqual(["Alpha", "Beta", "Zeta"]);
+    for (const term of ["BETA", "WORKSHOP", "ENGENHARIA", "LABORATÓRIO"]) {
+      fireEvent.change(screen.getByRole("textbox", { name: "Pesquisar eventos" }), { target: { value: term } });
+      expect(titles()).toEqual(["Beta"]);
+    }
+    fireEvent.change(screen.getByRole("textbox", { name: "Pesquisar eventos" }), { target: { value: "ausente" } });
+    expect(screen.getByRole("status")).toHaveTextContent("Nenhum evento encontrado.");
+    expect(mocks.list).toHaveBeenCalledOnce();
+  });
+
+  it("reabre edição com datas civis e todos os campos e chama update uma vez", async () => {
+    mocks.list.mockResolvedValue([createdEvent]); mocks.update.mockResolvedValue(createdEvent);
+    render(<EventsManager />);
+    await screen.findByRole("article", { name: createdEvent.title });
+    fireEvent.click(screen.getByRole("button", { name: `Editar ${createdEvent.title}` }));
+    expect(screen.getByLabelText("Título")).toHaveValue(createdEvent.title);
+    expect(screen.getByRole("button", { name: /Período: 15\/08\/2099 – 17\/08\/2099/ })).toBeInTheDocument();
+    expect(screen.getByLabelText("Tipo")).toHaveTextContent("Outro");
+    expect(screen.getByLabelText("Curso relacionado")).toHaveTextContent("Geral");
+    expect(screen.getByLabelText("Local")).toHaveValue(createdEvent.location);
+    expect(screen.getByLabelText("URL da imagem de capa")).toHaveValue(createdEvent.image_url);
+    expect(screen.getByLabelText("Link relacionado")).toHaveValue(createdEvent.link_url);
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledOnce());
+    expect(mocks.update).toHaveBeenCalledWith(createdEvent.id, expect.objectContaining({ event_date: "2099-08-15", event_end_date: "2099-08-17", description: null }));
+    expect(mocks.create).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("valida curso curto e conserva formulário em falha de criação de curso", async () => {
+    mocks.createCourse.mockRejectedValueOnce(new Error("Falha sintética do curso"));
+    render(<EventsManager />); await screen.findByText("Nenhum evento encontrado."); fillRequiredForm();
+    fireEvent.click(screen.getByRole("button", { name: "Criar curso" }));
+    fireEvent.change(screen.getByLabelText("Nome do novo curso"), { target: { value: " X " } });
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar" }));
+    expect(mocks.createCourse).not.toHaveBeenCalled();
+    expect(mocks.toastError).toHaveBeenCalledWith(expect.stringContaining("2 caracteres"));
+    fireEvent.change(screen.getByLabelText("Nome do novo curso"), { target: { value: "Medicina" } });
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar" }));
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("Falha sintética do curso"));
+    expect(screen.getByLabelText("Nome do novo curso")).toHaveValue("Medicina");
+    expect(screen.getByLabelText("Título")).toHaveValue("Semana Acadêmica");
+    expect(screen.getByLabelText("Curso relacionado")).toHaveTextContent("Geral");
+  });
+
+  it("cancelar exclusão não chama API; falha mantém item e sucesso remove após resposta", async () => {
+    mocks.list.mockResolvedValue([createdEvent]); mocks.remove.mockRejectedValueOnce(new Error("Falha sintética ao excluir"));
+    const user = userEvent.setup(); render(<EventsManager />);
+    const trigger = await screen.findByRole("button", { name: `Excluir ${createdEvent.title}` });
+    await user.click(trigger);
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(createdEvent.title);
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(mocks.remove).not.toHaveBeenCalled(); expect(trigger).toHaveFocus();
+    await user.click(trigger); await user.click(screen.getByRole("button", { name: "Excluir" }));
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("Falha sintética ao excluir"));
+    expect(screen.getByRole("article", { name: createdEvent.title })).toBeInTheDocument();
+    let finish!: () => void; mocks.remove.mockReturnValueOnce(new Promise<void>(resolve => { finish = resolve; }));
+    await user.click(trigger); await user.click(screen.getByRole("button", { name: "Excluir" }));
+    expect(screen.getByRole("article", { name: createdEvent.title })).toBeInTheDocument();
+    finish(); await waitFor(() => expect(screen.queryByRole("article")).not.toBeInTheDocument());
+  });
+
+  it("salvamento pendente bloqueia envio e falha preserva campos", async () => {
+    let fail!: (reason: Error) => void; mocks.create.mockReturnValueOnce(new Promise((_, reject) => { fail = reject; }));
+    render(<EventsManager />); await screen.findByText("Nenhum evento encontrado."); fillRequiredForm();
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    const busy = screen.getByRole("button", { name: "Salvando..." });
+    expect(busy).toBeDisabled(); expect(busy).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(busy); expect(mocks.create).toHaveBeenCalledOnce();
+    fail(new Error("Falha sintética ao salvar"));
+    await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith("Falha sintética ao salvar"));
+    expect(screen.getByRole("dialog", { name: "Novo evento" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Título")).toHaveValue("Semana Acadêmica");
+    expect(screen.getByLabelText("Local")).toHaveValue("Auditório Central");
+    expect(screen.getByRole("button", { name: "Salvar" })).toBeEnabled();
+  });
+
+  it("anuncia carga e preserva toast seguido de vazio na falha", async () => {
+    mocks.list.mockRejectedValueOnce(new Error("Falha sintética de carga"));
+    render(<EventsManager />);
+    expect(screen.getByRole("status", { name: "Carregando eventos" })).toBeInTheDocument();
+    expect(await screen.findByText("Nenhum evento encontrado.")).toBeInTheDocument();
+    expect(mocks.toastError).toHaveBeenCalledWith("Erro ao carregar eventos.");
+  });
+
+  it("Escape fecha formulário e retorna foco ao botão de origem sem salvar", async () => {
+    const user = userEvent.setup(); render(<EventsManager />); await screen.findByText("Nenhum evento encontrado.");
+    const trigger = screen.getByRole("button", { name: "Novo evento" }); await user.click(trigger);
+    await user.type(screen.getByLabelText("Título"), "Rascunho sintético"); await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument(); expect(trigger).toHaveFocus(); expect(mocks.create).not.toHaveBeenCalled();
+  });
+
 });

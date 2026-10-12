@@ -1,0 +1,19 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/eventos/events-manager.test.tsx" "app/(public)/components/public-events.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 45ms
+ ✓ app/(public)/components/public-events.test.tsx (17 tests) 556ms
+ ✓ app/(admin)/eventos/events-manager.test.tsx (12 tests) 3308ms
+   ✓ EventsManager > não exibe publicação e salva o período e as novas URLs em uma única chamada  481ms
+   ✓ EventsManager > cria um curso inexistente, seleciona e envia no evento  413ms
+   ✓ EventsManager > cancelar exclusão não chama API; falha mantém item e sucesso remove após resposta  385ms
+   ✓ EventsManager > Escape fecha formulário e retorna foco ao botão de origem sem salvar  731ms
+
+ Test Files  3 passed (3)
+      Tests  39 passed (39)
+   Start at  18:36:03
+   Duration  10.41s (transform 475ms, setup 1.59s, collect 5.36s, tests 3.91s, environment 3.45s, prepare 512ms)
