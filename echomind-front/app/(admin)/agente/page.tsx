@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Send, Bot, User, Loader2, Eraser, MessageSquareDashed } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 import { streamChat } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
@@ -114,16 +115,12 @@ export default function ChatbotTest() {
 
   return (
     <PageContainer>
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Testar Agente</h1>
-          <p className="text-muted-foreground mt-1">Valide as respostas da sua IA em tempo real</p>
-        </div>
+      <PageHeader title="Testar Agente" description="Valide as respostas da sua IA em tempo real" actions={
         <Button variant="outline" size="sm" onClick={clearChat} className="gap-2">
           <Eraser className="h-4 w-4" />
           Limpar
         </Button>
-      </div>
+      } />
 
       <Card className="border-border bg-card pb-0 pt-4 flex flex-col h-[600px] overflow-hidden">
         {/* shrink-0 garante que o header mantenha seu tamanho original */}

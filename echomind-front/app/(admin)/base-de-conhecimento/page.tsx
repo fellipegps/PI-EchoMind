@@ -4,17 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText } from "lucide-react";
 import { FaqTab } from "./components/faq-tab";
 import { DocumentTab } from "./components/document-tab";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 
 export default function KnowledgeBasePage() {
   return (
-    <PageContainer>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Base de Conhecimento</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie as FAQs e os documentos usados pelo chatbot.
-        </p>
-      </div>
+    <PageContainer variant="wide">
+      <PageHeader title="Base de Conhecimento" description="Gerencie as FAQs e os documentos usados pelo chatbot." />
 
       <Tabs defaultValue="faqs" className="w-full space-y-6">
         <TabsList className="bg-muted/50 p-1">

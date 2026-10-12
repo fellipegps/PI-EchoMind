@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Dashboard",
+    "url": "http://127.0.0.1:4100/dashboard",
+    "active": "Dashboard"
+  },
+  {
+    "name": "Base de Conhecimento",
+    "url": "http://127.0.0.1:4100/base-de-conhecimento",
+    "active": "Base de Conhecimento"
+  },
+  {
+    "name": "Mapa dos Campi",
+    "url": "http://127.0.0.1:4100/campi",
+    "active": "Mapa dos Campi"
+  },
+  {
+    "name": "Locais (mapa antigo)",
+    "url": "http://127.0.0.1:4100/locais",
+    "active": "Locais (mapa antigo)"
+  },
+  {
+    "name": "Eventos",
+    "url": "http://127.0.0.1:4100/eventos",
+    "active": "Eventos"
+  },
+  {
+    "name": "Não Respondidas",
+    "url": "http://127.0.0.1:4100/nao-respondidas",
+    "active": "Não Respondidas"
+  },
+  {
+    "name": "Agente (Chatbot)",
+    "url": "http://127.0.0.1:4100/agente",
+    "active": "Agente (Chatbot)"
+  },
+  {
+    "name": "Configurações",
+    "url": "http://127.0.0.1:4100/configuracoes",
+    "active": "Configurações"
+  }
+]

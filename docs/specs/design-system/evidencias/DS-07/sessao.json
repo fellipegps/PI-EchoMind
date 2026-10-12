@@ -1,0 +1,18 @@
+{
+  "initial": [
+    {
+      "scenario": "sessão ausente",
+      "url": "http://127.0.0.1:4100/login",
+      "protectedContent": 0
+    },
+    {
+      "scenario": "sessão rejeitada",
+      "url": "http://127.0.0.1:4100/login",
+      "protectedContent": 0
+    }
+  ],
+  "logout": {
+    "url": "http://127.0.0.1:4100/login",
+    "adminNavCount": 0
+  }
+}

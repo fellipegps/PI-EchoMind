@@ -1,0 +1,2962 @@
+[
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Dashboard",
+        "url": "/dashboard"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "light",
+    "title": "Dashboard de Insights",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Base de Conhecimento",
+        "url": "/base-de-conhecimento"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [
+      {
+        "client": 1134,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 429.5,
+          "height": 100.5,
+          "left": 281,
+          "right": 1415,
+          "top": 329,
+          "width": 1134,
+          "x": 281,
+          "y": 329
+        },
+        "scroll": 1134
+      }
+    ],
+    "theme": "light",
+    "title": "Base de Conhecimento",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Mapa dos Campi",
+        "url": "/campi"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1414,
+          "height": 1350,
+          "left": 256,
+          "right": 1425,
+          "top": 64,
+          "width": 1169,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1425,
+      "top": 0,
+      "width": 1169,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1425,
+    "tables": [],
+    "theme": "light",
+    "title": "Mapa dos campi",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Locais (mapa antigo)",
+        "url": "/locais"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "light",
+    "title": "Locais do Campus",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Eventos",
+        "url": "/eventos"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [
+      {
+        "client": 1134,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 404.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 1415,
+          "top": 289,
+          "width": 1134,
+          "x": 281,
+          "y": 289
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "light",
+    "title": "Eventos",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Não Respondidas",
+        "url": "/nao-respondidas"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "light",
+    "title": "Perguntas Não Respondidas",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Agente (Chatbot)",
+        "url": "/agente"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "light",
+    "title": "Testar Agente",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Configurações",
+        "url": "/configuracoes"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1332,
+          "height": 1268,
+          "left": 392.5,
+          "right": 1288.5,
+          "top": 64,
+          "width": 896,
+          "x": 392.5,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1425,
+      "top": 0,
+      "width": 1169,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1425,
+    "tables": [],
+    "theme": "light",
+    "title": "Configurações do Sistema",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Dashboard",
+        "url": "/dashboard"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "light",
+    "title": "Dashboard de Insights",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Base de Conhecimento",
+        "url": "/base-de-conhecimento"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [
+      {
+        "client": 718,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 444.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 999,
+          "top": 329,
+          "width": 718,
+          "x": 281,
+          "y": 329
+        },
+        "scroll": 744
+      }
+    ],
+    "theme": "light",
+    "title": "Base de Conhecimento",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Mapa dos Campi",
+        "url": "/campi"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1712,
+          "height": 1648,
+          "left": 256,
+          "right": 1009,
+          "top": 64,
+          "width": 753,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1009,
+      "top": 0,
+      "width": 753,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1009,
+    "tables": [],
+    "theme": "light",
+    "title": "Mapa dos campi",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Locais (mapa antigo)",
+        "url": "/locais"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "light",
+    "title": "Locais do Campus",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Eventos",
+        "url": "/eventos"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [
+      {
+        "client": 718,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 404.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 999,
+          "top": 289,
+          "width": 718,
+          "x": 281,
+          "y": 289
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "light",
+    "title": "Eventos",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Não Respondidas",
+        "url": "/nao-respondidas"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "light",
+    "title": "Perguntas Não Respondidas",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Agente (Chatbot)",
+        "url": "/agente"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "light",
+    "title": "Testar Agente",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Configurações",
+        "url": "/configuracoes"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1332,
+          "height": 1268,
+          "left": 256,
+          "right": 1009,
+          "top": 64,
+          "width": 753,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1009,
+      "top": 0,
+      "width": 753,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1009,
+    "tables": [],
+    "theme": "light",
+    "title": "Configurações do Sistema",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Dashboard",
+        "url": "/dashboard"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1482,
+          "height": 1418,
+          "left": 256,
+          "right": 753,
+          "top": 64,
+          "width": 497,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 753,
+      "top": 0,
+      "width": 497,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 753,
+    "tables": [],
+    "theme": "light",
+    "title": "Dashboard de Insights",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Base de Conhecimento",
+        "url": "/base-de-conhecimento"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [
+      {
+        "client": 462,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 444.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 743,
+          "top": 329,
+          "width": 462,
+          "x": 281,
+          "y": 329
+        },
+        "scroll": 744
+      }
+    ],
+    "theme": "light",
+    "title": "Base de Conhecimento",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Mapa dos Campi",
+        "url": "/campi"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 2340,
+          "height": 2276,
+          "left": 256,
+          "right": 753,
+          "top": 64,
+          "width": 497,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 753,
+      "top": 0,
+      "width": 497,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 753,
+    "tables": [],
+    "theme": "light",
+    "title": "Mapa dos campi",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Locais (mapa antigo)",
+        "url": "/locais"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [],
+    "theme": "light",
+    "title": "Locais do Campus",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Eventos",
+        "url": "/eventos"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [
+      {
+        "client": 462,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 404.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 743,
+          "top": 289,
+          "width": 462,
+          "x": 281,
+          "y": 289
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "light",
+    "title": "Eventos",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Não Respondidas",
+        "url": "/nao-respondidas"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [],
+    "theme": "light",
+    "title": "Perguntas Não Respondidas",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Agente (Chatbot)",
+        "url": "/agente"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [],
+    "theme": "light",
+    "title": "Testar Agente",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(232, 240, 254)",
+        "color": "rgb(11, 87, 208)",
+        "name": "Configurações",
+        "url": "/configuracoes"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1404,
+          "height": 1340,
+          "left": 256,
+          "right": 753,
+          "top": 64,
+          "width": 497,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 753,
+      "top": 0,
+      "width": 497,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 753,
+    "tables": [],
+    "theme": "light",
+    "title": "Configurações do Sistema",
+    "width": 768
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1762,
+          "height": 1698,
+          "left": 0,
+          "right": 375,
+          "top": 64,
+          "width": 375,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 375,
+      "top": 0,
+      "width": 375,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 375,
+    "tables": [],
+    "theme": "light",
+    "title": "Dashboard de Insights",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [
+      {
+        "client": 356,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 460.5,
+          "height": 115.5,
+          "left": 17,
+          "right": 373,
+          "top": 345,
+          "width": 356,
+          "x": 17,
+          "y": 345
+        },
+        "scroll": 444
+      }
+    ],
+    "theme": "light",
+    "title": "Base de Conhecimento",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 2108,
+          "height": 2044,
+          "left": 0,
+          "right": 375,
+          "top": 64,
+          "width": 375,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 375,
+      "top": 0,
+      "width": 375,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 375,
+    "tables": [],
+    "theme": "light",
+    "title": "Mapa dos campi",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [],
+    "theme": "light",
+    "title": "Locais do Campus",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [
+      {
+        "client": 356,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 476.5,
+          "height": 115.5,
+          "left": 17,
+          "right": 373,
+          "top": 361,
+          "width": 356,
+          "x": 17,
+          "y": 361
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "light",
+    "title": "Eventos",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [],
+    "theme": "light",
+    "title": "Perguntas Não Respondidas",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [],
+    "theme": "light",
+    "title": "Testar Agente",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1766,
+          "height": 1702,
+          "left": 0,
+          "right": 375,
+          "top": 64,
+          "width": 375,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 375,
+      "top": 0,
+      "width": 375,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 375,
+    "tables": [],
+    "theme": "light",
+    "title": "Configurações do Sistema",
+    "width": 390
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Dashboard",
+        "url": "/dashboard"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "dark",
+    "title": "Dashboard de Insights",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Base de Conhecimento",
+        "url": "/base-de-conhecimento"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [
+      {
+        "client": 1134,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 429.5,
+          "height": 100.5,
+          "left": 281,
+          "right": 1415,
+          "top": 329,
+          "width": 1134,
+          "x": 281,
+          "y": 329
+        },
+        "scroll": 1134
+      }
+    ],
+    "theme": "dark",
+    "title": "Base de Conhecimento",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Mapa dos Campi",
+        "url": "/campi"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1414,
+          "height": 1350,
+          "left": 256,
+          "right": 1425,
+          "top": 64,
+          "width": 1169,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1425,
+      "top": 0,
+      "width": 1169,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1425,
+    "tables": [],
+    "theme": "dark",
+    "title": "Mapa dos campi",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Locais (mapa antigo)",
+        "url": "/locais"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "dark",
+    "title": "Locais do Campus",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Eventos",
+        "url": "/eventos"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [
+      {
+        "client": 1134,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 404.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 1415,
+          "top": 289,
+          "width": 1134,
+          "x": 281,
+          "y": 289
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "dark",
+    "title": "Eventos",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Não Respondidas",
+        "url": "/nao-respondidas"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "dark",
+    "title": "Perguntas Não Respondidas",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Agente (Chatbot)",
+        "url": "/agente"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1440,
+          "top": 64,
+          "width": 1184,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1440,
+      "top": 0,
+      "width": 1184,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1440,
+    "tables": [],
+    "theme": "dark",
+    "title": "Testar Agente",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Configurações",
+        "url": "/configuracoes"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1332,
+          "height": 1268,
+          "left": 392.5,
+          "right": 1288.5,
+          "top": 64,
+          "width": 896,
+          "x": 392.5,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1425,
+      "top": 0,
+      "width": 1169,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1425,
+    "tables": [],
+    "theme": "dark",
+    "title": "Configurações do Sistema",
+    "width": 1440
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Dashboard",
+        "url": "/dashboard"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "dark",
+    "title": "Dashboard de Insights",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Base de Conhecimento",
+        "url": "/base-de-conhecimento"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [
+      {
+        "client": 718,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 444.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 999,
+          "top": 329,
+          "width": 718,
+          "x": 281,
+          "y": 329
+        },
+        "scroll": 744
+      }
+    ],
+    "theme": "dark",
+    "title": "Base de Conhecimento",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Mapa dos Campi",
+        "url": "/campi"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1712,
+          "height": 1648,
+          "left": 256,
+          "right": 1009,
+          "top": 64,
+          "width": 753,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1009,
+      "top": 0,
+      "width": 753,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1009,
+    "tables": [],
+    "theme": "dark",
+    "title": "Mapa dos campi",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Locais (mapa antigo)",
+        "url": "/locais"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "dark",
+    "title": "Locais do Campus",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Eventos",
+        "url": "/eventos"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [
+      {
+        "client": 718,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 404.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 999,
+          "top": 289,
+          "width": 718,
+          "x": 281,
+          "y": 289
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "dark",
+    "title": "Eventos",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Não Respondidas",
+        "url": "/nao-respondidas"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "dark",
+    "title": "Perguntas Não Respondidas",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Agente (Chatbot)",
+        "url": "/agente"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 1024,
+          "top": 64,
+          "width": 768,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1024,
+      "top": 0,
+      "width": 768,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1024,
+    "tables": [],
+    "theme": "dark",
+    "title": "Testar Agente",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Configurações",
+        "url": "/configuracoes"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1332,
+          "height": 1268,
+          "left": 256,
+          "right": 1009,
+          "top": 64,
+          "width": 753,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 1009,
+      "top": 0,
+      "width": 753,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 1009,
+    "tables": [],
+    "theme": "dark",
+    "title": "Configurações do Sistema",
+    "width": 1024
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Dashboard",
+        "url": "/dashboard"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1482,
+          "height": 1418,
+          "left": 256,
+          "right": 753,
+          "top": 64,
+          "width": 497,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 753,
+      "top": 0,
+      "width": 497,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 753,
+    "tables": [],
+    "theme": "dark",
+    "title": "Dashboard de Insights",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Base de Conhecimento",
+        "url": "/base-de-conhecimento"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [
+      {
+        "client": 462,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 444.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 743,
+          "top": 329,
+          "width": 462,
+          "x": 281,
+          "y": 329
+        },
+        "scroll": 744
+      }
+    ],
+    "theme": "dark",
+    "title": "Base de Conhecimento",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Mapa dos Campi",
+        "url": "/campi"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 2340,
+          "height": 2276,
+          "left": 256,
+          "right": 753,
+          "top": 64,
+          "width": 497,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 753,
+      "top": 0,
+      "width": 497,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 753,
+    "tables": [],
+    "theme": "dark",
+    "title": "Mapa dos campi",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Locais (mapa antigo)",
+        "url": "/locais"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [],
+    "theme": "dark",
+    "title": "Locais do Campus",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Eventos",
+        "url": "/eventos"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [
+      {
+        "client": 462,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 404.5,
+          "height": 115.5,
+          "left": 281,
+          "right": 743,
+          "top": 289,
+          "width": 462,
+          "x": 281,
+          "y": 289
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "dark",
+    "title": "Eventos",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Não Respondidas",
+        "url": "/nao-respondidas"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [],
+    "theme": "dark",
+    "title": "Perguntas Não Respondidas",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Agente (Chatbot)",
+        "url": "/agente"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 256,
+          "right": 768,
+          "top": 64,
+          "width": 512,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 768,
+      "top": 0,
+      "width": 512,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 768,
+    "tables": [],
+    "theme": "dark",
+    "title": "Testar Agente",
+    "width": 768
+  },
+  {
+    "active": [
+      {
+        "bg": "rgb(30, 41, 59)",
+        "color": "rgb(147, 197, 253)",
+        "name": "Configurações",
+        "url": "/configuracoes"
+      }
+    ],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "24px",
+        "rect": {
+          "bottom": 1404,
+          "height": 1340,
+          "left": 256,
+          "right": 753,
+          "top": 64,
+          "width": 497,
+          "x": 256,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 256,
+      "right": 753,
+      "top": 0,
+      "width": 497,
+      "x": 256,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 753,
+    "tables": [],
+    "theme": "dark",
+    "title": "Configurações do Sistema",
+    "width": 768
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1762,
+          "height": 1698,
+          "left": 0,
+          "right": 375,
+          "top": 64,
+          "width": 375,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 375,
+      "top": 0,
+      "width": 375,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 375,
+    "tables": [],
+    "theme": "dark",
+    "title": "Dashboard de Insights",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [
+      {
+        "client": 356,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 460.5,
+          "height": 115.5,
+          "left": 17,
+          "right": 373,
+          "top": 345,
+          "width": 356,
+          "x": 17,
+          "y": 345
+        },
+        "scroll": 444
+      }
+    ],
+    "theme": "dark",
+    "title": "Base de Conhecimento",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 2108,
+          "height": 2044,
+          "left": 0,
+          "right": 375,
+          "top": 64,
+          "width": 375,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 375,
+      "top": 0,
+      "width": 375,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 375,
+    "tables": [],
+    "theme": "dark",
+    "title": "Mapa dos campi",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [],
+    "theme": "dark",
+    "title": "Locais do Campus",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [
+      {
+        "client": 356,
+        "overflow": "auto",
+        "rect": {
+          "bottom": 476.5,
+          "height": 115.5,
+          "left": 17,
+          "right": 373,
+          "top": 361,
+          "width": 356,
+          "x": 17,
+          "y": 361
+        },
+        "scroll": 1232
+      }
+    ],
+    "theme": "dark",
+    "title": "Eventos",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "none",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "wide"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [],
+    "theme": "dark",
+    "title": "Perguntas Não Respondidas",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "1200px",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1024,
+          "height": 960,
+          "left": 0,
+          "right": 390,
+          "top": 64,
+          "width": 390,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "standard"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 390,
+    "tables": [],
+    "theme": "dark",
+    "title": "Testar Agente",
+    "width": 390
+  },
+  {
+    "active": [],
+    "container": [
+      {
+        "maxWidth": "896px",
+        "padding": "16px",
+        "rect": {
+          "bottom": 1766,
+          "height": 1702,
+          "left": 0,
+          "right": 375,
+          "top": 64,
+          "width": 375,
+          "x": 0,
+          "y": 64
+        },
+        "variant": "form"
+      }
+    ],
+    "header": {
+      "bottom": 64,
+      "height": 64,
+      "left": 0,
+      "right": 375,
+      "top": 0,
+      "width": 375,
+      "x": 0,
+      "y": 0
+    },
+    "height": 1024,
+    "overflow": [],
+    "pageWidth": 375,
+    "tables": [],
+    "theme": "dark",
+    "title": "Configurações do Sistema",
+    "width": 390
+  }
+]

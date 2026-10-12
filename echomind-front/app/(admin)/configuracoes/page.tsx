@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 import { configApi } from "@/lib/api";
 import type { Config } from "@/lib/api";
@@ -56,7 +57,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <PageContainer className="space-y-8 max-w-4xl">
+      <PageContainer variant="form">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96 w-full" />
       </PageContainer>
@@ -64,13 +65,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <PageContainer className="space-y-8 max-w-4xl">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Configurações do Sistema</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie a identidade institucional e o comportamento do EchoMind
-        </p>
-      </div>
+    <PageContainer variant="form">
+      <PageHeader title="Configurações do Sistema" description="Gerencie a identidade institucional e o comportamento do EchoMind" />
 
       <div className="grid gap-6">
         <Card className="border-border bg-card pb-0 pt-4">

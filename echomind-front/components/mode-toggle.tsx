@@ -20,23 +20,23 @@ export function ModeToggle() {
         {/* O botão que abre o menu */}
         <Button variant="outline" size="icon" className="relative">
           {/* Ícone de Sol: visível no modo light, escondido no dark */}
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          
+          <Sun aria-hidden="true" className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all motion-reduce:transition-none dark:-rotate-90 dark:scale-0" />
+
           {/* Ícone de Lua: escondido no modo light, visível no dark */}
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          
+          <Moon aria-hidden="true" className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all motion-reduce:transition-none dark:rotate-0 dark:scale-100" />
+
           <span className="sr-only">Alternar tema</span>
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem className="min-h-11" onClick={() => setTheme("light")}>
           Claro
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem className="min-h-11" onClick={() => setTheme("dark")}>
           Escuro
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem className="min-h-11" onClick={() => setTheme("system")}>
           Sistema
         </DropdownMenuItem>
       </DropdownMenuContent>

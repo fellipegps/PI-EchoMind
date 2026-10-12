@@ -1,0 +1,26 @@
+{
+  "preexistingMapError": {
+    "timestampUtc": "2026-10-12T14:15:21.473Z",
+    "message": "TypeError: Cannot read properties of undefined (reading '_leaflet_pos')",
+    "stack": [
+      "getPosition (Leaflet)",
+      "_getMapPanePos (Leaflet)",
+      "_rawPanBy (Leaflet)",
+      "invalidateSize (Leaflet)",
+      "GeoCampusMap.useEffect"
+    ],
+    "source": "echomind-front/app/(admin)/campi/geo-campus-map.tsx",
+    "lastChange": "6e76448",
+    "sourceUnchanged": true,
+    "callback": "requestAnimationFrame(() => map?.invalidateSize())",
+    "cleanup": "map?.remove(); callback não cancelado",
+    "fixedInThisPhase": false
+  },
+  "fixtureDuplicateKeys": {
+    "lastObservedUtc": "2026-10-12T14:07:53.990Z",
+    "key": "question1",
+    "cause": "Fixture não separava status da triagem",
+    "fixtureCorrected": true
+  },
+  "finalProductionConsole": "console-producao.json"
+}

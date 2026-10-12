@@ -8,6 +8,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 import { dashboardApi } from "@/lib/api";
 import type { DashboardData } from "@/lib/api";
@@ -51,13 +52,10 @@ export default function DashboardPage() {
 
   return (
     <PageContainer>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard de Insights</h1>
-        <p className="text-muted-foreground mt-1">Visão geral das interações com o Agente de IA</p>
-      </div>
+      <PageHeader title="Dashboard de Insights" description="Visão geral das interações com o Agente de IA" />
 
       {/* ── Métricas ── */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-border bg-card">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">

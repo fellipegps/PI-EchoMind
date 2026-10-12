@@ -1,16 +1,12 @@
 import { CampusLocationsManager } from "./campus-locations-manager";
+import { PageContainer } from "@/components/page-container";
+import { PageHeader } from "@/components/page-header";
 
 export default function CampusLocationsPage() {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 p-6">
-      <div>
-        <p className="text-sm font-medium text-primary">Mapa institucional</p>
-        <h1 className="text-3xl font-bold tracking-tight">Locais do Campus</h1>
-        <p className="mt-2 text-muted-foreground">
-          Cadastre os pontos que serão exibidos no mapa público da instituição.
-        </p>
-      </div>
+    <PageContainer variant="wide">
+      <PageHeader title="Locais do Campus" description="Cadastre os pontos que serão exibidos no mapa público da instituição." eyebrow="Mapa institucional" />
       <CampusLocationsManager />
-    </div>
+    </PageContainer>
   );
 }

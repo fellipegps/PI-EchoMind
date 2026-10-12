@@ -41,6 +41,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 import { Label } from "@/components/ui/label";
 import { unansweredApi } from "@/lib/api";
@@ -168,7 +169,7 @@ export default function UnansweredQuestions() {
 
   if (loading) {
     return (
-      <PageContainer className="space-y-6">
+      <PageContainer variant="wide">
         <Skeleton className="h-10 w-80" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
@@ -177,16 +178,8 @@ export default function UnansweredQuestions() {
   }
 
   return (
-    <PageContainer className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Perguntas Não Respondidas
-        </h1>
-        <p className="text-muted-foreground mt-1 text-base">
-          Analise o que o EchoMind ainda não sabe e transforme em
-          conhecimento oficial.
-        </p>
-      </div>
+    <PageContainer variant="wide">
+      <PageHeader title="Perguntas Não Respondidas" description="Analise o que o EchoMind ainda não sabe e transforme em conhecimento oficial." />
 
       <div className="flex gap-2" aria-label="Filtrar perguntas">
         <Button

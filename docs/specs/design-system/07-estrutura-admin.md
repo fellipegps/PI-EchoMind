@@ -2,7 +2,7 @@
 
 **Versão:** 1.0.
 
-**Status:** Proposta — aguardando aprovação. Nenhuma implementação autorizada por este arquivo.
+**Status:** Aprovada em 12/10/2026 — implementada e verificada no escopo disponível; resultado aceito pelo usuário em 12/10/2026.
 **Fase original:** Prompt 07; etapa 6 do plano.
 **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`) · High (`high`).
 **Commit sugerido, somente após revisão e autorização:** `refactor(admin): unifica sidebar cabecalhos e containers`.
@@ -70,13 +70,13 @@ Os caminhos delimitam investigação; não autorizam modificar todos os arquivos
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação da spec e dependências no STATUS; conferir alterações locais e instruções do repositório.
-- [ ] Recuperar a referência pertinente pelo MCP ou registrar a limitação e a referência verificada disponível.
-- [ ] Inventariar wrappers atuais e propor a correspondência de cada um às variantes aprovadas.
-- [ ] Compor sidebar, grupos, marca e cabeçalho sobre os componentes existentes.
-- [ ] Integrar variantes/cabeçalho apenas nos consumidores necessários, sem migrar seu conteúdo interno.
-- [ ] Revisar sessão, tema, saída, navegação móvel, rolagem e acesso por teclado.
-- [ ] Executar verificações, capturar evidências e atualizar STATUS com arquivos e limitações reais.
+- [x] Confirmar aprovação da spec e dependências no STATUS; conferir alterações locais e instruções do repositório.
+- [x] Recuperar a referência pertinente pelo MCP ou registrar a limitação e a referência verificada disponível.
+- [x] Inventariar wrappers atuais e propor a correspondência de cada um às variantes aprovadas.
+- [x] Compor sidebar, grupos, marca e cabeçalho sobre os componentes existentes.
+- [x] Integrar variantes/cabeçalho apenas nos consumidores necessários, sem migrar seu conteúdo interno.
+- [x] Revisar sessão, tema, saída, navegação móvel, rolagem e acesso por teclado.
+- [x] Executar verificações, capturar evidências e atualizar STATUS com arquivos e limitações reais.
 
 ## Verificação e evidências esperadas
 
@@ -92,4 +92,6 @@ Os caminhos delimitam investigação; não autorizam modificar todos os arquivos
 A fase só pode ser declarada implementada e verificada com os critérios acima evidenciados e as limitações registradas.
 Revisão visual e aprovação do usuário são estados separados; checklist concluído não comprova aprovação.
 Mudanças materiais de escopo ou especificação devem ser aprovadas antes da implementação dependente.
-Não avançar, criar commit ou publicar automaticamente. Esta entrega permanece **Proposta — aguardando aprovação**.
+Não avançar, criar commit ou publicar automaticamente. Implementação e verificação concluídas no escopo disponível em 12/10/2026; resultado **aceito em 12/10/2026**, pelo pedido de commit após apresentação da entrega e limitações.
+
+Registro: [DS-07](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-07.md>). Os seis critérios possuem evidências; falha anterior de ciclo de vida do mapa e limites de ambiente registrados separadamente. Nenhum requisito/critério material revisado. Commit local autorizado pelo usuário; identificação no histórico Git. Sem push ou avanço de fase.

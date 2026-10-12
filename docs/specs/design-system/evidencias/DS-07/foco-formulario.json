@@ -1,0 +1,27 @@
+{
+  "focused": "",
+  "header": {
+    "bottom": 64,
+    "height": 64,
+    "left": 256,
+    "right": 1425,
+    "top": 0,
+    "width": 1169,
+    "x": 256,
+    "y": 0
+  },
+  "rect": {
+    "bottom": 881,
+    "height": 44,
+    "left": 441.5,
+    "right": 1043.5,
+    "top": 837,
+    "width": 602,
+    "x": 441.5,
+    "y": 837
+  },
+  "viewport": [
+    1440,
+    1024
+  ]
+}

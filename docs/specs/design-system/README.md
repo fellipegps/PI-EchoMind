@@ -4,7 +4,7 @@ Versão documental: 1.0 · Data: 11/10/2026.
 
 Este conjunto adota **Specification Driven Development (SDD)**: a especificação define o resultado e as condições de aceitação; as tarefas orientam sua implementação; as evidências mostram o que foi verificado. Os textos são contratos de alteração, não uma sequência de prompts extensos.
 
-**Situação atual (12/10/2026): DS-00–DS-05 v1.0 aceitas e registradas nos commits locais 7e0dc9e, f332c62, 33520f2, 124a7eb, f88a7fd e 1ddcb87. DS-06 v1.0 aprovada, implementada e verificada no escopo disponível, com limites documentados; resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega. DS-07–DS-16 continuam propostas e não iniciadas.** DS-06 aplica a base aos mapas públicos e preserva origem manual, GPS, rotas e alternativa esquemática. Consulte STATUS.md e as evidências para critérios e pendências, incluindo zoom real. Commit local da DS-06 autorizado; nenhum push.
+**Situação atual (12/10/2026): DS-00–DS-06 v1.0 aceitas e registradas em commits locais; DS-06 em 0eab36b, com seus limites documentados. DS-07 v1.0 aprovada, implementada e verificada no escopo disponível, resultado aceito em 12/10/2026 pelo pedido de commit após apresentação da entrega e limitações. DS-08–DS-16 continuam propostas e não iniciadas.** DS-07 unifica sidebar, cabeçalho e containers das oito áreas administrativas, preservando sessão, navegação e conteúdo. Consulte STATUS.md e [DS-07](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-07.md>) para critérios, capturas e falha anterior do editor geográfico. Commit local da DS-07 autorizado; identificação no histórico Git. Sem push.
 
 ## Documentos de referência
 
