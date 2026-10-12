@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -208,6 +208,61 @@ describe("PublicPortal", () => {
       "noopener noreferrer"
     );
     expect(screen.queryByText("Semana da Tecnologia")).not.toBeInTheDocument();
+  });
+
+  it("oferece uma única navegação com seleção e regiões operáveis por teclado", async () => {
+    const user = userEvent.setup();
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { level: 1, name: "UniEVANGÉLICA" });
+    const navigation = screen.getByRole("navigation", { name: "Navegação principal" });
+    expect(within(navigation).getAllByRole("button")).toHaveLength(3);
+    await user.tab();
+    expect(within(navigation).getByRole("button", { name: "Chat" })).toHaveFocus();
+    await user.tab();
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("region", { name: "Próximos eventos" })).toBeInTheDocument();
+    expect(within(navigation).getByRole("button", { name: "Eventos" })).toHaveAttribute("aria-current", "page");
+    await user.tab();
+    await user.keyboard(" ");
+    expect(screen.getByRole("region", { name: "Locais do campus" })).toBeInTheDocument();
+    expect(within(navigation).getAllByRole("button").filter((button) => button.getAttribute("aria-current") === "page")).toHaveLength(1);
+  });
+
+  it("preserva conversa pendente, tokens e rascunho ao navegar, sem repetir as consultas institucionais", async () => {
+    const user = userEvent.setup();
+    let onToken!: (token: string) => void;
+    let onDone!: () => void;
+    apiMocks.streamPublicChat.mockImplementation((_question, _slug, token, done) => {
+      onToken = token;
+      onDone = done;
+      return Promise.resolve();
+    });
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Pergunta em andamento");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    await user.click(screen.getByRole("button", { name: "Eventos" }));
+    await act(async () => onToken("Resposta parcial "));
+    await user.click(screen.getByRole("button", { name: "Locais" }));
+    await user.click(screen.getByRole("button", { name: "Chat" }));
+    expect(screen.getByText("Pergunta em andamento")).toBeInTheDocument();
+    expect(screen.getByText("Resposta parcial")).toBeInTheDocument();
+    expect(screen.getByLabelText("Digite sua pergunta")).toBeDisabled();
+    await act(async () => { onToken("preservada."); onDone(); });
+    expect(screen.getByText("Resposta parcial preservada.")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Rascunho preservado");
+    const input = screen.getByLabelText("Digite sua pergunta");
+    fireEvent.resize(window);
+    expect(screen.getByLabelText("Digite sua pergunta")).toBe(input);
+    await user.click(screen.getByRole("button", { name: "Eventos" }));
+    await user.click(screen.getByRole("button", { name: "Chat" }));
+    expect(screen.getByLabelText("Digite sua pergunta")).toHaveValue("Rascunho preservado");
+    expect(screen.getByText("Resposta parcial preservada.")).toBeInTheDocument();
+    for (const query of [apiMocks.getInstitution, apiMocks.listFaqs, apiMocks.listEvents, apiMocks.listLocations]) {
+      expect(query).toHaveBeenCalledOnce();
+      expect(query).toHaveBeenCalledWith("unievangelica-anapolis");
+    }
+    expect(apiMocks.streamPublicChat).toHaveBeenCalledOnce();
   });
 
   it("remove a capa quebrada e mantém o card do evento", async () => {

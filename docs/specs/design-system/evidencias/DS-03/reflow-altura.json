@@ -1,0 +1,85 @@
+{
+  "limitation": "720x512 corresponde à área CSS de 1440x1024 a 200%; zoom real, safe area não nula e teclado virtual não emulados",
+  "cases": [
+    {
+      "draft": "Rascunho de teste em janela reduzida",
+      "fieldFocused": true,
+      "form": {
+        "bottom": 407,
+        "y": 334
+      },
+      "nav": {
+        "height": 77,
+        "y": 435
+      },
+      "overlap": false,
+      "scrollWidth": 705,
+      "scrollY": 311,
+      "viewport": [
+        720,
+        512
+      ],
+      "theme": "light"
+    },
+    {
+      "draft": "Rascunho de teste em janela reduzida",
+      "fieldFocused": true,
+      "form": {
+        "bottom": 375,
+        "y": 302
+      },
+      "nav": {
+        "height": 77,
+        "y": 403
+      },
+      "overlap": false,
+      "scrollWidth": 375,
+      "scrollY": 407,
+      "viewport": [
+        390,
+        480
+      ],
+      "theme": "light"
+    },
+    {
+      "draft": "Rascunho de teste em janela reduzida",
+      "fieldFocused": true,
+      "form": {
+        "bottom": 407,
+        "y": 334
+      },
+      "nav": {
+        "height": 77,
+        "y": 435
+      },
+      "overlap": false,
+      "scrollWidth": 705,
+      "scrollY": 311,
+      "viewport": [
+        720,
+        512
+      ],
+      "theme": "dark"
+    },
+    {
+      "draft": "Rascunho de teste em janela reduzida",
+      "fieldFocused": true,
+      "form": {
+        "bottom": 375,
+        "y": 302
+      },
+      "nav": {
+        "height": 77,
+        "y": 403
+      },
+      "overlap": false,
+      "scrollWidth": 375,
+      "scrollY": 407,
+      "viewport": [
+        390,
+        480
+      ],
+      "theme": "dark"
+    }
+  ]
+}

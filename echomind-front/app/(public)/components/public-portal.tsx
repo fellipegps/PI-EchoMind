@@ -4,7 +4,6 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   Bot,
   Building2,
-  CalendarDays,
   ChevronRight,
   Loader2,
   MapPin,
@@ -19,21 +18,14 @@ import { publicPortalApi, streamPublicChat } from "@/lib/api";
 import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
 
 import { PublicCampusNavigator } from "./public-campus-navigator";
+import { PortalSectionHeading, PortalShell, type PortalTabId as TabId } from "./public-portal-shell";
 import styles from "./public-portal.module.css";
-
-type TabId = "chat" | "eventos" | "locais";
 
 type ChatMessage = {
   id: number;
   role: "assistant" | "user";
   content: string;
 };
-
-const NAV_ITEMS = [
-  { id: "chat", label: "Chat", icon: Bot },
-  { id: "eventos", label: "Eventos", icon: CalendarDays },
-  { id: "locais", label: "Locais", icon: MapPin },
-] as const;
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: 1,
@@ -308,48 +300,10 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
 
   return (
     <div className={styles.portalRoot}>
-      <aside className={styles.navigation} aria-label="Navegação principal">
-        <div className={styles.brand}>
-          <span className={styles.brandMark}>EM</span>
-          <span>EchoMind</span>
-        </div>
-        <nav className={styles.navItems}>
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
-            <button
-              className={`${styles.navButton} ${activeTab === id ? styles.navButtonActive : ""}`}
-              type="button"
-              key={id}
-              onClick={() => setActiveTab(id)}
-              aria-current={activeTab === id ? "page" : undefined}
-            >
-              <Icon aria-hidden="true" />
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-
-      <div className={styles.mainWrapper}>
-        <header className={styles.header}>
-          <div>
-            <span className={styles.headerEyebrow}>Portal do estudante</span>
-            <h1>{companyName}</h1>
-          </div>
-          <span className={styles.statusPill}>
-            <span aria-hidden="true" /> Assistente online
-          </span>
-        </header>
-
-        <main className={styles.content}>
+      <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName}>
           {activeTab === "chat" && (
-            <section className={styles.panel} role="tabpanel" aria-labelledby="chat-title">
-              <div className={styles.sectionHeading}>
-                <span className={styles.sectionIcon}><Sparkles aria-hidden="true" /></span>
-                <div>
-                  <p>Atendimento digital</p>
-                  <h2 id="chat-title">Como podemos ajudar?</h2>
-                </div>
-              </div>
+            <section className={styles.panel} aria-labelledby="chat-title">
+              <PortalSectionHeading id="chat-title" eyebrow="Atendimento digital" title="Como podemos ajudar?" icon={<Sparkles className="size-5" />} />
 
               {portalLoading && (
                 <div className={styles.alert} role="status">
@@ -443,12 +397,9 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
           )}
 
           {activeTab === "eventos" && (
-            <section className={styles.panel} role="tabpanel" aria-labelledby="events-title">
-              <div className={styles.pageIntro}>
-                <p>Agenda</p>
-                <h2 id="events-title">Próximos eventos</h2>
-                <span>Atividades para aprender, conectar e participar.</span>
-              </div>
+            <section className={styles.panel} aria-labelledby="events-title">
+              <PortalSectionHeading id="events-title" eyebrow="Agenda" title="Próximos eventos" description="Atividades para aprender, conectar e participar." />
+              <div className={styles.legacyContent}>
               {eventsLoading && (
                 <div className={styles.alert} role="status">Carregando eventos...</div>
               )}
@@ -461,17 +412,15 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
               <div className={styles.eventList}>
                 {events.map((event) => <EventCard event={event} key={event.id} />)}
               </div>
+              </div>
             </section>
           )}
 
           {activeTab === "locais" && (
-            <section className={styles.panel} role="tabpanel" aria-labelledby="places-title">
-              <div className={styles.pageIntro}>
-                <p>Encontre seu caminho</p>
-                <h2 id="places-title">Locais do campus</h2>
-                <span>Pesquise os espaços cadastrados pela instituição.</span>
-              </div>
+            <section className={styles.panel} aria-labelledby="places-title">
+              <PortalSectionHeading id="places-title" eyebrow="Encontre seu caminho" title="Locais do campus" description="Pesquise os espaços cadastrados pela instituição." />
 
+              <div className={styles.legacyContent}>
               <PublicCampusNavigator
                 publicSlug={normalizedSlug}
                 onAvailabilityChange={setGeoAvailable}
@@ -595,10 +544,10 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
                 )}
               </div>
               </>}
+              </div>
             </section>
           )}
-        </main>
-      </div>
+      </PortalShell>
     </div>
   );
 }

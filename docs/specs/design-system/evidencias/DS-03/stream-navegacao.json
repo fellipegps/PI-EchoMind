@@ -1,0 +1,11 @@
+{
+  "disabledBefore": true,
+  "after": {
+    "body": "Atendimento digitalComo podemos ajudar?Olá! Sou o assistente acadêmico. Como posso ajudar você hoje?Pergunta de teste da DS-03Resposta localComo acessar a biblioteca?Onde encontro os horários de atendimento?Como consultar os eventos do campus?Como encontrar um local no campus?Digite sua pergunta",
+    "inputDisabled": true,
+    "questionVisible": true,
+    "selected": [
+      "Chat"
+    ]
+  }
+}

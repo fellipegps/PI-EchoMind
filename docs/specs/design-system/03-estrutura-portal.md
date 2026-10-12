@@ -4,12 +4,13 @@
 
 ## Identificação e controle
 
-- Status: **Proposta — aguardando aprovação; não implementada**.
+- Status: **Aprovada; implementada, verificada no escopo e aceita pelo usuário**.
 - Fase original: 03 do roteiro, etapa 3A do plano.
 - Modelo recomendado: **GPT-6.1 Sol**, esforço **High** (`high`).
 - Commit sugerido após revisão e autorização: `refactor(portal): padroniza estrutura e navegacao responsiva`.
 - Dependências obrigatórias: DS-00 aprovada com navegação e recolhimento definidos; DS-01 implementada/revisada com marca e tokens. DS-02 é a entrega anterior de validação visual, sem dependência funcional do portal.
-- Autorização futura cobre esta estrutura; migração dos conteúdos pertence às DS-04, DS-05 e DS-06.
+- Aprovação de DS-03 v1.0 e contrato comum v1.0 recebida em 11/10/2026: o usuário identificou **Fase: 03** e declarou “Aprovo a versão atual da especificação indicada e autorizo somente seu escopo.” A autorização cobre somente esta estrutura; migração dos conteúdos pertence às DS-04, DS-05 e DS-06. Sem commit, push ou avanço automático.
+- Dependências conferidas: DS-00 aceita em `7e0dc9e`, DS-01 aceita em `f332c62`; DS-02 aceita e commitada em `33520f2`. Evidências em [DS-03](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-03.md>).
 
 Consultar [README](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/README.md>), [CONTRATO](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/CONTRATO.md>) e [STATUS](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/STATUS.md>) para sequência, regras comuns e evidências de aprovação.
 
@@ -72,13 +73,13 @@ Uma composição de navegação pode ser extraída se reduzir repetição real. 
 
 ## Plano de implementação
 
-- [ ] Conferir decisões de DS-00, base DS-01, aprovação desta fase e estado local.
-- [ ] Comparar referências desktop/celular e registrar regras concretas de recolhimento já aprovadas.
-- [ ] Mapear classes de estrutura e consumidores compartilhados antes de remover seletores.
-- [ ] Implementar a composição externa e navegação preservando a identidade do componente que mantém estado.
-- [ ] Reservar a área auxiliar e manter o conteúdo interno atual para as próximas fases.
-- [ ] Conferir troca de largura, navegação, conversa em andamento, slug inválido e listas extensas.
-- [ ] Executar verificações, registrar imagens/evidências e entregar para revisão sem avançar.
+- [x] Conferir decisões de DS-00, base DS-01, aprovação desta fase e estado local.
+- [x] Comparar referências desktop/celular e registrar regras concretas de recolhimento já aprovadas.
+- [x] Mapear classes de estrutura e consumidores compartilhados antes de remover seletores.
+- [x] Implementar a composição externa e navegação preservando a identidade do componente que mantém estado.
+- [x] Reservar a área auxiliar e manter o conteúdo interno atual para as próximas fases.
+- [x] Conferir troca de largura, navegação, conversa em andamento, slug inválido e listas extensas.
+- [x] Executar verificações, registrar imagens/evidências e entregar para revisão sem avançar; limites de zoom real/dispositivo físico explícitos.
 
 ## Verificações e evidências esperadas
 
@@ -94,4 +95,4 @@ Uma composição de navegação pode ser extraída se reduzir repetição real. 
 
 A fase está pronta para revisão quando requisitos e critérios possuem evidência, verificações passam ou limitações são tratadas explicitamente, e consumidores não migrados continuam funcionando. STATUS diferencia implementação, verificação e aprovação do usuário.
 
-Nenhuma execução, commit/push ou próxima fase é autorizada pela criação desta spec. Mudança material de navegação ou comportamento exige revisão da spec e aprovação antes da implementação dependente. Todas as tarefas permanecem pendentes.
+Nenhuma execução, commit/push ou próxima fase é autorizada pela criação desta spec. Mudança material de navegação ou comportamento exige revisão da spec e aprovação antes da implementação dependente. As tarefas técnicas foram concluídas em 11/10/2026; AC01–AC07 possuem evidência no escopo registrado. O resultado foi aceito em 11/10/2026 pelo pedido “commite as alterações” após a apresentação da entrega; autorização adicional limitada ao commit local desta fase, sem push. Zoom real, teclado virtual e safe area física não emulados; reflow equivalente a 200% e expressões de safe area foram conferidos sem presumir esses testes reais.

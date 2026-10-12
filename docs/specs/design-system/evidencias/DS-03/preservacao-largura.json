@@ -1,0 +1,55 @@
+{
+  "before": {
+    "disabled": false,
+    "draft": "Rascunho preservado entre desktop e celular",
+    "messages": [
+      "Olá! Sou o assistente acadêmico. Como posso ajudar você hoje?",
+      "Pergunta de teste da DS-03",
+      "Resposta local preservada após a navegação e a troca de largura."
+    ],
+    "width": 1440
+  },
+  "after": {
+    "disabled": false,
+    "draft": "Rascunho preservado entre desktop e celular",
+    "messages": [
+      "Olá! Sou o assistente acadêmico. Como posso ajudar você hoje?",
+      "Pergunta de teste da DS-03",
+      "Resposta local preservada após a navegação e a troca de largura."
+    ],
+    "width": 390
+  },
+  "queryRecordsBefore": 7,
+  "queryRecordsAfter": 7,
+  "queriesUnchanged": true,
+  "queries": [
+    {
+      "request": "GET /public/ds03-fixture/faqs",
+      "count": 1
+    },
+    {
+      "request": "GET /public/ds03-fixture/events",
+      "count": 1
+    },
+    {
+      "request": "GET /public/ds03-fixture/locations",
+      "count": 1
+    },
+    {
+      "request": "GET /public/ds03-fixture",
+      "count": 1
+    },
+    {
+      "request": "POST /public/ds03-fixture/chat",
+      "count": 1
+    },
+    {
+      "request": "GET /public/ds03-fixture/geo-campus",
+      "count": 1
+    },
+    {
+      "request": "GET /public/ds03-fixture/geo-campus",
+      "count": 2
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "headerHeight": 117,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 1440,
+    "theme": "dark",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 64,
+    "titleWidth": 1013.375,
+    "viewport": [
+      1440,
+      1024
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 149,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 1024,
+    "theme": "dark",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 96,
+    "titleWidth": 597.375,
+    "viewport": [
+      1024,
+      1024
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 173,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 753,
+    "theme": "dark",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 64,
+    "titleWidth": 705,
+    "viewport": [
+      768,
+      1024
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 269,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 375,
+    "theme": "dark",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 160,
+    "titleWidth": 343,
+    "viewport": [
+      390,
+      844
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 117,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 1440,
+    "theme": "light",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 64,
+    "titleWidth": 1013.375,
+    "viewport": [
+      1440,
+      1024
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 149,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 1024,
+    "theme": "light",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 96,
+    "titleWidth": 597.375,
+    "viewport": [
+      1024,
+      1024
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 173,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 753,
+    "theme": "light",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 64,
+    "titleWidth": 705,
+    "viewport": [
+      768,
+      1024
+    ],
+    "whiteSpace": "normal"
+  },
+  {
+    "headerHeight": 269,
+    "overflowWrap": "anywhere",
+    "scrollWidth": 375,
+    "theme": "light",
+    "title": "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras",
+    "titleFullyVisible": true,
+    "titleHeight": 160,
+    "titleWidth": 343,
+    "viewport": [
+      390,
+      844
+    ],
+    "whiteSpace": "normal"
+  }
+]

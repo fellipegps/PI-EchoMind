@@ -1,0 +1,1282 @@
+[
+  {
+    "auxiliary": {
+      "display": "block",
+      "empty": true,
+      "width": 288
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1440,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      1440,
+      1024
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1425,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      1440,
+      1024
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1425,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      1440,
+      1024
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "none",
+      "empty": true,
+      "width": 0
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1024,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      1024,
+      1024
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1009,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      1024,
+      1024
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1009,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      1024,
+      1024
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "none",
+      "empty": true,
+      "width": 0
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Chat",
+        "width": 240.328125,
+        "x": 8,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 240.34375,
+        "x": 256.328125,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 240.328125,
+        "x": 504.671875,
+        "y": 956
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 77,
+      "width": 753,
+      "x": 0,
+      "y": 947
+    },
+    "scrollWidth": 753,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      768,
+      1024
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 240.328125,
+        "x": 8,
+        "y": 956
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Eventos",
+        "width": 240.34375,
+        "x": 256.328125,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 240.328125,
+        "x": 504.671875,
+        "y": 956
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 77,
+      "width": 753,
+      "x": 0,
+      "y": 947
+    },
+    "scrollWidth": 753,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      768,
+      1024
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 240.328125,
+        "x": 8,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 240.34375,
+        "x": 256.328125,
+        "y": 956
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Locais",
+        "width": 240.328125,
+        "x": 504.671875,
+        "y": 956
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 77,
+      "width": 753,
+      "x": 0,
+      "y": 947
+    },
+    "scrollWidth": 753,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      768,
+      1024
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "none",
+      "empty": true,
+      "width": 0
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Chat",
+        "width": 114.328125,
+        "x": 8,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 114.34375,
+        "x": 130.328125,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 114.328125,
+        "x": 252.671875,
+        "y": 776
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      390,
+      844
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 114.328125,
+        "x": 8,
+        "y": 776
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Eventos",
+        "width": 114.34375,
+        "x": 130.328125,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 114.328125,
+        "x": 252.671875,
+        "y": 776
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      390,
+      844
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 114.328125,
+        "x": 8,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 114.34375,
+        "x": 130.328125,
+        "y": 776
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Locais",
+        "width": 114.328125,
+        "x": 252.671875,
+        "y": 776
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(15, 23, 42)",
+      "border": "rgb(71, 85, 105)",
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "shellBackground": "rgb(2, 6, 23)",
+    "theme": "dark",
+    "titleColor": "rgb(248, 250, 252)",
+    "viewport": [
+      390,
+      844
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "block",
+      "empty": true,
+      "width": 288
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1440,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      1440,
+      1024
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1425,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      1440,
+      1024
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1425,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      1440,
+      1024
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "none",
+      "empty": true,
+      "width": 0
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1024,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      1024,
+      1024
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1009,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      1024,
+      1024
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 48,
+        "name": "Chat",
+        "width": 191,
+        "x": 16,
+        "y": 105
+      },
+      {
+        "current": null,
+        "height": 48,
+        "name": "Eventos",
+        "width": 191,
+        "x": 16,
+        "y": 161
+      },
+      {
+        "current": "page",
+        "height": 48,
+        "name": "Locais",
+        "width": 191,
+        "x": 16,
+        "y": 217
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 1024,
+      "width": 224,
+      "x": 0,
+      "y": 0
+    },
+    "scrollWidth": 1009,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      1024,
+      1024
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "none",
+      "empty": true,
+      "width": 0
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Chat",
+        "width": 240.328125,
+        "x": 8,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 240.34375,
+        "x": 256.328125,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 240.328125,
+        "x": 504.671875,
+        "y": 956
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 77,
+      "width": 753,
+      "x": 0,
+      "y": 947
+    },
+    "scrollWidth": 753,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      768,
+      1024
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 240.328125,
+        "x": 8,
+        "y": 956
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Eventos",
+        "width": 240.34375,
+        "x": 256.328125,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 240.328125,
+        "x": 504.671875,
+        "y": 956
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 77,
+      "width": 753,
+      "x": 0,
+      "y": 947
+    },
+    "scrollWidth": 753,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      768,
+      1024
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 240.328125,
+        "x": 8,
+        "y": 956
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 240.34375,
+        "x": 256.328125,
+        "y": 956
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Locais",
+        "width": 240.328125,
+        "x": 504.671875,
+        "y": 956
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 77,
+      "width": 753,
+      "x": 0,
+      "y": 947
+    },
+    "scrollWidth": 753,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      768,
+      1024
+    ],
+    "area": "locais"
+  },
+  {
+    "auxiliary": {
+      "display": "none",
+      "empty": true,
+      "width": 0
+    },
+    "buttons": [
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Chat",
+        "width": 114.328125,
+        "x": 8,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 114.34375,
+        "x": 130.328125,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 114.328125,
+        "x": 252.671875,
+        "y": 776
+      }
+    ],
+    "focus": {
+      "name": "Chat",
+      "visible": true
+    },
+    "heading": "Como podemos ajudar?",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      390,
+      844
+    ],
+    "area": "chat"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 114.328125,
+        "x": 8,
+        "y": 776
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Eventos",
+        "width": 114.34375,
+        "x": 130.328125,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Locais",
+        "width": 114.328125,
+        "x": 252.671875,
+        "y": 776
+      }
+    ],
+    "focus": {
+      "name": "Eventos",
+      "visible": true
+    },
+    "heading": "Próximos eventos",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      390,
+      844
+    ],
+    "area": "eventos"
+  },
+  {
+    "auxiliary": null,
+    "buttons": [
+      {
+        "current": null,
+        "height": 60,
+        "name": "Chat",
+        "width": 114.328125,
+        "x": 8,
+        "y": 776
+      },
+      {
+        "current": null,
+        "height": 60,
+        "name": "Eventos",
+        "width": 114.34375,
+        "x": 130.328125,
+        "y": 776
+      },
+      {
+        "current": "page",
+        "height": 60,
+        "name": "Locais",
+        "width": 114.328125,
+        "x": 252.671875,
+        "y": 776
+      }
+    ],
+    "focus": {
+      "name": "Locais",
+      "visible": true
+    },
+    "heading": "Locais do campus",
+    "nav": {
+      "background": "rgb(255, 255, 255)",
+      "border": "rgb(203, 213, 225)",
+      "height": 77,
+      "width": 375,
+      "x": 0,
+      "y": 767
+    },
+    "scrollWidth": 375,
+    "scrollY": 0,
+    "shellBackground": "rgb(248, 250, 252)",
+    "theme": "light",
+    "titleColor": "rgb(15, 23, 42)",
+    "viewport": [
+      390,
+      844
+    ],
+    "area": "locais"
+  }
+]
