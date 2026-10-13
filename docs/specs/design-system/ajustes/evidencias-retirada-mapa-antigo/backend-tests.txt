@@ -1,7 +1,0 @@
-============================= test session starts =============================
-platform win32 -- Python 3.12.10, pytest-8.2.0, pluggy-1.6.0
-rootdir: C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-backend
-configfile: pytest.ini
-plugins: anyio-4.14.2, asyncio-0.23.7, cov-7.1.0
-asyncio: mode=Mode.AUTO
-collected 514 items

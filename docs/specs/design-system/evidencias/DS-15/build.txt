@@ -1,9 +1,0 @@
-DS-15 — transcrição resumida da saída real de pnpm build em 12/10/2026.
-Ambiente temporário de processo: API/Supabase em loopback 4191, chave fictícia; .env.local preservado.
-Next.js 16.1.6 (Turbopack)
-Compiled successfully in 6.4s
-Running TypeScript ...
-Collecting page data using 7 workers ...
-Generating static pages using 7 workers (19/19)
-Finalizing page optimization ...
-Processo encerrado com código 0.

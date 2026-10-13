@@ -1,9 +1,0 @@
-{
-  "url": "http://127.0.0.1:4107/info/evento-1",
-  "text": "{\"title\":\"Evento local de teste\"}",
-  "referrer": "",
-  "openedNewTab": true,
-  "sourceTarget": "_blank",
-  "sourceRel": "noopener noreferrer",
-  "openerInspection": "Indisponível na API de inspeção: window.opener aparece undefined inclusive na aba principal; não usado como prova de isolamento."
-}

@@ -1,3 +1,0 @@
-
-> echomind-front@0.1.0 lint C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
-> eslint

@@ -1,8 +1,0 @@
-{
-  "baseline": "34512e1",
-  "logicUnchanged": {
-    "agente/page.tsx": true,
-    "configuracoes/page.tsx": true,
-    "configuracoes/public-portal-card.tsx": true
-  }
-}

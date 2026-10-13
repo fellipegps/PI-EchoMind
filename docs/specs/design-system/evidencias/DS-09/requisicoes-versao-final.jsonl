@@ -1,7 +1,0 @@
-{"method":"GET","path":"/auth/me","mode":"ready","hold":null,"authenticated":true}
-{"method":"GET","path":"/auth/me","mode":"ready","hold":null,"authenticated":true}
-{"method":"GET","path":"/auth/me","mode":"ready","hold":null,"authenticated":true}
-{"method":"GET","path":"/faqs","mode":"ready","hold":null,"authenticated":true}
-{"method":"GET","path":"/faqs","mode":"ready","hold":null,"authenticated":true,"completed":true,"status":200}
-{"method":"PUT","path":"/faqs/faq-1","mode":"edit-error","hold":null,"authenticated":true}
-{"method":"PUT","path":"/faqs/faq-1","mode":"edit-error","hold":null,"authenticated":true,"completed":true,"status":500,"payload":{"question":"Pergunta longa revisada com falha simulada DS-09","answer":"Resposta fictícia: consulte a secretaria acadêmica para conferir os procedimentos e os prazos do próximo semestre.\nEste texto conserva parágrafos, acentos e uma referência extensa sem espaços para verificar a leitura integral: ReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucionalReferenciaInstitucional."}}
