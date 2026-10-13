@@ -1,0 +1,9 @@
+{
+  "invalidHslSidebar": false,
+  "borderShadow": true,
+  "hoverShadow": true,
+  "declarations": [
+    "--tw-shadow:0 0 0 1px var(--tw-shadow-color,var(--sidebar-border))",
+    "--tw-shadow:0 0 0 1px var(--tw-shadow-color,var(--sidebar-accent))"
+  ]
+}

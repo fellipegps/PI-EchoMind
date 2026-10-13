@@ -130,21 +130,23 @@ export function FaqTab() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
-        <DialogContent showCloseButton={false} className="max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        <DialogContent showCloseButton={false} className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden"
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             dialogOrigin.current?.focus();
           }}>
-          <DialogHeader className="pr-8 text-left">
-            <DialogTitle>{editingFaq ? "Editar FAQ" : "Nova FAQ"}</DialogTitle>
-            <DialogDescription>Preencha a pergunta e a resposta. Ambos os campos são obrigatórios.</DialogDescription>
-          </DialogHeader>
-          <DialogClose asChild>
-            <Button variant="ghost" size="icon" aria-label="Fechar formulário de FAQ" disabled={saving} className="absolute right-2 top-2">
-              <X aria-hidden="true" />
-            </Button>
-          </DialogClose>
-          <form className="min-w-0 space-y-6" aria-label="Formulário de FAQ" aria-busy={saving}
+          <div className="flex items-start gap-2">
+            <DialogHeader className="min-w-0 flex-1 text-left">
+              <DialogTitle>{editingFaq ? "Editar FAQ" : "Nova FAQ"}</DialogTitle>
+              <DialogDescription>Preencha a pergunta e a resposta. Ambos os campos são obrigatórios.</DialogDescription>
+            </DialogHeader>
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" aria-label="Fechar formulário de FAQ" disabled={saving} className="shrink-0">
+                <X aria-hidden="true" />
+              </Button>
+            </DialogClose>
+          </div>
+          <form className="min-h-0 min-w-0 space-y-6 overflow-y-auto" aria-label="Formulário de FAQ" aria-busy={saving}
             onSubmit={(event) => { event.preventDefault(); void handleSave(); }}>
             <div className="space-y-2">
               <Label htmlFor="faq-question">Pergunta</Label>

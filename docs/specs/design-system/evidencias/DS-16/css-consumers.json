@@ -1,0 +1,74 @@
+[
+  {
+    "css": "echomind-front\\app\\(admin)\\campi\\geo-campus-map.module.css",
+    "classes": [
+      "map"
+    ],
+    "consumers": [
+      {
+        "file": "echomind-front\\app\\(admin)\\campi\\geo-campus-map.tsx",
+        "classes": [
+          "map"
+        ]
+      }
+    ],
+    "candidatesWithoutReference": []
+  },
+  {
+    "css": "echomind-front\\app\\(public)\\components\\campus-map-view.module.css",
+    "classes": [
+      "map"
+    ],
+    "consumers": [
+      {
+        "file": "echomind-front\\app\\(public)\\components\\campus-map-view.tsx",
+        "classes": [
+          "map"
+        ]
+      }
+    ],
+    "candidatesWithoutReference": []
+  },
+  {
+    "css": "echomind-front\\app\\(public)\\components\\public-portal.module.css",
+    "classes": [
+      "panel"
+    ],
+    "consumers": [
+      {
+        "file": "echomind-front\\app\\(public)\\components\\public-portal.tsx",
+        "classes": [
+          "panel"
+        ]
+      }
+    ],
+    "candidatesWithoutReference": []
+  },
+  {
+    "css": "echomind-front\\app\\(public)\\components\\public-schematic-map.module.css",
+    "classes": [
+      "campusMap",
+      "mapLabel",
+      "mapMarker",
+      "mapMarkerActive",
+      "mapPathOne",
+      "mapPathTwo",
+      "routeLine"
+    ],
+    "consumers": [
+      {
+        "file": "echomind-front\\app\\(public)\\components\\public-schematic-map.tsx",
+        "classes": [
+          "campusMap",
+          "mapLabel",
+          "mapMarker",
+          "mapMarkerActive",
+          "mapPathOne",
+          "mapPathTwo",
+          "routeLine"
+        ]
+      }
+    ],
+    "candidatesWithoutReference": []
+  }
+]

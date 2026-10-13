@@ -1,0 +1,529 @@
+[
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 42.695465087890625,
+      "width": 42.695465087890625,
+      "x": 232.7763671875,
+      "y": 46.900047302246094
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.455) 0px 0px 0px 0.909809px, rgba(11, 87, 208, 0.455) 0px 0px 0px 1.81962px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 95.39060974121094,
+      "width": 221.58441162109375,
+      "x": 41.755393981933594,
+      "y": 171.43800354003906
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-answer",
+    "rect": {
+      "height": 127.97491455078124,
+      "width": 222.956298828125,
+      "x": 41.02332305908203,
+      "y": 318.9845275878906
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.352132px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.704264px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Cancelar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 395
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.914503px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.82901px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Salvar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 343
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350355px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700709px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 41
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.354836px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.709672px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 171
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-return-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Nova FAQ",
+    "rect": {
+      "height": 44,
+      "width": 273,
+      "x": 16,
+      "y": 218
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.69) 0px 0px 0px 1.38236px, rgba(11, 87, 208, 0.69) 0px 0px 0px 2.76473px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": false,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": -23
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 162.6875
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.915693px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83139px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-answer",
+    "rect": {
+      "height": 128,
+      "width": 223,
+      "x": 41,
+      "y": 319
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Cancelar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 395
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350462px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700924px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Salvar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 343
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 41
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 171
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-return-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Nova FAQ",
+    "rect": {
+      "height": 44,
+      "width": 273,
+      "x": 16,
+      "y": 364
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.694) 0px 0px 0px 1.39041px, rgba(147, 197, 253, 0.694) 0px 0px 0px 2.78082px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar navegação",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 227,
+      "y": 16
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Dashboard",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 153
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Base de Conhecimento",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 201
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Não Respondidas",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 249
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Agente (Chatbot)",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Mapa dos Campi",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 332
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Locais (mapa antigo)",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Eventos",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Configurações",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 359
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Sair",
+    "rect": {
+      "height": 44,
+      "width": 271,
+      "x": 8,
+      "y": 428
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(15, 23, 42) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "navegacao-retorno",
+    "centerVisible": false,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "((a,b,c,d,e,f,g,h)=>{let i=document.documentElement,j=[\"light\",\"dark\"];function ",
+    "rect": {
+      "height": 1332,
+      "width": 305,
+      "x": 0,
+      "y": 0
+    },
+    "shadow": "none",
+    "tag": "BODY",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "qr-copiar",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 900,
+    "name": "Copiar link",
+    "rect": {
+      "height": 44,
+      "width": 120.78125,
+      "x": 33,
+      "y": 511
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.915833px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.83167px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "view": "qr-abrir",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 900,
+    "name": "Abrir portal",
+    "rect": {
+      "height": 44,
+      "width": 122.125,
+      "x": 161.78125,
+      "y": 511
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914573px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82915px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "view": "qr-baixar",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 900,
+    "name": "Baixar QR",
+    "rect": {
+      "height": 44,
+      "width": 114.921875,
+      "x": 33,
+      "y": 563
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.46) 0px 0px 0px 0.914433px, rgba(147, 197, 253, 0.46) 0px 0px 0px 1.82887px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "A",
+    "theme": "dark",
+    "width": 390
+  },
+  {
+    "view": "faq-resize-escuro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 31.7890625
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  }
+]

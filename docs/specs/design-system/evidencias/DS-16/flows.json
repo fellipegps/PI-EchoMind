@@ -1,0 +1,27 @@
+{
+  "agent": {
+    "imagesInConversation": 0,
+    "inputDisabled": false,
+    "text": "Você: Como consultar os serviços acadêmicos?Agente: Resposta **sintética**: Referência institucional extensa para conferência de leitura e quebra de linhas: TextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacos\n\n- Orientação institucional de teste.\n<img src=x onerror=alert(1)>"
+  },
+  "schematic": "Encontre seu caminho\n\nLocais do campus\n\nPesquise os espaços cadastrados pela instituição.\n\nMapa esquemático\n\nEstimativa temporária baseada no mapa esquemático.\n\nBuscar local\nPonto de origem\nSelecione a origem\nBiblioteca de ensino, pesquisa e extensão\nAuditório de integração\n\nOrigem: Biblioteca de ensino, pesquisa e extensão\n\nCAMPUS\n\nTrajeto aproximado calculado.\n\nTraçar rota\nBiblioteca de ensino, pesquisa e extensão → Auditório de integração\nAproximadamente 537 m · 8 min a pé\nEstimativa temporária baseada no mapa esquemático.\nBiblioteca de ensino, pesquisa e extensão\n\nbiblioteca · Bloco de demonstração · Térreo\n\nAuditório de integração\n\nensino · Bloco A · 1º andar",
+  "publicChat": {
+    "images": 0,
+    "inputDisabled": false,
+    "strong": 1,
+    "text": "EchoMindOlá! Sou o assistente acadêmico. Como posso ajudar você hoje?VocêQuais serviços estão disponíveis?EchoMindResposta sintética: Referência institucional extensa para conferência de leitura e quebra de linhas: TextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacosTextoSemEspacos\n\nOrientação institucional de teste.\n\n"
+  },
+  "geographic": "Destino: Bloco A\n\n16 m · cerca de 1 min a pé\n\nSiga cerca de 16 m até Bloco A.\nDirija-se à entrada de Bloco A.\nO percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.",
+  "faqCreated": "Pergunta criada pela revisão integrada DS-16",
+  "faqUpdated": "Resposta revisada pela DS-16, usando o mesmo ID.",
+  "faqRemoved": true,
+  "settings": "Instituição sintética de ensino, pesquisa e extensão — DS-16 revisada",
+  "qr": {
+    "download": "portal-ds16-fixture.png",
+    "imageHeight": 256,
+    "imageWidth": 256,
+    "pngOffered": true,
+    "url": "http://127.0.0.1:4200/p/ds16-fixture"
+  },
+  "copiedUrl": "http://127.0.0.1:4200/p/ds16-fixture"
+}

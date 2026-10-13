@@ -1,0 +1,631 @@
+[
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 41
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(2, 6, 23) 0px 0px 0px 2px, rgb(147, 197, 253) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 171
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.29) 0px 0px 0px 0.582746px, rgba(147, 197, 253, 0.29) 0px 0px 0px 1.16549px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-answer",
+    "rect": {
+      "height": 128,
+      "width": 223,
+      "x": 41,
+      "y": 319
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Cancelar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 395
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.35224px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.70448px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Salvar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 343
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 41
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.176) 0px 0px 0px 0.350301px, rgba(147, 197, 253, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-escuro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 171
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(2, 6, 23, 0.03) 0px 0px 0px 0.0655955px, rgba(147, 197, 253, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "dark",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 41
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 171
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.298) 0px 0px 0px 0.594854px, rgba(11, 87, 208, 0.298) 0px 0px 0px 1.18971px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-answer",
+    "rect": {
+      "height": 128,
+      "width": 223,
+      "x": 41,
+      "y": 319
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.03) 0px 0px 0px 0.0655955px, rgba(11, 87, 208, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Cancelar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 395
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Salvar",
+    "rect": {
+      "height": 44,
+      "width": 223,
+      "x": 41,
+      "y": 343
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar formulário de FAQ",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 235,
+      "y": 41
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.03) 0px 0px 0px 0.0655955px, rgba(11, 87, 208, 0.03) 0px 0px 0px 0.131191px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "faq-dialog-claro",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "faq-question",
+    "rect": {
+      "height": 96,
+      "width": 223,
+      "x": 41,
+      "y": 171
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.350301px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.700602px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "TEXTAREA",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": false,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "Fechar navegação",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": -36.49200439453125,
+      "y": 16
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.835) 0px 0px 0px 1.67422px, rgba(11, 87, 208, 0.835) 0px 0px 0px 3.34844px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "Dashboard",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": -124.35877990722656,
+      "y": 153
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "Base de Conhecimento",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": -56.610740661621094,
+      "y": 201
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "Não Respondidas",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": -20.74951171875,
+      "y": 249
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": false,
+    "height": 480,
+    "name": "Agente (Chatbot)",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": -2.0199432373046875,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Mapa dos Campi",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 7.2988128662109375,
+      "y": 332
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Locais (mapa antigo)",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Eventos",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Configurações",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 359
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-320",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Sair",
+    "rect": {
+      "height": 44,
+      "width": 271,
+      "x": 8,
+      "y": 428
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "qr-copiar",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 900,
+    "name": "Copiar link",
+    "rect": {
+      "height": 44,
+      "width": 120.78125,
+      "x": 33,
+      "y": 511
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.835) 0px 0px 0px 1.67298px, rgba(11, 87, 208, 0.835) 0px 0px 0px 3.34596px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "view": "qr-abrir",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 900,
+    "name": "Abrir portal",
+    "rect": {
+      "height": 44,
+      "width": 122.125,
+      "x": 161.78125,
+      "y": 511
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.176) 0px 0px 0px 0.349441px, rgba(11, 87, 208, 0.176) 0px 0px 0px 0.698882px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "view": "qr-baixar",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 900,
+    "name": "Baixar QR",
+    "rect": {
+      "height": 44,
+      "width": 114.921875,
+      "x": 33,
+      "y": 563
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(248, 250, 252, 0.46) 0px 0px 0px 0.918px, rgba(11, 87, 208, 0.46) 0px 0px 0px 1.836px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 390
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Fechar navegação",
+    "rect": {
+      "height": 44,
+      "width": 44,
+      "x": 227,
+      "y": 16
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(248, 250, 252) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Dashboard",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 153
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Base de Conhecimento",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 201
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Não Respondidas",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 249
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Agente (Chatbot)",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Mapa dos Campi",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 332
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Locais (mapa antigo)",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Eventos",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 288
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Configurações",
+    "rect": {
+      "height": 44,
+      "width": 256,
+      "x": 8,
+      "y": 359
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "A",
+    "theme": "light",
+    "width": 320
+  },
+  {
+    "view": "navegacao-claro-estavel",
+    "centerVisible": true,
+    "fullyInViewport": true,
+    "height": 480,
+    "name": "Sair",
+    "rect": {
+      "height": 44,
+      "width": 271,
+      "x": 8,
+      "y": 428
+    },
+    "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 2px, rgb(11, 87, 208) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+    "tag": "BUTTON",
+    "theme": "light",
+    "width": 320
+  }
+]
