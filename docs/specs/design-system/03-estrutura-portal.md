@@ -1,5 +1,7 @@
 # DS-03 — Estrutura e navegação do portal
 
+**Atualização autorizada em 13/10/2026:** o mapa esquemático e sua gestão foram retirados. As referências a esse recurso abaixo pertencem ao histórico da refatoração e não determinam sua manutenção ou restauração. O contrato atual desse escopo está na [retirada autorizada](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-retirada-mapa-antigo.md>); o mapa geográfico de campi permanece.
+
 **Versão:** 1.0.
 
 ## Identificação e controle

@@ -9,6 +9,8 @@ Este conjunto adota **Specification Driven Development (SDD)**: a especificaçã
 
 ## Documentos de referência
 
+Ajuste posterior, 13/10/2026: [retirada do mapa antigo](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-retirada-mapa-antigo.md>), autorizada pelo usuário. Página administrativa, alternativa pública e dependências funcionais removidas; somente o mapa geográfico permanece. Migração de retirada preparada e verificada offline, sem aplicação em banco real. Specs/evidências anteriores registram o histórico, sem reintroduzir o recurso.
+
 Ajuste posterior, 13/10/2026: [configurações simplificadas](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-configuracoes-simplificadas.md>), autorizado diretamente pelo usuário e implementado/verificado, aguardando revisão. Seletores de personalidade/voz removidos da página; tom já salvo e backend preservados. Nenhuma nova fase, commit ou push.
 
 - [Contrato comum](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/CONTRATO.md>): regras compartilhadas, preservações e fluxo de aprovação.
@@ -36,7 +38,7 @@ Cada arquivo contém problema, resultado esperado, limites, requisitos identific
 | 10 | 8B | [DS-10 — Documentos, upload e processamento](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/10-documentos.md>) | GPT-6.1 Sol | High |
 | 11 | 8C | [DS-11 — Perguntas não respondidas e triagem](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/11-triagem.md>) | GPT-6.1 Sol | Medium |
 | 12 | 9A | [DS-12 — Gestão administrativa de eventos](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/12-eventos-admin.md>) | GPT-6.1 Sol | Medium |
-| 13 | 9B | [DS-13 — Gestão administrativa de locais](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/13-locais-admin.md>) | GPT-6.1 Sol | Medium |
+| 13 | 9B | [DS-13 — Histórico: recurso retirado](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/13-locais-admin.md>) | GPT-6.1 Sol | Medium |
 | 14 | 9C | [DS-14 — Editor de campi e edição geográfica](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/14-editor-campi.md>) | GPT-6 Astra | High |
 | 15 | 10 | [DS-15 — Agente, configurações e QR do portal](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/15-agente-configuracoes.md>) | GPT-6.1 Sol | High |
 | 16 | 11 | [DS-16 — Consolidação e revisão integrada](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/16-consolidacao.md>) | GPT-6 Astra | High |

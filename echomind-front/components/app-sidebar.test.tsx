@@ -10,15 +10,15 @@ vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => state.mobile }));
 vi.mock("@/lib/api", () => ({ authApi: { logout: state.logout } }));
 import { AppSidebar } from "./app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "./ui/sidebar";
-const routes=["/dashboard","/base-de-conhecimento","/campi","/locais","/eventos","/nao-respondidas","/agente","/configuracoes"];
+const routes=["/dashboard","/base-de-conhecimento","/campi","/eventos","/nao-respondidas","/agente","/configuracoes"];
 beforeEach(() => {vi.clearAllMocks();state.mobile=false;state.pathname="/dashboard";state.logout.mockResolvedValue(undefined);});
 describe("Navegação administrativa", () => {
- it("preserva os oito destinos e identifica somente a rota atual", () => {
+ it("preserva os sete destinos atuais e identifica somente a rota atual", () => {
   const {rerender}=render(<SidebarProvider><AppSidebar /></SidebarProvider>);
   for(const route of routes){state.pathname=route;rerender(<SidebarProvider><AppSidebar /></SidebarProvider>);const links=screen.getAllByRole("link");expect(links.map(l=>l.getAttribute("href")).sort()).toEqual([...routes].sort());expect(links.filter(l=>l.getAttribute("aria-current")==="page").map(l=>l.getAttribute("href"))).toEqual([route]);}
  });
  it("abre o menu móvel, alcança seus destinos e fecha após seleção ou Escape",async()=>{
-  state.mobile=true;const user=userEvent.setup();render(<SidebarProvider><SidebarTrigger /><AppSidebar /></SidebarProvider>);await user.click(screen.getByRole("button",{name:"Alternar navegação"}));expect(await screen.findByRole("dialog",{name:"Navegação administrativa"})).toBeInTheDocument();expect(screen.getAllByRole("link")).toHaveLength(8);await user.click(screen.getByRole("link",{name:"Eventos"}));await waitFor(()=>expect(screen.queryByRole("dialog")).not.toBeInTheDocument());await user.click(screen.getByRole("button",{name:"Alternar navegação"}));await user.keyboard("{Escape}");await waitFor(()=>expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  state.mobile=true;const user=userEvent.setup();render(<SidebarProvider><SidebarTrigger /><AppSidebar /></SidebarProvider>);await user.click(screen.getByRole("button",{name:"Alternar navegação"}));expect(await screen.findByRole("dialog",{name:"Navegação administrativa"})).toBeInTheDocument();expect(screen.getAllByRole("link")).toHaveLength(7);await user.click(screen.getByRole("link",{name:"Eventos"}));await waitFor(()=>expect(screen.queryByRole("dialog")).not.toBeInTheDocument());await user.click(screen.getByRole("button",{name:"Alternar navegação"}));await user.keyboard("{Escape}");await waitFor(()=>expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
  });
  it("aguarda a saída existente e redireciona ao login",async()=>{render(<SidebarProvider><AppSidebar /></SidebarProvider>);await userEvent.click(screen.getByRole("button",{name:"Sair"}));await waitFor(()=>expect(state.replace).toHaveBeenCalledWith("/login"));expect(state.logout).toHaveBeenCalledOnce();});
 });

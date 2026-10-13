@@ -1,0 +1,326 @@
+[
+  {
+    "file": "docs/plano-refatoracao-design-echomind.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/00-direcao-visual.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/03-estrutura-portal.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/06-mapas-publicos.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/07-estrutura-admin.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/13-locais-admin.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/14-editor-campi.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/README.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/STATUS.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/ajustes/evidencias-configuracoes-simplificadas/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-00.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-02/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-03.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-03/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-03/preservacao-largura.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-03/requests.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-03/rota-esquematica.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-04.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-04/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-04/faq-fluxo.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-04/preservacao-resize.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-04/requests.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-05/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-05/consultas-fixture.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-05/consultas-slug.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06/estados-esquematico.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06/geografico.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06/matriz-esquematica.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06/requisicoes-fixture.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-06/textos-extensos.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/matriz-inicial.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/matriz.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/navegacao-desktop.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/navegacao.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/requisicoes.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/teclado-desktop.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/teclado.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-07/testes.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-08/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-09/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-10/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-11/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-11/medicoes.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-12/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-12/medicoes.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/medicoes.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/requisicoes-fluxos.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/requisicoes.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/testes-baseline.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/testes.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-13/tipos-ajuste.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/erro-leitura.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/exclusao-cancelada.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/exclusao-impedida.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/falha-atualizacao.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/validacao-distancia.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-14/validacao-pontos-iguais.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-15.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-15/requests.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16.md",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/browser-matrix.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/build.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/css-consumers.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/flows.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/keyboard-focus-transition.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/keyboard-focus.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/keyboard-stable.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/phase-ledger.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/prior-evidence-audit.json",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/requests.jsonl",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/tests-baseline.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "docs/specs/design-system/evidencias/DS-16/tests.txt",
+    "category": "historical documentation/evidence"
+  },
+  {
+    "file": "echomind-backend/alembic/versions/0016_campus_locations.py",
+    "category": "historical Alembic migration"
+  },
+  {
+    "file": "echomind-backend/tests/integration/test_migrations.py",
+    "category": "negative regression assertion"
+  }
+]

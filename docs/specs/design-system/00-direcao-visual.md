@@ -1,5 +1,7 @@
 # DS-00 — Direção visual e decisões comuns
 
+**Atualização autorizada em 13/10/2026:** o mapa esquemático e sua gestão foram retirados. As referências a esse recurso abaixo pertencem ao histórico da refatoração e não determinam sua manutenção ou restauração. O contrato atual desse escopo está na [retirada autorizada](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-retirada-mapa-antigo.md>); o mapa geográfico de campi permanece.
+
 | Metadado | Valor |
 | --- | --- |
 | ID | DS-00 |

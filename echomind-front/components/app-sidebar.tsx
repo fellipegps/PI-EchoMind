@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, HelpCircle, Bot, Settings, LogOut, Database, MapPin, MapPinned, CalendarDays, X } from "lucide-react";
+import { LayoutDashboard, HelpCircle, Bot, Settings, LogOut, Database, MapPinned, CalendarDays, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -30,7 +30,6 @@ const menuGroups = [
   ] },
   { title: "Campus e eventos", items: [
     { title: "Mapa dos Campi", url: "/campi", icon: MapPinned },
-    { title: "Locais (mapa antigo)", url: "/locais", icon: MapPin },
     { title: "Eventos", url: "/eventos", icon: CalendarDays },
   ] },
   { title: "Sistema", items: [

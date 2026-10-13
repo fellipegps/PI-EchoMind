@@ -16,7 +16,6 @@ const events = [
   { id: "ds05-event-4", title: "Virada acadêmica · capa quebrada de teste", event_date: "2099-12-31", event_end_date: "2100-01-02", event_type: "evento_social", course: "Administração · Curso de teste", description: "A capa deve falhar sem retirar este texto, os metadados ou o link.", location: "Sala de teste", image_url: "https://placehold.co/ds05-inexistente.png", link_url: "http://127.0.0.1:4107/info/evento-4" },
   { id: "ds05-event-5", title: "Encontro com campos opcionais ausentes", event_date: "2100-01-03", event_end_date: "2100-01-03", event_type: "evento_social", course: "Curso de teste", description: null, location: "Sala de teste", image_url: "http://example.com/capa-nao-permitida.png", link_url: "javascript:alert(1)" },
 ];
-const locations = Array.from({ length: 12 }, (_, index) => ({ id: `ds05-local-${index + 1}`, name: `Local de teste ${index + 1}`, description: "Local fictício para inspecionar a estrutura.", category: "ensino", floor: "Térreo", building: "Bloco de teste", x: 20 + (index % 4) * 20, y: 20 + Math.floor(index / 4) * 25 }));
 
 createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -57,7 +56,6 @@ createServer(async (req, res) => {
     "": { public_slug: slug, company_name: slug === "ds05-alternate" ? "Outra instituição · DS-05" : "Campus de teste · DS-05", website: null, phone: null, address: null, business_hours: null },
     "/faqs": faqs,
     "/events": slug === "ds05-empty" ? [] : slug === "ds05-alternate" ? [{ ...events[0], id: "ds05-other", title: "Evento exclusivo da segunda instituição" }] : events,
-    "/locations": locations,
     "/geo-campus": { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] },
   };
   if (suffix in responses) { res.end(JSON.stringify(responses[suffix])); return; }

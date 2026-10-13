@@ -51,7 +51,6 @@ createServer(async (req, res) => {
     "/unanswered": [{ id: "question1", canonical_question: "Pergunta fictícia para conferir a rolagem e a estrutura administrativa com uma descrição extensa.", count: 2, first_asked: stamp, last_asked: stamp, similar_questions: [], triage_status: "pending", triage_reason: null }],
     "/events": [{ id: "event1", title: "Encontro fictício de integração e apresentação dos espaços institucionais", event_date: "2026-10-12", event_end_date: "2026-10-13", event_type: "palestra", course: "Curso de teste com nome extenso", description: "Evento fictício", location: "Auditório de teste", image_url: null, link_url: null, created_at: stamp }],
     "/events/courses": [{id:"course",name:"Curso de teste com nome extenso"}],
-    "/locations": [{id:"loc1",name:"Laboratório fictício de ensino e pesquisa",description:"Local de teste",category:"laboratório",floor:"1º andar",building:"Bloco fictício",x:40,y:50,active:true,created_at:stamp,updated_at:stamp}],
     "/campuses": [{id:"campus1",name:"Campus fictício · DS-07",description:"Exemplo sintético sem posição real do usuário.",center_lat:-23.5505,center_lng:-46.6333,zoom:17,active:true}],
     "/campuses/campus1/buildings": [{id:"building1",campus_id:"campus1",name:"Bloco de teste",description:"Prédio fictício",category:"ensino",entrance_lat:-23.5505,entrance_lng:-46.6333,entrance_node_id:"node1",active:true}],
     "/campuses/campus1/spaces": [],

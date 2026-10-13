@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-13",
+  "baseline": "3c6838d",
+  "lint": {
+    "exitCode": 0,
+    "log": "lint.txt"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "log": "typecheck.txt"
+  },
+  "frontend": {
+    "exitCode": 0,
+    "tests": 218,
+    "files": 24,
+    "log": "frontend-complete-final.txt"
+  },
+  "backend": {
+    "exitCode": 0,
+    "tests": 514,
+    "warnings": 8,
+    "log": "backend-complete-final.txt"
+  },
+  "build": {
+    "exitCode": 0,
+    "pages": 18,
+    "log": "build.txt"
+  },
+  "migration": {
+    "offlineExitCode": 0,
+    "sqliteAndDowngradeTestsPassed": true,
+    "appliedToRealDatabase": false
+  },
+  "browser": {
+    "observations": 12,
+    "retiredEndpointRequests": 0
+  },
+  "commitCreated": false
+}

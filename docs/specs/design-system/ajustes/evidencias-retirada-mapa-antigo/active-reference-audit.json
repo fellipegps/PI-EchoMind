@@ -1,0 +1,10 @@
+{
+  "folders": [
+    "echomind-front/app",
+    "echomind-front/components",
+    "echomind-front/lib",
+    "echomind-front/test/fixtures",
+    "echomind-backend/app"
+  ],
+  "matches": []
+}

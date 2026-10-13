@@ -10,7 +10,6 @@ mkdirSync(dirname(logPath), { recursive: true });
 const counts = new Map();
 const faqs = Array.from({ length: 4 }, (_, index) => ({ id: `ds03-faq-${index + 1}`, question: ["Como acessar a biblioteca?", "Onde encontro os horários de atendimento?", "Como consultar os eventos do campus?", "Como encontrar um local no campus?"][index], answer: "Resposta local de teste." }));
 const events = Array.from({ length: 12 }, (_, index) => ({ id: `ds03-event-${index + 1}`, title: `Evento de teste ${index + 1}`, event_date: "2099-10-20", event_end_date: "2099-10-21", event_type: "evento_social", course: "Curso de teste", description: "Atividade fictícia para verificar a rolagem e a navegação do portal.", location: "Auditório de teste", image_url: null, link_url: "http://127.0.0.1:4104/info/evento" }));
-const locations = Array.from({ length: 12 }, (_, index) => ({ id: `ds03-local-${index + 1}`, name: `Local de teste ${index + 1}`, description: "Local fictício para inspecionar a estrutura.", category: "ensino", floor: "Térreo", building: "Bloco de teste", x: 20 + (index % 4) * 20, y: 20 + Math.floor(index / 4) * 25 }));
 
 createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -41,7 +40,6 @@ createServer(async (req, res) => {
     "": { public_slug: slug, company_name: slug === "ds03-longo" ? "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras" : "Campus de teste · DS-03", website: null, phone: null, address: null, business_hours: null },
     "/faqs": faqs,
     "/events": events,
-    "/locations": locations,
     "/geo-campus": { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] },
   };
   if (suffix in responses) { res.end(JSON.stringify(responses[suffix])); return; }

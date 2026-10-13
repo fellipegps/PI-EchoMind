@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 import { publicPortalApi, streamPublicChat } from "@/lib/api";
-import type { PublicCampusLocation, PublicEvent, PublicFaq } from "@/lib/api";
+import type { PublicEvent, PublicFaq } from "@/lib/api";
 
 import { PublicCampusNavigator } from "./public-campus-navigator";
 import { PortalSectionHeading, PortalShell, type PortalTabId as TabId } from "./public-portal-shell";
@@ -14,22 +14,12 @@ import styles from "./public-portal.module.css";
 
 import { ChatAuxiliary, PublicChat, type ChatMessage } from "./public-chat";
 import { PublicEvents } from "./public-events";
-import { Button } from "@/components/ui/button";
-import { PublicSchematicMap } from "./public-schematic-map";
-import { mapControlFocus } from "./public-map-controls";
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: 1,
   role: "assistant",
   content: "Olá! Sou o assistente acadêmico. Como posso ajudar você hoje?",
 };
-
-function schematicDistanceInMeters(
-  from: PublicCampusLocation,
-  to: PublicCampusLocation
-) {
-  return Math.max(25, Math.round(Math.hypot(to.x - from.x, to.y - from.y) * 12));
-}
 
 type PublicPortalProps = {
   publicSlug?: string;
@@ -43,11 +33,6 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
   const [events, setEvents] = useState<PublicEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(Boolean(normalizedSlug));
   const [eventsError, setEventsError] = useState("");
-  const [locations, setLocations] = useState<PublicCampusLocation[]>([]);
-  const [locationsLoading, setLocationsLoading] = useState(Boolean(normalizedSlug));
-  const [locationsError, setLocationsError] = useState("");
-  const [geoAvailable, setGeoAvailable] = useState(false);
-  const [showLegacyMap, setShowLegacyMap] = useState(false);
   const [portalLoading, setPortalLoading] = useState(Boolean(normalizedSlug));
   const [portalError, setPortalError] = useState(
     normalizedSlug ? "" : "Link inválido. Solicite à instituição o endereço correto do portal."
@@ -57,16 +42,6 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
   const [chatError, setChatError] = useState("");
   const [sending, setSending] = useState(false);
   const [waitingForFirstToken, setWaitingForFirstToken] = useState(false);
-  const [locationSearch, setLocationSearch] = useState("");
-  const [originId, setOriginId] = useState("");
-  const [destinationId, setDestinationId] = useState("");
-  const [locationStatus, setLocationStatus] = useState("");
-  const [route, setRoute] = useState<{
-    originName: string;
-    destination: PublicCampusLocation;
-    distance: number;
-    minutes: number;
-  } | null>(null);
   const nextMessageId = useRef(2);
   const firstToken = useRef(true);
   const chatScroll = useRef<HTMLDivElement>(null);
@@ -85,14 +60,6 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
         setEventsError("Não foi possível carregar os eventos agora.");
       })
       .finally(() => setEventsLoading(false));
-    publicPortalApi
-      .listLocations(normalizedSlug)
-      .then(setLocations)
-      .catch(() => {
-        setLocations([]);
-        setLocationsError("Não foi possível carregar os locais agora.");
-      })
-      .finally(() => setLocationsLoading(false));
     publicPortalApi
       .getInstitution(normalizedSlug)
       .then((institution) => {
@@ -168,46 +135,6 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
     void sendQuestion();
   };
 
-  const filteredLocations = locations.filter((location) => {
-    const normalizedSearch = locationSearch.trim().toLocaleLowerCase("pt-BR");
-    return (
-      !normalizedSearch ||
-      `${location.name} ${location.category} ${location.building ?? ""} ${location.floor ?? ""} ${location.description ?? ""}`
-        .toLocaleLowerCase("pt-BR")
-        .includes(normalizedSearch)
-    );
-  });
-
-  const selectDestination = (location: PublicCampusLocation) => {
-    setDestinationId(location.id);
-    setRoute(null);
-    setLocationStatus(`${location.name} selecionado como destino.`);
-  };
-
-  const traceRoute = () => {
-    const destination = locations.find((location) => location.id === destinationId);
-    const storedOrigin = locations.find((location) => location.id === originId);
-    const originName = storedOrigin?.name;
-
-    if (!destination || !storedOrigin || !originName) {
-      setLocationStatus("Selecione a origem e o destino para calcular o trajeto.");
-      return;
-    }
-    const distance = schematicDistanceInMeters(storedOrigin, destination);
-    setRoute({
-      originName,
-      destination,
-      distance,
-      minutes: Math.max(1, Math.ceil(distance / 75)),
-    });
-    setLocationStatus("Trajeto aproximado calculado.");
-  };
-
-  const originLocation = locations.find((location) => location.id === originId);
-  const destinationLocation = locations.find(
-    (location) => location.id === destinationId
-  );
-
   return (
     <div>
       <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName}
@@ -237,19 +164,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
             <section className={styles.panel} aria-labelledby="places-title">
               <PortalSectionHeading id="places-title" eyebrow="Encontre seu caminho" title="Locais do campus" description="Pesquise os espaços cadastrados pela instituição." />
 
-              <div className="space-y-6">
-                <PublicCampusNavigator publicSlug={normalizedSlug} onAvailabilityChange={setGeoAvailable} />
-                {geoAvailable && <Button variant="outline" type="button" className={mapControlFocus}
-                  onClick={() => setShowLegacyMap((visible) => !visible)} aria-expanded={showLegacyMap}>
-                  {showLegacyMap ? "Ocultar mapa esquemático" : "Ver mapa esquemático"}
-                </Button>}
-                {(!geoAvailable || showLegacyMap) && <PublicSchematicMap
-                  locations={locations} filteredLocations={filteredLocations} loading={locationsLoading} error={locationsError}
-                  search={locationSearch} onSearch={setLocationSearch} originId={originId}
-                  onOrigin={(value) => { setOriginId(value); setRoute(null); }} destinationId={destinationId}
-                  onDestination={selectDestination} originLocation={originLocation} destinationLocation={destinationLocation}
-                  route={route} status={locationStatus} onTrace={traceRoute} />}
-              </div>
+              <PublicCampusNavigator publicSlug={normalizedSlug} />
             </section>
           )}
       </PortalShell>

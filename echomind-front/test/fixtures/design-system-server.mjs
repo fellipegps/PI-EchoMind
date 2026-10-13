@@ -35,7 +35,6 @@ createServer(async (req, res) => {
     "/public/ds01-fixture": { public_slug: "ds01-fixture", company_name: "Campus de teste · DS-01", website: null, phone: null, address: null, business_hours: null },
     "/public/ds01-fixture/faqs": [faq],
     "/public/ds01-fixture/events": [],
-    "/public/ds01-fixture/locations": [],
   };
   if (path === "/public/ds01-fixture/chat") {
     res.setHeader("Content-Type", "text/plain; charset=utf-8");

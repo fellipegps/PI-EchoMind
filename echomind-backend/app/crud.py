@@ -18,7 +18,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .database import (
-    CampusLocation,
     CompanyEvent,
     Config,
     EventCourse,
@@ -31,8 +30,6 @@ from .database import (
 from .unanswered_triage import question_fingerprint
 from .middleware import latency_store
 from .schemas import (
-    CampusLocationCreate,
-    CampusLocationUpdate,
     ConfigUpdate,
     EventCourseCreate,
     EventCreate,
@@ -428,125 +425,6 @@ def delete_event(db: Session, event_id: str, tenant_id: str) -> bool:
     if not event:
         return False
     db.delete(event)
-    db.commit()
-    return True
-
-
-# Locais do campus
-
-class CampusLocationNameConflictError(ValueError):
-    pass
-
-
-def get_campus_locations(db: Session, tenant_id: str) -> list[CampusLocation]:
-    return (
-        db.query(CampusLocation)
-        .filter(CampusLocation.tenant_id == tenant_id)
-        .order_by(CampusLocation.name.asc(), CampusLocation.id.asc())
-        .all()
-    )
-
-
-def get_public_campus_locations(
-    db: Session,
-    tenant_id: str,
-) -> list[CampusLocation]:
-    return (
-        db.query(CampusLocation)
-        .filter(
-            CampusLocation.tenant_id == tenant_id,
-            CampusLocation.active.is_(True),
-        )
-        .order_by(CampusLocation.name.asc(), CampusLocation.id.asc())
-        .all()
-    )
-
-
-def _campus_location_name_exists(
-    db: Session,
-    *,
-    tenant_id: str,
-    name: str,
-    exclude_id: str | None = None,
-) -> bool:
-    query = db.query(CampusLocation.id).filter(
-        CampusLocation.tenant_id == tenant_id,
-        func.lower(CampusLocation.name) == name.strip().lower(),
-    )
-    if exclude_id is not None:
-        query = query.filter(CampusLocation.id != exclude_id)
-    return query.first() is not None
-
-
-def create_campus_location(
-    db: Session,
-    payload: CampusLocationCreate,
-    tenant_id: str,
-) -> CampusLocation:
-    if _campus_location_name_exists(
-        db,
-        tenant_id=tenant_id,
-        name=payload.name,
-    ):
-        raise CampusLocationNameConflictError
-    location = CampusLocation(
-        tenant_id=tenant_id,
-        **payload.model_dump(),
-    )
-    db.add(location)
-    db.commit()
-    db.refresh(location)
-    return location
-
-
-def update_campus_location(
-    db: Session,
-    location_id: str,
-    payload: CampusLocationUpdate,
-    tenant_id: str,
-) -> Optional[CampusLocation]:
-    location = (
-        db.query(CampusLocation)
-        .filter(
-            CampusLocation.id == location_id,
-            CampusLocation.tenant_id == tenant_id,
-        )
-        .first()
-    )
-    if location is None:
-        return None
-    changes = payload.model_dump(exclude_unset=True)
-    if "name" in changes and _campus_location_name_exists(
-        db,
-        tenant_id=tenant_id,
-        name=changes["name"],
-        exclude_id=location.id,
-    ):
-        raise CampusLocationNameConflictError
-    for field, value in changes.items():
-        setattr(location, field, value)
-    location.updated_at = utc_now()
-    db.commit()
-    db.refresh(location)
-    return location
-
-
-def delete_campus_location(
-    db: Session,
-    location_id: str,
-    tenant_id: str,
-) -> bool:
-    location = (
-        db.query(CampusLocation)
-        .filter(
-            CampusLocation.id == location_id,
-            CampusLocation.tenant_id == tenant_id,
-        )
-        .first()
-    )
-    if location is None:
-        return False
-    db.delete(location)
     db.commit()
     return True
 

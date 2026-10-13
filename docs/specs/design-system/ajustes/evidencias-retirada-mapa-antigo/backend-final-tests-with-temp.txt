@@ -1,0 +1,171 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.2.0, pluggy-1.6.0
+rootdir: C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-backend
+configfile: pytest.ini
+plugins: anyio-4.14.2, asyncio-0.23.7, cov-7.1.0
+asyncio: mode=Mode.AUTO
+collected 514 items
+
+tests\quick\test_cors_config.py ......................                   [  4%]
+tests\quick\test_document_calendar.py .............                      [  6%]
+tests\quick\test_document_coverage_gate.py .EEEEEEEEEEEEEEEEEEE          [ 10%]
+tests\quick\test_document_endpoints.py .................                 [ 14%]
+tests\quick\test_document_ingestion.py ................................. [ 20%]
+..............                                                           [ 23%]
+tests\quick\test_document_models.py ...                                  [ 23%]
+tests\quick\test_document_processing.py ...........                      [ 25%]
+tests\quick\test_document_repository.py ................................ [ 32%]
+.                                                                        [ 32%]
+tests\quick\test_document_retrieval_safety.py .......................    [ 36%]
+tests\quick\test_document_upload.py ................                     [ 39%]
+tests\quick\test_document_upload_limits.py ...........                   [ 42%]
+tests\quick\test_document_upload_streaming.py .......................... [ 47%]
+.                                                                        [ 47%]
+tests\quick\test_document_vector_contract.py ....                        [ 48%]
+tests\quick\test_embedding_prefixes.py ....                              [ 48%]
+tests\quick\test_endpoints.py .......................................... [ 57%]
+.....                                                                    [ 57%]
+tests\quick\test_eval_rag.py .EE....                                     [ 59%]
+tests\quick\test_faq_cache_matching.py .................                 [ 62%]
+tests\quick\test_faqs.py ................                                [ 65%]
+tests\quick\test_geographic_campus.py ...                                [ 66%]
+tests\quick\test_geographic_map_only.py ...                              [ 66%]
+tests\quick\test_hybrid_search.py ......                                 [ 68%]
+tests\quick\test_parent_child_retrieval.py ........                      [ 69%]
+tests\quick\test_public_portal.py ..........                             [ 71%]
+tests\quick\test_rag_context_sources.py .........                        [ 73%]
+tests\quick\test_rag_document_validity.py ............                   [ 75%]
+tests\quick\test_rag_metrics.py ...........                              [ 77%]
+tests\quick\test_rag_reindex.py .................................        [ 84%]
+tests\quick\test_rate_limit.py ...................                       [ 87%]
+tests\quick\test_reranker.py ............                                [ 90%]
+tests\quick\test_similarity_threshold_calibration.py ......E..           [ 92%]
+tests\quick\test_structured_rag_logging.py ........                      [ 93%]
+tests\quick\test_unanswered_triage.py .................................  [100%]
+
+=================================== ERRORS ====================================
+____________ ERROR at setup of test_accepts_exactly_eighty_percent ____________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_rejects_less_than_eighty_even_if_xml_rate_rounds_up __
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_cannot_compensate_one_module_with_other_modules_coverage _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_rejects_any_missing_required_module[document_ingestion.py] _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_rejects_any_missing_required_module[document_processing.py] _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_rejects_any_missing_required_module[document_repository.py] _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_rejects_any_missing_required_module[document_upload.py] _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_____ ERROR at setup of test_accepts_report_paths_from_backend_root[app/] _____
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+____ ERROR at setup of test_accepts_report_paths_from_backend_root[app\\] _____
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_does_not_accept_a_different_module_with_same_basename _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+________ ERROR at setup of test_rejects_module_without_measured_lines _________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_______ ERROR at setup of test_rejects_missing_or_invalid_report[None] ________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+____ ERROR at setup of test_rejects_missing_or_invalid_report[<coverage>] _____
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+__ ERROR at setup of test_cli_returns_failure_status_for_undercovered_module __
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_ ERROR at setup of test_rejects_duplicate_module_instead_of_choosing_better_coverage _
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+________ ERROR at setup of test_rejects_invalid_line_counts[1-invalid] ________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+__________ ERROR at setup of test_rejects_invalid_line_counts[1--1] ___________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+___________ ERROR at setup of test_rejects_invalid_line_counts[0-1] ___________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+___________ ERROR at setup of test_rejects_invalid_line_counts[2-1] ___________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+__________ ERROR at setup of test_dataset_rejects_duplicate_case_ids __________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_____ ERROR at setup of test_dataset_rejects_missing_required_case_field ______
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+_____________ ERROR at setup of test_split_rejects_duplicate_case _____________
+..\..\..\..\.pyenv\pyenv-win\versions\3.12.10\Lib\pathlib.py:1311: in mkdir
+    os.mkdir(self, mode)
+E   PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents\\Projeto Integrador\\EchoMind-main\\echomind-backend\\.pytest_cache\\map-retirement-20261013-v1'
+============================== warnings summary ===============================
+tests/quick/test_document_repository.py::test_database_index_protects_insert_when_precheck_is_stale
+tests/quick/test_document_upload.py::test_duplicate_is_scoped_to_authenticated_tenant
+tests/quick/test_document_upload.py::test_internal_persistence_error_does_not_leak_details
+tests/quick/test_document_upload_limits.py::test_upload_enforces_advertised_limit_without_trusting_ui[2]
+tests/quick/test_document_upload_limits.py::test_upload_enforces_advertised_limit_without_trusting_ui[20]
+tests/quick/test_document_upload_streaming.py::test_upload_failures_close_files_and_do_not_schedule_processing[metadata-422]
+tests/quick/test_document_upload_streaming.py::test_upload_failures_close_files_and_do_not_schedule_processing[persistence-500]
+tests/quick/test_public_portal.py::test_database_rejects_duplicate_public_slug
+  C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-backend\tests\quick\conftest.py:139: SAWarning: transaction already deassociated from connection
+    transaction.rollback()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/quick/test_document_coverage_gate.py::test_accepts_exactly_eighty_percent - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_less_than_eighty_even_if_xml_rate_rounds_up - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_cannot_compensate_one_module_with_other_modules_coverage - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_any_missing_required_module[document_ingestion.py] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_any_missing_required_module[document_processing.py] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_any_missing_required_module[document_repository.py] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_any_missing_required_module[document_upload.py] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_accepts_report_paths_from_backend_root[app/] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_accepts_report_paths_from_backend_root[app\\] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_does_not_accept_a_different_module_with_same_basename - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_module_without_measured_lines - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_missing_or_invalid_report[None] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_missing_or_invalid_report[<coverage>] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_cli_returns_failure_status_for_undercovered_module - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_duplicate_module_instead_of_choosing_better_coverage - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_invalid_line_counts[1-invalid] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_invalid_line_counts[1--1] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_invalid_line_counts[0-1] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_document_coverage_gate.py::test_rejects_invalid_line_counts[2-1] - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_eval_rag.py::test_dataset_rejects_duplicate_case_ids - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_eval_rag.py::test_dataset_rejects_missing_required_case_field - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+ERROR tests/quick/test_similarity_threshold_calibration.py::test_split_rejects_duplicate_case - PermissionError: [WinError 5] Acesso negado: 'C:\\Users\\Fellipe\\Documents...
+================= 492 passed, 8 warnings, 22 errors in 44.47s =================

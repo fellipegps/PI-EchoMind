@@ -1,16 +1,16 @@
 // DS-16: synthetic session and in-memory data; loopback only, no upstream services.
 import { createServer } from "node:http";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const logPath = fileURLToPath(new URL("../../../docs/specs/design-system/evidencias/DS-16/requests.jsonl", import.meta.url));
+const logPath = fileURLToPath(new URL("../../.next/ds16-requests.jsonl", import.meta.url));
+mkdirSync(fileURLToPath(new URL("../../.next/", import.meta.url)), { recursive: true });
 const stamp = "2026-10-12T12:00:00Z";
 const user = { id: "00000000-0000-4000-8000-000000000016", email: "ds16@example.test", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: {}, created_at: stamp };
 const long = "Referência institucional extensa para conferência de leitura e quebra de linhas: " + "TextoSemEspacos".repeat(12);
 let config = { id: "config16", public_slug: "ds16-fixture", company_name: "Instituição sintética de ensino, pesquisa e extensão — DS-16", description: long, tone_of_voice: "profissional e cordial", chat_voice_gender: "feminina", website: "https://example.test", phone: "(00) 00000-0000", address: "Avenida de teste, 1000", business_hours: "Segunda a sexta, das 8h às 22h", updated_at: stamp };
 let faqs = [{ id: "faq16", question: "Como consultar os serviços acadêmicos? " + long, answer: "Resposta **de teste** com orientação institucional. " + long, show_in_chatbot: true, created_at: stamp }];
 const events = [{ id: "event16", title: "Encontro de integração acadêmica e apresentação dos espaços institucionais", description: long, event_date: "2026-10-20", event_end_date: "2026-10-21", event_type: "palestra", course: "Curso sintético de sistemas de informação", location: "Auditório fictício — Bloco A", image_url: null, link_url: "https://example.test/evento", created_at: stamp }];
-const locations = [{ id: "loc16", name: "Biblioteca de ensino, pesquisa e extensão", description: long, category: "biblioteca", floor: "Térreo", building: "Bloco de demonstração", x: 30, y: 40, active: true, created_at: stamp, updated_at: stamp }, { id: "loc17", name: "Auditório de integração", description: "Dados sintéticos", category: "ensino", floor: "1º andar", building: "Bloco A", x: 70, y: 60, active: true, created_at: stamp, updated_at: stamp }];
 const campuses = [{ id: "c1", name: "Campus sintético Central", description: long, center_lat: -23.55045, center_lng: -46.63325, zoom: 18, active: true }];
 const nodes = [{ id: "a", campus_id: "c1", lat: -23.5505, lng: -46.6333, label: "Portaria" }, { id: "b", campus_id: "c1", lat: -23.5504, lng: -46.6332, label: "Bloco A" }];
 const edges = [{ id: "ab", campus_id: "c1", from_node_id: "a", to_node_id: "b", distance_m: 15.5, accessible: true, active: true }];
@@ -45,7 +45,7 @@ createServer(async (req, res) => {
   if (["/auth/v1/user", "/auth/me"].includes(path)) { send(200, { ...user, is_active: true }); return; }
   if (path === "/auth/v1/logout") { send(204); return; }
   // Public requests never require or forward a real session.
-  const publicMatch = path.match(/^\/public\/(ds16-fixture|ds16-schematic)(\/.*)?$/);
+  const publicMatch = path.match(/^\/public\/(ds16-fixture|ds16-empty|ds16-error)(\/.*)?$/);
   if (path === "/chat" || publicMatch?.[2] === "/chat") {
     if (path === "/chat" && body.tenant_id !== user.id) { send(400, { detail: "Contexto fictício incorreto" }); return; }
     res.setHeader("Content-Type", "text/plain; charset=utf-8"); res.flushHeaders();
@@ -56,8 +56,9 @@ createServer(async (req, res) => {
   }
   if (publicMatch) {
     const suffix = publicMatch[2] || "";
-    const geo = publicMatch[1] === "ds16-schematic" ? { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] } : { campuses, buildings, spaces, nodes, edges };
-    const data = { "": config, "/faqs": faqs.filter(f => f.show_in_chatbot), "/events": events, "/locations": locations, "/geo-campus": geo };
+    if (publicMatch[1] === "ds16-error" && suffix === "/geo-campus") { send(500, { detail: "DETALHE_INTERNO_SINTETICO" }); return; }
+    const geo = publicMatch[1] === "ds16-empty" ? { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] } : { campuses, buildings, spaces, nodes, edges };
+    const data = { "": config, "/faqs": faqs.filter(f => f.show_in_chatbot), "/events": events, "/geo-campus": geo };
     if (suffix in data) { send(200, data[suffix]); return; }
   }
   // Tiny local tile: no calls to OSM/MapTiler, attribution stays explicit.
@@ -69,7 +70,7 @@ createServer(async (req, res) => {
   if (faqMatch && req.method === "PUT") { const faq = faqs.find(f => f.id === faqMatch[1]); Object.assign(faq, body); send(200, faq); return; }
   if (faqMatch && req.method === "DELETE") { faqs = faqs.filter(f => f.id !== faqMatch[1]); send(204); return; }
   if (req.method !== "GET") { send(404, { detail: "Operação não implementada na fixture; nada persistido" }); return; }
-  const responses = { "/config": config, "/dashboard": dashboard, "/dashboard/rag-metrics": rag, "/faqs": faqs, "/documents": { documents, total: documents.length }, "/documents/upload-limits": { max_document_size_bytes: 10485760 }, "/unanswered": questions.filter(q => q.triage_status === (url.searchParams.get("status") || "pending")), "/events": events, "/events/courses": [{ id: "course16", name: events[0].course }], "/locations": locations, "/campuses": campuses, "/campuses/c1/buildings": buildings, "/campuses/c1/spaces": spaces, "/campuses/c1/path-nodes": nodes, "/campuses/c1/path-edges": edges };
+  const responses = { "/config": config, "/dashboard": dashboard, "/dashboard/rag-metrics": rag, "/faqs": faqs, "/documents": { documents, total: documents.length }, "/documents/upload-limits": { max_document_size_bytes: 10485760 }, "/unanswered": questions.filter(q => q.triage_status === (url.searchParams.get("status") || "pending")), "/events": events, "/events/courses": [{ id: "course16", name: events[0].course }], "/campuses": campuses, "/campuses/c1/buildings": buildings, "/campuses/c1/spaces": spaces, "/campuses/c1/path-nodes": nodes, "/campuses/c1/path-edges": edges };
   if (path in responses) { send(200, responses[path]); return; }
   send(404, { detail: "Fora da fixture DS-16" });
 }).listen(4201, "127.0.0.1", () => console.log("DS-16 fixture ready at http://127.0.0.1:4201"));

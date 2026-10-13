@@ -1,0 +1,13 @@
+BEGIN;
+
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Generating static SQL
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+-- Running upgrade 0022 -> 0023
+
+DROP TABLE campus_locations;
+
+INFO  [alembic.runtime.migration] Running upgrade 0022 -> 0023, Retira a tabela do mapa substitu�do pela navega��o geogr�fica.
+UPDATE alembic_version SET version_num='0023' WHERE alembic_version.version_num = '0022';
+
+COMMIT;

@@ -30,14 +30,11 @@ function errorForLocation(code: number): string {
   return "A localização demorou a responder. Tente novamente ou escolha uma origem no mapa.";
 }
 
-export function PublicCampusNavigator({
-  publicSlug,
-  onAvailabilityChange,
-}: {
-  publicSlug: string;
-  onAvailabilityChange?: (available: boolean) => void;
-}) {
+export function PublicCampusNavigator({ publicSlug }: { publicSlug: string }) {
   const [data, setData] = useState<PublicGeoCampus | null>(null);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const loading = Boolean(publicSlug) && loadedSlug !== publicSlug;
   const [campusId, setCampusId] = useState("");
   const [search, setSearch] = useState("");
   const [destination, setDestination] = useState<Destination>(null);
@@ -60,15 +57,17 @@ export function PublicCampusNavigator({
       if (cancelled) return;
       const activeCampuses = new Set(result.campuses.filter((campus) => campus.active).map((campus) => campus.id));
       const available = result.buildings.some((building) => building.active && activeCampuses.has(building.campus_id));
+      setError("");
       setData(available ? result : null);
-      onAvailabilityChange?.(available);
     }).catch(() => {
       if (cancelled) return;
       setData(null);
-      onAvailabilityChange?.(false);
+      setError("Não foi possível carregar o mapa do campus agora. Tente novamente mais tarde.");
+    }).finally(() => {
+      if (!cancelled) setLoadedSlug(publicSlug);
     });
     return () => { cancelled = true; };
-  }, [publicSlug, onAvailabilityChange]);
+  }, [publicSlug]);
 
   useEffect(() => {
     if (!tracking) return;
@@ -182,7 +181,12 @@ export function PublicCampusNavigator({
     });
   }, [buildings, spaces, search]);
 
-  if (!campus) return null;
+  if (loading) return <Card role="status" className="p-6 text-sm text-muted-foreground">Carregando mapa do campus…</Card>;
+  if (error) return <Card role="alert" className="p-6 text-sm text-destructive">{error}</Card>;
+  if (!campus) return <Card role="status" className="gap-2 p-6">
+    <h3 className="text-lg font-semibold">Mapa do campus indisponível</h3>
+    <p className="text-sm text-muted-foreground">A instituição ainda não disponibilizou um mapa geográfico para consulta.</p>
+  </Card>;
 
   const chooseManualBuilding = (id: string) => {
     const building = buildings.find((item) => item.id === id);

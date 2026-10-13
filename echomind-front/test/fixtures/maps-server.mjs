@@ -28,7 +28,6 @@ const edges = [
   { id: "ac", campus_id: "c1", from_node_id: "a", to_node_id: "c", distance_m: 16, accessible: true, active: true },
   { id: "cd", campus_id: "c1", from_node_id: "c", to_node_id: "d", distance_m: 16, accessible: true, active: true },
 ];
-const locations = Array.from({ length: 8 }, (_, i) => ({ id: `local-${i}`, name: `Local de teste ${i + 1}`, description: "Descrição fictícia", category: "ensino", building: "Bloco de teste", floor: "Térreo", x: 20 + (i % 4) * 20, y: 30 + Math.floor(i / 4) * 35 }));
 createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "*");
@@ -37,11 +36,11 @@ createServer(async (req, res) => {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   const path = new URL(req.url, "http://127.0.0.1:4109").pathname;
   appendFileSync(logPath, JSON.stringify({ method: req.method, path }) + "\n");
-  const match = path.match(/^\/public\/(ds06-fixture|ds06-schematic|ds06-disconnected|ds06-long|ds06-error|ds06-empty|ds06-loading)(\/[^?]*)?$/);
+  const match = path.match(/^\/public\/(ds06-fixture|ds06-disconnected|ds06-long|ds06-error|ds06-empty|ds06-loading)(\/[^?]*)?$/);
   if (!match) { res.writeHead(404);res.end("{}");return; }
   const [, slug, suffix = ""] = match;
-  if (slug === "ds06-loading" && ["/locations", "/geo-campus"].includes(suffix)) await new Promise(resolve => setTimeout(resolve, 6000));
-  if (slug === "ds06-error" && ["/locations", "/geo-campus"].includes(suffix)) {res.writeHead(500);res.end(JSON.stringify({ detail: "detalhe interno de teste" }));return;}
+  if (slug === "ds06-loading" && suffix === "/geo-campus") await new Promise(resolve => setTimeout(resolve, 6000));
+  if (slug === "ds06-error" && suffix === "/geo-campus") {res.writeHead(500);res.end(JSON.stringify({ detail: "detalhe interno de teste" }));return;}
   const long = "Nome extenso de teste para verificar a leitura completa de prédios, espaços, descrições e controles " + "TextoExtenso".repeat(8);
   const geo = { campuses, buildings: slug === "ds06-long" ? buildings.map(b => ({...b, name: b.name + " · " + long, description: long })) : buildings,
     spaces: slug === "ds06-long" ? spaces.map(s => ({...s, name: s.name + " · " + long, floor: "Andar de teste com identificação extensa", description: long })) : spaces,
@@ -49,8 +48,7 @@ createServer(async (req, res) => {
   const responses = {
     "": { public_slug: slug, company_name: "Campus fictício · DS-06", website: null, phone: null, address: null, business_hours: null },
     "/faqs": [], "/events": [],
-    "/locations": slug === "ds06-empty" ? [] : slug === "ds06-long" ? locations.map(l=>({...l,name:l.name+" · "+long,building:long,floor:long})) : locations,
-    "/geo-campus": ["ds06-schematic","ds06-empty"].includes(slug) ? { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] } : geo,
+    "/geo-campus": slug === "ds06-empty" ? { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] } : geo,
   };
   if (suffix in responses) {res.end(JSON.stringify(responses[suffix]));return;}
   res.writeHead(404);res.end("{}");

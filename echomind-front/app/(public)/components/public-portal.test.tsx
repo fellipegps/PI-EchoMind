@@ -6,7 +6,6 @@ const apiMocks = vi.hoisted(() => ({
   streamPublicChat: vi.fn(),
   listFaqs: vi.fn(),
   listEvents: vi.fn(),
-  listLocations: vi.fn(),
   getInstitution: vi.fn(),
 }));
 
@@ -15,13 +14,12 @@ vi.mock("@/lib/api", () => ({
   publicPortalApi: {
     listFaqs: apiMocks.listFaqs,
     listEvents: apiMocks.listEvents,
-    listLocations: apiMocks.listLocations,
     getInstitution: apiMocks.getInstitution,
   },
 }));
 
 vi.mock("./public-campus-navigator", () => ({
-  PublicCampusNavigator: () => null,
+  PublicCampusNavigator: ({ publicSlug }: { publicSlug: string }) => <div role="region" aria-label="Navegação geográfica do campus">{publicSlug}</div>,
 }));
 
 import { PublicPortal } from "./public-portal";
@@ -47,59 +45,21 @@ const publicEvent = {
   link_url: "https://example.com/mostra",
 };
 
-const publicLocations = [
-  {
-    id: "portaria-principal",
-    name: "Portaria Principal",
-    description: "Entrada de estudantes.",
-    category: "acesso",
-    floor: null,
-    building: "Entrada",
-    x: 18,
-    y: 74,
-  },
-  {
-    id: "bloco-f",
-    name: "Bloco F",
-    description: "Laboratórios de tecnologia.",
-    category: "laboratórios",
-    floor: "1º andar",
-    building: "Bloco F",
-    x: 70,
-    y: 30,
-  },
-  {
-    id: "biblioteca",
-    name: "Biblioteca Central",
-    description: "Acervo e salas de estudo.",
-    category: "estudo",
-    floor: "Térreo",
-    building: "Bloco B",
-    x: 38,
-    y: 42,
-  },
-  {
-    id: "bloco-b",
-    name: "Bloco B",
-    description: "Área de saúde.",
-    category: "saúde",
-    floor: null,
-    building: "Bloco B",
-    x: 28,
-    y: 18,
-  },
-];
-
 describe("PublicPortal", () => {
+  it("oferece somente o navegador geográfico na aba Locais", async () => {
+    render(<PublicPortal publicSlug="universidade" />);
+    await userEvent.click(screen.getByRole("button", { name: "Locais" }));
+    expect(screen.getByRole("region", { name: "Navegação geográfica do campus" })).toHaveTextContent("universidade");
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button").map(button => button.textContent?.trim())).toEqual(["Chat", "Eventos", "Locais"]);
+  });
   beforeEach(() => {
     apiMocks.streamPublicChat.mockReset();
     apiMocks.listFaqs.mockReset();
     apiMocks.listEvents.mockReset();
-    apiMocks.listLocations.mockReset();
     apiMocks.getInstitution.mockReset();
     apiMocks.listFaqs.mockResolvedValue([faq]);
     apiMocks.listEvents.mockResolvedValue([publicEvent]);
-    apiMocks.listLocations.mockResolvedValue(publicLocations);
     apiMocks.getInstitution.mockResolvedValue({ company_name: "UniEVANGÉLICA" });
   });
 
@@ -110,7 +70,6 @@ describe("PublicPortal", () => {
     expect(await screen.findByRole("button", { name: faq.question })).toBeInTheDocument();
     expect(apiMocks.listFaqs).toHaveBeenCalledWith("unievangelica-anapolis");
     expect(apiMocks.listEvents).toHaveBeenCalledWith("unievangelica-anapolis");
-    expect(apiMocks.listLocations).toHaveBeenCalledWith("unievangelica-anapolis");
     expect(apiMocks.getInstitution).toHaveBeenCalledWith("unievangelica-anapolis");
     expect(screen.getByRole("button", { name: "Chat" })).toHaveAttribute("aria-current", "page");
   });
@@ -165,7 +124,6 @@ describe("PublicPortal", () => {
     expect(screen.getByLabelText("Digite sua pergunta")).toBeDisabled();
     expect(apiMocks.listFaqs).not.toHaveBeenCalled();
     expect(apiMocks.listEvents).not.toHaveBeenCalled();
-    expect(apiMocks.listLocations).not.toHaveBeenCalled();
     expect(apiMocks.getInstitution).not.toHaveBeenCalled();
     expect(apiMocks.streamPublicChat).not.toHaveBeenCalled();
   });
@@ -258,7 +216,7 @@ describe("PublicPortal", () => {
     await user.click(screen.getByRole("button", { name: "Chat" }));
     expect(screen.getByLabelText("Digite sua pergunta")).toHaveValue("Rascunho preservado");
     expect(screen.getByText("Resposta parcial preservada.")).toBeInTheDocument();
-    for (const query of [apiMocks.getInstitution, apiMocks.listFaqs, apiMocks.listEvents, apiMocks.listLocations]) {
+    for (const query of [apiMocks.getInstitution, apiMocks.listFaqs, apiMocks.listEvents]) {
       expect(query).toHaveBeenCalledOnce();
       expect(query).toHaveBeenCalledWith("unievangelica-anapolis");
     }
@@ -292,48 +250,6 @@ describe("PublicPortal", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Não foi possível carregar os eventos agora."
-    );
-    expect(screen.getByRole("alert")).not.toHaveTextContent("segredo interno");
-  });
-
-  it("pesquisa locais, seleciona origem e calcula rota aproximada", async () => {
-    const user = userEvent.setup();
-    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
-
-    await user.click(screen.getByRole("button", { name: "Locais" }));
-    await user.selectOptions(screen.getByLabelText("Ponto de origem"), "portaria-principal");
-    await user.click(
-      screen.getByRole("button", { name: "Selecionar Bloco F como destino" })
-    );
-    await user.click(screen.getByRole("button", { name: "Traçar rota" }));
-
-    expect(screen.getByText("Portaria Principal → Bloco F")).toBeInTheDocument();
-    expect(screen.getByText(/Aproximadamente \d+ m · \d+ min a pé/)).toBeInTheDocument();
-
-    await user.type(screen.getByLabelText("Buscar local"), "biblioteca");
-    expect(
-      screen.getByRole("button", { name: "Selecionar Biblioteca Central como destino" })
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Selecionar Bloco B como destino" })
-    ).not.toBeInTheDocument();
-  });
-
-  it("trata lista vazia e erro seguro ao carregar locais reais", async () => {
-    const user = userEvent.setup();
-    apiMocks.listLocations.mockResolvedValueOnce([]);
-    const { unmount } = render(<PublicPortal publicSlug="unievangelica-anapolis" />);
-
-    await user.click(screen.getByRole("button", { name: "Locais" }));
-    expect(await screen.findByText("Nenhum local disponível no momento.")).toBeInTheDocument();
-    unmount();
-
-    apiMocks.listLocations.mockRejectedValueOnce(new Error("segredo interno"));
-    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
-    await user.click(screen.getByRole("button", { name: "Locais" }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Não foi possível carregar os locais agora."
     );
     expect(screen.getByRole("alert")).not.toHaveTextContent("segredo interno");
   });
@@ -444,7 +360,7 @@ describe("PublicPortal", () => {
     await user.click(within(auxiliary).getByRole("button", { name: "Ver eventos" }));
     expect(screen.getByRole("region", { name: "Próximos eventos" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Chat" }));
-    for (const query of [apiMocks.getInstitution, apiMocks.listFaqs, apiMocks.listEvents, apiMocks.listLocations]) expect(query).toHaveBeenCalledOnce();
+    for (const query of [apiMocks.getInstitution, apiMocks.listFaqs, apiMocks.listEvents]) expect(query).toHaveBeenCalledOnce();
     expect(screen.queryByText("Pergunta institucional 4")).not.toBeInTheDocument();
   });
 });

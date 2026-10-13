@@ -1,0 +1,158 @@
+[
+  {
+    "view": "portal-mapa",
+    "adminLinks": [],
+    "geoPresent": true,
+    "retiredUiPresent": false,
+    "scrollWidth": 1425,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-fixture",
+    "width": 1440
+  },
+  {
+    "view": "portal-mapa",
+    "adminLinks": [],
+    "geoPresent": true,
+    "retiredUiPresent": false,
+    "scrollWidth": 375,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-fixture",
+    "width": 390
+  },
+  {
+    "view": "portal-mapa",
+    "adminLinks": [],
+    "geoPresent": true,
+    "retiredUiPresent": false,
+    "scrollWidth": 305,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-fixture",
+    "width": 320
+  },
+  {
+    "view": "admin",
+    "adminLinks": [
+      "/dashboard",
+      "/base-de-conhecimento",
+      "/nao-respondidas",
+      "/agente",
+      "/campi",
+      "/eventos",
+      "/configuracoes"
+    ],
+    "geoPresent": false,
+    "retiredUiPresent": false,
+    "scrollWidth": 1425,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/dashboard",
+    "width": 1440
+  },
+  {
+    "view": "admin",
+    "adminLinks": [
+      "/dashboard",
+      "/base-de-conhecimento",
+      "/nao-respondidas",
+      "/agente",
+      "/campi",
+      "/eventos",
+      "/configuracoes"
+    ],
+    "geoPresent": false,
+    "retiredUiPresent": false,
+    "scrollWidth": 1425,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/dashboard",
+    "width": 1440
+  },
+  {
+    "view": "portal-mapa",
+    "adminLinks": [],
+    "geoPresent": true,
+    "retiredUiPresent": false,
+    "scrollWidth": 1425,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-fixture",
+    "width": 1440
+  },
+  {
+    "view": "portal-mapa",
+    "adminLinks": [],
+    "geoPresent": true,
+    "retiredUiPresent": false,
+    "scrollWidth": 375,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-fixture",
+    "width": 390
+  },
+  {
+    "view": "portal-mapa",
+    "adminLinks": [],
+    "geoPresent": true,
+    "retiredUiPresent": false,
+    "scrollWidth": 305,
+    "status": [],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-fixture",
+    "width": 320
+  },
+  {
+    "view": "ds16-empty",
+    "adminLinks": [],
+    "geoPresent": false,
+    "retiredUiPresent": false,
+    "scrollWidth": 390,
+    "status": [
+      "Mapa do campus indisponívelA instituição ainda não disponibilizou um mapa geográfico para consulta."
+    ],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-empty",
+    "width": 390
+  },
+  {
+    "view": "ds16-error",
+    "adminLinks": [],
+    "geoPresent": false,
+    "retiredUiPresent": false,
+    "scrollWidth": 390,
+    "status": [
+      "Não foi possível carregar o mapa do campus agora. Tente novamente mais tarde."
+    ],
+    "theme": "dark",
+    "url": "http://127.0.0.1:4220/p/ds16-error",
+    "width": 390
+  },
+  {
+    "view": "ds16-empty",
+    "adminLinks": [],
+    "geoPresent": false,
+    "retiredUiPresent": false,
+    "scrollWidth": 390,
+    "status": [
+      "Mapa do campus indisponívelA instituição ainda não disponibilizou um mapa geográfico para consulta."
+    ],
+    "theme": "light",
+    "url": "http://127.0.0.1:4220/p/ds16-empty",
+    "width": 390
+  },
+  {
+    "view": "ds16-error",
+    "adminLinks": [],
+    "geoPresent": false,
+    "retiredUiPresent": false,
+    "scrollWidth": 390,
+    "status": [
+      "Não foi possível carregar o mapa do campus agora. Tente novamente mais tarde."
+    ],
+    "theme": "light",
+    "url": "http://127.0.0.1:4220/p/ds16-error",
+    "width": 390
+  }
+]

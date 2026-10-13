@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -47,12 +47,10 @@ describe("PublicCampusNavigator", () => {
 
   it("busca espaços e calcula o caminho acessível a partir de origem manual", async () => {
     const user = userEvent.setup();
-    const available = vi.fn();
-    render(<PublicCampusNavigator publicSlug="universidade" onAvailabilityChange={available} />);
+    render(<PublicCampusNavigator publicSlug="universidade" />);
 
     expect(await screen.findByText("Encontre o caminho até a entrada")).toBeInTheDocument();
     expect(apiMocks.publicMap).toHaveBeenCalledWith("universidade");
-    expect(available).toHaveBeenCalledWith(true);
     await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
     await user.type(screen.getByLabelText("Buscar prédio ou espaço"), "química");
     await user.click(screen.getByRole("button", { name: /Laboratório de Química · 1º andar/ }));
@@ -103,12 +101,22 @@ describe("PublicCampusNavigator", () => {
     expect(screen.getByText(/20 m · cerca de 1 min a pé/)).toBeInTheDocument();
   });
 
-  it("mantém o mapa legado quando a instituição ainda não marcou prédios", async () => {
-    const available = vi.fn();
+  it("informa indisponibilidade quando a instituição ainda não marcou prédios", async () => {
     apiMocks.publicMap.mockResolvedValueOnce({ ...campusData, buildings: [] });
-    render(<PublicCampusNavigator publicSlug="universidade" onAvailabilityChange={available} />);
-    await waitFor(() => expect(available).toHaveBeenCalledWith(false));
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    expect(await screen.findByRole("heading", { name: "Mapa do campus indisponível" })).toBeInTheDocument();
     expect(screen.queryByText("Encontre o caminho até a entrada")).not.toBeInTheDocument();
+  });
+
+  it("informa carregamento e trata falha de leitura sem expor o erro interno", async () => {
+    let reject!: (error: Error) => void;
+    apiMocks.publicMap.mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; }));
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    expect(screen.getByRole("status")).toHaveTextContent("Carregando mapa do campus…");
+    await act(async () => reject(new Error("SEGREDO_INTERNO")));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível carregar o mapa do campus agora.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("SEGREDO_INTERNO");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("isola campi ativos e limpa origem/destino ao trocar campus", async () => {
