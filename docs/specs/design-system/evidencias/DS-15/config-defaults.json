@@ -1,0 +1,45 @@
+{
+  "inputs": [
+    {
+      "id": "settings-company_name",
+      "readOnly": false,
+      "value": ""
+    },
+    {
+      "id": "settings-description",
+      "readOnly": false,
+      "value": ""
+    },
+    {
+      "id": "settings-website",
+      "readOnly": false,
+      "value": ""
+    },
+    {
+      "id": "settings-phone",
+      "readOnly": false,
+      "value": ""
+    },
+    {
+      "id": "settings-address",
+      "readOnly": false,
+      "value": ""
+    },
+    {
+      "id": "settings-business_hours",
+      "readOnly": false,
+      "value": ""
+    },
+    {
+      "id": "public-portal-url",
+      "readOnly": true,
+      "value": ""
+    }
+  ],
+  "options": [
+    "Profissional e cordial",
+    "Feminina (pt-BR)"
+  ],
+  "qr": false,
+  "status": "Salve a configuração institucional para gerar o endereço público."
+}

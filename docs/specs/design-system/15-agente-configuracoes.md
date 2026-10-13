@@ -4,7 +4,7 @@
 
 ## Identificação e estado
 
-- **Status:** Proposta / aguardando aprovação. Não aprovada nem implementada.
+- **Status:** v1.0 aprovada em 12/10/2026; implementação concluída nas três áreas; verificação parcial (AC07: download pelo navegador; AC09: zoom nativo 200%); aguardando revisão do resultado. Commit local autorizado; identificação no histórico Git. Sem push ou DS-16.
 - **Origem:** fase 15 do roteiro anterior; etapa 10 do plano de refatoração.
 - **Modelo sugerido:** GPT-6.1 Sol (`gpt-6.1-sol`), esforço High (`high`).
 - **Commit sugerido, após revisão e autorização:** `refactor(settings): padroniza agente configuracoes e portal publico`.
@@ -86,13 +86,13 @@ Fora do escopo: mudanças no agente, sessão, backend, autenticação, política
 
 ## Plano de implementação
 
-- [ ] Confirmar aprovação, dependências e eventual divisão explícita da fase.
-- [ ] Padronizar composição do chat, avatar, estados e campo, preservando texto/streaming.
-- [ ] Padronizar grupos de configuração, rótulos, loading e ação de salvar sem alterar regras.
-- [ ] Alinhar cartão público e estados do QR, mantendo contraste funcional e slug atual.
-- [ ] Conferir fluxos com mocks de autenticação/contexto, streaming, configuração, QR e clipboard.
-- [ ] Validar teclado, zoom, temas, mensagens/URLs longas e larguras; executar verificações.
-- [ ] Registrar evidências, partes concluídas/pendentes e limitações no STATUS para revisão.
+- [x] Confirmar aprovação, dependências e eventual divisão explícita da fase.
+- [x] Padronizar composição do chat, avatar, estados e campo, preservando texto/streaming.
+- [x] Padronizar grupos de configuração, rótulos, loading e ação de salvar sem alterar regras.
+- [x] Alinhar cartão público e estados do QR, mantendo contraste funcional e slug atual.
+- [x] Conferir fluxos com mocks de autenticação/contexto, streaming, configuração, QR e clipboard.
+- [ ] Validar teclado, zoom, temas, mensagens/URLs longas e larguras; executar verificações. **Parcial:** teclado/temas/quatro larguras/testes/tipos/lint/build verificados; zoom nativo 200% e conclusão do download pelo navegador pendentes. PNG real ofertado decodificado nos dois temas.
+- [x] Registrar evidências, partes concluídas/pendentes e limitações no STATUS para revisão.
 
 ## Verificações e evidências
 
@@ -108,3 +108,11 @@ Fora do escopo: mudanças no agente, sessão, backend, autenticação, política
 DS-15 só conclui tecnicamente quando as três áreas forem entregues e verificadas; uma subdivisão parcial continua pendente. Registrar implementação, verificação e aprovação visual separadamente, sem presumir aceite pela ausência de resposta.
 
 A execução autoriza apenas esta fase. Mudanças materiais de contrato, escopo, semântica de mensagem ou direção visual exigem aprovação antes da implementação dependente. Não iniciar consolidação, criar commit ou fazer push automaticamente.
+
+## Registro de execução — 12/10/2026
+
+Autorização explícita da Fase: 15 recebida para v1.0 e contrato comum v1.0. Dependências conferidas e aceitas; baseline limpo `34512e1`. Entrega única, sem revisão material da especificação. Implementação concluída; oito critérios verificados e AC07/AC09 parciais. Resultado aguardando revisão, sem aceite, commit, push ou início da DS-16. Consulte [evidências DS-15](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/evidencias/DS-15.md>).
+
+## Autorização de commit local — 12/10/2026
+
+Após a apresentação do resultado, o usuário solicitou “faça commite das alterações”. Commit local autorizado para a entrega DS-15, com identificação no histórico Git; sem push ou DS-16. A verificação continua parcial em AC07/AC09 e o aceite do resultado permanece aguardando revisão. Os registros anteriores descrevem o estado na entrega, antes desta autorização.

@@ -1,0 +1,759 @@
+[
+  {
+    "name": "config-claro-1440",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 798
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 798
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 391
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 391
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 798
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 798
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 598
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 1425,
+    "theme": "light",
+    "url": "/configuracoes",
+    "width": 1440
+  },
+  {
+    "name": "config-claro-1024",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 655
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 655
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 319.5
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 319.5
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 655
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 655
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 455
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 1009,
+    "theme": "light",
+    "url": "/configuracoes",
+    "width": 1024
+  },
+  {
+    "name": "config-claro-768",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 399
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 399
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 191.5
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 191.5
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 399
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 399
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 199
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 753,
+    "theme": "light",
+    "url": "/configuracoes",
+    "width": 768
+  },
+  {
+    "name": "config-claro-390",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 309
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 309
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 309
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 309
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 309
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 309
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 309
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 375,
+    "theme": "light",
+    "url": "/configuracoes",
+    "width": 390
+  },
+  {
+    "name": "config-escuro-1440",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 798
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 798
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 391
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 391
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 798
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 798
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 598
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 1425,
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 1440
+  },
+  {
+    "name": "config-escuro-1024",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 655
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 655
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 319.5
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 319.5
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 655
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 655
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 455
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 1009,
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 1024
+  },
+  {
+    "name": "config-escuro-768",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 399
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 399
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 191.5
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 191.5
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 399
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 399
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 199
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 753,
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 768
+  },
+  {
+    "name": "config-escuro-390",
+    "fields": [
+      {
+        "id": "settings-company_name",
+        "readOnly": false,
+        "value": "Instituição sintética de ensino, pesquisa e extensão — unidade de demonstração",
+        "width": 309
+      },
+      {
+        "id": "settings-description",
+        "readOnly": false,
+        "value": "Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. Contexto fictício para verificação visual e funcional. ",
+        "width": 309
+      },
+      {
+        "id": "settings-website",
+        "readOnly": false,
+        "value": "https://example.test/endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-endereco-sem-espacos-",
+        "width": 309
+      },
+      {
+        "id": "settings-phone",
+        "readOnly": false,
+        "value": "<redacted>",
+        "width": 309
+      },
+      {
+        "id": "settings-address",
+        "readOnly": false,
+        "value": "Avenida fictícia, 1000 — Setor de demonstração, Cidade de teste",
+        "width": 309
+      },
+      {
+        "id": "settings-business_hours",
+        "readOnly": false,
+        "value": "Segunda a sexta, das 8h às 22h; sábado das 8h às 12h",
+        "width": 309
+      },
+      {
+        "id": "public-portal-url",
+        "readOnly": true,
+        "value": "http://127.0.0.1:4190/p/instituicao-sintetica-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-campus-extenso-central",
+        "width": 309
+      }
+    ],
+    "height": 1000,
+    "qr": true,
+    "scrollWidth": 375,
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 390
+  },
+  {
+    "name": "agente-vazio-claro-1440",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Nenhuma mensagem enviada ainda.Envie uma pergunta para testar as respostas da sua base de conhecimento.",
+    "logScrollWidth": 1134,
+    "logWidth": 1134,
+    "renderedHtml": false,
+    "scrollHeight": 452,
+    "scrollTop": 0,
+    "scrollWidth": 1440,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "agente-vazio-claro-390",
+    "clientHeight": 416,
+    "inputDisabled": false,
+    "log": "Nenhuma mensagem enviada ainda.Envie uma pergunta para testar as respostas da sua base de conhecimento.",
+    "logScrollWidth": 356,
+    "logWidth": 356,
+    "renderedHtml": false,
+    "scrollHeight": 416,
+    "scrollTop": 0,
+    "scrollWidth": 390,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-vazio-escuro-1440",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Nenhuma mensagem enviada ainda.Envie uma pergunta para testar as respostas da sua base de conhecimento.",
+    "logScrollWidth": 1134,
+    "logWidth": 1134,
+    "renderedHtml": false,
+    "scrollHeight": 452,
+    "scrollTop": 0,
+    "scrollWidth": 1440,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "agente-vazio-escuro-390",
+    "clientHeight": 416,
+    "inputDisabled": false,
+    "log": "Nenhuma mensagem enviada ainda.Envie uma pergunta para testar as respostas da sua base de conhecimento.",
+    "logScrollWidth": 356,
+    "logWidth": 356,
+    "renderedHtml": false,
+    "scrollHeight": 416,
+    "scrollTop": 0,
+    "scrollWidth": 390,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-espera-escuro-390",
+    "clientHeight": 432,
+    "inputDisabled": true,
+    "log": "Você: Teste de streaming com texto longoPreparando resposta…",
+    "logScrollWidth": 356,
+    "logWidth": 356,
+    "renderedHtml": false,
+    "scrollHeight": 432,
+    "scrollTop": 0,
+    "scrollWidth": 390,
+    "status": "Aguardando a primeira resposta do agente.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-espera-claro-1440",
+    "clientHeight": 452,
+    "inputDisabled": true,
+    "log": "Você: Teste de streaming com texto longoPreparando resposta…",
+    "logScrollWidth": 1134,
+    "logWidth": 1134,
+    "renderedHtml": false,
+    "scrollHeight": 452,
+    "scrollTop": 0,
+    "scrollWidth": 1440,
+    "status": "Aguardando a primeira resposta do agente.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "agente-streaming-claro-1440",
+    "clientHeight": 452,
+    "inputDisabled": true,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: ",
+    "logScrollWidth": 1134,
+    "logWidth": 1134,
+    "renderedHtml": false,
+    "scrollHeight": 452,
+    "scrollTop": 0,
+    "scrollWidth": 1440,
+    "status": "Recebendo resposta…",
+    "theme": "light",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "agente-streaming-escuro-390",
+    "clientHeight": 432,
+    "inputDisabled": true,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: ",
+    "logScrollWidth": 356,
+    "logWidth": 356,
+    "renderedHtml": false,
+    "scrollHeight": 432,
+    "scrollTop": 0,
+    "scrollWidth": 390,
+    "status": "Recebendo resposta…",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-longo-claro-1440",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 1119,
+    "logWidth": 1119,
+    "renderedHtml": false,
+    "scrollHeight": 886,
+    "scrollTop": 410,
+    "scrollWidth": 1440,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "agente-longo-claro-1024",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 703,
+    "logWidth": 703,
+    "renderedHtml": false,
+    "scrollHeight": 1030,
+    "scrollTop": 410,
+    "scrollWidth": 1024,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 1024
+  },
+  {
+    "name": "agente-longo-claro-768",
+    "clientHeight": 432,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 447,
+    "logWidth": 447,
+    "renderedHtml": false,
+    "scrollHeight": 1318,
+    "scrollTop": 410,
+    "scrollWidth": 768,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 768
+  },
+  {
+    "name": "agente-longo-claro-390",
+    "clientHeight": 416,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 341,
+    "logWidth": 341,
+    "renderedHtml": false,
+    "scrollHeight": 1446,
+    "scrollTop": 410,
+    "scrollWidth": 390,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "light",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-longo-escuro-1440",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 1119,
+    "logWidth": 1119,
+    "renderedHtml": false,
+    "scrollHeight": 886,
+    "scrollTop": 410,
+    "scrollWidth": 1440,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "agente-longo-escuro-1024",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 703,
+    "logWidth": 703,
+    "renderedHtml": false,
+    "scrollHeight": 1030,
+    "scrollTop": 410,
+    "scrollWidth": 1024,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 1024
+  },
+  {
+    "name": "agente-longo-escuro-768",
+    "clientHeight": 432,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 447,
+    "logWidth": 447,
+    "renderedHtml": false,
+    "scrollHeight": 1318,
+    "scrollTop": 410,
+    "scrollWidth": 768,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 768
+  },
+  {
+    "name": "agente-longo-escuro-390",
+    "clientHeight": 416,
+    "inputDisabled": false,
+    "log": "Você: Teste de streaming com texto longoAgente: Resposta parcial: <img src=x onerror=alert(1)>\n**Texto literal**\nMensagem extensa sem espaços: SemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacosSemEspacos\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\nLinha de teste preservada.\n",
+    "logScrollWidth": 341,
+    "logWidth": 341,
+    "renderedHtml": false,
+    "scrollHeight": 1446,
+    "scrollTop": 410,
+    "scrollWidth": 390,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-limpo-escuro-390",
+    "clientHeight": 416,
+    "inputDisabled": false,
+    "log": "Nenhuma mensagem enviada ainda.Envie uma pergunta para testar as respostas da sua base de conhecimento.",
+    "logScrollWidth": 356,
+    "logWidth": 356,
+    "renderedHtml": false,
+    "scrollHeight": 416,
+    "scrollTop": 0,
+    "scrollWidth": 390,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 390
+  },
+  {
+    "name": "agente-erro-escuro-1440",
+    "clientHeight": 452,
+    "inputDisabled": false,
+    "log": "Você: Erro de teste",
+    "logScrollWidth": 1134,
+    "logWidth": 1134,
+    "renderedHtml": false,
+    "scrollHeight": 452,
+    "scrollTop": 0,
+    "scrollWidth": 1440,
+    "status": "Enter para enviar. As respostas usam a base de conhecimento atual.",
+    "theme": "dark",
+    "url": "/agente",
+    "width": 1440
+  },
+  {
+    "name": "config-salvando-escuro-1440",
+    "renderedHtml": false,
+    "scrollWidth": 1425,
+    "status": "QR Code pronto para compartilhar. O download é gerado neste dispositivo.",
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 1440
+  },
+  {
+    "name": "config-falha-escuro-1440",
+    "renderedHtml": false,
+    "scrollWidth": 1425,
+    "status": "QR Code pronto para compartilhar. O download é gerado neste dispositivo.",
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 1440
+  },
+  {
+    "name": "config-sucesso-escuro-1440",
+    "renderedHtml": false,
+    "scrollWidth": 1425,
+    "status": "QR Code pronto para compartilhar. O download é gerado neste dispositivo.",
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 1440
+  },
+  {
+    "name": "config-carregando-escuro-1440",
+    "renderedHtml": false,
+    "scrollWidth": 1440,
+    "status": "Carregando configurações…",
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 1440
+  },
+  {
+    "name": "config-defaults-sem-slug-escuro-390",
+    "renderedHtml": false,
+    "scrollWidth": 375,
+    "status": "Salve a configuração institucional para gerar o endereço público.",
+    "theme": "dark",
+    "url": "/configuracoes",
+    "width": 390
+  }
+]

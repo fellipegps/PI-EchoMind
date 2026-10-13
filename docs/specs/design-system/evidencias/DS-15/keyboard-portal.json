@@ -1,0 +1,27 @@
+{
+  "focus": [
+    {
+      "bottom": 364,
+      "height": 572,
+      "name": "Copiar link",
+      "tag": "BUTTON",
+      "top": 320
+    },
+    {
+      "bottom": 308,
+      "height": 572,
+      "name": "Abrir portal",
+      "tag": "BUTTON",
+      "top": 264
+    },
+    {
+      "bottom": 308,
+      "height": 572,
+      "name": "Baixar QR",
+      "tag": "A",
+      "top": 264
+    }
+  ],
+  "clipboard": "http://127.0.0.1:4190/p/instituicao-atualizada",
+  "url": "http://127.0.0.1:4190/p/instituicao-atualizada"
+}

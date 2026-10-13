@@ -1,0 +1,19 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/agente/page.test.tsx" "app/(admin)/configuracoes/page.test.tsx" "app/(admin)/configuracoes/public-portal-card.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 44ms
+ ✓ app/(admin)/configuracoes/public-portal-card.test.tsx (6 tests) 457ms
+ ✓ app/(admin)/agente/page.test.tsx (4 tests) 1186ms
+   ✓ Agente administrativo — contrato DS-15 > ignora entrada vazia e aguarda contexto autenticado inclusive por Enter  588ms
+ ✓ app/(admin)/configuracoes/page.test.tsx (4 tests) 1996ms
+   ✓ Configurações — contrato DS-15 > nomeia salvamento pendente e usa o retorno da API como fonte após sucesso  655ms
+   ✓ Configurações — contrato DS-15 > mantém a edição quando salvar falha e libera nova tentativa  951ms
+
+ Test Files  4 passed (4)
+      Tests  24 passed (24)
+   Start at  20:41:43
+   Duration  5.15s (transform 594ms, setup 1.68s, collect 3.76s, tests 3.68s, environment 3.53s, prepare 673ms)
