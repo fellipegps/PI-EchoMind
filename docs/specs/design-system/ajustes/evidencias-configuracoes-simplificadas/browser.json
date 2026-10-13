@@ -1,0 +1,62 @@
+[
+  {
+    "editableFields": 6,
+    "groupPresent": false,
+    "personalityPresent": false,
+    "qrPresent": true,
+    "scrollWidth": 1425,
+    "theme": "light",
+    "voicePresent": false,
+    "width": 1440
+  },
+  {
+    "editableFields": 6,
+    "groupPresent": false,
+    "personalityPresent": false,
+    "qrPresent": true,
+    "scrollWidth": 375,
+    "theme": "light",
+    "voicePresent": false,
+    "width": 390
+  },
+  {
+    "editableFields": 6,
+    "groupPresent": false,
+    "personalityPresent": false,
+    "qrPresent": true,
+    "scrollWidth": 305,
+    "theme": "light",
+    "voicePresent": false,
+    "width": 320
+  },
+  {
+    "editableFields": 6,
+    "groupPresent": false,
+    "personalityPresent": false,
+    "qrPresent": true,
+    "scrollWidth": 1425,
+    "theme": "dark",
+    "voicePresent": false,
+    "width": 1440
+  },
+  {
+    "editableFields": 6,
+    "groupPresent": false,
+    "personalityPresent": false,
+    "qrPresent": true,
+    "scrollWidth": 375,
+    "theme": "dark",
+    "voicePresent": false,
+    "width": 390
+  },
+  {
+    "editableFields": 6,
+    "groupPresent": false,
+    "personalityPresent": false,
+    "qrPresent": true,
+    "scrollWidth": 305,
+    "theme": "dark",
+    "voicePresent": false,
+    "width": 320
+  }
+]

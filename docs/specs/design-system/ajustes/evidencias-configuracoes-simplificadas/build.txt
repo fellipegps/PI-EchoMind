@@ -1,0 +1,41 @@
+
+> echomind-front@0.1.0 build C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 26.2s
+  Running TypeScript ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/19) ...
+  Generating static pages using 7 workers (4/19)
+  Generating static pages using 7 workers (9/19)
+  Generating static pages using 7 workers (14/19)
+✓ Generating static pages using 7 workers (19/19) in 1656.5ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /agente
+├ ○ /base-de-conhecimento
+├ ○ /campi
+├ ○ /configuracoes
+├ ○ /dashboard
+├ ○ /dev/campus-verification
+├ ○ /dev/design-system
+├ ○ /dev/map-verification
+├ ○ /eventos
+├ ○ /locais
+├ ○ /login
+├ ○ /nao-respondidas
+├ ƒ /p/[slug]
+├ ○ /recuperar-senha
+├ ○ /redefinir-senha
+└ ○ /registrar-conta
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

@@ -9,6 +9,8 @@ Este conjunto adota **Specification Driven Development (SDD)**: a especificaçã
 
 ## Documentos de referência
 
+Ajuste posterior, 13/10/2026: [configurações simplificadas](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-configuracoes-simplificadas.md>), autorizado diretamente pelo usuário e implementado/verificado, aguardando revisão. Seletores de personalidade/voz removidos da página; tom já salvo e backend preservados. Nenhuma nova fase, commit ou push.
+
 - [Contrato comum](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/CONTRATO.md>): regras compartilhadas, preservações e fluxo de aprovação.
 - [Andamento](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/STATUS.md>): status independente da especificação, implementação, evidências e revisão do usuário.
 - [Plano e análise originais](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/plano-refatoracao-design-echomind.md>): contexto, diagnóstico e referências do UX Pilot.

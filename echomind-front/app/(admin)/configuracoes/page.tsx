@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -23,8 +22,6 @@ export default function SettingsPage() {
   const [form, setForm] = useState<Partial<Config>>({
     company_name: "",
     description: "",
-    tone_of_voice: "profissional e cordial",
-    chat_voice_gender: "feminina",
     website: "",
     phone: "",
     address: "",
@@ -45,7 +42,14 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updated = await configApi.save(form);
+      const updated = await configApi.save({
+        company_name: form.company_name,
+        description: form.description,
+        website: form.website,
+        phone: form.phone,
+        address: form.address,
+        business_hours: form.business_hours,
+      });
       setForm(updated);
       toast.success("Configurações atualizadas com sucesso!");
     } catch (err) {
@@ -58,7 +62,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <PageContainer variant="form">
-        <PageHeader title="Configurações do Sistema" description="Gerencie a identidade institucional e o comportamento do EchoMind" />
+        <PageHeader title="Configurações do Sistema" description="Gerencie os dados institucionais e o acesso ao portal público" />
         <div role="status" aria-label="Carregando configurações" className="space-y-6">
           <p className="text-sm text-muted-foreground">Carregando configurações…</p>
           <Skeleton aria-hidden="true" className="h-96 w-full motion-reduce:animate-none" />
@@ -69,7 +73,7 @@ export default function SettingsPage() {
 
   return (
     <PageContainer variant="form">
-      <PageHeader title="Configurações do Sistema" description="Gerencie a identidade institucional e o comportamento do EchoMind" />
+      <PageHeader title="Configurações do Sistema" description="Gerencie os dados institucionais e o acesso ao portal público" />
 
       <div className="grid gap-6">
         <Card className="gap-5 overflow-hidden pb-0">
@@ -105,37 +109,6 @@ export default function SettingsPage() {
               />
             </div>
 
-            </fieldset>
-            <fieldset className="min-w-0 space-y-4 border-t pt-6">
-              <legend className="mb-4 text-sm font-semibold">Comportamento do agente</legend>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="settings-tone_of_voice">Personalidade da IA</Label>
-                <Select
-                  value={form.tone_of_voice ?? "profissional e cordial"}
-                  onValueChange={(v) => setForm({ ...form, tone_of_voice: v })}
-                >
-                  <SelectTrigger id="settings-tone_of_voice" className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="profissional e cordial">Profissional e cordial</SelectItem>
-                    <SelectItem value="descontraído e jovem">Descontraído e jovem</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="settings-chat_voice_gender">Voz do Chatbot</Label>
-                <Select
-                  value={form.chat_voice_gender ?? "feminina"}
-                  onValueChange={(v) => setForm({ ...form, chat_voice_gender: v })}
-                >
-                  <SelectTrigger id="settings-chat_voice_gender" className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="feminina">Feminina (pt-BR)</SelectItem>
-                    <SelectItem value="masculina">Masculino (pt-BR)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             </fieldset>
             <fieldset className="min-w-0 space-y-4 border-t pt-6">
               <legend className="mb-4 text-sm font-semibold">Contato e atendimento</legend>

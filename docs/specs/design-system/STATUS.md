@@ -1,6 +1,6 @@
 # Andamento — refatoração visual por especificação
 
-Data de criação: 11/10/2026. Última atualização: 12/10/2026. Situação: DS-00–DS-15 aceitas, com pendências preservadas; baseline local `9c39e5f`. DS-16 v1.0 aprovada e implementada, com verificação parcial em AC02 (zoom nativo 200%) e aguardando revisão do usuário. O conjunto não está concluído. Commit local da DS-16 autorizado posteriormente; identificação no histórico Git. Sem push.
+Data de criação: 11/10/2026. Última atualização: 13/10/2026. Situação: DS-00–DS-15 aceitas, com pendências preservadas; baseline local `9c39e5f`. DS-16 v1.0 aprovada e implementada, com verificação parcial em AC02 (zoom nativo 200%) e aguardando revisão do usuário. O conjunto não está concluído. Commit local da DS-16 autorizado posteriormente; identificação no histórico Git. Sem push.
 
 Aprovação da spec, implementação, verificação e aceite permanecem distintos. O usuário confirmou explicitamente: “Confirmo o aceite da DS-15 e autorizo a DS-16 com as pendências registradas.” A exceção de dependência permite a DS-16 sem dispensar zoom nativo, conclusão do download do QR e limites anteriores. Commit anterior da DS-15 não foi usado como prova de aceite.
 
@@ -277,3 +277,15 @@ Aprovação da spec, implementação, verificação e aceite permanecem distinto
 ### 12/10/2026 — autorização de commit local da DS-16
 
 Após a apresentação da entrega e pendências, o usuário solicitou “commite as alterações”. Autorizado somente o commit local, com código, fixture, documentação e evidências da DS-16. Aceite final permanece aguardando revisão; o pedido de commit não foi reinterpretado como dispensa das pendências nem como conclusão integral. Sem push. Mensagem: `refactor(ui): consolida estilos e corrige inconsistencias visuais`; identificação no histórico Git.
+
+### 13/10/2026 — ajuste autorizado: configurações simplificadas
+
+- Solicitação do usuário: verificar e retirar “Personalidade da IA” e “Voz do Chatbot” de Configurações. Substitui especificamente a preservação desses seletores da DS-15-R05; não reabre nem altera evidências históricas da DS-16. Baseline `d9c0547`; nenhuma nova fase ou commit autorizado.
+- Auditoria: personalidade é usada no prompt do RAG; voz é armazenada, sem consumidor de áudio encontrado na aplicação. Os dois controles/grupo foram retirados conforme pedido; valores existentes e lógica do backend preservados.
+- Implementação: removidos seletores, import e defaults locais; descrição atualizada. Payload explicitamente limitado aos seis campos editáveis, evitando envio de campos ocultos/metadados; carregamento, erros, retorno/slug e QR preservados.
+- Verificação: lint, tipos, build e 20 testes relacionados passaram. Browser com fixture sintética: seis vistas em 1440/390/320 nos dois temas sem controles removidos ou overflow; PUT somente com seis campos, retorno normalizado/slug atualizado, tom/voz conservados em memória. Sem homologação de infraestrutura real.
+- Entrega: ajuste implementado e verificado, aguardando revisão. [Contrato e evidências](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-configuracoes-simplificadas.md>). Pendências anteriores de zoom/download continuam abertas. Sem commit/push.
+
+### 13/10/2026 — autorização de commit do ajuste de configurações
+
+O usuário solicitou “faça commite dessa alteração” após a entrega. Commit local do ajuste e suas evidências autorizado, com mensagem `refactor(settings): remove seletores de personalidade e voz`; identificação no histórico Git. Sem push. Testes e pendências anteriores mantidos; pedido de commit não foi reinterpretado como aceite final do conjunto.

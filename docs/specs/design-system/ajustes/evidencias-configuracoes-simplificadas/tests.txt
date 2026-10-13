@@ -1,0 +1,16 @@
+
+> echomind-front@0.1.0 test:run C:\Users\Fellipe\Documents\Projeto Integrador\EchoMind-main\echomind-front
+> vitest run "app/(admin)/configuracoes/page.test.tsx" "app/(admin)/configuracoes/public-portal-card.test.tsx" "lib/api.test.ts"
+
+
+ RUN  v3.2.4 C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/echomind-front
+
+ ✓ lib/api.test.ts (10 tests) 65ms
+ ✓ app/(admin)/configuracoes/public-portal-card.test.tsx (6 tests) 491ms
+ ✓ app/(admin)/configuracoes/page.test.tsx (4 tests) 1027ms
+   ✓ Configurações — contrato DS-15 com simplificação autorizada > mantém a edição quando salvar falha e libera nova tentativa  450ms
+
+ Test Files  3 passed (3)
+      Tests  20 passed (20)
+   Start at  16:08:16
+   Duration  33.00s (transform 951ms, setup 26.33s, collect 16.57s, tests 1.58s, environment 41.23s, prepare 1.97s)

@@ -2,6 +2,8 @@
 
 **Versão:** 1.0.
 
+**Ajuste posterior autorizado em 13/10/2026:** o usuário solicitou retirar os seletores de personalidade e voz das configurações. O contrato abaixo conserva o histórico da v1.0; somente a preservação desses controles em R05 foi substituída pelo [ajuste de configurações simplificadas](<C:/Users/Fellipe/Documents/Projeto Integrador/EchoMind-main/docs/specs/design-system/ajustes/2026-10-13-configuracoes-simplificadas.md>). Valores existentes e comportamento do backend preservados; formulário envia apenas os seis campos editáveis.
+
 ## Identificação e estado
 
 - **Status:** v1.0 aprovada em 12/10/2026; implementação concluída nas três áreas; verificação parcial (AC07: download pelo navegador; AC09: zoom nativo 200%); aguardando revisão do resultado. Commit local autorizado; identificação no histórico Git. Sem push ou DS-16.

@@ -14,10 +14,10 @@ const config = {
   address: "Rua fictícia", business_hours: "9h–18h", updated_at: null,
 };
 
-describe("Configurações — contrato DS-15", () => {
+describe("Configurações — contrato DS-15 com simplificação autorizada", () => {
   beforeEach(() => { vi.resetAllMocks(); mocks.get.mockResolvedValue(config); });
 
-  it("identifica carregamento e associa rótulos aos oito campos/opções carregados", async () => {
+  it("identifica carregamento, associa os seis campos e remove opções de personalidade/voz", async () => {
     let resolve!: (value: unknown) => void;
     mocks.get.mockReturnValue(new Promise(r => { resolve = r; }));
     render(<SettingsPage />);
@@ -26,8 +26,9 @@ describe("Configurações — contrato DS-15", () => {
     for (const [label, value] of [["Nome da Instituição", config.company_name], ["Descrição Base (Contexto)", config.description], ["Website Oficial", config.website], ["Telefone de Contato", config.phone], ["Endereço", config.address], ["Horário de Funcionamento", config.business_hours]]) {
       expect(screen.getByLabelText(label)).toHaveValue(value);
     }
-    expect(screen.getByRole("combobox", { name: "Personalidade da IA" })).toHaveTextContent("Descontraído e jovem");
-    expect(screen.getByRole("combobox", { name: "Voz do Chatbot" })).toHaveTextContent("Masculino (pt-BR)");
+    expect(screen.queryByRole("combobox", { name: "Personalidade da IA" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Voz do Chatbot" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Comportamento do agente")).not.toBeInTheDocument();
   });
 
   it("preserva defaults quando a carga falha, sem validação nova nem slug inventado", async () => {
@@ -36,11 +37,9 @@ describe("Configurações — contrato DS-15", () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
     expect(await screen.findByLabelText("Nome da Instituição")).toHaveValue("");
-    expect(screen.getByRole("combobox", { name: "Personalidade da IA" })).toHaveTextContent("Profissional e cordial");
-    expect(screen.getByRole("combobox", { name: "Voz do Chatbot" })).toHaveTextContent("Feminina (pt-BR)");
     expect(screen.getByLabelText("Slug retornado")).toBeEmptyDOMElement();
     await user.click(screen.getByRole("button", { name: "Salvar Alterações" }));
-    expect(mocks.save).toHaveBeenCalledWith({ company_name: "", description: "", tone_of_voice: "profissional e cordial", chat_voice_gender: "feminina", website: "", phone: "", address: "", business_hours: "" });
+    expect(mocks.save).toHaveBeenCalledWith({ company_name: "", description: "", website: "", phone: "", address: "", business_hours: "" });
   });
 
   it("nomeia salvamento pendente e usa o retorno da API como fonte após sucesso", async () => {
@@ -52,7 +51,7 @@ describe("Configurações — contrato DS-15", () => {
     await user.clear(input); await user.type(input, "Edição local");
     await user.click(screen.getByRole("button", { name: "Salvar Alterações" }));
     expect(screen.getByRole("button", { name: "Salvando…" })).toBeDisabled();
-    expect(mocks.save).toHaveBeenCalledWith({ ...config, company_name: "Edição local" });
+    expect(mocks.save).toHaveBeenCalledWith({ company_name: "Edição local", description: config.description, website: config.website, phone: config.phone, address: config.address, business_hours: config.business_hours });
     await act(async () => resolve({ ...config, company_name: "Normalizado pelo servidor", public_slug: "slug-da-api" }));
     expect(input).toHaveValue("Normalizado pelo servidor");
     expect(screen.getByLabelText("Slug retornado")).toHaveTextContent("slug-da-api");
