@@ -102,6 +102,35 @@ def main() -> None:
                    "echomind_restorecheck") == "t"
         print("PASS: backup restores previous revision, removed data and RLS in separate empty DB", flush=True)
 
+        # Programmatic migration must honor the caller's transaction and table lock.
+        # Force a rollback in the restored synthetic DB, preserving the removed row.
+        transaction_check = '''
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine, text
+import os
+url = os.environ['DATABASE_URL'].replace('/echomind_integration?', '/echomind_restorecheck?')
+engine = create_engine(url)
+config = Config('alembic.ini')
+try:
+    try:
+        with engine.begin() as connection:
+            connection.execute(text('LOCK TABLE public.campus_locations IN ACCESS EXCLUSIVE MODE'))
+            config.attributes['connection'] = connection
+            command.upgrade(config, '0023')
+            assert connection.execute(text("SELECT to_regclass('public.campus_locations') IS NULL")).scalar_one()
+            raise RuntimeError('synthetic rollback')
+    except RuntimeError as error:
+        assert str(error) == 'synthetic rollback'
+    with engine.connect() as connection:
+        assert connection.execute(text('SELECT version_num FROM alembic_version')).scalar_one() == '0022'
+        assert connection.execute(text('SELECT count(*) FROM campus_locations')).scalar_one() == 1
+finally:
+    engine.dispose()
+'''
+        run([sys.executable, '-c', transaction_check], cwd=BACKEND, env=environment)
+        print("PASS: shared-connection DDL rolled back with caller transaction; revision and legacy row intact", flush=True)
+
         # The archive stays inside the disposable container; no real data is read.
         print("PASS: no remote database, real credentials or persistent backup files used", flush=True)
     finally:

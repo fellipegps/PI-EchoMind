@@ -1236,8 +1236,9 @@ da aplicação não foram desabilitadas para publicar.
 - [x] Validação das variáveis públicas e build de produção do frontend.
 - [x] Escolher domínio da API: `echomind-api.duckdns.org`, informado como reservado pelo responsável.
 - [ ] Apontar o DNS para o Elastic IP e validar HTTPS/health na EC2 real.
-- [ ] Preparar conexão privada IPv4, backup real e teste de restauração.
-- [ ] Aplicar `0023` e conferir o banco real depois da manutenção.
+- [x] Criar backup real consistente do schema público e testar a restauração em banco local separado.
+- [x] Aplicar `0023` e conferir o banco real depois da manutenção.
+- [ ] Conferir conexão privada IPv4/session pooler a partir da EC2.
 - [x] Conferir projeto e deployment Vercel via integração reconectada, usando o ID e o contexto padrão.
 - [ ] Configurar valores reais de Vercel/CORS/Auth e testar login/cadastro/reset.
 
@@ -1334,7 +1335,8 @@ um release malicioso aprovado em código seguro.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [ ] Instalar/verificar AWS CLI **v2** no host pelo instalador oficial com assinatura verificada. O bootstrap atual não a instala.
 - [ ] Verificar SSM Agent **3.3.2746.0 ou superior**. Sem `ENV_VAR`, o documento falha fechado.
-- [ ] Concluir backup/restauração e migrations reais da etapa 7; conferir IPv4, TLS, RLS e vetores.
+- [x] Criar backup consistente do schema público real, restaurá-lo localmente e aplicar a revisão 0023; preflight real de schema/RLS/vetores aprovado via TLS.
+- [ ] Conferir a conexão PostgreSQL de produção pela EC2/IPv4.
 - [ ] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.
 - [ ] Configurar `API_DOMAIN=echomind-api.duckdns.org` e e-mail ACME real no `deploy.env`; CORS exato no backend.
 - [ ] Apontar DuckDNS para o Elastic IP; conferir propagação e portas 80/443. O primeiro deploy requer DNS correto para emitir TLS.
@@ -1510,6 +1512,40 @@ python deploy/measure_resources.py --output docs/e5-memory-linux.json
 python deploy/measure_resources.py --cold --output docs/e5-memory-linux-cold.json
 ```
 
+## Banco real preparado - 2026-10-14
+
+Backup consistente do **schema público** criado com `pg_dump` PostgreSQL 17 e
+snapshot exportado de uma transação somente de leitura. A conexão ao endpoint
+direto manteve TLS de ponta a ponta por um relay TCP vinculado exclusivamente
+ao loopback do Windows, para permitir ao cliente Docker alcançar o endereço IPv6.
+Não foi aberta uma porta de banco na rede pública/local.
+
+O dump foi restaurado em PostgreSQL/pgvector Docker descartável: contagens das
+20 tabelas iguais às do snapshot, revisão `0022` preservada e RLS conferido.
+O dump, manifesto com hash/contagens e logs privados ficam em `.database-backups/`,
+ignorada pelo Git e com ACL Windows restrita ao proprietário. O banco de ensaio
+e seu armazenamento temporário foram removidos.
+
+Após o ensaio, a revisão `0023` foi aplicada ao Supabase real. O aplicador exige
+backup intacto/restaurado com menos de duas horas, revisão esperada e tabela
+legada vazia. A trava exclusiva, a nova conferência de ausência de registros e
+a execução do Alembic compartilham a mesma transação; não há intervalo aberto
+entre conferir e remover a tabela. `alembic/env.py` agora aceita uma conexão
+fornecida pelo chamador, mantendo o fluxo CLI anterior.
+
+Validação local adicional provocou rollback após executar a migration: a
+revisão `0022` e o registro sentinela sintético reapareceram, comprovando que
+o Alembic respeita a transação externa. No banco real, a tabela antiga estava
+vazia sob a trava; após commit, o preflight informou **`ready=true`, revisão
+`0023`, nenhuma migration pendente**, com schema, RLS e vetores compatíveis.
+
+Ferramentas adicionadas: `deploy/backup_production_database.py` e
+`deploy/apply_prepared_database.py`. Recebem credenciais apenas da configuração
+local existente dentro do processo e não as imprimem. Nenhum dump ou dado real
+foi incluído no commit. Este backup não cobre Auth, Storage, papéis ou configurações
+do projeto Supabase, nem substitui uma cópia externa criptografada periódica.
+A conexão session pooler IPv4 pela futura EC2 permanece pendente.
+
 ## Referências
 
 - [FastAPI em containers](https://fastapi.tiangolo.com/deployment/docker/)
@@ -1547,4 +1583,5 @@ python deploy/measure_resources.py --cold --output docs/e5-memory-linux-cold.jso
 - [Instalação e verificação de assinatura AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - [Preços ECR](https://aws.amazon.com/ecr/pricing/)
 - [Preços S3](https://aws.amazon.com/s3/pricing/)
+- [Alembic usando uma conexão/transação do chamador](https://alembic.sqlalchemy.org/en/latest/cookbook.html#sharing-a-connection-across-one-or-more-programmatic-migration-commands)
 - [Docker Engine no Ubuntu](https://docs.docker.com/engine/install/ubuntu/)

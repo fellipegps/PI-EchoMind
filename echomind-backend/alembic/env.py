@@ -56,20 +56,29 @@ def run_migrations_offline() -> None:
 
 
 # ─── Modo Online (conecta e aplica as migrações) ──────────────────────────────
+def migrate_on_connection(connection) -> None:
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+    )
+    with context.begin_transaction():
+        context.run_migrations()
+
+
 def run_migrations_online() -> None:
+    provided_connection = config.attributes.get("connection")
+    if provided_connection is not None:
+        # Keep caller checks, table locks and DDL in the same transaction.
+        migrate_on_connection(provided_connection)
+        return
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            compare_type=True,
-        )
-        with context.begin_transaction():
-            context.run_migrations()
+        migrate_on_connection(connection)
 
 
 if context.is_offline_mode():
