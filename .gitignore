@@ -4,6 +4,8 @@
 *.env
 .document-data/
 *.documents.tar
+deploy/aws/parameters.json
+deploy/aws/parameters.local.json
 !.env.example
 !**/.env.example
 

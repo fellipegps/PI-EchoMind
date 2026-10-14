@@ -790,7 +790,211 @@ confiança no computador. Nenhum certificado público é solicitado.
 A configuração de renovação automática foi preparada; emissão e renovação por
 uma CA pública dependem do domínio, DNS e EC2 reais e ainda não foram testadas.
 Não houve leitura de segredos reais, mudança de DNS, criação de recursos AWS ou
-publicação do projeto. A próxima etapa é a **6: infraestrutura AWS**.
+publicação do projeto.
+
+## Etapa 6: infraestrutura AWS
+
+**Preparação em validação.** Os arquivos estão em `deploy/aws`; ainda não foram
+criados recursos. O template só prepara o host e seus controles. Não instala
+segredos, publica containers, aplica migrations ou altera DNS automaticamente.
+
+### Conta, créditos e estimativa
+
+Consulta somente de leitura em **14/10/2026** pelo AWS MCP:
+
+- Plano `FREE`, estado `ACTIVE`, saldo informado de **US$ 100**.
+- Data de expiração informada: **13/04/2027**. O plano termina antes se os
+  créditos acabarem; não foi alterado para Paid.
+- `t3.small` aparece como elegível na API EC2, com 2 vCPU e 2 GiB, arquitetura
+  x86_64. Elegibilidade não significa uma máquina gratuita permanente.
+- Quota regional de vCPU Standard: 5; nenhuma EC2 encontrada em `us-east-1`.
+- Nenhuma stack ativa ou trilha CloudTrail encontrada na consulta regional.
+- Perfil atual identificado como root. O preflight o registra como impedimento
+  para executar a criação da infraestrutura.
+
+Os preços unitários foram consultados na Price List API para `us-east-1` e nas
+páginas oficiais de KMS/CloudWatch. Cálculo reproduzível:
+
+```sh
+python deploy/aws/estimate_cost.py
+```
+
+| Item | Hipótese | Estimativa mensal bruta em USD |
+| --- | --- | --- |
+| EC2 `t3.small` Linux | 730 horas, US$ 0,0208/h | 15,18 |
+| EBS gp3 | 16 GiB de sistema + 20 GiB de dados, US$ 0,08/GiB-mês | 2,88 |
+| Um IPv4 público | 730 horas, US$ 0,005/h | 3,65 |
+| KMS para notificações | Uma chave própria | 1,00 |
+| Alarmes | Quatro alarmes, antes de franquias gratuitas | 0,40 |
+| Snapshots | Hipótese de 20 GiB-mês armazenados, US$ 0,05/GiB-mês | 1,00 |
+| **Total ilustrativo** | Calculado sem arredondar cada parcela antes da soma | **24,11** |
+
+Nesse cenário, US$ 100 equivalem a aproximadamente **4,15 meses**, antes de
+variações de uso. O cálculo não inclui armazenamento/requisições de auditoria
+S3, entregas SNS, chamadas KMS, tráfego excedente, domínio/DNS, impostos/câmbio
+ou serviços externos Supabase/Groq/Vercel. Franquias podem reduzir parcelas,
+mas não foram descontadas sem confirmação do uso aplicável. Snapshots são
+incrementais: sete pontos de recuperação não equivalem a sete discos completos.
+Revise saldo e preços imediatamente antes de criar recursos. No Free Plan,
+esgotar créditos pode encerrar o acesso à conta e aos dados; não conte apenas
+com a data de abril para manter o projeto disponível.
+
+### Recursos preparados
+
+| Área | Configuração |
+| --- | --- |
+| Rede | VPC própria IPv4, uma subnet pública em uma AZ, Internet Gateway e um Elastic IP; sem NAT Gateway ou balanceador |
+| Entradas | Apenas TCP 80/443; sem chave SSH, porta 22 ou porta do backend |
+| Saídas | TCP 80 para pacotes assinados do Ubuntu, 443 para serviços HTTPS e 5432 para Supabase com SSL |
+| Sistema | Ubuntu 24.04 amd64 obtido do parâmetro público da Canonical; revisar AMI resolvida antes de executar |
+| Compute | Uma `t3.small`, um worker; créditos de CPU em `standard`, com alerta de saldo baixo |
+| Metadados | IMDSv2 obrigatório, hop limit 1 intencional: o host usa IAM, os containers não precisam de credenciais AWS |
+| Armazenamento | Sistema gp3 criptografado de 16 GiB; EBS gp3 criptografado de dados de 20 GiB, chave gerenciada `aws/ebs`, retido em exclusão/substituição |
+| Inicialização | Docker e containerd habilitados no boot e impedidos de iniciar sem as montagens persistentes |
+| Backup | DLM diário às 03:00 UTC, retenção de sete snapshots do volume de dados |
+| Operação | Role SSM dedicada para o host; política separada de sessões para o operador IAM |
+| Alertas | Falha EC2, CPU alta, créditos de CPU baixos e falha de snapshot; tópico SNS criptografado |
+| Orçamento | Conta inteira, US$ 30/mês brutos antes dos créditos, alertas reais em 50/80/100% e previsão em 100% |
+| Auditoria | Trilha multirregional de eventos de gerenciamento em S3 privado/criptografado, validação dos logs e retenção de 90 dias |
+
+O orçamento é um **alerta, não um limite de gastos**. Não há desligamento
+automático que possa interromper uploads. Em modo CPU `standard`, falta de
+créditos reduz o desempenho em vez de gerar cobrança de CPU excedente; isso
+precisa ser observado no teste do E5. RAM e disco não têm alarmes neste template;
+acompanhe-os durante a validação e escolha a monitoração definitiva na etapa 9.
+
+A rede proposta é IPv4. Para o Supabase, use uma conexão compatível com IPv4,
+como o **session pooler na porta 5432**; o endpoint direto IPv6 de um projeto
+não funcionará nessa rede sem ajustes. Não compre um adicional IPv4 sem antes
+verificar essa alternativa. O teste de banco real fica na etapa 7.
+
+### Identidade e proteção de alterações
+
+O host recebe apenas `AmazonSSMManagedInstanceCore`, sem chaves de acesso
+estáticas e sem acesso aos segredos do Supabase/Groq. A role de snapshots tem
+permissões para o disco selecionado, snapshots e regras de agendamento DLM;
+exclusão fica limitada a snapshots com a tag de backup desta stack. Não há
+permissão para Fast Snapshot Restore, cópias entre regiões ou compartilhamento
+de snapshots. As regras públicas 80/443 são uma escolha deliberada para a API
+pública com Caddy, conforme a etapa 5; os demais acessos continuam fechados.
+
+A política `SsmOperatorPolicy` destina-se a um **usuário IAM dedicado**, com
+MFA no login, para iniciar sessões apenas nessa EC2 e retomar/encerrar suas
+próprias sessões. Não cria usuário, senha ou access key. Criar a stack exige
+uma identidade de provisionamento separada com as permissões dos recursos
+descritos, `iam:PassRole` limitado às roles correspondentes e `CAPABILITY_IAM`.
+A política de operação do host não concede esses poderes de provisionamento.
+
+Antes da criação, configure o usuário IAM pelo console privado, ative MFA e
+prepare a autenticação temporária. `SignInLocalDevelopmentAccess` permite o
+fluxo `aws login` para esse usuário; a troca do perfil será uma ação explícita
+quando essa identidade estiver pronta. Não gere ou cole access keys no chat.
+Não habilite Organizations, Control Tower ou uma configuração de SSO que crie
+Organizations para resolver esse login: isso pode converter o Free Plan para
+Paid automaticamente. Não houve criação ou troca de identidade nesta etapa.
+
+`stack-policy.json` bloqueia substituição/exclusão por updates de Node, disco,
+Elastic IP, chave KMS e bucket de auditoria. Essa política precisa acompanhar
+a criação da stack. Não existe Export/ImportValue entre stacks. Uma mudança
+de AMI pode exigir substituir a EC2; um disco de uma AZ não se move para outra
+AZ por simples edição. Planeje drenagem, backup e recuperação antes de liberar
+uma mudança protegida. A proteção de término também exige operação explícita
+para encerrar a EC2.
+
+### Persistência e bootstrap
+
+O volume de dados é identificado pelo **ID EBS/NVMe**, não por uma ordem fixa
+de discos. Só um volume novo criado pela stack, sem filesystem ou assinatura,
+pode ser formatado. Um volume de recuperação vazio, particionado ou com tipo
+inesperado é rejeitado. Um ext4 existente é preservado.
+
+O disco monta em `/srv/echomind`; Docker usa `docker/` e containerd usa
+`containerd/` nesse disco. Configurar apenas `data-root` do Docker não basta
+para o image store das instalações novas do Docker 29. A configuração privada
+fica em `/srv/echomind/private`, com bind mount em `/etc/echomind`, mantendo
+compatibilidade com o instalador da etapa 4 que rejeita links simbólicos.
+As montagens entram no fstab por UUID e o serviço verifica ambas antes de subir.
+Uma falha de bootstrap bloqueia o Docker até reparo; não usa o disco do sistema
+como substituto silencioso para os dados.
+
+O bootstrap instala Docker a partir do repositório oficial assinado e exige
+Compose >= 2.30. A versão de pacotes do host acompanha o repositório no primeiro
+boot; registre as versões efetivamente instaladas e teste upgrades, enquanto
+as imagens da aplicação continuam fixadas por digest/commit. O script não
+deve ser executado manualmente em um host existente sem reconciliação.
+
+CloudFormation `CREATE_COMPLETE` não confirma o fim desse processo: a anexação
+EBS ocorre após a criação da EC2, e o bootstrap aguarda o disco e o Elastic IP.
+Antes de configurar a aplicação, confirme por SSM:
+
+```sh
+sudo test -f /srv/echomind/bootstrap-ready
+sudo mountpoint -q /srv/echomind
+sudo mountpoint -q /etc/echomind
+sudo systemctl is-active docker containerd
+sudo docker info --format '{{.DockerRootDir}}'
+sudo docker compose version
+```
+
+O diretório de dados contém os volumes de originais, cache e certificados, o
+estado Docker e os arquivos privados. Não publique seu conteúdo em logs. A
+trilha CloudTrail registra chamadas administrativas, incluindo APIs SSM, mas
+este template não habilita gravação do conteúdo interativo das sessões, evitando
+registrar segredos exibidos em editores. Auditoria detalhada da sessão exige
+um fluxo de configuração de segredos que não os mostre no terminal.
+
+### Backup, restauração e encerramento
+
+Os snapshots DLM são **crash-consistent** e podem perder alterações desde o
+último snapshot; não prometem backup coordenado com o PostgreSQL externo.
+Para uma cópia consistente da aplicação, use a drenagem e o arquivo de backup
+da etapa 3. Prepare o backup do Supabase antes de migrations na etapa 7. O
+alarme DLM detecta falhas reportadas; confirme também os snapshots concluídos,
+pois ausência de execução de uma política desativada não equivale a erro emitido.
+
+Para recuperar, escolha um snapshot, crie um EBS criptografado **na AZ de
+destino**, aplique as tags `Project`/`EchoMindBackup` da nova stack e use seu ID
+em `ExistingDataVolumeId`. Ele precisa estar desanexado e conter ext4. O volume
+antigo não é sobrescrito. Só execute esse processo após revisar qual é a cópia
+correta, o estado do banco e a interrupção da instância anterior. A restauração
+com uma EC2 real ainda não foi executada; será um teste obrigatório antes de
+considerar a publicação concluída.
+
+Encerrar/parar a EC2 não elimina despesas de EBS, snapshots, Elastic IP, S3 ou
+KMS. O template retém disco de dados, endereço público, chave KMS e bucket de
+auditoria. Esses recursos precisam de inventário e remoção explícita quando
+não forem mais necessários. Excluir uma stack não é um comando de limpeza
+completa de custos nem substitui backup.
+
+### Validação e execução futura
+
+- `preflight.mcp.py`: script somente de leitura para `run_script` do AWS MCP;
+  revisa plano, identidade, quota, AMI, zonas e recursos na região de destino.
+- `parameters.example.json`: exemplo sem credenciais; copie fora do Git e
+  preencha email/AZ antes de preparar um change set.
+- `check_infra.py`: testes de invariantes, sintaxe Bash e recusa de formatação
+  de discos recuperados, com comandos de disco simulados.
+- `security.guard` e `check_guard.py`: controles de segurança do projeto e
+  regressões negativas para SSH, portas amplas, IMDSv1, CPU ilimitada e exposição
+  de dados. Não equivalem a uma certificação de conformidade.
+- `validation.Dockerfile`: ambiente isolado proposto com cfn-lint 1.57.2 e
+  cfn-guard 3.2.1; o binário Guard tem SHA-256 fixado.
+
+| Camada | Resultado atual |
+| --- | --- |
+| Conta/preços/quota/AMI | Consultados por APIs somente de leitura; root permanece como impedimento de execução |
+| Invariantes e Bash | Dez testes passaram no container Linux existente, sem executar o bootstrap |
+| API `ValidateTemplate` | Aprovou estrutura e informou `CAPABILITY_IAM`; não confere a execução do bootstrap nem toda a semântica |
+| cfn-lint | Pendente de autorização para baixar a versão fixa em container isolado |
+| cfn-guard | Pendente da mesma autorização; controles de segurança ainda não foram avaliados por essa ferramenta |
+| Change set/validação da conta | Não criado; exige identidade não root, parâmetros finais e revisão antes de executar |
+| EC2/SSM/backup/alertas reais | Não provisionados ou testados; dependem da execução aprovada da infraestrutura |
+
+A etapa 6 não está marcada como concluída enquanto a validação local completa
+estiver pendente. Antes da criação real: rever crédito/custos, medir o E5 no
+limite candidato, preencher o email, usar identidade não root, revisar o change
+set e aplicar `stack-policy.json`. A confirmação SNS só é enviada ao criar o
+tópico. Não foram enviados alertas ou feitas alterações na conta.
 
 ## Referências
 
@@ -813,3 +1017,13 @@ publicação do projeto. A próxima etapa é a **6: infraestrutura AWS**.
 - [Remoção de valores no merge de Compose](https://docs.docker.com/reference/compose-file/merge/#reset-value)
 - [Middleware de proxy do Uvicorn 0.29.0](https://github.com/encode/uvicorn/blob/0.29.0/uvicorn/middleware/proxy_headers.py)
 - [Acesso HTTP/HTTPS a uma EC2](https://repost.aws/knowledge-center/connect-http-https-ec2)
+- [Condições do Free Tier e duração do Free Plan](https://aws.amazon.com/free/terms/)
+- [Planos Free/Paid e conversões automáticas](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier-plans.html)
+- [IAM para DLM](https://docs.aws.amazon.com/ebs/latest/userguide/service-role.html)
+- [Métricas de snapshots DLM](https://docs.aws.amazon.com/ebs/latest/userguide/monitor-dlm-cw-metrics.html)
+- [Permissões de sessões SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started-restrict-access-examples.html)
+- [Alarmes CloudWatch com SNS criptografado](https://repost.aws/knowledge-center/cloudwatch-configure-alarm-sns)
+- [Preços KMS](https://aws.amazon.com/kms/pricing/)
+- [Preços CloudWatch](https://aws.amazon.com/cloudwatch/pricing/)
+- [Dados persistentes do Docker e containerd](https://docs.docker.com/engine/daemon/#daemon-data-directory)
+- [Docker Engine no Ubuntu](https://docs.docker.com/engine/install/ubuntu/)

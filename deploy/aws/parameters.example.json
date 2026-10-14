@@ -1,0 +1,8 @@
+[
+  {"ParameterKey": "AvailabilityZone", "ParameterValue": "us-east-1a"},
+  {"ParameterKey": "AlertEmail", "ParameterValue": "CHANGE_ME@example.invalid"},
+  {"ParameterKey": "MonthlyBudgetUSD", "ParameterValue": "30"},
+  {"ParameterKey": "DataVolumeGiB", "ParameterValue": "20"},
+  {"ParameterKey": "ExistingDataVolumeId", "ParameterValue": ""},
+  {"ParameterKey": "CreateAuditTrail", "ParameterValue": "true"}
+]

@@ -1,0 +1,498 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EchoMind single-node infrastructure - encrypted durable storage, private administration and bounded MVP costs.
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@3
+  com.aws.cloudformation.Context:
+    ref:
+      - at: docs/deploy-aws.md
+        has: Architecture, cost review, operator prerequisites and recovery procedures
+    must:
+      - Prepare only; deployment requires a non-root operator and a current credit review.
+      - One amd64 backend worker; public ingress is restricted to HTTP and HTTPS.
+      - Disk and node replacement require drained uploads and an explicit recovery plan.
+Parameters:
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Single AZ for the node and its durable EBS disk; must match a reused disk.
+  ImageId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id
+    Description: Public Canonical Ubuntu 24.04 amd64 AMI parameter; review resolved AMI before execution.
+  AlertEmail:
+    Type: String
+    AllowedPattern: '^[^\s@]+@[^\s@]+\.[^\s@]+$'
+    Description: Owner email for operational and cost notifications; subscription confirmation required.
+  MonthlyBudgetUSD:
+    Type: Number
+    Default: 30
+    MinValue: 5
+    MaxValue: 100
+    Description: Gross account-wide monthly alert budget before promotional credits, not a spending cap.
+  DataVolumeGiB:
+    Type: Number
+    Default: 20
+    MinValue: 20
+    MaxValue: 100
+  ExistingDataVolumeId:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^vol-[a-f0-9]{8,17}$'
+    Description: Recovery only - detached ext4 disk in the selected AZ; empty creates a new disk.
+  CreateAuditTrail:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Disable only when an existing organization/account trail already records management events.
+Conditions:
+  NewDataVolume: !Equals [!Ref ExistingDataVolumeId, '']
+  EnableAuditTrail: !Equals [!Ref CreateAuditTrail, 'true']
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.42.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: {VpcId: !Ref Vpc, InternetGatewayId: !Ref InternetGateway}
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: 10.42.0.0/24
+      MapPublicIpOnLaunch: false
+      Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: {VpcId: !Ref Vpc}
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties: {RouteTableId: !Ref RouteTable, DestinationCidrBlock: 0.0.0.0/0, GatewayId: !Ref InternetGateway}
+  SubnetRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref Subnet, RouteTableId: !Ref RouteTable}
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Direct public Caddy avoids an extra load balancer; administrative access uses SSM.
+        must: [Only public TCP 80/443; no SSH or backend publication.]
+    Properties:
+      GroupDescription: EchoMind public HTTPS and HTTP challenge only
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: HTTPS redirect and ACME HTTP challenge}
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: Public TLS API}
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: Signed Ubuntu package repositories}
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: HTTPS dependencies and SSM}
+        - {IpProtocol: tcp, FromPort: 5432, ToPort: 5432, CidrIp: 0.0.0.0/0, Description: Supabase PostgreSQL with required SSL}
+  NodeRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: The host runs SSM; application containers do not call AWS APIs.
+        must: [No static access keys or administrator policy; no instance credentials in application containers.]
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - {Effect: Allow, Principal: {Service: ec2.amazonaws.com}, Action: 'sts:AssumeRole'}
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
+  NodeProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: {Roles: [!Ref NodeRole]}
+  DataVolume:
+    Type: AWS::EC2::Volume
+    Condition: NewDataVolume
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Docker volumes, certificates and private runtime configuration outlive the OS/node.
+        must: [Never format a disk with an existing filesystem; explicit same-AZ reattachment on recovery.]
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      Encrypted: true
+      KmsKeyId: alias/aws/ebs
+      VolumeType: gp3
+      Size: !Ref DataVolumeGiB
+      Tags:
+        - {Key: Project, Value: !Ref 'AWS::StackName'}
+        - {Key: EchoMindBackup, Value: !Ref 'AWS::StackName'}
+        - {Key: Name, Value: !Sub '${AWS::StackName}-data'}
+  Node:
+    Type: AWS::EC2::Instance
+    DependsOn: [PublicRoute, SubnetRoute]
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Small amd64 CPU node matches the measured packaging; standard credits bound burst costs.
+        must:
+          - IMDSv2 required; hop limit one deliberately keeps host credentials away from bridge containers.
+          - CloudFormation completion is not bootstrap readiness; confirm SSM and the bootstrap marker.
+          - Termination protection and the attached retained disk prevent unattended node replacement.
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: t3.small
+      IamInstanceProfile: !Ref NodeProfile
+      DisableApiTermination: true
+      CreditSpecification: {CPUCredits: standard}
+      MetadataOptions: {HttpTokens: required, HttpPutResponseHopLimit: 1, InstanceMetadataTags: disabled}
+      Monitoring: false
+      NetworkInterfaces:
+        - {DeviceIndex: '0', SubnetId: !Ref Subnet, AssociatePublicIpAddress: false, GroupSet: [!Ref WebSecurityGroup]}
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs: {VolumeType: gp3, VolumeSize: 16, Encrypted: true, KmsKeyId: alias/aws/ebs, DeleteOnTermination: true}
+      Tags: [{Key: Name, Value: !Sub '${AWS::StackName}-node'}, {Key: Project, Value: !Ref 'AWS::StackName'}]
+      UserData:
+        Fn::Base64:
+          Fn::Sub:
+            - |
+              #!/bin/bash
+              set -Eeuo pipefail
+              umask 077
+              exec > >(tee -a /var/log/echomind-bootstrap.log) 2>&1
+              trap 'systemctl stop docker.service docker.socket || true; systemctl mask docker.service docker.socket || true; echo "Bootstrap failed; Docker blocked until repaired."' ERR
+              systemctl mask docker.service docker.socket
+              VOLUME_ID='${DiskId}'
+              VOLUME_SUFFIX=$(printf '%s' "$VOLUME_ID" | tr -d '-')
+              DEVICE="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_$VOLUME_SUFFIX"
+              for attempt in $(seq 1 120); do
+                test -b "$DEVICE" && break
+                sleep 5
+              done
+              test -b "$DEVICE"
+              # Reject partitioned or unexpected disks; only an entirely blank disk may be formatted.
+              test "$(lsblk -nr -o TYPE "$DEVICE" | wc -l)" -eq 1
+              FS_TYPE=$(blkid -s TYPE -o value "$DEVICE" || true)
+              if test -z "$FS_TYPE"; then
+                test '${FreshDisk}' = true
+                test -z "$(wipefs --no-act --noheadings --output TYPE "$DEVICE")"
+                mkfs.ext4 -L echomind-data "$DEVICE"
+              elif test "$FS_TYPE" != ext4; then
+                echo 'Unexpected existing filesystem; refusing to format.'
+                exit 1
+              fi
+              DISK_UUID=$(blkid -s UUID -o value "$DEVICE")
+              install -d -m 755 /srv/echomind
+              grep -q "UUID=$DISK_UUID /srv/echomind " /etc/fstab || printf 'UUID=%s /srv/echomind ext4 defaults,nofail 0 2\n' "$DISK_UUID" >> /etc/fstab
+              mount /srv/echomind
+              mountpoint -q /srv/echomind
+              install -d -m 700 /srv/echomind/private /etc/echomind
+              test -z "$(ls -A /etc/echomind)"
+              grep -q '^/srv/echomind/private /etc/echomind ' /etc/fstab || printf '%s\n' '/srv/echomind/private /etc/echomind none bind,nofail,x-systemd.requires-mounts-for=/srv/echomind 0 0' >> /etc/fstab
+              mount /etc/echomind
+              mountpoint -q /etc/echomind
+              # Wait for the separate Elastic IP association and internet route.
+              for attempt in $(seq 1 60); do
+                curl -fsS --connect-timeout 5 https://download.docker.com/linux/ubuntu/gpg -o /tmp/docker.asc && break
+                sleep 5
+              done
+              test -s /tmp/docker.asc
+              export DEBIAN_FRONTEND=noninteractive
+              apt-get -o Acquire::Retries=3 update
+              apt-get -o Acquire::Retries=3 install -y ca-certificates curl git
+              install -d -m 755 /etc/apt/keyrings
+              install -m 644 /tmp/docker.asc /etc/apt/keyrings/docker.asc
+              printf '%s\n' 'Types: deb' 'URIs: https://download.docker.com/linux/ubuntu' 'Suites: noble' 'Components: stable' 'Architectures: amd64' 'Signed-By: /etc/apt/keyrings/docker.asc' > /etc/apt/sources.list.d/docker.sources
+              apt-get -o Acquire::Retries=3 update
+              apt-get -o Acquire::Retries=3 install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+              install -d -m 755 /etc/docker /etc/systemd/system/docker.service.d /etc/systemd/system/containerd.service.d
+              # Both image layers and named volumes must reside on the durable disk.
+              printf '%s\n' '{"data-root":"/srv/echomind/docker","log-driver":"local","log-opts":{"max-size":"10m","max-file":"3"}}' > /etc/docker/daemon.json
+              # Docker 29 uses a separate containerd image store on fresh installations.
+              systemctl stop containerd
+              containerd config default | sed -E 's|^root[[:space:]]*=.*$|root = "/srv/echomind/containerd"|' > /etc/containerd/config.toml
+              grep -qx 'root = "/srv/echomind/containerd"' /etc/containerd/config.toml
+              for service in docker containerd; do
+                printf '%s\n' '[Unit]' 'RequiresMountsFor=/srv/echomind /etc/echomind' '[Service]' 'ExecStartPre=/usr/bin/mountpoint -q /srv/echomind' 'ExecStartPre=/usr/bin/mountpoint -q /etc/echomind' > "/etc/systemd/system/$service.service.d/echomind-storage.conf"
+              done
+              systemctl daemon-reload
+              systemctl unmask docker.service docker.socket
+              systemctl enable --now containerd docker
+              COMPOSE_VERSION=$(docker compose version --short | sed 's/^v//')
+              dpkg --compare-versions "$COMPOSE_VERSION" ge 2.30.0
+              # Canonical's EC2 image ships SSM Agent; fail readiness if it is unavailable.
+              systemctl is-active --quiet snap.amazon-ssm-agent.amazon-ssm-agent.service
+              printf '%s\n' 'Host ready; application images, runtime secrets and database migrations are separate steps.' > /srv/echomind/bootstrap-ready
+            - DiskId: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
+              FreshDisk: !If [NewDataVolume, 'true', 'false']
+  DiskAttachment:
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      Device: /dev/sdf
+      InstanceId: !Ref Node
+      VolumeId: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
+  PublicIp:
+    Type: AWS::EC2::EIP
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties: {Domain: vpc, Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]}
+  IpAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties: {AllocationId: !GetAtt PublicIp.AllocationId, InstanceId: !Ref Node}
+  SsmOperatorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Attach this to a dedicated non-root IAM user; no IAM or infrastructure-administration privileges.
+        must: [SSM shell access is privileged host administration; never attach to application credentials.]
+    Properties:
+      Description: EchoMind instance administration through SSM without SSH
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: ['ssm:StartSession']
+            Resource:
+              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${Node}
+              - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:*:document/SSM-SessionManagerRunShell
+          - Effect: Allow
+            Action: ['ssmmessages:OpenDataChannel']
+            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:session/${!aws:username}-*'
+          - Effect: Allow
+            Action: ['ssm:ResumeSession', 'ssm:TerminateSession']
+            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:session/*'
+            Condition:
+              StringEquals:
+                ssm:resourceTag/aws:ssmmessages:target-id: !Ref Node
+                ssm:resourceTag/aws:ssmmessages:session-id: '${aws:userid}'
+          - Effect: Allow
+            Action: ['ssm:DescribeInstanceInformation', 'ssm:DescribeSessions', 'ec2:DescribeInstances']
+            Resource: '*'
+  SnapshotRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: dlm.amazonaws.com}
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals: {'aws:SourceAccount': !Ref 'AWS::AccountId'}
+              ArnLike: {'aws:SourceArn': !Sub 'arn:${AWS::Partition}:dlm:${AWS::Region}:${AWS::AccountId}:policy/*'}
+      Policies:
+        - PolicyName: snapshots
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ['ec2:DescribeInstances', 'ec2:DescribeVolumes', 'ec2:DescribeSnapshots', 'ec2:DescribeAvailabilityZones']
+                Resource: '*'
+              - Effect: Allow
+                Action: ['ec2:CreateSnapshot']
+                Resource:
+                  - !Sub
+                    - arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/${DiskId}
+                    - DiskId: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
+                  - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*
+              - Effect: Allow
+                Action: ['ec2:CreateTags']
+                Resource: !Sub arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*
+              - Effect: Allow
+                Action: ['ec2:DeleteSnapshot']
+                Resource: !Sub arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*
+                Condition: {StringEquals: {'ec2:ResourceTag/EchoMindBackup': !Ref 'AWS::StackName'}}
+              - Effect: Allow
+                Action: ['events:PutRule', 'events:DeleteRule', 'events:DescribeRule', 'events:EnableRule', 'events:DisableRule', 'events:ListTargetsByRule', 'events:PutTargets', 'events:RemoveTargets']
+                Resource: !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/AwsDataLifecycleRule.managed-cwe.*
+  SnapshotPolicy:
+    Type: AWS::DLM::LifecyclePolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Daily encrypted EBS snapshots protect the complete durable disk without an extra backup agent.
+        must: [Crash-consistent only; Supabase backup and a tested restore are separate requirements.]
+    Properties:
+      Description: EchoMind daily durable disk snapshot
+      State: ENABLED
+      ExecutionRoleArn: !GetAtt SnapshotRole.Arn
+      PolicyDetails:
+        PolicyType: EBS_SNAPSHOT_MANAGEMENT
+        ResourceTypes: [VOLUME]
+        TargetTags: [{Key: EchoMindBackup, Value: !Ref 'AWS::StackName'}]
+        Schedules:
+          - Name: daily
+            CopyTags: true
+            TagsToAdd: [{Key: EchoMindBackup, Value: !Ref 'AWS::StackName'}]
+            CreateRule: {Interval: 24, IntervalUnit: HOURS, Times: ['03:00']}
+            RetainRule: {Count: 7}
+  AlertKey:
+    Type: AWS::KMS::Key
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: EchoMind operational notification encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - {Sid: AccountAdministration, Effect: Allow, Principal: {AWS: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:root'}, Action: 'kms:*', Resource: '*'}
+          - Sid: CloudWatchNotifications
+            Effect: Allow
+            Principal: {Service: cloudwatch.amazonaws.com}
+            Action: ['kms:Decrypt', 'kms:GenerateDataKey*']
+            Resource: '*'
+            Condition:
+              StringEquals: {'aws:SourceAccount': !Ref 'AWS::AccountId'}
+              ArnLike: {'aws:SourceArn': !Sub 'arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AWS::StackName}-*'}
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      KmsMasterKeyId: !Ref AlertKey
+      Subscription: [{Protocol: email, Endpoint: !Ref AlertEmail}]
+  AlertTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: [!Ref AlertTopic]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: cloudwatch.amazonaws.com}
+            Action: 'sns:Publish'
+            Resource: !Ref AlertTopic
+            Condition:
+              StringEquals: {'aws:SourceAccount': !Ref 'AWS::AccountId'}
+              ArnLike: {'aws:SourceArn': !Sub 'arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AWS::StackName}-*'}
+  StatusAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-node-status'
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed
+      Dimensions: [{Name: InstanceId, Value: !Ref Node}]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: missing
+      AlarmActions: [!Ref AlertTopic]
+  CpuAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-cpu-high'
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions: [{Name: InstanceId, Value: !Ref Node}]
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: missing
+      AlarmActions: [!Ref AlertTopic]
+  CreditAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-cpu-credits-low'
+      Namespace: AWS/EC2
+      MetricName: CPUCreditBalance
+      Dimensions: [{Name: InstanceId, Value: !Ref Node}]
+      Statistic: Minimum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: missing
+      AlarmActions: [!Ref AlertTopic]
+  BackupAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-snapshot-failure'
+      Namespace: AWS/EBS
+      MetricName: SnapshotsCreateFailed
+      Dimensions: [{Name: DLMPolicyId, Value: !Ref SnapshotPolicy}]
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertTopic]
+  Budget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub '${AWS::StackName}-gross-monthly'
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit: {Amount: !Ref MonthlyBudgetUSD, Unit: USD}
+        CostTypes: {IncludeCredit: false, IncludeRefund: false, IncludeTax: true, UseAmortized: false}
+      NotificationsWithSubscribers:
+        - Notification: {NotificationType: ACTUAL, ComparisonOperator: GREATER_THAN, Threshold: 50, ThresholdType: PERCENTAGE}
+          Subscribers: [{SubscriptionType: EMAIL, Address: !Ref AlertEmail}]
+        - Notification: {NotificationType: ACTUAL, ComparisonOperator: GREATER_THAN, Threshold: 80, ThresholdType: PERCENTAGE}
+          Subscribers: [{SubscriptionType: EMAIL, Address: !Ref AlertEmail}]
+        - Notification: {NotificationType: ACTUAL, ComparisonOperator: GREATER_THAN, Threshold: 100, ThresholdType: PERCENTAGE}
+          Subscribers: [{SubscriptionType: EMAIL, Address: !Ref AlertEmail}]
+        - Notification: {NotificationType: FORECASTED, ComparisonOperator: GREATER_THAN, Threshold: 100, ThresholdType: PERCENTAGE}
+          Subscribers: [{SubscriptionType: EMAIL, Address: !Ref AlertEmail}]
+  AuditBucket:
+    Type: AWS::S3::Bucket
+    Condition: EnableAuditTrail
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, IgnorePublicAcls: true, BlockPublicPolicy: true, RestrictPublicBuckets: true}
+      OwnershipControls: {Rules: [{ObjectOwnership: BucketOwnerEnforced}]}
+      BucketEncryption: {ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]}
+      VersioningConfiguration: {Status: Enabled}
+      LifecycleConfiguration:
+        Rules:
+          - {Id: expiry, Status: Enabled, ExpirationInDays: 90, NoncurrentVersionExpiration: {NoncurrentDays: 30}}
+  AuditBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: EnableAuditTrail
+    Properties:
+      Bucket: !Ref AuditBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - {Effect: Deny, Principal: '*', Action: 's3:*', Resource: [!GetAtt AuditBucket.Arn, !Sub '${AuditBucket.Arn}/*'], Condition: {Bool: {'aws:SecureTransport': false}}}
+          - Effect: Allow
+            Principal: {Service: cloudtrail.amazonaws.com}
+            Action: 's3:GetBucketAcl'
+            Resource: !GetAtt AuditBucket.Arn
+            Condition: {StringEquals: {'aws:SourceArn': !Sub 'arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/${AWS::StackName}-audit'}}
+          - Effect: Allow
+            Principal: {Service: cloudtrail.amazonaws.com}
+            Action: 's3:PutObject'
+            Resource: !Sub '${AuditBucket.Arn}/AWSLogs/${AWS::AccountId}/*'
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+                aws:SourceArn: !Sub 'arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/${AWS::StackName}-audit'
+  AuditTrail:
+    Type: AWS::CloudTrail::Trail
+    Condition: EnableAuditTrail
+    DependsOn: AuditBucketPolicy
+    Properties:
+      TrailName: !Sub '${AWS::StackName}-audit'
+      S3BucketName: !Ref AuditBucket
+      IsLogging: true
+      IsMultiRegionTrail: true
+      IncludeGlobalServiceEvents: true
+      EnableLogFileValidation: true
+      EventSelectors: [{IncludeManagementEvents: true, ReadWriteType: All}]
+Outputs:
+  InstanceId: {Description: Host managed through SSM, Value: !Ref Node}
+  PublicIpv4: {Description: Set the API DNS A record to this address after bootstrap validation, Value: !Ref PublicIp}
+  DurableVolumeId:
+    Description: Retained disk; record before any update or recovery.
+    Value: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
+  OperatorPolicyArn: {Description: Attach to a dedicated non-root administrator identity, Value: !Ref SsmOperatorPolicy}
+  SnapshotPolicyId: {Description: Daily snapshot policy to verify after provisioning, Value: !Ref SnapshotPolicy}
+  AlertTopicArn: {Description: Operational email subscription must be confirmed, Value: !Ref AlertTopic}
+  AuditBucketName: {Condition: EnableAuditTrail, Description: Private retained management event log bucket, Value: !Ref AuditBucket}
