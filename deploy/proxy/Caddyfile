@@ -1,0 +1,55 @@
+{
+	admin off
+	http_port 8080
+	https_port 8443
+	email {$ACME_EMAIL}
+	skip_install_trust
+	grace_period 300s
+	servers {
+		protocols h1 h2
+		strict_sni_host on
+		max_header_size 16KiB
+		timeouts {
+			read_header 10s
+			read_body 120s
+			idle 120s
+		}
+	}
+}
+
+{$API_DOMAIN} {
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		Strict-Transport-Security "max-age=31536000"
+	}
+	# 10 MiB file + the backend's 64 KiB multipart envelope fits below 11 MiB.
+	@upload path /documents/upload
+	request_body @upload {
+		max_size 11MiB
+	}
+	@other not path /documents/upload
+	request_body @other {
+		max_size 1MiB
+	}
+	reverse_proxy backend:8000 {
+		# Caddy is directly internet-facing: never accept client-supplied IPs.
+		header_up -Forwarded
+		header_up -X-Real-IP
+		# Default X-Forwarded handling overwrites untrusted incoming values.
+		# Positive interval keeps upstream cancellation on client disconnect.
+		# Unknown-length chat responses are flushed immediately by Caddy.
+		flush_interval 100ms
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 60s
+		}
+	}
+}
+
+# Container-local liveness only, without publishing an administrative endpoint.
+http://127.0.0.1:8090 {
+	bind 127.0.0.1
+	respond /health 200
+}

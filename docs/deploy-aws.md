@@ -37,7 +37,7 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   validação de variáveis obrigatórias, armazenamento fora do Git e da imagem,
   entrega ao processo em tempo de execução e permissões mínimas. Se houver uso do
   Secrets Manager pelo agente, usar `asm-exec` e referências dinâmicas.
-- [ ] **5. HTTPS e acesso público:** definir domínio da API, proxy e certificados
+- [x] **5. HTTPS e acesso público:** definir domínio da API, proxy e certificados
   com renovação, portas públicas 80/443, API acessível somente pelo proxy, CORS exato,
   streaming e limite de upload. Configurar confiança no IP do proxy para preservar
   o IP do cliente no rate limiting sem aceitar cabeçalhos falsificados.
@@ -620,7 +620,177 @@ serviço remoto foi autenticado e nenhum recurso AWS foi criado.
 Credenciais reais e as URLs definitivas serão preenchidas privadamente no
 servidor quando as etapas de infraestrutura e HTTPS estiverem prontas.
 
-A próxima etapa é a **5: HTTPS e acesso público**.
+## Etapa 5: HTTPS e acesso público
+
+A publicação usa o Compose base junto de `deploy/compose.https.yaml`. O overlay
+adiciona Caddy, remove a publicação da porta 8000 do backend e permite entrada
+pública apenas pelo proxy. O Compose base sozinho continua disponível para
+diagnóstico privado; ele não representa a configuração final de publicação.
+
+| Conexão | Configuração |
+| --- | --- |
+| Internet → EC2 | TCP 80 para redirecionamento/desafio ACME e TCP 443 para HTTPS |
+| Host → Caddy | 80 → 8080 e 443 → 8443; processo com UID/GID 10001, sem capabilities |
+| Caddy → API | HTTP na bridge local Docker; backend em 8000 sem publicação no host |
+| Identidade do proxy | IP fixo `172.30.80.2`; Uvicorn aceita headers encaminhados somente desse IP |
+| Backend | IP fixo `172.30.80.3`, mesma rede; acesso de saída para Supabase/Groq/modelos |
+| Certificados | Emissão e renovação automáticas pelo Caddy; volume `proxy_data` em `/data` |
+| Estado do proxy | Volume `proxy_config` em `/config`; nenhum segredo do backend é entregue ao proxy |
+| Recursos do proxy | Limite de 128 MiB de RAM, sem swap extra, 0,5 CPU e logs locais rotacionados |
+
+A imagem oficial Caddy 2.11.7 está fixada por digest no Dockerfile do proxy.
+O build remove a capability de portas baixas do executável, pois o processo
+usa portas internas altas. Isso permite `cap_drop: ALL`, raiz somente para
+leitura e `no-new-privileges`. O backend mantém um worker e os limites anteriores.
+A máquina de 2 GiB continua candidata, dependendo da medição com E5 real e do
+consumo total do host, API e proxy na etapa 9.
+
+### Domínio, DNS e portas antes de publicar
+
+O domínio real ainda precisa ser escolhido. Use um subdomínio sob seu controle,
+por exemplo `api.seudominio.com`. Não use IP, URL com `https://`, porta, caminho
+ou curinga no campo `API_DOMAIN`. Não é necessário hospedar o DNS no Route 53.
+Se ainda não houver domínio, resolva essa escolha antes do primeiro início
+público; não foi comprado ou registrado nenhum domínio nesta etapa.
+
+Na etapa 6, defina um IP público estável e confira custos de infraestrutura,
+IPv4 e domínio. Crie um registro DNS `A` do subdomínio apontando para esse IP.
+Só publique `AAAA` se IPv6 estiver configurado e testado de ponta a ponta.
+Um registro IPv6 incorreto pode impedir a emissão do certificado.
+
+O Security Group e o firewall do host devem permitir TCP 80/443 de clientes
+IPv4 (`0.0.0.0/0`); regras IPv6 só serão necessárias se IPv6 for adotado.
+Não abra 8000, 8080, 8443, 8090 ou 2019 na EC2. O acesso administrativo seguirá
+Systems Manager na etapa 6. O proxy precisa alcançar os serviços de certificado
+por HTTPS e resolver DNS. Essas regras ainda não foram criadas na AWS.
+
+O modelo atual recebe o cliente diretamente no Caddy. Não coloque CDN ou outro
+proxy na frente sem revisar a confiança nos cabeçalhos e repetir os testes de
+IP e rate limiting. Escolha uma subnet Docker livre antes de publicar: se a
+rede padrão conflitar com VPC, VPN ou outra bridge, altere `PROXY_SUBNET`,
+`PROXY_IP` e `BACKEND_PRIVATE_IP` em conjunto. Use dois IPs diferentes e válidos
+nessa subnet; a rede configurada também impede usar `*` como IP confiável.
+
+### Configuração do servidor
+
+`deploy/proxy/.env.example` contém apenas parâmetros de publicação, caminhos e
+marcadores públicos. A configuração privada do backend continua no arquivo
+da etapa 4. No futuro host Linux, prepare o arquivo de publicação:
+
+```sh
+sudo install -m 600 deploy/proxy/.env.example /etc/echomind/deploy.env
+sudoedit /etc/echomind/deploy.env
+```
+
+Preencha `API_DOMAIN`, `ACME_EMAIL`, nomes das imagens já disponíveis no host e
+o caminho absoluto `BACKEND_ENV_FILE`. Use um endereço de email que você
+acompanhe para avisos da autoridade certificadora. A entrega das imagens por
+CI/CD será tratada na etapa 8. Os arquivos `.env` preenchidos ficam fora do Git.
+
+Depois de ativar HTTPS, **todos os comandos que recriam a stack** precisam usar
+os dois arquivos Compose e o arquivo de publicação. Usar apenas o arquivo base
+reintroduz a porta de diagnóstico e remove a configuração de confiança no proxy.
+Na raiz do checkout, uma função de conveniência para a sessão administrativa:
+
+```sh
+dc() {
+  sudo docker compose --env-file /etc/echomind/deploy.env \
+    -f deploy/compose.yaml -f deploy/compose.https.yaml "$@"
+}
+dc config --quiet
+# Só após DNS, portas, imagens e configuração privada estarem prontos:
+dc up --detach --no-build --wait
+curl --fail https://api.seudominio.com/health
+```
+
+Use o mesmo prefixo `dc` para os comandos privados de drenagem/retomada da
+etapa 3 e para recriação durante rotação da etapa 4. `/health` verifica a API;
+o healthcheck local do Caddy verifica apenas que o proxy responde e não
+comprova emissão de certificado, autenticação, banco ou IA. Confirme HTTPS
+externamente usando validação normal do certificado, sem `curl -k`.
+
+No frontend, defina `NEXT_PUBLIC_API_URL=https://api.seudominio.com`, sem barra
+final. No backend, `ALLOWED_ORIGINS` deve conter as origens HTTPS exatas do
+frontend, incluindo a produção na Vercel ou seu domínio próprio. Não libere
+`*.vercel.app`; previews necessários recebem entradas explícitas. CORS continua
+sob responsabilidade da API; erros produzidos pelo proxy antes de chegar à API
+podem não incluir os cabeçalhos CORS. URLs de autenticação e a validação dos
+serviços reais serão conferidas na etapa 7.
+
+### Streaming, uploads e IP do cliente
+
+O proxy mantém as respostas do chat em fluxo, sem compressão adicionada pelo
+proxy e sem buffer de resposta completo. A configuração usa flush positivo
+de 100 ms, preservando o cancelamento da requisição upstream quando o cliente
+desconecta; respostas sem tamanho conhecido são enviadas progressivamente.
+Não há timeout total de escrita que corte uma resposta longa do chat.
+A conexão com o backend tem timeout de 5 s e seus cabeçalhos devem chegar em
+até 60 s. Cabeçalhos de entrada têm limite de 16 KiB e timeout de 10 s;
+um corpo de entrada deve terminar em até 120 s.
+
+O limite do arquivo continua em **10 MiB** na API, com 64 KiB adicionais para
+multipart. O proxy admite até 11 MiB no corpo de `/documents/upload` e até
+1 MiB nos demais caminhos. Ao alterar `MAX_DOCUMENT_SIZE_MB`, revise também
+esse teto do proxy. Autenticação, tipos de arquivo e regras documentais
+continuam sendo aplicados pela API.
+
+O Caddy descarta os valores `X-Forwarded-*` recebidos de clientes e define os
+seus próprios; também remove `Forwarded` e `X-Real-IP`. O Uvicorn confia apenas
+no IP fixo do Caddy. Outros peers da bridge não conseguem escolher o IP usado
+pelo rate limiter, mesmo enviando esses cabeçalhos. O teste com dois clientes
+de IPs distintos confirmou limites independentes. A preservação do IP na rede
+real da EC2 ainda deve ser conferida após o provisionamento.
+
+### Renovação, atualização e persistência
+
+Com um domínio público válido e portas/DNS corretos, Caddy gerencia a emissão
+e a renovação sem cron adicional. O volume `/data` contém também chaves privadas
+de certificados e dados da conta ACME: mantenha-o privado, persistente e fora
+do Git. Nunca use `down --volumes` em produção. EBS criptografado, backup e
+recuperação desses volumes serão preparados na etapa 6. Sem o volume, Caddy
+precisa emitir novamente e pode encontrar limites da autoridade certificadora.
+
+A API administrativa do Caddy fica desativada. Uma alteração do Caddyfile
+exige nova imagem e recriação do proxy; use a janela de manutenção e drenagem
+da etapa 3. Atualizações apenas do backend podem usar `dc up --detach --no-deps
+--force-recreate backend`, preservando o proxy e os certificados, após a
+drenagem. Há uma janela de indisponibilidade ao trocar o único backend;
+publicação sem interrupção exigiria outra arquitetura e um limiter compartilhado.
+
+### Validação local reproduzível
+
+```sh
+docker build --platform linux/amd64 -t echomind-backend:local ./echomind-backend
+docker build --platform linux/amd64 -t echomind-proxy:local ./deploy/proxy
+python deploy/validate_https.py \
+  --backend-image echomind-backend:local --proxy-image echomind-proxy:local
+```
+
+O teste monta `deploy/fixtures/https_app.py` apenas no projeto descartável.
+Ele usa a API e seus middlewares reais, substituindo conteúdo de chat,
+persistência/autenticação de upload e dependências externas por dados sintéticos.
+O adaptador não entra em nenhuma imagem de produção. A CA é local ao volume de
+teste; o cliente valida o certificado com seu certificado público, sem instalar
+confiança no computador. Nenhum certificado público é solicitado.
+
+| Verificação | Resultado |
+| --- | --- |
+| Build e início do Caddy | Aprovados sem root, capabilities ou escrita na raiz |
+| TLS, host e HTTP | Certificado local validado, Host incompatível rejeitado e redirecionamento 308 aprovado |
+| Exposição | Backend sem porta no host; proxy recebe somente configuração própria |
+| CORS | Origem permitida aceita e origem não autorizada rejeitada pelo HTTPS |
+| Chat | Primeiro trecho chega antes da conclusão; desconexão cancela o gerador upstream |
+| Upload | Arquivo de 10 MiB aceito; 10 MiB + 1 byte rejeitado com 413 e CORS preservado |
+| Corpo no proxy | Corpo maior que 1 MiB em rota comum rejeitado com 413 |
+| IP e rate limiting | Dois clientes independentes; cabeçalhos forjados não contornam o limite |
+| Acesso direto interno | Uvicorn ignora cabeçalhos encaminhados de outro peer da bridge |
+| Certificados persistentes | Mesmo certificado após recriar o proxy; arquivos de chave com modo 600 |
+| Limpeza | Containers, redes e volumes do projeto de teste removidos |
+
+A configuração de renovação automática foi preparada; emissão e renovação por
+uma CA pública dependem do domínio, DNS e EC2 reais e ainda não foram testadas.
+Não houve leitura de segredos reais, mudança de DNS, criação de recursos AWS ou
+publicação do projeto. A próxima etapa é a **6: infraestrutura AWS**.
 
 ## Referências
 
@@ -636,3 +806,10 @@ A próxima etapa é a **5: HTTPS e acesso público**.
 - [Chaves públicas e secretas do Supabase](https://supabase.com/docs/guides/getting-started/api-keys)
 - [Conexões PostgreSQL do Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres)
 - [Interpolação do ConfigParser](https://docs.python.org/3.12/library/configparser.html#interpolation-of-values)
+- [HTTPS automático no Caddy](https://caddyserver.com/docs/automatic-https)
+- [Reverse proxy, headers e streaming no Caddy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy)
+- [Opções de portas e timeouts do Caddy](https://caddyserver.com/docs/caddyfile/options)
+- [Limite de corpo no Caddy](https://caddyserver.com/docs/caddyfile/directives/request_body)
+- [Remoção de valores no merge de Compose](https://docs.docker.com/reference/compose-file/merge/#reset-value)
+- [Middleware de proxy do Uvicorn 0.29.0](https://github.com/encode/uvicorn/blob/0.29.0/uvicorn/middleware/proxy_headers.py)
+- [Acesso HTTP/HTTPS a uma EC2](https://repost.aws/knowledge-center/connect-http-https-ec2)

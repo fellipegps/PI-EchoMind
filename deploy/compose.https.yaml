@@ -1,0 +1,83 @@
+# Production overlay; always use after compose.yaml (Compose >= 2.30).
+services:
+  backend:
+    # Remove even the loopback publication from the private runtime configuration.
+    ports: !reset []
+    command:
+      - python
+      - -m
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --proxy-headers
+      - --forwarded-allow-ips
+      - ${PROXY_IP:-172.30.80.2}
+      - --timeout-graceful-shutdown
+      - "300"
+    networks:
+      proxy:
+        ipv4_address: ${BACKEND_PRIVATE_IP:-172.30.80.3}
+
+  proxy:
+    image: ${PROXY_IMAGE:?Defina PROXY_IMAGE com a imagem do proxy}
+    platform: linux/amd64
+    build:
+      context: ./proxy
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Defina API_DOMAIN com o dominio da API}
+      ACME_EMAIL: ${ACME_EMAIL:?Defina ACME_EMAIL para avisos de certificado}
+      GOMEMLIMIT: 96MiB
+      GOMAXPROCS: "1"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 310s
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: "0.5"
+    mem_limit: 128m
+    memswap_limit: 128m
+    pids_limit: 128
+    ports:
+      - "${PROXY_BIND_IP:-0.0.0.0}:${PROXY_HTTP_PORT:-80}:8080"
+      - "${PROXY_BIND_IP:-0.0.0.0}:${PROXY_HTTPS_PORT:-443}:8443"
+    networks:
+      proxy:
+        ipv4_address: ${PROXY_IP:-172.30.80.2}
+    volumes:
+      - proxy_data:/data
+      - proxy_config:/config
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8090/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+networks:
+  proxy:
+    ipam:
+      config:
+        - subnet: ${PROXY_SUBNET:-172.30.80.0/29}
+
+volumes:
+  proxy_data:
+  proxy_config:

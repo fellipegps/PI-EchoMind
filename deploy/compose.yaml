@@ -33,7 +33,7 @@ services:
     memswap_limit: ${BACKEND_MEMORY_LIMIT:-1536m}
     pids_limit: 256
     ports:
-      # Public access will be provided by the HTTPS proxy in step 5.
+      # Private diagnostics only; compose.https.yaml removes this publication.
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     volumes:
       - model_cache:/var/cache/echomind/models
