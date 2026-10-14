@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 import { configApi } from "@/lib/api";
 import type { Config } from "@/lib/api";
@@ -22,8 +22,6 @@ export default function SettingsPage() {
   const [form, setForm] = useState<Partial<Config>>({
     company_name: "",
     description: "",
-    tone_of_voice: "profissional e cordial",
-    chat_voice_gender: "feminina",
     website: "",
     phone: "",
     address: "",
@@ -44,7 +42,14 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const updated = await configApi.save(form);
+      const updated = await configApi.save({
+        company_name: form.company_name,
+        description: form.description,
+        website: form.website,
+        phone: form.phone,
+        address: form.address,
+        business_hours: form.business_hours,
+      });
       setForm(updated);
       toast.success("Configurações atualizadas com sucesso!");
     } catch (err) {
@@ -56,34 +61,35 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <PageContainer className="space-y-8 max-w-4xl">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-96 w-full" />
+      <PageContainer variant="form">
+        <PageHeader title="Configurações do Sistema" description="Gerencie os dados institucionais e o acesso ao portal público" />
+        <div role="status" aria-label="Carregando configurações" className="space-y-6">
+          <p className="text-sm text-muted-foreground">Carregando configurações…</p>
+          <Skeleton aria-hidden="true" className="h-96 w-full motion-reduce:animate-none" />
+        </div>
       </PageContainer>
     );
   }
 
   return (
-    <PageContainer className="space-y-8 max-w-4xl">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Configurações do Sistema</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie a identidade institucional e o comportamento do EchoMind
-        </p>
-      </div>
+    <PageContainer variant="form">
+      <PageHeader title="Configurações do Sistema" description="Gerencie os dados institucionais e o acesso ao portal público" />
 
       <div className="grid gap-6">
-        <Card className="border-border bg-card pb-0 pt-4">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl">Dados da Instituição</CardTitle>
+        <Card className="gap-5 overflow-hidden pb-0">
+          <CardHeader className="px-4 md:px-6">
+            <CardTitle><h2 className="text-lg">Dados da Instituição</h2></CardTitle>
             <CardDescription>
               Informações essenciais para a calibração das respostas da IA.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 px-4 md:px-6">
+            <fieldset className="min-w-0 space-y-4">
+              <legend className="mb-4 text-sm font-semibold">Identidade institucional</legend>
             <div className="space-y-2">
-              <Label>Nome da Instituição</Label>
+              <Label htmlFor="settings-company_name">Nome da Instituição</Label>
               <Input
+                id="settings-company_name"
                 value={form.company_name ?? ""}
                 onChange={(e) => setForm({ ...form, company_name: e.target.value })}
                 placeholder="Ex: UniEVANGÉLICA"
@@ -92,49 +98,25 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Descrição Base (Contexto)</Label>
+              <Label htmlFor="settings-description">Descrição Base (Contexto)</Label>
               <Textarea
+                id="settings-description"
                 value={form.description ?? ""}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Descreva o que sua instituição faz, seus diferenciais e público-alvo..."
                 rows={4}
-                className="bg-background resize-none"
+                className="min-h-32 max-h-64 resize-none overflow-y-auto bg-background [field-sizing:fixed]"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </fieldset>
+            <fieldset className="min-w-0 space-y-4 border-t pt-6">
+              <legend className="mb-4 text-sm font-semibold">Contato e atendimento</legend>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Personalidade da IA</Label>
-                <Select
-                  value={form.tone_of_voice ?? "profissional e cordial"}
-                  onValueChange={(v) => setForm({ ...form, tone_of_voice: v })}
-                >
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="profissional e cordial">Profissional e cordial</SelectItem>
-                    <SelectItem value="descontraído e jovem">Descontraído e jovem</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Voz do Chatbot</Label>
-                <Select
-                  value={form.chat_voice_gender ?? "feminina"}
-                  onValueChange={(v) => setForm({ ...form, chat_voice_gender: v })}
-                >
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="feminina">Feminina (pt-BR)</SelectItem>
-                    <SelectItem value="masculina">Masculino (pt-BR)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label>Website Oficial</Label>
+                <Label htmlFor="settings-website">Website Oficial</Label>
                 <Input
+                id="settings-website"
                   value={form.website ?? ""}
                   onChange={(e) => setForm({ ...form, website: e.target.value })}
                   className="bg-background"
@@ -142,8 +124,9 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Telefone de Contato</Label>
+                <Label htmlFor="settings-phone">Telefone de Contato</Label>
                 <Input
+                id="settings-phone"
                   value={form.phone ?? ""}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   className="bg-background"
@@ -153,8 +136,9 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Endereço</Label>
+              <Label htmlFor="settings-address">Endereço</Label>
               <Input
+                id="settings-address"
                 value={form.address ?? ""}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 className="bg-background"
@@ -163,18 +147,21 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Horário de Funcionamento</Label>
+              <Label htmlFor="settings-business_hours">Horário de Funcionamento</Label>
               <Input
+                id="settings-business_hours"
                 value={form.business_hours ?? ""}
                 onChange={(e) => setForm({ ...form, business_hours: e.target.value })}
                 className="bg-background"
                 placeholder="Ex: Seg-Sex 9h-18h, Sáb 9h-13h"
               />
             </div>
+            </fieldset>
           </CardContent>
-          <CardFooter className="px-6 py-4">
-            <Button onClick={handleSave} disabled={saving} className="min-w-35">
-              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Salvar Alterações"}
+          <CardFooter className="border-t bg-muted/20 px-4 py-4 [.border-t]:pt-4 md:px-6">
+            <Button onClick={handleSave} disabled={saving} aria-busy={saving} className="w-full sm:w-auto sm:min-w-40">
+              {saving && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+              {saving ? "Salvando…" : "Salvar Alterações"}
             </Button>
           </CardFooter>
         </Card>

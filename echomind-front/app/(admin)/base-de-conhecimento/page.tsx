@@ -4,25 +4,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText } from "lucide-react";
 import { FaqTab } from "./components/faq-tab";
 import { DocumentTab } from "./components/document-tab";
+import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/page-container";
 
 export default function KnowledgeBasePage() {
   return (
-    <PageContainer>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Base de Conhecimento</h1>
-        <p className="text-muted-foreground mt-1">
-          Gerencie as FAQs e os documentos usados pelo chatbot.
-        </p>
-      </div>
+    <PageContainer variant="standard">
+      <PageHeader title="Base de Conhecimento" description="Gerencie as FAQs e os documentos usados pelo chatbot." />
 
       <Tabs defaultValue="faqs" className="w-full space-y-6">
-        <TabsList className="bg-muted/50 p-1">
-          <TabsTrigger value="faqs" className="gap-2 px-4 py-2 text-sm font-medium transition-all">
-            <BookOpen className="h-4 w-4" /> FAQs
+        <TabsList aria-label="Áreas da base de conhecimento" className="w-full p-1 group-data-[orientation=horizontal]/tabs:h-auto sm:w-fit">
+          <TabsTrigger value="faqs" className="min-h-11 gap-2 px-4 text-sm font-medium text-muted-foreground">
+            <BookOpen aria-hidden="true" className="h-4 w-4" /> FAQs
           </TabsTrigger>
-          <TabsTrigger value="documents" className="gap-2 px-4 py-2 text-sm font-medium transition-all">
-            <FileText className="h-4 w-4" /> Documentos
+          <TabsTrigger value="documents" className="min-h-11 gap-2 px-4 text-sm font-medium text-muted-foreground">
+            <FileText aria-hidden="true" className="h-4 w-4" /> Documentos
           </TabsTrigger>
         </TabsList>
 

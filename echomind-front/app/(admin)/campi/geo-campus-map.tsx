@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import type { Building, PathEdge, PathNode } from "@/lib/geocampus-api";
+import styles from "./geo-campus-map.module.css";
 
 export interface GeoPoint {
   lat: number;
@@ -54,6 +55,9 @@ export function GeoCampusMap({
   useEffect(() => {
     let cancelled = false;
     let map: Leaflet.Map | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let resizeFrame: number | null = null;
+    let initialFrame: number | null = null;
 
     void import("leaflet").then((L) => {
       if (cancelled || !elementRef.current) return;
@@ -61,7 +65,9 @@ export function GeoCampusMap({
         center: [center.lat, center.lng],
         zoom,
         scrollWheelZoom: false,
+        zoomControl: false,
       });
+      L.control.zoom({ zoomInTitle: "Aproximar mapa", zoomOutTitle: "Afastar mapa" }).addTo(map);
       const mapTiles = L.tileLayer(MAP_TILE_URL, {
         attribution: MAP_TILE_ATTRIBUTION,
         maxZoom: 19,
@@ -109,11 +115,21 @@ export function GeoCampusMap({
       leafletRef.current = L;
       overlayRef.current = overlay;
       setReady(true);
-      requestAnimationFrame(() => map?.invalidateSize());
+      initialFrame = requestAnimationFrame(() => { if (!cancelled) map?.invalidateSize(); });
+      if (typeof ResizeObserver !== "undefined") {
+        resizeObserver = new ResizeObserver(() => {
+          if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+          resizeFrame = requestAnimationFrame(() => { if (!cancelled) map?.invalidateSize({ pan: false }); });
+        });
+        resizeObserver.observe(elementRef.current);
+      }
     });
 
     return () => {
       cancelled = true;
+      resizeObserver?.disconnect();
+      if (initialFrame !== null) cancelAnimationFrame(initialFrame);
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
       map?.remove();
       mapRef.current = null;
       leafletRef.current = null;
@@ -136,18 +152,19 @@ export function GeoCampusMap({
       const to = byId.get(edge.to_node_id);
       if (!from || !to) return;
       L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
-        color: edge.accessible ? "#16803d" : "#b45309",
+        color: edge.accessible ? "var(--success)" : "var(--warning)",
         weight: 5,
         opacity: 0.8,
+        dashArray: edge.accessible ? undefined : "6 6",
       }).addTo(overlay).bindTooltip(label(edge.accessible ? "Trecho acessível" : "Trecho com barreira de acessibilidade"));
     });
 
     nodes.forEach((node) => {
       L.circleMarker([node.lat, node.lng], {
         radius: 5,
-        color: "#fff",
+        color: "var(--card)",
         weight: 2,
-        fillColor: "#2563eb",
+        fillColor: "var(--primary)",
         fillOpacity: 1,
       }).addTo(overlay).bindTooltip(label(node.label || "Ponto do caminho"));
     });
@@ -155,19 +172,21 @@ export function GeoCampusMap({
     buildings.forEach((building) => {
       L.circleMarker([building.entrance_lat, building.entrance_lng], {
         radius: 9,
-        color: "#fff",
+        color: "var(--card)",
         weight: 3,
-        fillColor: building.active ? "#7c3aed" : "#64748b",
+        fillColor: building.active ? "var(--chart-4)" : "var(--muted-foreground)",
         fillOpacity: 1,
-      }).addTo(overlay).bindTooltip(label(`Entrada: ${building.name}`));
+      }).addTo(overlay).bindTooltip(label(`Entrada: ${building.name}${building.active ? "" : " (Inativo)"}`));
     });
 
     if (draftPoint) {
       const marker = L.marker([draftPoint.lat, draftPoint.lng], {
         draggable: Boolean(onPickRef.current),
+        title: "Ponto em edição",
+        alt: "Ponto em edição; ajuste também por latitude e longitude",
         icon: L.divIcon({
           className: "",
-          html: '<span style="display:block;width:22px;height:22px;border:3px solid white;border-radius:50%;background:#dc2626;box-shadow:0 2px 8px #0008"></span>',
+          html: '<span style="display:block;width:22px;height:22px;border:3px solid var(--card);border-radius:50%;background:var(--destructive);box-shadow:0 2px 8px #0008"></span>',
           iconSize: [22, 22],
           iconAnchor: [11, 11],
         }),
@@ -193,8 +212,9 @@ export function GeoCampusMap({
   return (
     <div
       ref={elementRef}
-      className="h-[28rem] w-full rounded-lg border bg-muted"
+      className={styles.map}
       aria-label="Mapa geográfico do campus; clique para marcar um ponto durante o cadastro"
+      aria-describedby="geo-map-instructions"
       role="application"
     />
   );

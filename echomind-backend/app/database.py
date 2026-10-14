@@ -112,39 +112,6 @@ class CompanyEvent(Base):
     updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
-class CampusLocation(Base):
-    """Ponto navegável do mapa esquemático de um campus por tenant."""
-    __tablename__ = "campus_locations"
-    __table_args__ = (
-        UniqueConstraint(
-            "tenant_id",
-            "name",
-            name="uq_campus_locations_tenant_name",
-        ),
-        CheckConstraint("x >= 0 AND x <= 100", name="ck_campus_locations_x_range"),
-        CheckConstraint("y >= 0 AND y <= 100", name="ck_campus_locations_y_range"),
-        Index(
-            "ix_campus_locations_tenant_active_name",
-            "tenant_id",
-            "active",
-            "name",
-        ),
-    )
-
-    id          = Column(String, primary_key=True, default=new_uuid)
-    tenant_id   = Column(String, nullable=False, index=True)
-    name        = Column(String(200), nullable=False)
-    description = Column(Text, nullable=True)
-    category    = Column(String(100), nullable=False, default="outro")
-    floor       = Column(String(50), nullable=True)
-    building    = Column(String(100), nullable=True)
-    x           = Column(Float, nullable=False)
-    y           = Column(Float, nullable=False)
-    active      = Column(Boolean, nullable=False, default=True)
-    created_at  = Column(DateTime, default=utc_now, nullable=False)
-    updated_at  = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
-
-
 class Campus(Base):
     """Mapa geográfico de um campus pertencente a uma instituição."""
 

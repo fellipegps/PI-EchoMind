@@ -73,30 +73,6 @@ export interface EventCourse {
   name: string;
 }
 
-export interface CampusLocation {
-  id: string;
-  name: string;
-  description: string | null;
-  category: string;
-  floor: string | null;
-  building: string | null;
-  x: number;
-  y: number;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export type PublicCampusLocation = Omit<
-  CampusLocation,
-  "active" | "created_at" | "updated_at"
->;
-
-export type CampusLocationInput = Omit<
-  CampusLocation,
-  "id" | "created_at" | "updated_at"
->;
-
 export interface Config {
   id: string;
   public_slug: string;
@@ -611,29 +587,6 @@ export const configApi = {
     request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
-//  LOCAIS DO CAMPUS
-// ══════════════════════════════════════════════════════════════════════════════
-
-export const locationApi = {
-  list: () => request<CampusLocation[]>("/locations"),
-
-  create: (data: CampusLocationInput) =>
-    request<CampusLocation>("/locations", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-
-  update: (id: string, data: Partial<CampusLocationInput>) =>
-    request<CampusLocation>(`/locations/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
-
-  delete: (id: string) =>
-    request<void>(`/locations/${id}`, { method: "DELETE" }),
-};
-
 export const publicPortalApi = {
   getInstitution: (publicSlug: string) =>
     publicRequest<PublicInstitution>(
@@ -650,10 +603,6 @@ export const publicPortalApi = {
       `/public/${encodeURIComponent(publicSlug)}/events`
     ),
 
-  listLocations: (publicSlug: string) =>
-    publicRequest<PublicCampusLocation[]>(
-      `/public/${encodeURIComponent(publicSlug)}/locations`
-    ),
 };
 
 // ══════════════════════════════════════════════════════════════════════════════

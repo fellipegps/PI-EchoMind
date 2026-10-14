@@ -487,7 +487,6 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `PATCH` | `/faqs/{id}/toggle-chatbot` | Exibe ou oculta uma FAQ no chat publico |
 | `GET` | `/public/{slug}/faqs` | FAQs publicas do portal web |
 | `GET` | `/public/{slug}/events` | Eventos programados no portal web |
-| `GET` | `/public/{slug}/locations` | Locais ativos no portal web |
 | `GET` | `/public/{slug}/geo-campus` | Campi, prédios, espaços e caminhos ativos da instituição |
 | `POST` | `/public/{slug}/chat` | Chat publico vinculado ao slug da instituicao |
 | `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
@@ -504,8 +503,12 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `POST` | `/feedback` | Feedback publico do chatbot |
 | `GET` | `/health` | Health check |
 
-O cadastro e a navegação no mapa geográfico estão descritos em
-[`docs/NAVEGACAO-CAMPUS.md`](docs/NAVEGACAO-CAMPUS.md).
+O cadastro geográfico de campi, prédios, espaços e caminhos é feito em `/campi`.
+A aba pública Locais usa somente esse cadastro, incluindo origem manual, GPS e
+rotas acessíveis. Sem cadastro publicado, o portal informa indisponibilidade.
+A revisão Alembic `0023` retira a tabela do recurso descontinuado; ela remove
+seus registros quando aplicada. Faça backup antes de aplicá-la em um banco
+existente. A reversão recria somente a estrutura, sem recuperar registros.
 
 ## Fluxo Rapido De Teste
 

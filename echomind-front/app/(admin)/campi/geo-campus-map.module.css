@@ -1,0 +1,28 @@
+.map {
+  height: 448px;
+  min-height: 320px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: inherit;
+  z-index: 0;
+  scroll-margin-top: 96px;
+}
+.map:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.map :global(.leaflet-bar) { border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: none; overflow: hidden; }
+.map :global(.leaflet-bar a) { width: 44px; height: 44px; line-height: 44px; background: var(--card); color: var(--foreground); border-color: var(--border); }
+.map :global(.leaflet-bar a:hover) { background: var(--accent); }
+.map :global(.leaflet-bar a.leaflet-disabled) { background: var(--muted); color: var(--muted-foreground); }
+.map :global(.leaflet-control-layers) { max-width: 160px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card); color: var(--foreground); box-shadow: none; }
+.map :global(.leaflet-control-layers label) { min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 4px; }
+.map :global(.leaflet-control-layers input) { accent-color: var(--primary); }
+.map :global(.leaflet-control-attribution) { max-width: 100%; background: var(--card); color: var(--muted-foreground); font-family: inherit; font-size: 12px; line-height: 16px; overflow-wrap: anywhere; }
+.map :global(.leaflet-control-attribution a) { color: var(--primary); text-decoration: underline; }
+.map :global(a:focus-visible), .map :global(input:focus-visible), .map :global(.leaflet-marker-icon:focus-visible) { outline: 2px solid var(--ring); outline-offset: -2px; }
+.map :global(a), .map :global(input), .map :global(.leaflet-marker-icon) { scroll-margin-top: 96px; scroll-margin-bottom: 16px; }
+.map :global(.leaflet-tooltip) { width: max-content; max-width: 240px; white-space: normal; overflow-wrap: anywhere; border-color: var(--border); background: var(--card); color: var(--foreground); font-size: 12px; line-height: 16px; }
+@media (max-width: 1023px) { .map { height: 320px; } }
+@media (prefers-reduced-motion: reduce) { .map :global(.leaflet-zoom-animated) { transition: none; } }

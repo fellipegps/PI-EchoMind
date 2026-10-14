@@ -204,7 +204,7 @@ describe("publicPortalApi", () => {
     localStorage.clear();
   });
 
-  it("resolve instituição, FAQs, eventos e locais pelo slug sem enviar tenant ou autenticação", async () => {
+  it("resolve instituição, FAQs e eventos pelo slug sem enviar tenant ou autenticação", async () => {
     fetchMock
       .mockResolvedValueOnce(
         jsonResponse({
@@ -213,13 +213,11 @@ describe("publicPortalApi", () => {
         })
       )
       .mockResolvedValueOnce(jsonResponse([]))
-      .mockResolvedValueOnce(jsonResponse([]))
       .mockResolvedValueOnce(jsonResponse([]));
 
     await publicPortalApi.getInstitution("unievangelica-anapolis");
     await publicPortalApi.listFaqs("unievangelica-anapolis");
     await publicPortalApi.listEvents("unievangelica-anapolis");
-    await publicPortalApi.listLocations("unievangelica-anapolis");
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
@@ -234,11 +232,6 @@ describe("publicPortalApi", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,
       `${API_URL}/public/unievangelica-anapolis/events`,
-      expect.any(Object)
-    );
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      4,
-      `${API_URL}/public/unievangelica-anapolis/locations`,
       expect.any(Object)
     );
     for (const call of fetchMock.mock.calls) {

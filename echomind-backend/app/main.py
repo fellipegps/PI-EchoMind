@@ -36,8 +36,6 @@ from .schemas import (
     FaqCreate, FaqUpdate, FaqResponse, PublicFaqResponse,
     EventCreate, EventUpdate, EventResponse, PublicEventResponse,
     EventCourseCreate, EventCourseResponse,
-    CampusLocationCreate, CampusLocationUpdate, CampusLocationResponse,
-    PublicCampusLocationResponse,
     ConfigUpdate, ConfigResponse, PublicInstitutionResponse,
     UnansweredQuestionResponse, ConvertToFaqRequest,
     DashboardResponse, RagMetricsResponse, FeedbackRequest, FeedbackResponse,
@@ -155,7 +153,6 @@ router_auth = APIRouter(prefix="/auth", tags=["Autenticação"])
 router_chat = APIRouter(prefix="/chat", tags=["Chat"])
 router_faqs = APIRouter(prefix="/faqs", tags=["Base de Conhecimento"])
 router_events = APIRouter(prefix="/events", tags=["Eventos"])
-router_locations = APIRouter(prefix="/locations", tags=["Locais do Campus"])
 router_config = APIRouter(prefix="/config", tags=["Configurações"])
 router_unanswered = APIRouter(prefix="/unanswered", tags=["Não Respondidas"])
 router_dashboard = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -391,18 +388,6 @@ def get_public_events(
     return crud.get_public_events(db, tenant_id=config.tenant_id)
 
 
-@router_public.get(
-    "/{public_slug}/locations",
-    response_model=list[PublicCampusLocationResponse],
-)
-def get_public_campus_locations(
-    public_slug: str,
-    db: Session = Depends(get_db),
-):
-    config = _public_config_or_404(db, public_slug)
-    return crud.get_public_campus_locations(db, tenant_id=config.tenant_id)
-
-
 @router_public.post(
     "/{public_slug}/chat",
     summary="Chat público institucional com streaming",
@@ -563,73 +548,6 @@ def delete_event(
 ):
     if not crud.delete_event(db, event_id, tenant_id=current_user.id):
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-#  LOCAIS DO CAMPUS  /locations
-# ══════════════════════════════════════════════════════════════════════════════
-
-@router_locations.get("", response_model=list[CampusLocationResponse])
-def list_campus_locations(
-    db: Session = Depends(get_db),
-    current_user: CurrentUser = Depends(get_current_user),
-):
-    ensure_onboarding(db, current_user)
-    return crud.get_campus_locations(db, tenant_id=current_user.id)
-
-
-@router_locations.post("", response_model=CampusLocationResponse, status_code=201)
-def create_campus_location(
-    payload: CampusLocationCreate,
-    db: Session = Depends(get_db),
-    current_user: CurrentUser = Depends(get_current_user),
-):
-    ensure_onboarding(db, current_user)
-    try:
-        return crud.create_campus_location(db, payload, tenant_id=current_user.id)
-    except crud.CampusLocationNameConflictError as exc:
-        raise HTTPException(
-            status_code=409,
-            detail="Já existe um local com esse nome.",
-        ) from exc
-
-
-@router_locations.put("/{location_id}", response_model=CampusLocationResponse)
-def update_campus_location(
-    location_id: str,
-    payload: CampusLocationUpdate,
-    db: Session = Depends(get_db),
-    current_user: CurrentUser = Depends(get_current_user),
-):
-    try:
-        location = crud.update_campus_location(
-            db,
-            location_id,
-            payload,
-            tenant_id=current_user.id,
-        )
-    except crud.CampusLocationNameConflictError as exc:
-        raise HTTPException(
-            status_code=409,
-            detail="Já existe um local com esse nome.",
-        ) from exc
-    if location is None:
-        raise HTTPException(status_code=404, detail="Local não encontrado.")
-    return location
-
-
-@router_locations.delete("/{location_id}", status_code=204)
-def delete_campus_location(
-    location_id: str,
-    db: Session = Depends(get_db),
-    current_user: CurrentUser = Depends(get_current_user),
-):
-    if not crud.delete_campus_location(
-        db,
-        location_id,
-        tenant_id=current_user.id,
-    ):
-        raise HTTPException(status_code=404, detail="Local não encontrado.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1142,7 +1060,6 @@ app.include_router(router_auth)
 app.include_router(router_chat)
 app.include_router(router_faqs)
 app.include_router(router_events)
-app.include_router(router_locations)
 app.include_router(router_config)
 app.include_router(router_unanswered)
 app.include_router(router_dashboard)

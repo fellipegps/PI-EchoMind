@@ -16,7 +16,11 @@ import {
 } from "./campus-routing";
 import type { GeoPoint, LocationFix } from "./campus-routing";
 
-import styles from "./public-campus-navigator.module.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { MapSelect, mapControlFocus } from "./public-map-controls";
 
 type Destination = { kind: "building" | "space"; id: string } | null;
 
@@ -26,14 +30,11 @@ function errorForLocation(code: number): string {
   return "A localização demorou a responder. Tente novamente ou escolha uma origem no mapa.";
 }
 
-export function PublicCampusNavigator({
-  publicSlug,
-  onAvailabilityChange,
-}: {
-  publicSlug: string;
-  onAvailabilityChange?: (available: boolean) => void;
-}) {
+export function PublicCampusNavigator({ publicSlug }: { publicSlug: string }) {
   const [data, setData] = useState<PublicGeoCampus | null>(null);
+  const [loadedSlug, setLoadedSlug] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const loading = Boolean(publicSlug) && loadedSlug !== publicSlug;
   const [campusId, setCampusId] = useState("");
   const [search, setSearch] = useState("");
   const [destination, setDestination] = useState<Destination>(null);
@@ -56,15 +57,17 @@ export function PublicCampusNavigator({
       if (cancelled) return;
       const activeCampuses = new Set(result.campuses.filter((campus) => campus.active).map((campus) => campus.id));
       const available = result.buildings.some((building) => building.active && activeCampuses.has(building.campus_id));
+      setError("");
       setData(available ? result : null);
-      onAvailabilityChange?.(available);
     }).catch(() => {
       if (cancelled) return;
       setData(null);
-      onAvailabilityChange?.(false);
+      setError("Não foi possível carregar o mapa do campus agora. Tente novamente mais tarde.");
+    }).finally(() => {
+      if (!cancelled) setLoadedSlug(publicSlug);
     });
     return () => { cancelled = true; };
-  }, [publicSlug, onAvailabilityChange]);
+  }, [publicSlug]);
 
   useEffect(() => {
     if (!tracking) return;
@@ -178,7 +181,12 @@ export function PublicCampusNavigator({
     });
   }, [buildings, spaces, search]);
 
-  if (!campus) return null;
+  if (loading) return <Card role="status" className="p-6 text-sm text-muted-foreground">Carregando mapa do campus…</Card>;
+  if (error) return <Card role="alert" className="p-6 text-sm text-destructive">{error}</Card>;
+  if (!campus) return <Card role="status" className="gap-2 p-6">
+    <h3 className="text-lg font-semibold">Mapa do campus indisponível</h3>
+    <p className="text-sm text-muted-foreground">A instituição ainda não disponibilizou um mapa geográfico para consulta.</p>
+  </Card>;
 
   const chooseManualBuilding = (id: string) => {
     const building = buildings.find((item) => item.id === id);
@@ -226,16 +234,17 @@ export function PublicCampusNavigator({
   };
 
   return (
-    <section className={styles.navigator} aria-label="Navegação geográfica do campus">
-      <div className={styles.heading}>
-        <div>
-          <p>Mapa da instituição</p>
-          <h3>Encontre o caminho até a entrada</h3>
-        </div>
-        {campuses.length > 1 && (
-          <label>
+    <section className="min-w-0 space-y-6 text-foreground [overflow-wrap:anywhere]" aria-label="Navegação geográfica do campus">
+      <Card className="min-w-0 gap-6 border-border p-4 sm:p-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <p className="text-sm leading-5 font-medium text-primary">Mapa da instituição</p>
+            <h3 className="text-xl leading-7 font-semibold tracking-tight">Encontre o caminho até a entrada</h3>
+            <p className="text-sm leading-5 text-muted-foreground">{campus.name}</p>
+          </div>
+          {campuses.length > 1 && <label className="grid min-w-0 gap-2 text-sm font-medium sm:w-64 sm:shrink-0">
             <span>Campus</span>
-            <select value={campus.id} onChange={(event) => {
+            <MapSelect value={campus.id} onChange={(event) => {
               setCampusId(event.target.value);
               setDestination(null);
               setManualOrigin(null);
@@ -243,130 +252,101 @@ export function PublicCampusNavigator({
               stopLocation();
             }}>
               {campuses.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
-          </label>
-        )}
-      </div>
+            </MapSelect>
+          </label>}
+        </div>
 
-      <div className={styles.mapPanel}>
-        <CampusMapView
-          campus={campus}
-          buildings={buildings}
-          nodes={nodes}
-          edges={edges}
-          destinationId={selectedBuilding?.id ?? null}
-          route={route}
-          fix={originMode === "live" ? fix : null}
-          manualOrigin={originMode === "manual" ? manualOrigin : null}
-          onSelectBuilding={(id) => setDestination({ kind: "building", id })}
-          onSelectManualOrigin={chooseMapOrigin}
-        />
-        <p className={styles.mapHint}>Toque em um prédio para escolher o destino ou em um caminho para marcar a origem.</p>
-      </div>
-
-      <div className={styles.controls}>
-        <div className={styles.originControls}>
-          <div className={styles.controlTitle}><LocateFixed aria-hidden="true" /><strong>Seu ponto de partida</strong></div>
-          <div className={styles.originChoices}>
-            <button type="button" onClick={tracking ? stopLocation : startLocation}>
-              <LocateFixed aria-hidden="true" /> {tracking ? "Parar acompanhamento" : "Usar minha localização"}
-            </button>
-            <label>
-              <span className={styles.srOnly}>Origem cadastrada</span>
-              <select value={manualBuildingId} onChange={(event) => chooseManualBuilding(event.target.value)}>
-                <option value="">Escolha uma origem ou toque no mapa</option>
-                {buildings.map((building) => <option key={building.id} value={building.id}>{building.name}</option>)}
-              </select>
+        <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+          <div className="min-w-0 space-y-6 rounded-xl border border-border bg-background p-4">
+            <div className="space-y-4">
+              <h4 className="flex items-center gap-2 text-base leading-6 font-semibold"><LocateFixed aria-hidden="true" className="size-5 shrink-0 text-primary" />Seu ponto de partida</h4>
+              <Button type="button" className={cn("min-h-11 w-full h-auto whitespace-normal", mapControlFocus)} onClick={tracking ? stopLocation : startLocation}>
+                <LocateFixed aria-hidden="true" />{tracking ? "Parar acompanhamento" : "Usar minha localização"}
+              </Button>
+              <label className="grid min-w-0 gap-2 text-sm font-medium">
+                <span>Origem cadastrada</span>
+                <MapSelect value={manualBuildingId} onChange={(event) => chooseManualBuilding(event.target.value)}>
+                  <option value="">Escolha uma origem ou toque no mapa</option>
+                  {buildings.map((building) => <option key={building.id} value={building.id}>{building.name}</option>)}
+                </MapSelect>
+              </label>
+              {manualBuilding && originMode === "manual" && <p className="text-sm leading-5 text-muted-foreground">Origem: {manualBuilding.name}</p>}
+              {originMode === "live" && fix && <p role="status" className="text-sm leading-5 text-muted-foreground">Precisão da localização: ±{Math.round(fix.accuracy)} m</p>}
+              {locationMessage && <p className="text-sm leading-5 text-muted-foreground" role="status">{locationMessage}</p>}
+            </div>
+            <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-5">
+              <input type="checkbox" checked={accessibleOnly} onChange={(event) => setAccessibleOnly(event.target.checked)}
+                className={cn("mt-0.5 size-5 shrink-0 accent-primary outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background", mapControlFocus)} />
+              <span className="flex min-w-0 items-start gap-2"><Accessibility aria-hidden="true" className="size-5 shrink-0 text-primary" />Usar apenas caminhos acessíveis</span>
             </label>
           </div>
-          {originMode === "live" && fix && <p className={styles.accuracy}>Precisão da localização: ±{Math.round(fix.accuracy)} m</p>}
-          {locationMessage && <p className={styles.helper} role="status">{locationMessage}</p>}
+          <div className="min-w-0 space-y-3">
+            <CampusMapView campus={campus} buildings={buildings} nodes={nodes} edges={edges}
+              destinationId={selectedBuilding?.id ?? null} route={route}
+              fix={originMode === "live" ? fix : null} manualOrigin={originMode === "manual" ? manualOrigin : null}
+              onSelectBuilding={(id) => setDestination({ kind: "building", id })} onSelectManualOrigin={chooseMapOrigin} />
+            <p className="text-xs leading-4 text-muted-foreground">Toque em um prédio para escolher o destino ou em um caminho para marcar a origem.</p>
+          </div>
         </div>
-        <label className={styles.accessibility}>
-          <input
-            type="checkbox"
-            checked={accessibleOnly}
-            onChange={(event) => setAccessibleOnly(event.target.checked)}
-          />
-          <Accessibility aria-hidden="true" /> Usar apenas caminhos acessíveis
-        </label>
-      </div>
 
-      <div className={styles.destinationHeader}>
-        <h4>Escolha o destino</h4>
-        <label className={styles.searchField}>
-          <Search aria-hidden="true" />
-          <span className={styles.srOnly}>Buscar prédio ou espaço</span>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Busque prédio, auditório ou laboratório" />
-        </label>
-      </div>
-      <div className={styles.buildingList}>
-        {filteredBuildings.map((building) => {
-          const indoorSpaces = spaces.filter((space) => space.building_id === building.id);
-          const selected = selectedBuilding?.id === building.id;
-          return (
-            <article key={building.id} className={`${styles.buildingCard} ${selected ? styles.buildingCardSelected : ""}`}>
-              <button type="button" onClick={() => setDestination({ kind: "building", id: building.id })}>
-                <span className={styles.buildingIcon}><Building2 aria-hidden="true" /></span>
-                <span><strong>{building.name}</strong><small>{building.category}{building.description ? ` · ${building.description}` : ""}</small></span>
-                <MapPin aria-hidden="true" />
-              </button>
-              {indoorSpaces.length > 0 && (
-                <div className={styles.spaces}>
-                  {indoorSpaces.map((space) => (
-                    <button
-                      type="button"
-                      key={space.id}
-                      className={destination?.kind === "space" && destination.id === space.id ? styles.spaceSelected : ""}
-                      onClick={() => setDestination({ kind: "space", id: space.id })}
-                    >
-                      {space.name}{space.floor ? ` · ${space.floor}` : ""}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </article>
-          );
-        })}
-        {filteredBuildings.length === 0 && <p className={styles.empty}>Nenhum prédio ou espaço encontrado.</p>}
-      </div>
-
-      {selectedBuilding && (
-        <div className={styles.routePanel} aria-live="polite">
-          <div className={styles.routeTitle}><Navigation aria-hidden="true" /><strong>Destino: {selectedSpace?.name ?? selectedBuilding.name}</strong></div>
-          {selectedSpace && <p>{selectedBuilding.name}{selectedSpace.floor ? ` · ${selectedSpace.floor}` : ""}{selectedSpace.description ? ` · ${selectedSpace.description}` : ""}</p>}
-          {arrived ? (
-            <p className={styles.arrival}>Você chegou à entrada de {selectedBuilding.name}. Consulte a sinalização interna para encontrar o espaço.</p>
-          ) : !entranceNode ? (
-            <p>A instituição ainda não vinculou a entrada deste prédio a um ponto do caminho.</p>
-          ) : entranceGapM > MAX_ENTRANCE_APPROACH_M ? (
-            <p>O ponto do caminho vinculado está distante da entrada. Consulte a instituição antes de seguir.</p>
-          ) : !origin ? (
-            <p>Use sua localização ou escolha uma origem para calcular o percurso.</p>
-          ) : !route ? (
-            <p>{nearestPathDistance > MAX_PATH_SNAP_M
-              ? "Sua origem está longe dos caminhos cadastrados. Aproxime-se do campus ou escolha uma origem no mapa."
-              : accessibleOnly
-                ? "Não há caminho acessível cadastrado entre esses pontos. Escolha outra origem ou consulte a instituição."
-                : "Não há caminho conectado cadastrado entre esses pontos. Escolha outra origem ou consulte a instituição."}</p>
-          ) : (
-            <>
-              <p className={styles.routeMetrics}>{route.distanceM} m · cerca de {Math.max(1, Math.ceil(route.distanceM / 75))} min a pé</p>
-              <ol className={styles.steps}>
-                {route.startGapM > 8 && <li>Vá até o caminho sinalizado mais próximo (cerca de {Math.round(route.startGapM)} m).</li>}
-                {route.nodes.slice(1).map((node, index) => (
-                  <li key={node.id}>Siga cerca de {Math.round(route.segmentDistancesM[index])} m até {node.label || "o próximo ponto do caminho"}.</li>
-                ))}
-                <li>Dirija-se à entrada de {selectedBuilding.name}{route.entranceGapM > 8 ? ` (trecho final estimado de ${Math.round(route.entranceGapM)} m)` : ""}.</li>
-              </ol>
-              {(route.startGapM > 3 || route.entranceGapM > 3) && (
-                <small>Trechos laranja tracejados são apenas uma referência até a rede de caminhos ou a entrada; procure o acesso sinalizado.</small>
-              )}
-              <small>O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.</small>
-            </>
-          )}
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <h4 className="text-base leading-6 font-semibold">Escolha o destino</h4>
+          <label className="grid min-w-0 gap-2 text-sm font-medium sm:w-80">
+            <span>Buscar prédio ou espaço</span>
+            <span className="relative block min-w-0"><Search aria-hidden="true" className="pointer-events-none absolute top-3 left-3 size-5 text-muted-foreground" />
+              <Input className={cn("h-11 pl-10", mapControlFocus)} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Busque prédio, auditório ou laboratório" />
+            </span>
+          </label>
         </div>
-      )}
+        <div className="grid min-w-0 gap-4 md:grid-cols-2">
+          {filteredBuildings.map((building) => {
+            const indoorSpaces = spaces.filter((space) => space.building_id === building.id);
+            const selected = selectedBuilding?.id === building.id;
+            return <article key={building.id} className={cn("min-w-0 space-y-3 rounded-xl border border-border p-4", selected && "border-primary bg-accent")}>
+              <Button type="button" variant="ghost" aria-pressed={selected} aria-label={`${building.name} ${building.category}${building.description ? ` · ${building.description}` : ""}`}
+                className={cn("h-auto min-h-11 w-full min-w-0 items-start justify-start gap-3 p-0 text-left whitespace-normal hover:bg-transparent", mapControlFocus)}
+                onClick={() => setDestination({ kind: "building", id: building.id })}>
+                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-primary"><Building2 aria-hidden="true" className="size-5" /></span>
+                <span className="min-w-0 flex-1 text-base leading-6 font-semibold">{building.name}</span>
+                <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
+              </Button>
+              <p className="text-sm leading-5 text-muted-foreground">{building.category}{building.description ? ` · ${building.description}` : ""}</p>
+              {indoorSpaces.length > 0 && <div className="flex min-w-0 flex-wrap gap-2">
+                {indoorSpaces.map((space) => <Button type="button" key={space.id} variant="outline"
+                  aria-pressed={destination?.kind === "space" && destination.id === space.id}
+                  className={cn("h-auto min-h-11 max-w-full whitespace-normal text-left", mapControlFocus, destination?.kind === "space" && destination.id === space.id && "border-primary bg-background text-primary")}
+                  onClick={() => setDestination({ kind: "space", id: space.id })}>
+                  {space.name}{space.floor ? ` · ${space.floor}` : ""}
+                </Button>)}
+              </div>}
+            </article>;
+          })}
+          {filteredBuildings.length === 0 && <p role="status" className="col-span-full rounded-xl border border-dashed border-border p-6 text-center text-sm leading-5 text-muted-foreground">Nenhum prédio ou espaço encontrado.</p>}
+        </div>
+      </Card>
+
+      {selectedBuilding && <Card className="min-w-0 gap-3 border-border p-4 text-sm leading-5 sm:p-6" role="region" aria-live="polite" aria-label="Resumo do percurso">
+        <h4 className="flex min-w-0 items-start gap-3 text-base leading-6 font-semibold"><Navigation aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primary" /><span>Destino: {selectedSpace?.name ?? selectedBuilding.name}</span></h4>
+        {selectedSpace && <p>{selectedBuilding.name}{selectedSpace.floor ? ` · ${selectedSpace.floor}` : ""}{selectedSpace.description ? ` · ${selectedSpace.description}` : ""}</p>}
+        {arrived ? <p className="font-medium text-success">Você chegou à entrada de {selectedBuilding.name}. Consulte a sinalização interna para encontrar o espaço.</p>
+          : !entranceNode ? <p>A instituição ainda não vinculou a entrada deste prédio a um ponto do caminho.</p>
+          : entranceGapM > MAX_ENTRANCE_APPROACH_M ? <p>O ponto do caminho vinculado está distante da entrada. Consulte a instituição antes de seguir.</p>
+          : !origin ? <p>Use sua localização ou escolha uma origem para calcular o percurso.</p>
+          : !route ? <p>{nearestPathDistance > MAX_PATH_SNAP_M
+            ? "Sua origem está longe dos caminhos cadastrados. Aproxime-se do campus ou escolha uma origem no mapa."
+            : accessibleOnly ? "Não há caminho acessível cadastrado entre esses pontos. Escolha outra origem ou consulte a instituição."
+            : "Não há caminho conectado cadastrado entre esses pontos. Escolha outra origem ou consulte a instituição."}</p>
+          : <>
+            <p className="text-base leading-6 font-semibold text-primary">{route.distanceM} m · cerca de {Math.max(1, Math.ceil(route.distanceM / 75))} min a pé</p>
+            <ol className="list-decimal space-y-2 pl-6">
+              {route.startGapM > 8 && <li>Vá até o caminho sinalizado mais próximo (cerca de {Math.round(route.startGapM)} m).</li>}
+              {route.nodes.slice(1).map((node, index) => <li key={node.id}>Siga cerca de {Math.round(route.segmentDistancesM[index])} m até {node.label || "o próximo ponto do caminho"}.</li>)}
+              <li>Dirija-se à entrada de {selectedBuilding.name}{route.entranceGapM > 8 ? ` (trecho final estimado de ${Math.round(route.entranceGapM)} m)` : ""}.</li>
+            </ol>
+            {(route.startGapM > 3 || route.entranceGapM > 3) && <small className="text-xs leading-4 text-muted-foreground">Trechos tracejados são apenas uma referência até a rede de caminhos ou a entrada; procure o acesso sinalizado.</small>}
+            <small className="text-xs leading-4 text-muted-foreground">O percurso usa os caminhos cadastrados pela instituição. Siga sempre a sinalização local.</small>
+          </>}
+      </Card>}
     </section>
   );
 }

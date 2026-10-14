@@ -11,6 +11,8 @@ from threading import Barrier
 from uuid import uuid4
 
 import pytest
+from alembic.config import Config as AlembicConfig
+from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, delete, inspect, text
 from sqlalchemy.exc import IntegrityError
@@ -241,6 +243,9 @@ def migration_database(postgres_engine):
 @pytest.mark.parametrize("starting_revision", ["base", "0021"])
 def test_migration_from_zero_and_previous_head(migration_database, starting_revision):
     engine, migrate = migration_database
+    alembic_config = AlembicConfig(str(BACKEND_ROOT / "alembic.ini"))
+    alembic_config.set_main_option("script_location", str(BACKEND_ROOT / "alembic"))
+    expected_head = ScriptDirectory.from_config(alembic_config).get_current_head()
     if starting_revision == "0021":
         migrate("upgrade", "0021")
         with Session(engine) as session:
@@ -252,7 +257,7 @@ def test_migration_from_zero_and_previous_head(migration_database, starting_revi
     assert index["column_names"] == ["tenant_id", "sha256"]
     assert all(status in str(index["dialect_options"]["postgresql_where"]) for status in ACTIVE_STATUSES)
     with engine.connect() as connection:
-        assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0022"
+        assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == expected_head
         if starting_revision == "0021":
             assert connection.execute(text("SELECT count(*) FROM documents")).scalar_one() == 3
     migrate("downgrade", "0021")

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type PublicPortalCardProps = {
   publicSlug: string;
@@ -80,51 +81,51 @@ export function PublicPortalCard({ publicSlug }: PublicPortalCardProps) {
   };
 
   return (
-    <Card className="bg-card">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2 text-primary">
-          <LinkIcon className="h-5 w-5" />
-          <CardTitle className="text-lg">Portal público da instituição</CardTitle>
+    <Card className="gap-5">
+      <CardHeader className="px-4 md:px-6">
+        <div className="flex items-start gap-3">
+          <span className="shrink-0 rounded-lg bg-primary/10 p-2 text-primary"><LinkIcon className="h-5 w-5" aria-hidden="true" /></span>
+          <CardTitle><h2 className="text-lg">Portal público da instituição</h2></CardTitle>
         </div>
         <CardDescription>
-          Compartilhe este endereço com estudantes. O link não expõe o identificador interno do tenant.
+          Compartilhe o link ou o QR Code com estudantes para abrir o portal da instituição.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-5 md:grid-cols-[1fr_auto] md:items-center">
-        <div className="space-y-3">
+      <CardContent className="grid min-w-0 gap-6 px-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-6">
+        <div className="min-w-0 space-y-3">
+          <Label htmlFor="public-portal-url">URL do portal público</Label>
           <Input
-            aria-label="URL do portal público"
+            id="public-portal-url"
             value={publicUrl}
             readOnly
-            className="bg-background font-mono text-sm"
+            aria-describedby="public-portal-state"
+            className="min-w-0 bg-background font-mono text-sm"
           />
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => void copyUrl()} disabled={!publicUrl}>
-              <Copy className="h-4 w-4" />
+              <Copy className="h-4 w-4" aria-hidden="true" />
               Copiar link
             </Button>
             <Button onClick={openPortal} disabled={!publicUrl}>
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
               Abrir portal
             </Button>
             {qrDataUrl && (
               <Button variant="outline" asChild>
                 <a href={qrDataUrl} download={`portal-${publicSlug}.png`}>
-                  <Download className="h-4 w-4" />
+                  <Download className="h-4 w-4" aria-hidden="true" />
                   Baixar QR
                 </a>
               </Button>
             )}
           </div>
-          {!publicSlug && (
-            <p className="text-sm text-muted-foreground">
-              Salve a configuração institucional para gerar o endereço público.
-            </p>
-          )}
+          <p id="public-portal-state" role="status" className="text-sm text-muted-foreground [overflow-wrap:anywhere]">
+            {!normalizedSlug ? "Salve a configuração institucional para gerar o endereço público." : qrDataUrl ? "QR Code pronto para compartilhar. O download é gerado neste dispositivo." : qrError ? "O link continua disponível. Tente gerar o QR Code novamente mais tarde." : "Gerando QR Code…"}
+          </p>
           {qrError && <p className="text-sm text-destructive" role="alert">{qrError}</p>}
         </div>
 
-        <div className="flex h-44 w-44 items-center justify-center rounded-xl border bg-white p-2">
+        <div className="flex h-44 w-44 items-center justify-center justify-self-center rounded-xl border bg-white p-2 md:justify-self-end">
           {qrDataUrl ? (
             <Image
               src={qrDataUrl}
@@ -133,10 +134,10 @@ export function PublicPortalCard({ publicSlug }: PublicPortalCardProps) {
               height={160}
               unoptimized
             />
-          ) : publicSlug && !qrError ? (
-            <Loader2 className="h-7 w-7 animate-spin text-primary" aria-label="Gerando QR Code" />
+          ) : normalizedSlug && !qrError ? (
+            <Loader2 className="h-7 w-7 animate-spin text-[#172554] motion-reduce:animate-none" aria-hidden="true" />
           ) : (
-            <QrCode className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+            <QrCode className="h-12 w-12 text-[#172554]" aria-hidden="true" />
           )}
         </div>
       </CardContent>

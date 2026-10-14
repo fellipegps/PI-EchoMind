@@ -18,7 +18,6 @@ BACKEND_ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_POSTGRES_MAJOR = 17
 EXPECTED_TABLES = {
     "alembic_version",
-    "campus_locations",
     "config",
     "document_chunks",
     "document_chunk_parents",
@@ -58,6 +57,7 @@ def test_database_revision_is_exactly_alembic_head(postgres_engine: Engine) -> N
 
     existing_tables = set(inspect(postgres_engine).get_table_names(schema="public"))
     assert EXPECTED_TABLES <= existing_tables
+    assert "campus_locations" not in existing_tables
 
 
 def test_unanswered_triage_schema_and_suppression_rls(postgres_engine: Engine) -> None:
@@ -209,46 +209,6 @@ def test_event_courses_are_tenant_scoped_and_keep_rls(postgres_engine: Engine) -
                 "SELECT relrowsecurity FROM pg_class c "
                 "JOIN pg_namespace n ON n.oid = c.relnamespace "
                 "WHERE n.nspname = 'public' AND c.relname = 'event_courses'"
-            )
-        ).scalar_one()
-
-    assert rls_enabled is True
-
-
-def test_campus_locations_are_bounded_indexed_and_rls_enabled(
-    postgres_engine: Engine,
-) -> None:
-    inspector = inspect(postgres_engine)
-    columns = {
-        column["name"]: column
-        for column in inspector.get_columns("campus_locations")
-    }
-    indexes = {
-        index["name"]: index["column_names"]
-        for index in inspector.get_indexes("campus_locations")
-    }
-    checks = {
-        constraint["name"]
-        for constraint in inspector.get_check_constraints("campus_locations")
-    }
-
-    assert columns["tenant_id"]["nullable"] is False
-    assert columns["x"]["nullable"] is False
-    assert columns["y"]["nullable"] is False
-    assert indexes["ix_campus_locations_tenant_active_name"] == [
-        "tenant_id",
-        "active",
-        "name",
-    ]
-    assert "ck_campus_locations_x_range" in checks
-    assert "ck_campus_locations_y_range" in checks
-
-    with postgres_engine.connect() as connection:
-        rls_enabled = connection.execute(
-            text(
-                "SELECT relrowsecurity FROM pg_class c "
-                "JOIN pg_namespace n ON n.oid = c.relnamespace "
-                "WHERE n.nspname = 'public' AND c.relname = 'campus_locations'"
             )
         ).scalar_one()
 

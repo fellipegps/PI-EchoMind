@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import styles from "./campus-map-view.module.css";
 
 import type { Building, Campus, PathEdge, PathNode } from "@/lib/geocampus-api";
 import { distanceMeters } from "./campus-routing";
@@ -77,7 +78,7 @@ export function CampusMapView({
         const to = byId.get(edge.to_node_id);
         if (!from || !to) continue;
         L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
-          color: edge.accessible ? "#75a78a" : "#a6a9ad",
+          color: edge.accessible ? "var(--success)" : "var(--muted-foreground)",
           weight: 3,
           opacity: 0.55,
           interactive: false,
@@ -87,9 +88,9 @@ export function CampusMapView({
       for (const building of buildings) {
         const marker = L.circleMarker([building.entrance_lat, building.entrance_lng], {
           radius: building.id === destinationId ? 11 : 8,
-          color: "#fff",
+          color: "var(--card)",
           weight: 2,
-          fillColor: building.id === destinationId ? "#0b57d0" : "#304d9d",
+          fillColor: building.id === destinationId ? "var(--primary)" : "var(--foreground)",
           fillOpacity: 1,
           bubblingMouseEvents: false,
         }).addTo(map);
@@ -97,6 +98,20 @@ export function CampusMapView({
         label.textContent = building.name;
         marker.bindTooltip(label, { direction: "top" });
         marker.on("click", () => onSelectBuildingRef.current(building.id));
+        const element = marker.getElement();
+        if (element) {
+          element.setAttribute("tabindex", "0");
+          element.setAttribute("role", "button");
+          element.setAttribute("aria-label", `Selecionar ${building.name} como destino`);
+          element.setAttribute("aria-pressed", String(building.id === destinationId));
+          element.addEventListener("keydown", (event) => {
+            if (!(event instanceof KeyboardEvent)) return;
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onSelectBuildingRef.current(building.id);
+            }
+          });
+        }
         markers.set(building.id, marker);
       }
       map.on("click", (event) => onSelectManualOriginRef.current({
@@ -131,8 +146,9 @@ export function CampusMapView({
     const state = layers.current;
     if (!state) return;
     for (const [id, marker] of state.markers) {
+      marker.getElement()?.setAttribute("aria-pressed", String(id === destinationId));
       marker.setRadius(id === destinationId ? 11 : 8);
-      marker.setStyle({ fillColor: id === destinationId ? "#0b57d0" : "#304d9d" });
+      marker.setStyle({ fillColor: id === destinationId ? "var(--primary)" : "var(--foreground)" });
     }
   }, [ready, destinationId]);
 
@@ -143,8 +159,12 @@ export function CampusMapView({
     if (route) {
       const coordinates: [number, number][] = route.points.map((point) => [point.lat, point.lng]);
       if (coordinates.length >= 2) {
+        // A surface halo preserves route contrast over map tiles in both themes.
         state.L.polyline(coordinates, {
-          color: "#0b57d0",
+          color: "var(--card)", weight: 10, opacity: 0.95, interactive: false,
+        }).addTo(state.route);
+        state.L.polyline(coordinates, {
+          color: "var(--primary)",
           weight: 6,
           opacity: 0.9,
         }).addTo(state.route);
@@ -154,7 +174,7 @@ export function CampusMapView({
       if (first && start && distanceMeters(first, start) > 3) {
         state.L.polyline(
           [[start.lat, start.lng], [first.lat, first.lng]],
-          { color: "#db6a15", weight: 3, dashArray: "5 8", opacity: 0.8 }
+          { color: "var(--warning)", weight: 3, dashArray: "5 8", opacity: 0.8 }
         ).addTo(state.route);
       }
       const last = route.points.at(-1);
@@ -162,7 +182,7 @@ export function CampusMapView({
       if (last && destination && route.entranceGapM > 3) {
         state.L.polyline(
           [[last.lat, last.lng], [destination.entrance_lat, destination.entrance_lng]],
-          { color: "#db6a15", weight: 3, dashArray: "5 8", opacity: 0.8 }
+          { color: "var(--warning)", weight: 3, dashArray: "5 8", opacity: 0.8 }
         ).addTo(state.route);
       }
       if (destinationId && lastFittedDestination.current !== destinationId) {
@@ -181,26 +201,26 @@ export function CampusMapView({
     if (fix) {
       state.L.circle([fix.lat, fix.lng], {
         radius: fix.accuracy,
-        color: "#0b57d0",
+        color: "var(--primary)",
         weight: 1,
-        fillColor: "#5c9cff",
+        fillColor: "var(--primary)",
         fillOpacity: 0.14,
         interactive: false,
       }).addTo(state.current);
       state.L.circleMarker([fix.lat, fix.lng], {
         radius: 8,
-        color: "#fff",
+        color: "var(--card)",
         weight: 3,
-        fillColor: "#0b57d0",
+        fillColor: "var(--primary)",
         fillOpacity: 1,
         interactive: false,
       }).addTo(state.current);
     } else if (manualOrigin) {
       state.L.circleMarker([manualOrigin.lat, manualOrigin.lng], {
         radius: 8,
-        color: "#fff",
+        color: "var(--card)",
         weight: 3,
-        fillColor: "#db6a15",
+        fillColor: "var(--warning)",
         fillOpacity: 1,
         interactive: false,
       }).addTo(state.current);
@@ -209,8 +229,8 @@ export function CampusMapView({
 
   return (
     <>
-      <div ref={container} className="geo-campus-map" aria-label={`Mapa geográfico do ${campus.name}`} />
-      {mapError && <p role="status">O mapa visual não carregou. Você ainda pode consultar os destinos abaixo.</p>}
+      <div ref={container} className={`geo-campus-map ${styles.map}`} role="region" aria-label={`Mapa geográfico do ${campus.name}`} />
+      {mapError && <p role="status" className="rounded-xl border border-border bg-card p-4 text-sm leading-5 text-muted-foreground">O mapa visual não carregou. Você ainda pode consultar os destinos abaixo.</p>}
     </>
   );
 }

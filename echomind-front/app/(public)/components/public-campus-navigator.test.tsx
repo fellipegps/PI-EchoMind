@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -47,12 +47,10 @@ describe("PublicCampusNavigator", () => {
 
   it("busca espaços e calcula o caminho acessível a partir de origem manual", async () => {
     const user = userEvent.setup();
-    const available = vi.fn();
-    render(<PublicCampusNavigator publicSlug="universidade" onAvailabilityChange={available} />);
+    render(<PublicCampusNavigator publicSlug="universidade" />);
 
     expect(await screen.findByText("Encontre o caminho até a entrada")).toBeInTheDocument();
     expect(apiMocks.publicMap).toHaveBeenCalledWith("universidade");
-    expect(available).toHaveBeenCalledWith(true);
     await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
     await user.type(screen.getByLabelText("Buscar prédio ou espaço"), "química");
     await user.click(screen.getByRole("button", { name: /Laboratório de Química · 1º andar/ }));
@@ -103,11 +101,103 @@ describe("PublicCampusNavigator", () => {
     expect(screen.getByText(/20 m · cerca de 1 min a pé/)).toBeInTheDocument();
   });
 
-  it("mantém o mapa legado quando a instituição ainda não marcou prédios", async () => {
-    const available = vi.fn();
+  it("informa indisponibilidade quando a instituição ainda não marcou prédios", async () => {
     apiMocks.publicMap.mockResolvedValueOnce({ ...campusData, buildings: [] });
-    render(<PublicCampusNavigator publicSlug="universidade" onAvailabilityChange={available} />);
-    await waitFor(() => expect(available).toHaveBeenCalledWith(false));
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    expect(await screen.findByRole("heading", { name: "Mapa do campus indisponível" })).toBeInTheDocument();
     expect(screen.queryByText("Encontre o caminho até a entrada")).not.toBeInTheDocument();
   });
+
+  it("informa carregamento e trata falha de leitura sem expor o erro interno", async () => {
+    let reject!: (error: Error) => void;
+    apiMocks.publicMap.mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; }));
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    expect(screen.getByRole("status")).toHaveTextContent("Carregando mapa do campus…");
+    await act(async () => reject(new Error("SEGREDO_INTERNO")));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível carregar o mapa do campus agora.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("SEGREDO_INTERNO");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("isola campi ativos e limpa origem/destino ao trocar campus", async () => {
+    const user = userEvent.setup();
+    apiMocks.publicMap.mockResolvedValueOnce({ ...campusData,
+      campuses: [...campusData.campuses, { ...campusData.campuses[0], id: "campus-2", name: "Campus Norte" }, { ...campusData.campuses[0], id: "inactive", name: "Campus inativo", active: false }],
+      buildings: [...campusData.buildings, { ...campusData.buildings[0], id: "north", campus_id: "campus-2", name: "Biblioteca Norte" }, { ...campusData.buildings[0], id: "inactive", name: "Prédio inativo", active: false }],
+    });
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    await screen.findByText("Encontre o caminho até a entrada");
+    expect(screen.queryByRole("option", { name: "Campus inativo" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Biblioteca Norte/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Prédio inativo/ })).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
+    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
+    await user.selectOptions(screen.getByLabelText("Campus", { exact: true }), "campus-2");
+    expect(screen.getByRole("button", { name: /Biblioteca Norte/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Bloco A ensino/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(/20 m · cerca/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Origem cadastrada")).toHaveValue("");
+  });
+
+  it("mostra ausência de percurso sem inventar uma rota substituta", async () => {
+    const user = userEvent.setup();
+    apiMocks.publicMap.mockResolvedValueOnce({ ...campusData, edges: [] });
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    await screen.findByText("Encontre o caminho até a entrada");
+    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
+    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
+    expect(screen.getByText(/Não há caminho conectado cadastrado/)).toBeInTheDocument();
+    await user.click(screen.getByLabelText("Usar apenas caminhos acessíveis"));
+    expect(screen.getByText(/Não há caminho acessível cadastrado/)).toBeInTheDocument();
+    expect(screen.queryByText(/min a pé/)).not.toBeInTheDocument();
+  });
+
+  it.each([[2, "Não foi possível determinar sua posição"], [3, "A localização demorou a responder"]])("preserva alternativa manual após erro GPS %s", async (code, message) => {
+    let failure: PositionErrorCallback = () => {};
+    const watchPosition = vi.fn((_success: PositionCallback, error: PositionErrorCallback) => { failure = error; return 90; });
+    const clearWatch = vi.fn();
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch } });
+    const user = userEvent.setup();
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    await screen.findByText("Encontre o caminho até a entrada");
+    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Aguardando localização do aparelho...");
+    act(() => failure({ code } as GeolocationPositionError));
+    expect(screen.getByRole("status")).toHaveTextContent(message);
+    expect(clearWatch).toHaveBeenCalledWith(90);
+    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
+    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
+    expect(screen.getByText(/20 m · cerca de 1 min a pé/)).toBeInTheDocument();
+  });
+
+  it("filtra sinal impreciso e pequenos saltos; recalcula, chega e libera o observador", async () => {
+    let success: PositionCallback = () => {};
+    const watchPosition = vi.fn((callback: PositionCallback) => { success = callback; return 71; });
+    const clearWatch = vi.fn();
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch } });
+    const user = userEvent.setup();
+    const { unmount } = render(<PublicCampusNavigator publicSlug="universidade" />);
+    await screen.findByText("Encontre o caminho até a entrada");
+    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
+    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
+    const emit = (lat: number, lng: number, accuracy: number, timestamp: number) => act(() => success({ coords: { latitude: lat, longitude: lng, accuracy }, timestamp } as GeolocationPosition));
+    emit(0, -0.0002, 90, 1);
+    expect(screen.getByRole("status")).toHaveTextContent("Sinal impreciso (±90 m)");
+    expect(screen.queryByText(/min a pé/)).not.toBeInTheDocument();
+    emit(0, -0.0002, 12, 2);
+    const metric = screen.getByText(/min a pé/).textContent;
+    emit(0, -0.000199, 12, 3);
+    expect(screen.getByText(/min a pé/)).toHaveTextContent(metric!);
+    emit(0, 0, 30, 4);
+    expect(screen.getByText(/min a pé/)).not.toHaveTextContent(metric!);
+    emit(0.0001, 0.0001, 10, 5);
+    expect(screen.getByText(/Você chegou à entrada de Bloco A/)).toBeInTheDocument();
+    expect(clearWatch).toHaveBeenCalledWith(71);
+    expect(watchPosition).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
+    unmount();
+    expect(watchPosition).toHaveBeenCalledTimes(2);
+    expect(clearWatch).toHaveBeenCalledTimes(2);
+  });
+
 });
