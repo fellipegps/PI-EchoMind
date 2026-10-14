@@ -10,6 +10,7 @@
 !alembic/**
 !scripts/
 !scripts/reindex_all.py
+!scripts/check_database.py
 
 # These exclusions also apply inside the permitted directories.
 **/.env

@@ -266,6 +266,13 @@ do primeiro build:
 | `NEXT_PUBLIC_API_URL` | URL HTTPS publica do backend FastAPI, sem barra final; deixe ausente enquanto o backend nao estiver hospedado |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase usado pelo backend |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave publica (`sb_publishable_...`) do mesmo projeto Supabase |
+| `ECHOMIND_REQUIRE_API_URL` | `true` ao publicar o projeto completo com a API AWS; impede build sem seu endereco HTTPS |
+
+O build valida as origens HTTPS e o formato da chave publica e rejeita variaveis
+publicas de segredos do backend. `pnpm dev` continua aceitando a API local.
+Para um build de producao local, use configuracao publica adequada ou deixe a API
+ausente para validar somente o frontend. O procedimento de banco, backup e
+configuracao de Auth esta na [etapa 7](docs/deploy-aws.md#etapa-7-banco-e-frontend).
 
 Sem `NEXT_PUBLIC_API_URL`, o frontend pode ser publicado e as chamadas a API
 mostram que o servidor ainda nao esta disponivel. Quando o backend for

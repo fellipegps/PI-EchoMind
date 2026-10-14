@@ -48,6 +48,8 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
 - [ ] **7. Banco e frontend:** conferir migrations com backup e acesso PostgreSQL,
   aplicar migrations como operação explícita, ajustar URL HTTPS da API na Vercel e
   URLs de autenticação no Supabase. Reindexação de embeddings continua manual.
+  Preparação local validada; aplicação no banco real e configuração dos serviços
+  continuam pendentes, conforme o registro da etapa 7 abaixo.
 - [ ] **8. Publicação por GitHub Actions:** testes antes de publicar, autenticação
   temporária OIDC, imagem identificada pelo commit, atualizações serializadas,
   drenagem de tarefas, verificação após deploy e recuperação da versão anterior.
@@ -1017,6 +1019,224 @@ rever crédito/custos, medir o E5 no limite candidato, conferir os parâmetros
 privados, usar identidade não root, revisar o change
 set e aplicar `stack-policy.json`. A confirmação SNS só é enviada ao criar o
 tópico. Não foram enviados alertas ou feitas alterações na conta.
+
+## Etapa 7: banco e frontend
+
+**Preparação local validada; configuração real pendente.** O frontend de produção
+informado é `https://echomind-front.vercel.app`. O domínio da API ainda não foi
+escolhido. Ele será o endereço HTTPS do backend na EC2, separado do endereço do
+frontend; precisa de DNS apontando para o Elastic IP e certificado do Caddy.
+Não use localhost, IP HTTP ou um domínio fictício na configuração publicada.
+
+### Diagnóstico dos serviços existentes
+
+Consultas somente de leitura em 14/10/2026 identificaram o projeto Supabase
+EchoMind ativo em `sa-east-1`, PostgreSQL 17.6 e pgvector 0.8.0. A AWS candidata
+continua em `us-east-1`; essa distância afeta latência e deve ser medida antes
+de uma mudança de região. O banco continua no Supabase.
+
+- Revisão aplicada: **0022**. Head do repositório: **0023**.
+- A `0023` remove `campus_locations`, tabela do mapa antigo. Havia **zero
+  registros** na consulta. Isso precisa ser conferido novamente na manutenção;
+  o downgrade recria a estrutura, sem recuperar registros removidos.
+- As vinte tabelas públicas consultadas estavam com RLS ativo. A ausência de
+  policies é intencional para tabelas acessadas pelo backend com filtros de
+  tenant, sem leitura direta pelo navegador. Não criar policies amplas para
+  eliminar os avisos informativos do advisor.
+- A coluna vetorial do LangChain não fixa dimensão no tipo, mas os vetores
+  armazenados consultados tinham **384 dimensões**. O preflight verifica os
+  valores nesses casos; não exige reindexação só por o tipo ser `vector`.
+- O advisor também apontou a extensão vector em `public` e proteção contra
+  senhas vazadas desativada. Não foram alteradas: mover a extensão exige revisar
+  dependências; a configuração de Auth deve ser conferida no plano disponível.
+  [Extensões no schema público](https://supabase.com/docs/guides/database/database-linter?lint=0014_extension_in_public),
+  [RLS sem policies](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)
+  e [proteção de senhas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+O conector Vercel listou um projeto EchoMind, mas retornou **403 ao consultar
+suas configurações**; a CLI não estava instalada. A referência local em
+`.vercel/project.json` não confirma que o projeto corresponde ao domínio
+informado. Antes de editar ou publicar, conferir no painel qual projeto possui
+`echomind-front.vercel.app` e restabelecer o acesso da integração a esse projeto.
+Não houve alteração de variáveis, domínio, Auth ou deploy remoto nesta etapa.
+
+### Conexão e preflight do banco
+
+A EC2 preparada usa IPv4. Obtenha **Session pooler, porta 5432** no botão
+Connect do Supabase; o hostname real não deve ser montado por tentativa a
+partir da região. Use o mesmo projeto do frontend e `sslmode=require` ou
+validação de certificado mais forte. Não use transaction pooler na porta 6543
+para esse fluxo. Conexão direta é adequada se o ambiente de manutenção tiver
+acesso IPv6; o teste via conector não comprova a conectividade da EC2.
+[Modos de conexão](https://supabase.com/docs/guides/database/connecting-to-postgres).
+
+`scripts/check_database.py`, incluído na imagem de produção, recebe
+`DATABASE_URL` somente pelo processo, sem carregar `.env`. A transação é de
+leitura, com timeout; confere revisões, tabelas essenciais, RLS, pgvector e
+dimensões. Não mostra DSN, valores de credenciais, textos ou embeddings.
+Por padrão termina com erro se o banco não estiver pronto; `--inventory`
+serve apenas para diagnóstico e pode informar `ready=false` sem falhar.
+Esse diagnóstico não comprova autenticação, permissões de cada rota nem toda
+a equivalência do schema; esses testes continuam necessários.
+
+No host, depois de instalar os arquivos privados da etapa 4 e escolher a
+imagem candidata, use o Compose da etapa 2:
+
+```sh
+docker compose --env-file /etc/echomind/compose.env -f deploy/compose.yaml run --rm --no-deps backend python scripts/check_database.py --inventory
+```
+
+O comando não inicia Uvicorn, workers documentais ou downloads de modelos.
+Não publique a saída de `docker compose config` com a configuração real.
+
+### Backup antes de aplicar a migration
+
+O Free Plan do Supabase exige preparar exportação própria; não foi presumido
+backup diário recuperável da plataforma. O snapshot EBS da etapa 6 não contém
+o PostgreSQL externo. [Backups Supabase](https://supabase.com/docs/guides/platform/backups).
+
+O procedimento abaixo cria um **backup do schema public da aplicação**,
+incluindo dados, revisão Alembic e RLS. Ele não é backup completo do Supabase:
+não inclui Auth, configurações de provedores, roles/senhas ou objetos Storage.
+Uma recuperação completa do projeto requer um plano separado para esses itens.
+
+Prepare privadamente `/etc/echomind/pg_service.conf` a partir do exemplo em
+`deploy/database`, com o endpoint correto. A senha fica somente em
+`/etc/echomind/pgpass`, no formato libpq, com `:` e `\` escapados quando necessário.
+Use diretório 700 e arquivos 600. Esses arquivos e os dumps ficam fora do Git;
+não cole a senha no comando, no chat ou em logs. Use cliente PostgreSQL 17.
+
+Exemplo no host Linux, em sessão administrativa, com a imagem cliente já
+disponível localmente e diretório privado de backup preparado:
+
+```sh
+set -eu
+release="$(date -u +%Y%m%dT%H%M%SZ)"
+test ! -e "/srv/echomind/db-backups/$release.dump"
+pg_client() {
+  docker run --rm --pull never --user 0:0 \
+    --mount type=bind,source=/etc/echomind/pg_service.conf,target=/private/pg_service.conf,readonly \
+    --mount type=bind,source=/etc/echomind/pgpass,target=/private/pgpass,readonly \
+    --mount type=bind,source=/srv/echomind/db-backups,target=/backup \
+    -e PGSERVICE=echomind -e PGSERVICEFILE=/private/pg_service.conf \
+    -e PGPASSFILE=/private/pgpass pgvector/pgvector:0.8.6-pg17 "$@"
+}
+pg_client pg_dump --schema=public --format=custom --no-owner --no-privileges --file="/backup/$release.dump"
+chmod 600 "/srv/echomind/db-backups/$release.dump"
+pg_client pg_restore --list "/backup/$release.dump" >/dev/null
+sha256sum "/srv/echomind/db-backups/$release.dump"
+```
+
+Antes do dump final, drene uploads/processamento conforme a etapa 3 e interrompa
+as demais escritas da aplicação durante a manutenção. Guarde uma cópia protegida
+fora da EC2 e registre hash, horário, revisão e imagem candidata em local privado.
+Um dump legível por `--list` não comprova que ele restaura.
+
+Restaure **essa cópia real** primeiro em um PostgreSQL descartável e vazio,
+com extensões vector/uuid-ossp já instaladas. Use `pg_restore --schema=public
+--no-owner --no-privileges --exit-on-error --single-transaction` apontando
+explicitamente para o banco de teste. O filtro de schema evita tentar recriar
+o schema public já existente. Compare revisão, contagens e registros de aceite;
+revise permissões/owners removidos por esses flags antes de restaurar no serviço
+gerenciado. Não use `--clean` no banco real como procedimento automático.
+
+Somente após esse teste, revisão da migration e nova conferência da tabela
+retirada, a aplicação será uma operação separada:
+
+```sh
+docker compose --env-file /etc/echomind/compose.env -f deploy/compose.yaml run --rm --no-deps backend python -m alembic upgrade 0023
+docker compose --env-file /etc/echomind/compose.env -f deploy/compose.yaml run --rm --no-deps backend python scripts/check_database.py
+```
+
+O destino `0023` é explícito para não incluir futuras migrations sem revisão.
+Se falhar, mantenha a aplicação em manutenção; não execute downgrade para tentar
+recuperar registros. O teste sintético desta etapa não substitui a restauração
+do dump real. Nenhuma migration ou exportação de dados reais foi executada.
+
+### Vercel, CORS e Supabase Auth
+
+No projeto que possui o domínio informado, conferir Root Directory
+`echomind-front`, preset Next.js, Node 22 e pnpm 10.30.0. O lockfile permanece
+versionado. O exemplo em `deploy/frontend/.env.example` contém somente campos
+públicos e a opção de validação do build.
+
+| Local | Configuração de produção |
+| --- | --- |
+| Vercel `NEXT_PUBLIC_API_URL` | Origem HTTPS da API, a definir, sem caminho ou barra final |
+| Vercel `NEXT_PUBLIC_SUPABASE_URL` | URL do mesmo projeto Supabase usado pelo backend |
+| Vercel `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Chave publishable desse projeto, nunca secret/service_role |
+| Vercel `ECHOMIND_REQUIRE_API_URL` | `true` para publicar o projeto completo com a API |
+| Backend `ALLOWED_ORIGINS` | `https://echomind-front.vercel.app`, mais outras origens exatas se forem necessárias |
+| Supabase Auth Site URL | `https://echomind-front.vercel.app` |
+| Supabase Auth Redirect URLs | `https://echomind-front.vercel.app/redefinir-senha` |
+
+O build agora rejeita origens HTTP/localhost, caminhos, credenciais na URL,
+chaves incompatíveis e variáveis públicas de segredos do backend. A API ausente
+continua permitida para o frontend isolado já existente; a opção
+`ECHOMIND_REQUIRE_API_URL=true` exige seu endereço na publicação completa.
+Essa validação confere formato, sem autenticar chaves ou testar serviços reais.
+
+As variáveis `NEXT_PUBLIC_*` entram no bundle durante o build: mudar seu valor
+na Vercel exige novo deployment. Produção e Preview precisam de configurações
+próprias; prefira um Supabase de teste para previews, sem liberar origens ou
+redirects genéricos em produção. Não colocar DATABASE_URL, GROQ_API_KEY ou
+SUPABASE_SECRET_KEY na Vercel deste frontend.
+[Variáveis Vercel](https://vercel.com/docs/environment-variables) e
+[variáveis Next.js](https://nextjs.org/docs/app/guides/environment-variables).
+
+Preserve URLs locais ainda usadas no desenvolvimento. O reset de senha já usa
+`window.location.origin/redefinir-senha`; confirme que o template de email
+respeita esse destino e teste com uma conta de aceite. Site URL também afeta
+confirmação de cadastro. O envio de emails de teste e a alteração desses valores
+não foram realizados. [Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).
+
+### Evidência e pendências
+
+O ensaio local `deploy/validate_database_release.py` cria e remove somente um
+container PostgreSQL descartável em loopback. Usa credenciais sintéticas,
+não carrega `.env`, não baixa imagem e mantém o dump dentro do container.
+Na raiz do projeto, com Docker e as dependências Python já disponíveis:
+
+```powershell
+& ./echomind-backend/.venv/Scripts/python.exe ./deploy/validate_database_release.py
+```
+
+Ele validou `0022 -> 0023`, detectou a pendência pelo preflight e restaurou
+a revisão anterior, um registro removido e RLS em outro banco vazio. Também
+verificou dimensão de vetores em coluna sem dimensão fixa. A imagem usa
+PostgreSQL 17.11/pgvector 0.8.6; isso não equivale a testar o dump real do
+Supabase 17.6/pgvector 0.8.0.
+
+Resultados finais desta etapa:
+
+| Verificação | Resultado |
+| --- | --- |
+| Integração PostgreSQL/pgvector | 87 testes aprovados em banco local descartável |
+| Frontend: configuração, API e páginas de autenticação | 44 testes aprovados, incluindo 14 casos da nova validação pública |
+| Frontend: lint, tipos e build de produção | Aprovados com configuração pública sintética HTTPS |
+| Imagem backend Linux amd64 | Construída; preflight final informou `ready=true` no banco local migrado |
+| Backup/restauração | Ensaio sintético aprovado; backup do Supabase real permanece pendente |
+
+O aviso de descontinuação futura da integração LangChain PGVector permanece;
+a atualização de dependências deve ter validação própria e não foi incluída
+nesta etapa. A CI executará novamente seus gates após o envio dos commits.
+
+Os testes HTTP de deduplicação passaram a compartilhar um único ciclo de vida
+da aplicação e a usar armazenamento temporário. A corrida entre transações
+continua testada em sessões PostgreSQL independentes; não se força uma barreira
+dentro do lock de admissão. O teste de compensação concorrente isola a camada
+transacional, pois o endpoint serializa as operações no filesystem. As proteções
+da aplicação não foram desabilitadas para publicar.
+
+- [x] Diagnóstico de revisão, RLS e vetores do Supabase, somente de leitura.
+- [x] Preflight incluído e executado na imagem Linux de produção.
+- [x] Ensaio sintético de backup, migration e restauração.
+- [x] Validação das variáveis públicas e build de produção do frontend.
+- [ ] Definir domínio da API e validar DNS/HTTPS/health na EC2 real.
+- [ ] Preparar conexão privada IPv4, backup real e teste de restauração.
+- [ ] Aplicar `0023` e conferir o banco real depois da manutenção.
+- [ ] Conferir o projeto Vercel correto e liberar acesso às suas configurações.
+- [ ] Configurar valores reais de Vercel/CORS/Auth e testar login/cadastro/reset.
 
 ## Referências
 

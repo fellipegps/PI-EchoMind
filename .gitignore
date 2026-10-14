@@ -4,6 +4,11 @@
 *.env
 .document-data/
 *.documents.tar
+*.dump
+*.pgpass
+pgpass
+pg_service.conf
+.database-backups/
 deploy/aws/parameters.json
 deploy/aws/parameters.local.json
 !.env.example

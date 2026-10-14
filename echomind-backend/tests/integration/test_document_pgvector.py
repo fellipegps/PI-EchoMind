@@ -1565,7 +1565,7 @@ def test_failed_delete_does_not_reactivate_ingestion_error(delete_recovery_runti
     assert final.chunks == final.parents == final.vectors == []
 
 
-def test_overlapping_delete_does_not_remove_vectors_after_another_attempt_recovers(
+def test_transactional_delete_does_not_remove_vectors_after_another_attempt_recovers(
     delete_recovery_runtime, monkeypatch,
 ):
     from concurrent.futures import ThreadPoolExecutor
@@ -1606,9 +1606,12 @@ def test_overlapping_delete_does_not_remove_vectors_after_another_attempt_recove
         with Session(context.engine) as session:
             session.info["attempt"] = attempt
             try:
-                main.delete_stored_document(
+                # Isolate the relational compensation layer: the outer endpoint
+                # intentionally serializes operations with a filesystem lock.
+                main._delete_stored_document(
                     context.document_id, db=session, rag=context.indexer,
                     current_user=SimpleNamespace(id=context.tenant),
+                    storage=main.document_storage(),
                 )
                 return 204
             except HTTPException as exc:

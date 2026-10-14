@@ -26,6 +26,7 @@ COPY app ./app
 COPY alembic.ini ./alembic.ini
 COPY alembic ./alembic
 COPY scripts/reindex_all.py ./scripts/reindex_all.py
+COPY scripts/check_database.py ./scripts/check_database.py
 
 USER 10001:10001
 
