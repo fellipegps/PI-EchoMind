@@ -6,5 +6,8 @@ RUN mkdir /tmp/guard \
     && tar -xzf /tmp/guard.tar.gz -C /tmp/guard \
     && find /tmp/guard -type f -name cfn-guard -exec install -m 755 {} /usr/local/bin/cfn-guard \; \
     && cfn-guard --version
+ADD --checksum=sha256:8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz /tmp/actionlint.tar.gz
+RUN tar -xzf /tmp/actionlint.tar.gz -C /usr/local/bin actionlint \
+    && actionlint --version
 WORKDIR /work
 USER 10001:10001

@@ -1,0 +1,100 @@
+name: Deploy AWS
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+# Serialized across all commits. GitHub may replace a queued run with a newer one;
+# running SSM transactions are never cancelled to make room for another release.
+concurrency:
+  group: production-aws
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_PAGER: ""
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+  BACKEND_REPOSITORY: ${{ vars.AWS_BACKEND_REPOSITORY }}
+  PROXY_REPOSITORY: ${{ vars.AWS_PROXY_REPOSITORY }}
+  RELEASE_BUCKET: ${{ vars.AWS_RELEASE_BUCKET }}
+  RELEASE_REVISION: ${{ github.event.workflow_run.head_sha }}
+
+jobs:
+  publish:
+    # A pull request CI (including forks) must never reach a privileged workflow.
+    if: >-
+      vars.AWS_DEPLOY_ENABLED == 'true' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    environment: aws-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      bundle_sha256: ${{ steps.publish.outputs.bundle_sha256 }}
+    steps:
+      - name: Checkout exactly the commit tested by CI
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Reject obsolete CI runs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 deploy/pipeline/ensure_main.py
+      - name: Assume the publication role with OIDC
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_BUILD_ROLE_ARN }}
+          role-session-name: echomind-build-${{ github.run_id }}
+          role-duration-seconds: 3600
+          aws-region: us-east-1
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+          unset-current-credentials: true
+      - name: Publish immutable commit images and release bundle
+        id: publish
+        run: python3 deploy/pipeline/publish_release.py
+
+  deploy:
+    needs: publish
+    environment: production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout the tested commit
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Reject a stale release after any environment approval wait
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 deploy/pipeline/ensure_main.py
+      - name: Assume the deployment role with OIDC
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: echomind-deploy-${{ github.run_id }}
+          role-duration-seconds: 3600
+          aws-region: us-east-1
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+          unset-current-credentials: true
+      - name: Drain, back up, update, verify and recover on failure
+        env:
+          INSTANCE_ID: ${{ vars.AWS_INSTANCE_ID }}
+          DEPLOY_DOCUMENT: ${{ vars.AWS_DEPLOY_DOCUMENT }}
+          BUNDLE_SHA256: ${{ needs.publish.outputs.bundle_sha256 }}
+        run: python3 deploy/pipeline/send_release.py

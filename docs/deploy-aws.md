@@ -50,10 +50,12 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   URLs de autenticação no Supabase. Reindexação de embeddings continua manual.
   Preparação local validada; aplicação no banco real e configuração dos serviços
   continuam pendentes, conforme o registro da etapa 7 abaixo.
-- [ ] **8. Publicação por GitHub Actions:** testes antes de publicar, autenticação
+- [x] **8. Preparação da publicação por GitHub Actions:** testes antes de publicar, autenticação
   temporária OIDC, imagem identificada pelo commit, atualizações serializadas,
   drenagem de tarefas, verificação após deploy e recuperação da versão anterior.
-  O fluxo atual em `.github/workflows/ci.yml` apenas testa e constrói o frontend.
+  Workflow, infraestrutura complementar e recuperação validados localmente.
+  A ativação na AWS/GitHub e a primeira execução real permanecem pendentes;
+  `AWS_DEPLOY_ENABLED` fica ausente/desativado até concluir os pré-requisitos.
 - [ ] **9. Validação em produção:** login, recuperação de senha, chat, upload e
   consulta de documentos, memória/CPU/disco com embeddings reais, revisão de
   vulnerabilidades das dependências, logs e recuperação após reinício.
@@ -1083,7 +1085,7 @@ No host, depois de instalar os arquivos privados da etapa 4 e escolher a
 imagem candidata, use o Compose da etapa 2:
 
 ```sh
-docker compose --env-file /etc/echomind/compose.env -f deploy/compose.yaml run --rm --no-deps backend python scripts/check_database.py --inventory
+docker compose --env-file /etc/echomind/deploy.env -f deploy/compose.yaml run --rm --no-deps backend python scripts/check_database.py --inventory
 ```
 
 O comando não inicia Uvicorn, workers documentais ou downloads de modelos.
@@ -1144,8 +1146,8 @@ Somente após esse teste, revisão da migration e nova conferência da tabela
 retirada, a aplicação será uma operação separada:
 
 ```sh
-docker compose --env-file /etc/echomind/compose.env -f deploy/compose.yaml run --rm --no-deps backend python -m alembic upgrade 0023
-docker compose --env-file /etc/echomind/compose.env -f deploy/compose.yaml run --rm --no-deps backend python scripts/check_database.py
+docker compose --env-file /etc/echomind/deploy.env -f deploy/compose.yaml run --rm --no-deps backend python -m alembic upgrade 0023
+docker compose --env-file /etc/echomind/deploy.env -f deploy/compose.yaml run --rm --no-deps backend python scripts/check_database.py
 ```
 
 O destino `0023` é explícito para não incluir futuras migrations sem revisão.
@@ -1232,11 +1234,229 @@ da aplicação não foram desabilitadas para publicar.
 - [x] Preflight incluído e executado na imagem Linux de produção.
 - [x] Ensaio sintético de backup, migration e restauração.
 - [x] Validação das variáveis públicas e build de produção do frontend.
-- [ ] Definir domínio da API e validar DNS/HTTPS/health na EC2 real.
+- [x] Escolher domínio da API: `echomind-api.duckdns.org`, informado como reservado pelo responsável.
+- [ ] Apontar o DNS para o Elastic IP e validar HTTPS/health na EC2 real.
 - [ ] Preparar conexão privada IPv4, backup real e teste de restauração.
 - [ ] Aplicar `0023` e conferir o banco real depois da manutenção.
-- [ ] Conferir o projeto Vercel correto e liberar acesso às suas configurações.
+- [x] Conferir projeto e deployment Vercel via integração reconectada, usando o ID e o contexto padrão.
 - [ ] Configurar valores reais de Vercel/CORS/Auth e testar login/cadastro/reset.
+
+## Etapa 8: publicação por GitHub Actions
+
+**Situação: preparação concluída e validada localmente. Automação ainda não
+ativada e nenhum recurso AWS criado nesta etapa.** As pendências de banco,
+infraestrutura, identidade dedicada e DNS continuam necessárias para publicar.
+O hostname escolhido é `echomind-api.duckdns.org`; o domínio do frontend é
+`echomind-front.vercel.app`. A reserva do DuckDNS não comprova apontamento ou TLS.
+
+### Fluxo preparado
+
+1. Um push/merge na `main` executa o CI existente: backend, banco e frontend.
+   O CI agora também valida os templates, as regras de segurança, os workflows
+   e os cenários de falha/recuperação do deploy. Constrói a imagem com o lock
+   de produção e ensaia inicialização, reinício, persistência e rollback com
+   serviços fictícios, antes de conceder credenciais ao workflow de publicação.
+2. `deploy-aws.yml` recebe o resultado do CI e só continua para um **push da
+   main deste repositório com CI bem-sucedido**, quando `AWS_DEPLOY_ENABLED=true`.
+   PRs, forks e execução manual do CI não publicam. A branch de preparação não
+   publica ao receber commits.
+3. O workflow confere se o commit testado ainda é o mais recente da `main`, faz
+   checkout desse SHA e assume um papel temporário por OIDC. Não se armazena
+   access key AWS ou chave SSH no GitHub.
+4. Constrói backend e Caddy Linux `amd64` no runner, publica no ECR com tags
+   imutáveis de commit e entrega referências por **digest** no manifesto. Um
+   reprocessamento reaproveita as imagens do mesmo SHA; nunca altera uma tag.
+5. Empacota apenas dois arquivos Compose, `rollout.py` e um manifesto público.
+   O bundle determinístico fica no S3 privado, com gravação condicional que
+   impede sobrescrever o bundle de um commit. Arquivos `.env` não participam.
+6. Um segundo papel, do ambiente `production`, chama somente o documento SSM
+   preparado e somente a EC2 indicada. Não pode usar `AWS-RunShellScript`,
+   alterar IAM, provisionar instâncias ou consultar documentos de backup.
+7. O host confere checksum, tipo/tamanho/nomes dos arquivos do bundle, mounts
+   persistentes, arquivos privados e espaço livre (mínimo 4 GiB). Baixa as imagens
+   antes da manutenção, valida Compose e executa o preflight de banco da versão
+   candidata. **Migration pendente bloqueia a publicação; não se executa Alembic
+   nem reindexação automaticamente.**
+8. Drena uploads/exclusões usando um utilitário isolado da aplicação, sem rede
+   ou segredos. Gera backup dos originais/marcadores e o envia ao S3 criptografado.
+   Se a drenagem ou o backup falharem, a versão anterior permanece e é retomada.
+9. Troca os containers, verifica saúde Compose, revisão/schema/RLS/vetores no
+   banco e `/health` pelo domínio com certificado TLS confiável. Só então libera
+   documentos e grava a versão corrente de forma atômica no disco persistente.
+10. Se a troca ou verificação falhar, drena com o utilitário da versão anterior,
+    recria essa versão, confere sua saúde e retoma os documentos. Se a própria
+    recuperação falhar, mantém o marcador de operação pendente para intervenção.
+
+O GitHub serializa publicações sem cancelar a execução em andamento. Locks no
+host também bloqueiam atualizações concorrentes por SSM ou pelo operador. O
+GitHub pode substituir uma execução em espera por uma mais recente; não há
+garantia de publicar todos os commits intermediários. O SHA é conferido outra
+vez antes de enviar o comando, inclusive depois de uma espera por aprovação.
+
+O serviço tem uma única EC2 e um worker: a troca pode causar indisponibilidade
+temporária e os documentos ficam em manutenção. Este fluxo não oferece deploy
+sem interrupção. A verificação automática de saúde não valida uma conversa Groq,
+login ou embeddings E5 reais; esses ensaios permanecem na etapa 9.
+
+### Arquivos e fronteiras de acesso
+
+| Arquivo | Responsabilidade |
+| --- | --- |
+| `.github/workflows/deploy-aws.yml` | Encadear CI aprovado, publicação, OIDC e comando SSM |
+| `deploy/aws/pipeline.yaml` | Dois repositórios ECR, bucket S3, OIDC, papéis restritos e documento SSM |
+| `deploy/pipeline/package_release.py` | Empacotamento por allowlist, sem arquivos de configuração |
+| `deploy/pipeline/publish_release.py` | Publicar/reaproveitar imagens e bundle imutáveis |
+| `deploy/pipeline/ensure_main.py` | Recusar um CI aprovado que já ficou desatualizado |
+| `deploy/pipeline/send_release.py` | Enviar comando e observar somente status, sem reproduzir logs privados |
+| `deploy/pipeline/rollout.py` | Drenagem, backup, atualização, saúde e recuperação no host |
+| `deploy/pipeline/validate.py` | Validações offline na imagem Docker de ferramentas |
+| `deploy/pipeline/smoke_release.py` | Ensaio descartável com falha real de container e dados fictícios |
+
+O papel `aws-build` publica somente nesses ECRs e em `releases/` do bucket. O
+papel `production` só envia o documento SSM à instância e consulta o resultado
+do comando. A consulta `GetCommandInvocation` e a autenticação ECR exigem
+`Resource: '*'`, conforme a referência de autorização AWS; as operações que
+permitem restringir recursos usam os ARNs concretos do template.
+
+O papel da EC2 ganha leitura das imagens e de `releases/`, além de escrita em
+`backups/`. Ele não pode ler nem apagar backups. O aplicativo continua sem AWS
+access keys; o limite de salto do IMDS permanece em um. A credencial temporária
+de login ECR fica em diretório restrito temporário, removido após o comando.
+
+Permissão para publicar o código implantado equivale a executar código como
+root nesta EC2: proteja quem escreve no repositório e revisa workflows, scripts,
+Compose e Dockerfiles. Papéis separados reduzem o alcance, mas não transformam
+um release malicioso aprovado em código seguro.
+
+### Pré-requisitos de ativação - ainda pendentes
+
+- [ ] Concluir medição Linux do E5 e confirmar a capacidade da máquina antes de criá-la.
+- [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
+- [ ] Instalar/verificar AWS CLI **v2** no host pelo instalador oficial com assinatura verificada. O bootstrap atual não a instala.
+- [ ] Verificar SSM Agent **3.3.2746.0 ou superior**. Sem `ENV_VAR`, o documento falha fechado.
+- [ ] Concluir backup/restauração e migrations reais da etapa 7; conferir IPv4, TLS, RLS e vetores.
+- [ ] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.
+- [ ] Configurar `API_DOMAIN=echomind-api.duckdns.org` e e-mail ACME real no `deploy.env`; CORS exato no backend.
+- [ ] Apontar DuckDNS para o Elastic IP; conferir propagação e portas 80/443. O primeiro deploy requer DNS correto para emitir TLS.
+- [ ] Criar os ambientes GitHub `aws-build` e `production`, ambos restritos exclusivamente à `main`; proteger a branch e as alterações do pipeline.
+- [ ] Verificar o `sub` OIDC real do repositório. Repositórios novos/opt-in podem incluir IDs imutáveis: informar o prefixo exato em `GitHubSubjectPrefix`, sem wildcard. Não imprimir o token.
+- [ ] Inspecionar o provedor OIDC GitHub já existente na conta. Reutilizar seu ARN; criar um apenas se não existir.
+- [ ] Criar/revisar change set de `deploy/aws/pipeline.yaml`, sem executar até conferir identidade, custos e permissões.
+- [ ] Configurar as variáveis públicas do repositório abaixo, usando outputs reais.
+- [ ] Habilitar `AWS_DEPLOY_ENABLED=true` somente quando os pré-requisitos estiverem atendidos; acompanhar a primeira publicação.
+
+O stack complementar recebe `InstanceId` do stack principal e `NodeRoleName`
+da role real do instance profile da EC2. Não substitui a role nem o nó. As
+trust policies exigem `aud=sts.amazonaws.com` e o `sub` exato de cada ambiente.
+Como o subject de ambiente não traz a branch, a restrição dos ambientes à
+`main` é obrigatória antes de conceder acesso. Revisores de produção são uma
+opção adicional conforme os recursos disponíveis no plano GitHub.
+
+| Variável GitHub do repositório | Origem |
+| --- | --- |
+| `AWS_DEPLOY_ENABLED` | Ausente/`false` durante preparação; `true` para ativar |
+| `AWS_ACCOUNT_ID` | Conta AWS de destino |
+| `AWS_BUILD_ROLE_ARN` | Output `BuildRoleArn` |
+| `AWS_DEPLOY_ROLE_ARN` | Output `DeployRoleArn` |
+| `AWS_BACKEND_REPOSITORY` | Output `BackendRepositoryUri` |
+| `AWS_PROXY_REPOSITORY` | Output `ProxyRepositoryUri` |
+| `AWS_RELEASE_BUCKET` | Output `ReleaseBucketName` |
+| `AWS_DEPLOY_DOCUMENT` | Output `DeployDocumentName` |
+| `AWS_INSTANCE_ID` | Output `InstanceId` do stack principal |
+
+Essas variáveis identificam recursos; não contêm segredos da aplicação. As
+credenciais Supabase/Groq/banco continuam exclusivamente no arquivo privado
+do host. As tags `BACKEND_IMAGE`/`PROXY_IMAGE` do exemplo `deploy.env` são
+substituídas pelo manifesto durante o pipeline. Valores com `CHANGE_ME` nos
+outros campos impedem a execução. Mantenha os demais valores do exemplo,
+incluindo as portas padrão e `BACKEND_ENV_FILE=/etc/echomind/backend.env`.
+
+O frontend continua com o fluxo Git da Vercel. Este pipeline publica o backend
+e o proxy; não muda configurações Vercel/Auth. Configure a URL pública da API
+na Vercel somente quando o endereço HTTPS responder, depois refaça o build.
+Frontend e backend não são uma publicação atômica; mantenha compatibilidade
+de API entre versões durante essa transição.
+
+### Estado, backup, custos e recuperação
+
+`/srv/echomind/current.json` registra a última versão saudável, seus digests,
+diretório do release e configurações públicas. `previous.json` guarda a anterior.
+`pending.json` registra uma troca em andamento. Esses arquivos não contêm
+credenciais, ficam restritos no volume criptografado e nunca vão ao GitHub.
+
+A primeira implantação precisa iniciar sem containers Compose `echomind`
+externos a este fluxo; se já existirem, ele bloqueia para o operador registrar
+ou migrar a instalação conscientemente. No primeiro deploy não há versão
+anterior: uma falha para o candidato e conserva os volumes para diagnóstico.
+
+O backup por deploy contém **originais e marcadores de documentos**, não banco,
+credenciais, certificados ou cache de modelos. O backup do PostgreSQL é uma
+operação separada da etapa 7. Snapshots diários do EBS continuam cobrindo o disco
+durável da etapa 6. S3 expira os backups por deploy após sete dias, bundles após
+90 dias e versões não correntes após sete dias. Essa janela finita exige um
+plano separado caso seja necessário recuperar dados mais antigos.
+
+Os ECRs retêm imagens com tag; apenas imagens sem tag expiram após sete dias.
+Os releases locais também ficam preservados para rollback. **O armazenamento
+cresce com novas versões:** revisar a limpeza de versões antigas, preservando
+`current`, `previous`, qualquer operação pendente e as imagens por eles usadas.
+O pipeline não executa prune, remove volumes ou apaga versões ativas. Espaço
+insuficiente interrompe o deploy; backups locais grandes podem exigir mais que
+os 4 GiB mínimos, e uma falha ao gerá-los também bloqueia a troca.
+
+ECR, S3, requisições, transferências aplicáveis e minutos de Actions podem gerar
+custo/consumir franquias. Não foram acrescentados CodePipeline, CodeBuild,
+load balancer ou uma nova chave KMS mensal. A estimativa anterior de US$24,11
+da etapa 6 **não inclui o armazenamento/uso incremental desta etapa**. Recalcular
+com tamanho das imagens, documentos e frequência de deploy antes da ativação;
+créditos não garantem gratuidade permanente. Bucket e ECR retidos continuam
+cobrando armazenamento mesmo após excluir o stack.
+
+Rollback restaura somente aplicação/proxy/Compose e suas configurações públicas.
+Não desfaz migrations, rotaciona credenciais ou restaura documentos por cima de
+dados novos. Um banco modificado de maneira incompatível impede recuperar a
+versão anterior: revisar compatibilidade e realizar migrations explicitamente.
+
+Após um reboot, timeout, cancelamento manual ou perda do runner, não suponha
+que o comando remoto parou. O workflow observa até cerca de 52 minutos e o
+documento limita execução a 50 minutos. Confira o comando no SSM e o estado
+do host antes de repetir. `pending.json` bloqueia novas transações quando há
+uma interrupção não reconciliada. Não remova esse arquivo para forçar um deploy.
+
+O operador pode recuperar a versão anterior com `rollout.py --recover-previous`
+por uma sessão SSM administrativa, usando código revisado e as variáveis públicas
+`RELEASE_BUCKET`, `BACKEND_REPOSITORY` e `PROXY_REPOSITORY` dos outputs. O utilitário
+adquire o lock, confere o manifesto salvo, drena, recria, verifica e retoma a
+versão anterior antes de retirar o marcador. Se for a primeira implantação,
+sem anterior, exige diagnóstico/parada manual do candidato; nunca inventa uma
+versão de recuperação. Depois de um deploy saudável, um rollback deliberado
+pode usar `--release` com o diretório preservado da versão desejada, sujeito ao
+mesmo preflight e backup. Nenhum desses comandos faz downgrade do banco.
+
+### Evidências locais da etapa 8
+
+```sh
+docker build --tag echomind-infra-validation:local --file deploy/aws/validation.Dockerfile deploy/aws
+python deploy/pipeline/validate.py
+python deploy/pipeline/smoke_release.py --image echomind-backend:deploy-step7
+```
+
+O contexto de build do validador exclui parâmetros privados. A execução offline
+monta somente arquivos públicos, sem rede. Ferramentas: cfn-lint 1.57.2,
+cfn-guard 3.2.1 e actionlint 1.7.12; binários baixados com SHA-256 fixado.
+
+| Verificação | Resultado |
+| --- | --- |
+| actionlint nos dois workflows | Aprovado |
+| cfn-lint nos dois templates, região us-east-1 | Zero erros/avisos |
+| Guard para o bucket do pipeline | Aprovado |
+| Testes de segurança/ordenação/falhas/recuperação | 20 testes aprovados |
+| Ensaio Docker real com API sintética | Candidato falhou; anterior recriada e saudável; manutenção liberada |
+| Originais e backup no ensaio | Conteúdo preservado e conferido após rollback |
+| Validador da imagem de produção usado no CI | Inicialização, limites, reinício, cache, recuperação de documento e manutenção aprovados |
+| Limpeza do ensaio | Apenas projeto descartável removido; volumes reais não utilizados |
+| OIDC, ECR, S3 e SSM reais | Ainda não criados/ativados/executados |
+| HTTPS/banco real, chat, E5 e medição de recursos | Pendentes das etapas 7/9 |
 
 ## Referências
 
@@ -1268,4 +1488,11 @@ da aplicação não foram desabilitadas para publicar.
 - [Preços KMS](https://aws.amazon.com/kms/pricing/)
 - [Preços CloudWatch](https://aws.amazon.com/cloudwatch/pricing/)
 - [Dados persistentes do Docker e containerd](https://docs.docker.com/engine/daemon/#daemon-data-directory)
+- [OIDC GitHub Actions com AWS e subjects de ambiente](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)
+- [Parâmetros SSM por variável de ambiente](https://docs.aws.amazon.com/systems-manager/latest/userguide/documents-syntax-data-elements-parameters.html)
+- [Versão mínima do SSM Agent para ENV_VAR](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-troubleshooting.html)
+- [Impedir sobrescrita com escritas condicionais no S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/conditional-writes-enforce.html)
+- [Instalação e verificação de assinatura AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [Preços ECR](https://aws.amazon.com/ecr/pricing/)
+- [Preços S3](https://aws.amazon.com/s3/pricing/)
 - [Docker Engine no Ubuntu](https://docs.docker.com/engine/install/ubuntu/)

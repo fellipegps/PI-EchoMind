@@ -15,6 +15,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  deployment-checks:
+    name: Deployment / safety-and-recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Build the isolated infrastructure validator
+        run: docker build --tag echomind-infra-validation:local --file deploy/aws/validation.Dockerfile deploy/aws
+      - name: Check CloudFormation, security controls and release failure recovery
+        run: python3 deploy/pipeline/validate.py
+      - name: Build the production backend image with its locked dependencies
+        run: docker build --platform linux/amd64 --tag echomind-backend:ci ./echomind-backend
+      - name: Check real container startup, persistence and restart without providers
+        run: python3 deploy/validate_runtime.py --image echomind-backend:ci
+      - name: Rehearse a failed deployment and recovery with disposable containers
+        run: python3 deploy/pipeline/smoke_release.py --image echomind-backend:ci
+
   backend-unit-api:
     name: Backend / unit-api
     runs-on: ubuntu-latest
