@@ -1330,7 +1330,7 @@ um release malicioso aprovado em código seguro.
 
 ### Pré-requisitos de ativação - ainda pendentes
 
-- [ ] Concluir medição Linux do E5 e confirmar a capacidade da máquina antes de criá-la.
+- [x] Medir E5 real no Linux com limite de 1536 MiB, dois CPUs e sem swap; manter t3.small/2 GiB para MVP de baixo tráfego, com validação final em produção.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [ ] Instalar/verificar AWS CLI **v2** no host pelo instalador oficial com assinatura verificada. O bootstrap atual não a instala.
 - [ ] Verificar SSM Agent **3.3.2746.0 ou superior**. Sem `ENV_VAR`, o documento falha fechado.
@@ -1457,6 +1457,49 @@ cfn-guard 3.2.1 e actionlint 1.7.12; binários baixados com SHA-256 fixado.
 | Limpeza do ensaio | Apenas projeto descartável removido; volumes reais não utilizados |
 | OIDC, ECR, S3 e SSM reais | Ainda não criados/ativados/executados |
 | HTTPS/banco real, chat, E5 e medição de recursos | Pendentes das etapas 7/9 |
+
+## Medição prévia da capacidade - 2026-10-14
+
+Executado `deploy/measure_resources.py` na imagem Linux de produção já construída
+`echomind-backend:deploy-step7`, limitada a **1536 MiB**, **dois CPUs**, sem swap.
+O teste usa o singleton e o adapter E5 do aplicativo, importação completa da API,
+extração/divisão de um TXT de 10 MiB e sobreposição de 40 embeddings de chunks
+com 20 embeddings de perguntas. A indexação atual envia um chunk por chamada.
+Reranker permaneceu desligado. Não acessa banco, Groq ou autenticação reais.
+
+| Ensaio | Pico RSS do processo | Pico cgroup, incluindo cache de arquivos | OOM |
+| --- | --- | --- | --- |
+| Modelo já no cache | 1004,21 MiB | 983,35 MiB | Nenhum |
+| Primeiro download/carregamento | 1036,06 MiB | 1462,68 MiB | Nenhum |
+
+RSS e cgroup usam critérios diferentes, inclusive compartilhamento/contabilização
+do cache, por isso não devem ser somados nem tratados como números equivalentes.
+Durante o ensaio frio, o processo terminou em aproximadamente 1008 MiB RSS;
+parte importante do cgroup era cache do download. Uma tentativa preliminar de
+carga atingiu o teto de 1536 MiB, com recuperação de páginas e sem OOM; o ensaio
+completo acima foi repetido com cache novo e terminou sem eventos de limite.
+
+**Decisão:** não usar uma máquina de 1 GiB. Manter `t3.small`/2 GiB e o limite
+de 1536 MiB do backend como configuração inicial do MVP, um worker, uma ingestão
+por vez e reranker desligado. Preservar memória para Caddy e sistema operacional.
+Esses limites são tetos, não reservas; o consumo real e os créditos de CPU ainda
+precisam ser acompanhados na EC2. Não é aprovação para tráfego arbitrário.
+
+Relatórios públicos, sem documentos/credenciais reais: `docs/e5-memory-linux.json`
+e `docs/e5-memory-linux-cold.json`. Modelo ONNX: 470268510 bytes, SHA-256
+`ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665`.
+
+Limitações: não foi uma conversa HTTP completa nem persistência PGVector real;
+somente 40 dos 14625 chunks produzidos foram codificados. O teste não cobre PDFs
+ou DOCXs extremos, muitas conversas concorrentes ou o desempenho da CPU T3 após
+esgotar créditos. Os tempos no Docker local não são previsão de latência AWS.
+O cache público de medição ficou em volume Docker próprio para repetições; o
+cache usado no ensaio frio e os containers descartáveis foram removidos.
+
+```sh
+python deploy/measure_resources.py --output docs/e5-memory-linux.json
+python deploy/measure_resources.py --cold --output docs/e5-memory-linux-cold.json
+```
 
 ## Referências
 
