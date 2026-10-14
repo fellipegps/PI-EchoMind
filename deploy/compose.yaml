@@ -12,6 +12,7 @@ services:
         format: raw
         required: true
     environment:
+      ECHOMIND_ENV: production
       HF_HOME: /var/cache/echomind/models
       DOCUMENT_STORAGE_DIR: /var/lib/echomind/documents
       RATE_LIMIT_INSTANCE_COUNT: "1"

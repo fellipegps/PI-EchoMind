@@ -33,7 +33,7 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   implementar a retenção dos originais, recuperação de processamento interrompido,
   drenagem antes de trocar versões e teste de recriação do container sem perda.
   Definir backup e recuperação; volume local não substitui backup.
-- [ ] **4. Configuração de produção e segredos:** exemplo sem valores reais,
+- [x] **4. Configuração de produção e segredos:** exemplo sem valores reais,
   validação de variáveis obrigatórias, armazenamento fora do Git e da imagem,
   entrega ao processo em tempo de execução e permissões mínimas. Se houver uso do
   Secrets Manager pelo agente, usar `asm-exec` e referências dinâmicas.
@@ -480,7 +480,147 @@ banco remoto ou criação de recursos AWS. E5 real, backup externo automatizado,
 criptografia/retenção do EBS e recuperação de uma EC2 perdida continuam nas
 etapas de infraestrutura e validação em produção.
 
-A próxima etapa é a **4: configuração de produção e segredos**.
+## Etapa 4: configuração de produção e segredos
+
+O exemplo público está em `deploy/.env.example`. Ele contém apenas nomes,
+valores operacionais e marcadores `CHANGE_ME`; não contém credenciais reais.
+O arquivo preenchido fica fora do checkout e é entregue ao container por
+`BACKEND_ENV_FILE`. A imagem continua sem `.env` e sem credenciais AWS.
+
+| Variável | Destino | Tratamento |
+| --- | --- | --- |
+| `DATABASE_URL` | Backend e migrações | Segredo; URI PostgreSQL com senha codificada e `sslmode=require`, `verify-ca` ou `verify-full` |
+| `SUPABASE_SECRET_KEY` | Backend | Segredo; chave atual `sb_secret_…`, nunca chave publishable |
+| `GROQ_API_KEY` | Backend | Segredo; chave `gsk_…` |
+| `SUPABASE_URL`, `ALLOWED_ORIGINS` | Backend | Endereço HTTPS do projeto e origens exatas do frontend, sem caminho/barra final |
+| `NEXT_PUBLIC_API_URL` | Frontend/Vercel | URL pública HTTPS da API, definida na etapa 5 |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Frontend/Vercel | Dados públicos; publishable `sb_publishable_…` depende das políticas de acesso do Supabase |
+
+As três variáveis secretas nunca recebem o prefixo `NEXT_PUBLIC_`, nem entram
+em build args, Dockerfile, commits, logs ou respostas da API. Uma URL PostgreSQL
+contém a senha e deve receber o mesmo cuidado de uma chave privada. A imagem e
+o frontend são construídos sem essas três credenciais. O processo da API recebe
+os valores somente quando o container é criado.
+
+### Preparar e conferir no host Linux
+
+Os comandos abaixo são instruções para o futuro servidor; não foram executados
+em uma EC2 nesta etapa. Use uma sessão administrativa privada. Não cole os
+valores em mensagens, comandos do histórico ou parâmetros de linha de comando.
+
+```sh
+sudo install -d -m 700 /etc/echomind
+sudo install -m 600 deploy/.env.example /etc/echomind/backend.env
+sudoedit /etc/echomind/backend.env
+sudo python3 deploy/configure_runtime.py --file /etc/echomind/backend.env
+```
+
+Preencha os cinco campos essenciais: banco, URL do Supabase, chave secreta do
+Supabase, chave da Groq e origens do frontend. Obtenha a URI do banco no painel
+do Supabase usando um método de conexão compatível com a rede da EC2; confira
+acesso IPv4/IPv6 antes de publicar. Codifique caracteres especiais da senha na
+URI, por exemplo `@` como `%40`. Não altere o valor da chave da API com escaping.
+
+O formato é `NAME=value`, sem aspas e sem comentário no fim da linha. O Compose
+usa `format: raw` para preservar `$`, `#` e outros caracteres literalmente.
+Comentários ocupam uma linha própria. O exemplo deve continuar com valores
+fictícios no Git; arquivos `.env` preenchidos já são ignorados como proteção
+adicional, mas devem ficar fora do checkout.
+
+Para instalar a partir de outro arquivo privado já preenchido:
+
+```sh
+sudo python3 deploy/configure_runtime.py \
+  --file /caminho/privado/backend.env \
+  --output /etc/echomind/backend.env
+```
+
+A ferramenta valida antes de gravar, recusa arquivos no checkout, links
+simbólicos, variáveis não previstas e arquivos legíveis por outros usuários.
+No Linux exige propriedade do usuário executor, arquivo `600` e diretório de
+destino `700`; instala de forma atômica. Para trocar um arquivo existente,
+adicione `--replace`. Uma configuração inválida preserva o arquivo anterior.
+No Windows permite validar o conteúdo, mas não instala nem promete validar
+ACLs do Linux. Ela nunca busca segredos na AWS e nunca imprime os valores.
+
+O Docker lê o arquivo no host; a API com UID 10001 não precisa acessá-lo
+diretamente. Apenas o administrador que opera o Docker precisa dessa permissão.
+Acesso ao daemon Docker permite inspecionar variáveis do container; limite esse
+acesso a administradores. Evite compartilhar `docker inspect`, saídas de
+`docker compose config` e dumps do ambiente. Para conferir só a sintaxe do
+Compose, use `docker compose ... config --quiet`.
+
+### Validação ao iniciar
+
+O Compose força `ECHOMIND_ENV=production`. Antes de criar a conexão SQLAlchemy
+ou o cliente Supabase, a API valida variáveis essenciais, marcadores não
+substituídos, referências dinâmicas ainda não resolvidas, PostgreSQL com SSL,
+URLs/origens HTTPS sem curingas, tipos de chave, limites numéricos, dimensão
+384 e um único worker/instância. Os erros informam apenas os nomes a revisar.
+Em produção não há leitura automática de `.env`; desenvolvimento mantém o
+comportamento anterior. As migrações preservam senhas codificadas com `%`,
+escapando a interpolação do ConfigParser antes de entregar a URI ao Alembic.
+
+Isso valida a estrutura, sem autenticar credenciais ou conectar aos serviços.
+Não substitui os testes reais da etapa 7/9. `DOCUMENT_RECOVERY_ENABLED` e
+`RAG_WARMUP_ENABLED` ficam ligados no exemplo; podem ser desligados em testes
+controlados ou manutenção. O teste Compose usa serviços fictícios e desliga
+ambos para não chamar Supabase/Groq nem baixar o modelo. Apenas os subprocessos
+de recuperação sintética usam `ECHOMIND_ENV=testing` e SQLite.
+
+### Secrets Manager e rotação
+
+O arquivo restrito de runtime é a opção preparada nesta etapa. Ainda não foram
+criados Secrets Manager, políticas IAM ou credenciais de produção. Se Secrets
+Manager for adotado, a identidade, permissões e custos serão definidos na etapa
+6. Para o agente, valores devem chegar por referências dinâmicas resolvidas
+por `asm-exec`, nunca por consultas que imprimam o segredo. Exemplo para uma
+sessão privada com o wrapper e a autenticação já configurados:
+
+```sh
+export DATABASE_URL='{{resolve:secretsmanager:echomind/production:SecretString:DATABASE_URL}}'
+export SUPABASE_SECRET_KEY='{{resolve:secretsmanager:echomind/production:SecretString:SUPABASE_SECRET_KEY}}'
+export GROQ_API_KEY='{{resolve:secretsmanager:echomind/production:SecretString:GROQ_API_KEY}}'
+# Configure SUPABASE_URL e ALLOWED_ORIGINS com os endereços públicos reais.
+asm-exec -- python3 deploy/configure_runtime.py \
+  --from-environment --output /etc/echomind/backend.env
+```
+
+O wrapper deve executar como o proprietário autorizado do diretório privado.
+O instalador só lê as variáveis previstas no exemplo e rejeita referências
+ainda não resolvidas. Não use `sudo` dentro do wrapper sem configurar a
+preservação segura do ambiente, pois os valores podem ser descartados. Limite
+uma futura identidade de resolução ao segredo necessário e, se houver chave
+KMS própria, à decriptação correspondente; a API atual não precisa de acesso
+à AWS para atender Supabase/Groq.
+
+Para rotacionar: gere a nova credencial no provedor, prepare/valide o novo
+arquivo privado, drene os uploads pelo procedimento da etapa 3, instale o
+arquivo com `--replace` e recrie o container com `up --force-recreate`.
+Um `restart` simples não recarrega `env_file`. Confira saúde e serviços reais,
+retome a admissão de uploads e só então revogue a credencial antiga.
+O fluxo automático com verificação e recuperação fica para a etapa 8.
+
+### Validação da etapa 4
+
+| Verificação | Resultado |
+| --- | --- |
+| Build Linux `amd64` | Imagem local `echomind-backend:deploy-step4` construída |
+| Suíte rápida na imagem | 585 testes passaram; dez avisos conhecidos das fixtures SQLite |
+| Cobertura | Global 90,45%; módulo de configuração 100%; gates documentais aprovados |
+| Segredos fictícios | Valores com `$`, `#` e senhas com `%40`, `%2F`, `%25` preservados |
+| Falha de configuração | API rejeita configuração inválida antes da conexão; diagnóstico sem valores |
+| Instalação Linux | Arquivo `600` e diretório `700`; links, acesso de outros usuários e sobrescrita implícita rejeitados |
+| Rotação | Configuração inválida preserva o arquivo anterior; troca válida testada |
+| Compose real | Saúde, isolamento, limites, cache/originais, recuperação, reinício, drenagem/retomada e parada aprovados |
+| Limpeza | Containers, redes e volumes dos testes descartáveis removidos |
+
+Todos os valores de teste foram fictícios. Nenhum `.env` real foi lido, nenhum
+serviço remoto foi autenticado e nenhum recurso AWS foi criado.
+Credenciais reais e as URLs definitivas serão preenchidas privadamente no
+servidor quando as etapas de infraestrutura e HTTPS estiverem prontas.
+
+A próxima etapa é a **5: HTTPS e acesso público**.
 
 ## Referências
 
@@ -492,3 +632,7 @@ A próxima etapa é a **4: configuração de produção e segredos**.
 - [Volumes Docker](https://docs.docker.com/engine/storage/volumes/)
 - [Rotação de logs com o driver local](https://docs.docker.com/engine/logging/drivers/local/)
 - [Tratamento de sinais no Uvicorn 0.29](https://github.com/encode/uvicorn/blob/0.29.0/uvicorn/server.py)
+- [Sintaxe e formato raw de env_file no Compose](https://docs.docker.com/reference/compose-file/services/#env_file)
+- [Chaves públicas e secretas do Supabase](https://supabase.com/docs/guides/getting-started/api-keys)
+- [Conexões PostgreSQL do Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres)
+- [Interpolação do ConfigParser](https://docs.python.org/3.12/library/configparser.html#interpolation-of-values)

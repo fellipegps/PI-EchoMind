@@ -61,6 +61,7 @@ os.kill(targets[0], signal.SIGKILL)
 # interrupted ingest without contacting Supabase or loading the real E5 model.
 DOCUMENT_SETUP = """
 import os
+os.environ['ECHOMIND_ENV'] = 'testing'
 os.environ['DATABASE_URL'] = 'sqlite:////var/lib/echomind/documents/runtime-smoke.db'
 import pgvector.sqlalchemy
 from sqlalchemy import Text
@@ -168,10 +169,11 @@ def main() -> None:
         directory = Path(temporary_directory)
         runtime_env = directory / "backend.env"
         runtime_env.write_text(
-            "DATABASE_URL=postgresql://smoke:smoke@127.0.0.1:1/smoke\n"
-            "SUPABASE_URL=http://127.0.0.1:54321\n"
-            "SUPABASE_SECRET_KEY=smoke-placeholder\n"
-            "GROQ_API_KEY=smoke-placeholder\n"
+            "DATABASE_URL=postgresql://smoke:synthetic%40password@127.0.0.1:1/smoke?sslmode=require\n"
+            "SUPABASE_URL=https://synthetic.supabase.co\n"
+            "SUPABASE_SECRET_KEY=sb_secret_synthetic_offline_only\n"
+            "GROQ_API_KEY=gsk_synthetic_offline_only\n"
+            "ALLOWED_ORIGINS=https://synthetic.vercel.app\n"
             "RAG_WARMUP_ENABLED=false\n"
             "DOCUMENT_RECOVERY_ENABLED=false\n"
             "DEPLOY_SMOKE_LITERAL=literal-${DO_NOT_EXPAND}-$-#\n"
