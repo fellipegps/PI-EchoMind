@@ -292,6 +292,13 @@ Antes de usar login, chat e documentos em producao:
 O deploy do frontend nao executa migrations nem publica o backend. Deploys de
 preview precisam de uma origem liberada no CORS e de Redirect URLs proprias.
 
+## Preparação do backend para a AWS
+
+A arquitetura e a checklist de publicação estão em [docs/deploy-aws.md](docs/deploy-aws.md).
+O empacotamento do backend usa `echomind-backend/Dockerfile` e um lock de dependências
+para Python 3.12/Linux. A checklist registra o que já foi validado e o que ainda
+precisa ser preparado antes de publicar.
+
 ## Banco De Dados
 
 O schema do banco e gerenciado somente por migrations Alembic. O backend nao cria tabelas automaticamente no startup.
