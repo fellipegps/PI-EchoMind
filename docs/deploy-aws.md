@@ -41,9 +41,10 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   com renovação, portas públicas 80/443, API acessível somente pelo proxy, CORS exato,
   streaming e limite de upload. Configurar confiança no IP do proxy para preservar
   o IP do cliente no rate limiting sem aceitar cabeçalhos falsificados.
-- [ ] **6. Infraestrutura AWS:** revisar créditos e custos, identidade dedicada,
+- [x] **6. Preparação da infraestrutura AWS:** revisar créditos e custos, definir identidade dedicada,
   EC2 por infraestrutura como código, acesso administrativo via Systems Manager,
   EBS criptografado e persistente, regras de rede, backup e orçamento/alertas.
+  Template validado; a identidade dedicada e os recursos ainda precisam ser criados.
 - [ ] **7. Banco e frontend:** conferir migrations com backup e acesso PostgreSQL,
   aplicar migrations como operação explícita, ajustar URL HTTPS da API na Vercel e
   URLs de autenticação no Supabase. Reindexação de embeddings continua manual.
@@ -794,7 +795,7 @@ publicação do projeto.
 
 ## Etapa 6: infraestrutura AWS
 
-**Preparação em validação.** Os arquivos estão em `deploy/aws`; ainda não foram
+**Preparação concluída e validada.** Os arquivos estão em `deploy/aws`; ainda não foram
 criados recursos. O template só prepara o host e seus controles. Não instala
 segredos, publica containers, aplica migrations ou altera DNS automaticamente.
 
@@ -970,29 +971,50 @@ completa de custos nem substitui backup.
 
 - `preflight.mcp.py`: script somente de leitura para `run_script` do AWS MCP;
   revisa plano, identidade, quota, AMI, zonas e recursos na região de destino.
-- `parameters.example.json`: exemplo sem credenciais; copie fora do Git e
-  preencha email/AZ antes de preparar um change set.
+- `parameters.example.json`: exemplo sem credenciais. A cópia privada
+  `parameters.local.json`, ignorada pelo Git, contém o email informado para os
+  alertas. Confira AZ e demais parâmetros antes de preparar um change set;
+  não coloque senhas ou chaves nesse arquivo.
 - `check_infra.py`: testes de invariantes, sintaxe Bash e recusa de formatação
   de discos recuperados, com comandos de disco simulados.
 - `security.guard` e `check_guard.py`: controles de segurança do projeto e
   regressões negativas para SSH, portas amplas, IMDSv1, CPU ilimitada e exposição
   de dados. Não equivalem a uma certificação de conformidade.
-- `validation.Dockerfile`: ambiente isolado proposto com cfn-lint 1.57.2 e
+- `validation.Dockerfile`: ambiente isolado com cfn-lint 1.57.2 e
   cfn-guard 3.2.1; o binário Guard tem SHA-256 fixado.
+- `validate.ps1`: executa os validadores e testes em containers sem rede, com
+  filesystem somente de leitura e apenas os arquivos públicos necessários
+  montados. Não instala ferramentas, monta parâmetros privados ou chama AWS.
+
+Para reproduzir a validação no PowerShell, na raiz do repositório, com Docker
+Desktop em modo Linux:
+
+```powershell
+# O build baixa apenas os validadores e suas dependências no container.
+docker build --platform linux/amd64 -f deploy/aws/validation.Dockerfile -t echomind-infra-validation:local deploy/aws
+if ($LASTEXITCODE -ne 0) { throw 'Falha na construção dos validadores' }
+& ./deploy/aws/validate.ps1
+```
+
+Validação executada em 14/10/2026. O build do Guard usa a tag oficial `3.2.1`
+e confere o checksum publicado. O script exige a imagem local já construída;
+não baixa uma imagem substituta. Nenhuma dependência foi instalada no Python
+do projeto.
 
 | Camada | Resultado atual |
 | --- | --- |
 | Conta/preços/quota/AMI | Consultados por APIs somente de leitura; root permanece como impedimento de execução |
-| Invariantes e Bash | Dez testes passaram no container Linux existente, sem executar o bootstrap |
+| Invariantes e Bash | Dez testes passaram no container de validação, sem executar o bootstrap ou acessar discos reais |
 | API `ValidateTemplate` | Aprovou estrutura e informou `CAPABILITY_IAM`; não confere a execução do bootstrap nem toda a semântica |
-| cfn-lint | Pendente de autorização para baixar a versão fixa em container isolado |
-| cfn-guard | Pendente da mesma autorização; controles de segurança ainda não foram avaliados por essa ferramenta |
+| cfn-lint 1.57.2 | Aprovado para `us-east-1`, sem erros ou avisos |
+| cfn-guard 3.2.1 | Template aprovado; seis regressões rejeitadas: SSH, faixa ampla de portas, disco sem criptografia, CPU ilimitada, IMDSv1 e bucket público |
 | Change set/validação da conta | Não criado; exige identidade não root, parâmetros finais e revisão antes de executar |
 | EC2/SSM/backup/alertas reais | Não provisionados ou testados; dependem da execução aprovada da infraestrutura |
 
-A etapa 6 não está marcada como concluída enquanto a validação local completa
-estiver pendente. Antes da criação real: rever crédito/custos, medir o E5 no
-limite candidato, preencher o email, usar identidade não root, revisar o change
+A etapa 6 conclui a preparação e a validação local da infraestrutura. Não
+confirma o funcionamento de serviços ainda não criados. Antes da criação real:
+rever crédito/custos, medir o E5 no limite candidato, conferir os parâmetros
+privados, usar identidade não root, revisar o change
 set e aplicar `stack-policy.json`. A confirmação SNS só é enviada ao criar o
 tópico. Não foram enviados alertas ou feitas alterações na conta.
 
