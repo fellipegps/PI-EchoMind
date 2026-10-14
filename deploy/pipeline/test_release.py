@@ -181,7 +181,7 @@ class PipelineSecurityTests(unittest.TestCase):
         self.resources = self.template["Resources"]
 
     def test_trust_requires_exact_environment_subject_and_audience(self):
-        for name, environment in (("BuildRole", "aws-build"), ("DeployRole", "production")):
+        for name, environment in (("BuildRole", "aws-build"), ("DeployRole", "aws-production")):
             trust = self.resources[name]["Properties"]["AssumeRolePolicyDocument"]["Statement"][0]
             conditions = trust["Condition"]["StringEquals"]
             self.assertEqual(conditions["token.actions.githubusercontent.com:aud"], "sts.amazonaws.com")

@@ -67,7 +67,7 @@ jobs:
 
   deploy:
     needs: publish
-    environment: production
+    environment: aws-production
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:

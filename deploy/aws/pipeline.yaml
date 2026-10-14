@@ -134,8 +134,8 @@ Resources:
     Type: AWS::IAM::Role
     Metadata:
       com.aws.cloudformation.Context:
-        why: Production can invoke only the fixed release document on one node; separate from the publication role.
-        must: [Never allow AWS-RunShellScript or arbitrary targets; protect the production environment to main.]
+        why: AWS production can invoke only the fixed release document on one node; separate from the publication role.
+        must: [Never allow AWS-RunShellScript or arbitrary targets; protect the aws-production environment to main.]
     Properties:
       MaxSessionDuration: 3600
       AssumeRolePolicyDocument:
@@ -147,7 +147,7 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:production'
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:aws-production'
       Policies:
         - PolicyName: release-one-node
           PolicyDocument:

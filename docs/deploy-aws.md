@@ -1269,7 +1269,7 @@ O hostname escolhido é `echomind-api.duckdns.org`; o domínio do frontend é
 5. Empacota apenas dois arquivos Compose, `rollout.py` e um manifesto público.
    O bundle determinístico fica no S3 privado, com gravação condicional que
    impede sobrescrever o bundle de um commit. Arquivos `.env` não participam.
-6. Um segundo papel, do ambiente `production`, chama somente o documento SSM
+6. Um segundo papel, do ambiente `aws-production`, chama somente o documento SSM
    preparado e somente a EC2 indicada. Não pode usar `AWS-RunShellScript`,
    alterar IAM, provisionar instâncias ou consultar documentos de backup.
 7. O host confere checksum, tipo/tamanho/nomes dos arquivos do bundle, mounts
@@ -1313,7 +1313,7 @@ login ou embeddings E5 reais; esses ensaios permanecem na etapa 9.
 | `deploy/pipeline/smoke_release.py` | Ensaio descartável com falha real de container e dados fictícios |
 
 O papel `aws-build` publica somente nesses ECRs e em `releases/` do bucket. O
-papel `production` só envia o documento SSM à instância e consulta o resultado
+papel `aws-production` só envia o documento SSM à instância e consulta o resultado
 do comando. A consulta `GetCommandInvocation` e a autenticação ECR exigem
 `Resource: '*'`, conforme a referência de autorização AWS; as operações que
 permitem restringir recursos usam os ARNs concretos do template.
@@ -1338,7 +1338,8 @@ um release malicioso aprovado em código seguro.
 - [ ] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.
 - [ ] Configurar `API_DOMAIN=echomind-api.duckdns.org` e e-mail ACME real no `deploy.env`; CORS exato no backend.
 - [ ] Apontar DuckDNS para o Elastic IP; conferir propagação e portas 80/443. O primeiro deploy requer DNS correto para emitir TLS.
-- [ ] Criar os ambientes GitHub `aws-build` e `production`, ambos restritos exclusivamente à `main`; proteger a branch e as alterações do pipeline.
+- [x] Criar os ambientes GitHub `aws-build` e `aws-production`, ambos restritos exclusivamente à branch `main`, sem tags permitidas.
+- [ ] Proteger a branch `main` e as alterações do pipeline.
 - [ ] Verificar o `sub` OIDC real do repositório. Repositórios novos/opt-in podem incluir IDs imutáveis: informar o prefixo exato em `GitHubSubjectPrefix`, sem wildcard. Não imprimir o token.
 - [ ] Inspecionar o provedor OIDC GitHub já existente na conta. Reutilizar seu ARN; criar um apenas se não existir.
 - [ ] Criar/revisar change set de `deploy/aws/pipeline.yaml`, sem executar até conferir identidade, custos e permissões.
@@ -1370,6 +1371,14 @@ do host. As tags `BACKEND_IMAGE`/`PROXY_IMAGE` do exemplo `deploy.env` são
 substituídas pelo manifesto durante o pipeline. Valores com `CHANGE_ME` nos
 outros campos impedem a execução. Mantenha os demais valores do exemplo,
 incluindo as portas padrão e `BACKEND_ENV_FILE=/etc/echomind/backend.env`.
+
+Em 2026-10-14, os dois ambientes AWS foram criados no GitHub e as regras
+`main` foram conferidas pela interface (uma branch e zero tags permitidas).
+Foi configurada a variável de repositório `AWS_DEPLOY_ENABLED=false`.
+O ambiente `Production` já existente foi preservado; o workflow e a trust
+policy usam o nome exclusivo `aws-production` para evitar compartilhar a
+configuração usada pela integração anterior. As variáveis com outputs AWS
+continuam pendentes da criação dos recursos.
 
 O frontend continua com o fluxo Git da Vercel. Este pipeline publica o backend
 e o proxy; não muda configurações Vercel/Auth. Configure a URL pública da API
