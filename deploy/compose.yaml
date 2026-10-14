@@ -1,0 +1,48 @@
+name: echomind
+
+services:
+  backend:
+    image: ${BACKEND_IMAGE:?Defina BACKEND_IMAGE com a imagem do backend}
+    platform: linux/amd64
+    build:
+      context: ../echomind-backend
+    env_file:
+      - path: ${BACKEND_ENV_FILE:?Defina BACKEND_ENV_FILE com um arquivo fora do Git}
+        # Compose 2.30+: preserve literal dollar signs in runtime credentials.
+        format: raw
+        required: true
+    environment:
+      HF_HOME: /var/cache/echomind/models
+      RATE_LIMIT_INSTANCE_COUNT: "1"
+      UVICORN_WORKERS: "1"
+      WEB_CONCURRENCY: "1"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 310s
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: ${BACKEND_CPUS:-2.0}
+    # Leave memory for the host and HTTPS proxy on a candidate 2 GiB instance.
+    # Validate these limits with the real E5 workload before provisioning.
+    mem_limit: ${BACKEND_MEMORY_LIMIT:-1536m}
+    memswap_limit: ${BACKEND_MEMORY_LIMIT:-1536m}
+    pids_limit: 256
+    ports:
+      # Public access will be provided by the HTTPS proxy in step 5.
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - model_cache:/var/cache/echomind/models
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+volumes:
+  model_cache:
