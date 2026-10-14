@@ -29,7 +29,7 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   volume do cache de modelos, rotação de logs, limites de recursos e tempo de parada.
   O Docker precisa estar habilitado no boot. Um healthcheck isolado não reinicia
   automaticamente um processo travado.
-- [ ] **3. Persistência e segurança dos uploads durante atualizações:** definir e
+- [x] **3. Persistência e segurança dos uploads durante atualizações:** definir e
   implementar a retenção dos originais, recuperação de processamento interrompido,
   drenagem antes de trocar versões e teste de recriação do container sem perda.
   Definir backup e recuperação; volume local não substitui backup.
@@ -55,9 +55,9 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   consulta de documentos, memória/CPU/disco com embeddings reais, revisão de
   vulnerabilidades das dependências, logs e recuperação após reinício.
 
-## O que a análise encontrou
+## Diagnóstico inicial, antes das etapas de preparação
 
-| Área | Situação atual | Consequência para o deploy |
+| Área | Situação inicial | Consequência para o deploy |
 | --- | --- | --- |
 | Runtime | FastAPI/Uvicorn e Python 3.12; frontend Next.js com Node 22 | Empacotar apenas o backend para EC2; manter o frontend separado |
 | Dependências | Há versões fixas e intervalos em `requirements.txt` | Usar um lock específico de produção para evitar resolução diferente a cada build |
@@ -244,7 +244,7 @@ O nome de projeto padrão é `echomind`; mantenha esse nome ao atualizar para
 reutilizar o volume `echomind_model_cache`. A tag local serve para preparação;
 imagens publicadas receberão identificação pelo commit na etapa 8. A política de
 reinício não aplica migrations ou reindexações. Atualizações e paradas durante
-ingestões precisam da drenagem e recuperação a implementar na etapa 3.
+ingestões usam a drenagem e recuperação descritas na etapa 3.
 
 As opções `BACKEND_CPUS`, `BACKEND_MEMORY_LIMIT` e `BACKEND_PORT` ajustam CPU,
 memória e porta local. O valor de memória é um limite, não uma medição de consumo:
@@ -303,7 +303,184 @@ etapa 1 (`echomind-backend:deploy-step1`). O verificador terminou com código 0.
 Não houve leitura de segredos reais, acesso ao banco/Groq ou operação de
 infraestrutura AWS. O reboot da EC2, o modelo E5 real e o comportamento de
 uploads interrompidos permanecem para as etapas correspondentes. A próxima
-etapa é a **3: persistência dos arquivos e recuperação de uploads**.
+etapa seguinte àquela validação é a **3: persistência dos arquivos e recuperação de uploads**.
+
+## Etapa 3: originais duráveis, recuperação e manutenção
+
+O volume `echomind_documents` é montado em `/var/lib/echomind/documents`, separado
+do cache de modelos. `DOCUMENT_STORAGE_DIR` aponta para ele; o Compose fixa esse
+caminho. Em desenvolvimento, o exemplo usa `.document-data`, ignorado pelo Git.
+Os arquivos são privados, gravados com permissões restritas e organizados por
+chaves derivadas da instituição e do documento, sem usar o nome fornecido no upload
+como caminho. O volume não é publicado como conteúdo estático.
+
+### Como o upload passa a funcionar
+
+1. Autenticar e validar o upload, seu limite, metadados e duplicidade por instituição.
+2. Criar o registro dentro da transação do banco.
+3. Gravar o original e um marcador de trabalho com escrita atômica, `fsync` do
+   arquivo e, em Linux, dos diretórios envolvidos.
+4. Confirmar a transação do banco e só então responder HTTP 202.
+5. Carregar os bytes do disco ao processar o trabalho. Somente uma ingestão ocupa
+   o slot de processamento, evitando carregar vários documentos/modelos em paralelo.
+6. Remover o marcador ao concluir em `ready` ou `error`, mantendo o original até
+   a exclusão explícita do documento.
+
+O SHA-256 completo e o tamanho são conferidos antes do processamento. Falha na
+gravação do original impede a confirmação do upload. Há uma reserva mínima de
+64 MiB livres no volume para aceitar novos arquivos; capacidade e alertas de disco
+serão definidos na infraestrutura. Backups também consomem espaço e precisam de
+retenção limitada.
+
+`app/document_runtime.py` verifica os marcadores na inicialização e a cada cinco
+segundos, após concluir a rotina de aquecimento inicial dos modelos. Se essa rotina
+ultrapassar o timeout de inicialização da API, o recuperador ainda aguarda sua
+conclusão. Trabalhos `pending` são iniciados; trabalhos `processing` interrompidos
+são retomados com os originais e remoção dos vetores parciais conhecidos antes da
+substituição dos chunks. Uma trava de arquivo impede sobreposição entre o trabalho
+imediato do upload e o recuperador. Falhas transitórias que impedem executar o
+trabalho preservam seu marcador para nova tentativa. Falhas do parser/indexação
+que já são tratadas pelo fluxo existente continuam retornando estado `error`;
+não são repetidas indefinidamente.
+
+Originais ausentes ou corrompidos deixam o documento em `error`, com orientação
+para reenvio. O modo de recuperação pode ser desativado somente para testes com
+`DOCUMENT_RECOVERY_ENABLED=false`; em produção, mantenha o valor padrão `true`.
+A implementação usa os estados e tabelas já existentes, sem uma migration nova.
+
+Se um commit do banco tiver resultado incerto, o original e o marcador são
+preservados. Um trabalho sem registro correspondente não é removido
+automaticamente: primeiro é preciso confirmar o estado do banco e comparar o
+backup. Essa escolha pode deixar arquivos órfãos após falhas, mas evita descartar
+um original cujo commit pode ter sido confirmado. Marcadores malformados exigem
+triagem administrativa; os logs não incluem conteúdo dos documentos ou exceções
+com caminhos privados.
+
+### Exclusão e retenção
+
+Os originais permanecem até o administrador excluir o documento. A exclusão é
+serializada com a ingestão e pode pedir nova tentativa se outro documento estiver
+ocupando o processamento. Um marcador de exclusão é persistido antes de remover
+o registro. O original só é apagado depois da confirmação do banco. Se o processo
+for interrompido nessa janela, o recuperador conclui a remoção ao constatar que o
+registro foi excluído. Uma falha no banco preserva o original para repetir a operação.
+
+Documentos enviados antes desta mudança não têm original recuperável a partir
+dos chunks. Seu conteúdo já processado permanece no banco; reenvie os originais
+que precisarem desta garantia. Pendências antigas sem marcador e sem original
+precisam de triagem/reenvio. Um snapshot do volume também não substitui o backup
+do PostgreSQL/Supabase, que contém metadados, chunks e vetores.
+
+### Atualizar com drenagem
+
+Os comandos administrativos são acessíveis via execução no container; não foi
+criada uma rota pública para controle de manutenção. Com o Compose configurado,
+use no shell Linux da EC2:
+
+```sh
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime drain --timeout 300
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime status
+```
+
+`drain` persiste o modo de manutenção, bloqueia novos uploads e exclusões com HTTP
+503 e aguarda o trabalho ativo. Pendências ainda não iniciadas ficam duráveis para
+depois da atualização. Se o timeout vencer, o comando falha e a manutenção fica
+ativada; aguarde e repita a drenagem, aumente o timeout ou cancele usando `resume`.
+Não prossiga para trocar a versão depois de uma drenagem que falhou.
+
+Após uma drenagem bem-sucedida, publique a imagem previamente construída:
+
+```sh
+docker compose --file deploy/compose.yaml up --detach --no-build --pull never --wait --wait-timeout 120
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime resume
+```
+
+Defina `BACKEND_IMAGE` com a nova versão antes de executar `up`. O modo de
+manutenção sobrevive à recriação; `resume` libera os uploads e a retomada das
+pendências depois das verificações da nova versão. Na etapa 8, esse procedimento
+será integrado ao GitHub Actions. Um encerramento abrupto também mantém os
+originais e marcadores, permitindo recuperação no mesmo volume, desde que o
+armazenamento não tenha sido perdido.
+
+### Backup e restauração
+
+Política inicial para a publicação: backup diário e antes de cada atualização,
+retenção de sete cópias diárias e da última cópia anterior ao deploy, guardadas
+criptografadas fora da EC2. Testar a restauração regularmente. O agendamento,
+destino AWS, criptografia e alertas serão configurados na etapa 6; não há backup
+automático em nuvem ativado nesta etapa.
+
+Para uma cópia consistente, drene primeiro e pause também ferramentas manuais de
+reindexação. Exporte o PostgreSQL/Supabase na mesma janela de manutenção e produza
+o arquivo dos originais e marcadores. A disponibilidade dos backups do próprio
+Supabase depende do plano; confira isso antes da publicação.
+
+No shell Linux, com diretório de backup privado fora do Git:
+
+```sh
+umask 077
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime backup > /CAMINHO_PRIVADO/echomind.documents.tar
+```
+
+O comando exige manutenção ativa e bloqueia alterações nos documentos durante
+a cópia. O arquivo contém originais e identificadores de instituições, portanto
+precisa das mesmas restrições de acesso dos dados de produção. Copie-o para o
+destino criptografado fora da máquina e retome a aplicação com `resume`. A cópia
+local sozinha não protege contra perda da EC2 ou do EBS.
+
+Para recuperar: restaure o banco correspondente, prepare um volume de documentos
+vazio e mantenha a API em manutenção. Então, no shell Linux:
+
+```sh
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime drain --timeout 300
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime restore < /CAMINHO_PRIVADO/echomind.documents.tar
+docker compose --file deploy/compose.yaml exec -T backend python -m app.document_runtime status
+```
+
+O restore exige volume vazio e rejeita links, caminhos arbitrários, membros
+duplicados e arquivos maiores que 100 MiB. O limite padrão dos uploads permanece
+10 MiB. Uma restauração interrompida pode deixar um volume parcialmente preenchido;
+repita em outro volume vazio, preservando o backup original. Confira o banco e a
+integridade dos documentos antes de liberar com `resume`.
+
+Preserve os volumes ao atualizar. `docker compose down --volumes` apaga também
+os originais; essa opção fica restrita aos projetos descartáveis de teste.
+O volume de produção deve usar EBS criptografado e política explícita de retenção
+na etapa 6. [Snapshots EBS](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html)
+e a capacidade provisionada têm custos próprios, sujeitos aos créditos e
+[preços vigentes](https://aws.amazon.com/ebs/pricing/).
+
+## Evidência de validação da etapa 3
+
+Etapa 3 concluída em 2026-10-14 usando a imagem Linux
+`echomind-backend:deploy-step3`, Python 3.12.15 e Docker Compose 5.1.4.
+
+| Verificação | Resultado |
+| --- | --- |
+| Suíte rápida na imagem de produção | 538 testes passaram; dez avisos das transações SQLite usadas nas fixtures |
+| Cobertura global | 90,28%, acima do gate de 72% |
+| Gates documentais | Ingestão 92,53%; processamento 92,06%; repositório 97,35%; upload 100% |
+| Original antes de confirmar o upload | Testado; falha de armazenamento retorna 503 sem agendar processamento |
+| Falha de commit do banco | Original e marcador preservados para reconciliação |
+| Retomada | Estados `pending` e `processing` concluem em `ready`, sem reindexação duplicada após conclusão |
+| Vetores parciais | Remoção dos IDs conhecidos validada antes da substituição dos chunks |
+| Integridade e isolamento | SHA-256/tamanho, escopo da instituição e caminhos derivados validados |
+| Exclusão | Original removido após confirmação; falhas preservam os bytes e permitem nova tentativa |
+| Backup e restore | Original e trabalho pendente restaurados; links/caminhos inválidos e sobrescrita rejeitados |
+| Inicialização | Recuperação aguarda o aquecimento; encerramento durante aquecimento impede iniciar um recuperador tardio |
+| Compose real | Recriação preservou original/cache e permitiu concluir um documento sintético interrompido |
+| Falha do processo | Reinício automático saudável com original preservado |
+| Manutenção | Comandos privados de drenagem/status/retomada e encerramento controlado validados |
+| Limpeza | Containers, redes e volumes dos projetos descartáveis removidos; imagem local preservada |
+
+Os testes usam SQLite e indexadores sintéticos; o teste Compose mantém o banco
+fictício no volume descartável somente para simular recuperação. Em produção,
+o banco continua no Supabase. Não houve leitura de segredos reais, alteração no
+banco remoto ou criação de recursos AWS. E5 real, backup externo automatizado,
+criptografia/retenção do EBS e recuperação de uma EC2 perdida continuam nas
+etapas de infraestrutura e validação em produção.
+
+A próxima etapa é a **4: configuração de produção e segredos**.
 
 ## Referências
 

@@ -13,6 +13,7 @@ services:
         required: true
     environment:
       HF_HOME: /var/cache/echomind/models
+      DOCUMENT_STORAGE_DIR: /var/lib/echomind/documents
       RATE_LIMIT_INSTANCE_COUNT: "1"
       UVICORN_WORKERS: "1"
       WEB_CONCURRENCY: "1"
@@ -35,6 +36,7 @@ services:
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     volumes:
       - model_cache:/var/cache/echomind/models
+      - documents:/var/lib/echomind/documents
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m,mode=1777
     logging:
@@ -46,3 +48,4 @@ services:
 
 volumes:
   model_cache:
+  documents:

@@ -57,6 +57,58 @@ assert len(targets) == 1, targets
 os.kill(targets[0], signal.SIGKILL)
 """
 
+# A file-backed, synthetic SQLite database allows this test to simulate an
+# interrupted ingest without contacting Supabase or loading the real E5 model.
+DOCUMENT_SETUP = """
+import os
+os.environ['DATABASE_URL'] = 'sqlite:////var/lib/echomind/documents/runtime-smoke.db'
+import pgvector.sqlalchemy
+from sqlalchemy import Text
+pgvector.sqlalchemy.Vector = lambda dimension: Text()
+from app.database import Base, engine, SessionLocal
+from app.document_storage import DocumentStorage
+from app import document_repository as repository
+from hashlib import sha256
+content = b'Original sintetico persistido antes de uma interrupcao.'
+tenant_id = 'runtime-smoke-tenant'
+document_id = 'runtime-smoke-document'
+storage = DocumentStorage()
+"""
+DOCUMENT_SEED = DOCUMENT_SETUP + """
+for table in Base.metadata.tables.values():
+    for index in tuple(table.indexes):
+        if 'hnsw' in index.name.lower():
+            table.indexes.discard(index)
+Base.metadata.create_all(engine)
+with SessionLocal() as db:
+    document = repository.create_document(db, tenant_id=tenant_id, data=repository.DocumentCreateData(
+        filename='synthetic.txt', mime_type='text/plain', size_bytes=len(content), sha256=sha256(content).hexdigest(),
+    ))
+    document.id = document_id
+    db.flush()
+    repository.transition_document_status(db, tenant_id=tenant_id, document_id=document_id, target_status='processing')
+    repository.replace_document_chunks(db, tenant_id=tenant_id, document_id=document_id, chunks=[repository.DocumentChunkData(content='partial chunk')])
+    storage.save(tenant_id=tenant_id, document_id=document_id, content=content, digest=sha256(content).hexdigest())
+    db.commit()
+"""
+DOCUMENT_CHECK = DOCUMENT_SETUP + """
+with SessionLocal() as db:
+    document = repository.get_document(db, tenant_id=tenant_id, document_id=document_id)
+    assert document.status == 'ready', document.status
+assert storage.read_original(tenant_id=tenant_id, document_id=document_id, digest=sha256(content).hexdigest(), size=len(content)) == content
+assert not list(storage.jobs())
+"""
+DOCUMENT_RECOVER = DOCUMENT_SETUP + """
+from app import document_processing
+from app.document_runtime import DocumentRuntime
+from unittest.mock import MagicMock
+indexer = MagicMock()
+document_processing.get_rag_indexer = lambda db, tenant: indexer
+DocumentRuntime(storage).recover_once()
+assert indexer.delete_document_chunks.call_count == 1
+assert indexer.reindex_document_chunks.call_count == 1
+""" + DOCUMENT_CHECK
+
 
 def run(
     arguments: list[str],
@@ -121,6 +173,7 @@ def main() -> None:
             "SUPABASE_SECRET_KEY=smoke-placeholder\n"
             "GROQ_API_KEY=smoke-placeholder\n"
             "RAG_WARMUP_ENABLED=false\n"
+            "DOCUMENT_RECOVERY_ENABLED=false\n"
             "DEPLOY_SMOKE_LITERAL=literal-${DO_NOT_EXPAND}-$-#\n"
             # Verify Compose protects the single-process contract even if mis-set here.
             "UVICORN_WORKERS=4\n"
@@ -174,6 +227,7 @@ def main() -> None:
             ) as response:
                 assert json.load(response) == {"status": "ok", "service": "EchoMind API"}
             exec_python(CACHE_CHECK)
+            exec_python(DOCUMENT_SEED)
             print("PASS: healthy startup, runtime limits, logging, isolation and cache permissions", flush=True)
 
             compose_run(
@@ -184,7 +238,8 @@ def main() -> None:
             assert recreated_id != container_id
             details = wait_healthy(recreated_id, environment)
             exec_python(CACHE_PERSISTED)
-            print("PASS: model cache preserved when the container is recreated", flush=True)
+            exec_python(DOCUMENT_RECOVER)
+            print("PASS: cache and originals preserved; interrupted document recovered after recreation", flush=True)
 
             # Docker documents a >=10-second successful start before restart monitoring.
             time.sleep(11)
@@ -196,7 +251,14 @@ def main() -> None:
             )
             details = wait_healthy(recreated_id, environment, restart_after=before_restart)
             exec_python(CACHE_PERSISTED)
+            exec_python(DOCUMENT_CHECK)
             print("PASS: automatic restart after process failure, preserving cache", flush=True)
+
+            compose_run("exec", "--no-TTY", "backend", "python", "-m", "app.document_runtime", "drain", "--timeout", "5")
+            maintenance = json.loads(compose_run("exec", "--no-TTY", "backend", "python", "-m", "app.document_runtime", "status"))
+            assert maintenance["draining"] is True and maintenance["active"] is False
+            compose_run("exec", "--no-TTY", "backend", "python", "-m", "app.document_runtime", "resume")
+            print("PASS: private maintenance commands drain and resume document writes", flush=True)
 
             compose_run("stop")
             stopped = inspect(recreated_id, environment)

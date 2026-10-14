@@ -2,6 +2,8 @@
 .env
 .env.*
 *.env
+.document-data/
+*.documents.tar
 !.env.example
 !**/.env.example
 

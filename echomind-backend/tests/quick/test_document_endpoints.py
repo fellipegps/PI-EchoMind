@@ -407,3 +407,32 @@ def test_delete_compensation_and_retry(
     with Session(engine) as session:
         assert get_document(session, tenant_id="test-admin", document_id=identifier) is None
         assert list_document_chunks(session, tenant_id="test-admin", document_id=identifier) == []
+
+
+def test_deletion_failure_preserves_original_and_retry_removes_it(durable_delete_api, monkeypatch):
+    from sqlalchemy.orm import Session
+    from app import main
+    from app.document_storage import DocumentStorage
+
+    client, engine = durable_delete_api
+    content = b"original preservado em falha de exclusao"
+    with Session(engine) as db:
+        document = _create_document(db)
+        identifier = document.id
+        document.sha256 = sha256(content).hexdigest()
+        document.size_bytes = len(content)
+        db.commit()
+    storage = DocumentStorage()
+    path = storage.save(tenant_id="test-admin", document_id=identifier, content=content, digest=sha256(content).hexdigest())
+    original_delete = main.delete_document_record
+
+    def fail_delete(*args, **kwargs):
+        raise RuntimeError("database unavailable")
+
+    monkeypatch.setattr(main, "delete_document_record", fail_delete)
+    assert client.delete(f"/documents/{identifier}").status_code == 500
+    assert path.with_name("original.bin").read_bytes() == content
+    assert storage.read_job(path)["action"] == "delete"
+    monkeypatch.setattr(main, "delete_document_record", original_delete)
+    assert client.delete(f"/documents/{identifier}").status_code == 204
+    assert not path.with_name("original.bin").exists()

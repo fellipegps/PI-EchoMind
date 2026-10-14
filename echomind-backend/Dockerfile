@@ -6,6 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/var/cache/echomind/models \
+    DOCUMENT_STORAGE_DIR=/var/lib/echomind/documents \
     RATE_LIMIT_INSTANCE_COUNT=1 \
     UVICORN_WORKERS=1 \
     WEB_CONCURRENCY=1
@@ -17,8 +18,8 @@ RUN python -m pip install --no-cache-dir --only-binary=:all: --require-hashes -r
     && python -m pip check \
     && groupadd --gid 10001 echomind \
     && useradd --uid 10001 --gid 10001 --create-home echomind \
-    && mkdir -p /var/cache/echomind/models \
-    && chown -R echomind:echomind /var/cache/echomind
+    && mkdir -p /var/cache/echomind/models /var/lib/echomind/documents \
+    && chown -R echomind:echomind /var/cache/echomind /var/lib/echomind
 
 # Explicit copies keep local configuration and uploaded data out of the image.
 COPY app ./app
