@@ -941,8 +941,16 @@ senha no próximo login. Essa opção acrescentaria automaticamente a política
 `IAMUserChangePassword`, que não faz parte do plano inicial aprovado. Depois,
 usar **Atribuir dispositivo com MFA** nessa mesma aba para cadastrar seu
 autenticador ou chave de segurança. Não compartilhar senha, QR code, semente ou
-códigos MFA na conversa. Senha, MFA, autenticação com o novo usuário e permissões
-de provisionamento continuam pendentes de conclusão/verificação.
+códigos MFA na conversa.
+
+Ainda em 2026-10-19, após o proprietário concluir a configuração, as APIs IAM
+confirmaram perfil de login ativo, `PasswordResetRequired=false`, um dispositivo
+MFA cadastrado e nenhuma access key. A única política anexada continuou sendo
+`SignInLocalDevelopmentAccess`, sem políticas inline ou grupos adicionais.
+O perfil local `default` ainda estava com a sessão anterior expirada; a
+autenticação temporária com o novo usuário e as permissões de provisionamento
+continuam pendentes. Ter senha e MFA configurados não concede autorização para
+criar os recursos do stack principal.
 
 `stack-policy.json` bloqueia substituição/exclusão por updates de Node, disco,
 Elastic IP, chave KMS e bucket de auditoria. Essa política precisa acompanhar
@@ -1408,7 +1416,8 @@ um release malicioso aprovado em código seguro.
 - [x] Medir E5 real no Linux com limite de 1536 MiB, dois CPUs e sem swap; manter t3.small/2 GiB para MVP de baixo tráfego, com validação final em produção.
 - [x] Preparar e validar o template do primeiro operador, sem credenciais embutidas ou privilégios administrativos.
 - [x] Criar e conferir o usuário dedicado por CloudFormation, após aprovação explícita, com somente a política de autenticação temporária.
-- [ ] Proprietário configura senha e MFA no console; conferir a autenticação do novo usuário e revisar separadamente o acesso para provisionamento.
+- [x] Proprietário configura senha e MFA; conferir pelas APIs que o perfil está ativo, possui MFA e não tem access keys ou políticas adicionais.
+- [ ] Autenticar as ferramentas com o novo usuário e revisar separadamente o acesso para provisionamento.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
