@@ -928,6 +928,34 @@ boot; registre as versões efetivamente instaladas e teste upgrades, enquanto
 as imagens da aplicação continuam fixadas por digest/commit. O script não
 deve ser executado manualmente em um host existente sem reconciliação.
 
+O bootstrap também instala o AWS CLI **2.38.0 amd64**, com versão fixa. O ZIP e
+a assinatura são baixados exclusivamente de `awscli.amazonaws.com`. A chave
+pública do guia oficial está no template; o fingerprint
+`FB5DB77FD5C118B80511ADA8A6310ACC4672475C` é conferido antes da importação e o
+status `VALIDSIG` é obrigatório antes de extrair ou executar o instalador.
+A chave publicada expira em **2027-07-01**: uma atualização exige conferir a
+documentação oficial e repetir a validação, sem ignorar assinatura ou validade.
+
+O SSM Agent precisa ser **3.3.2746.0 ou superior** para a interpolação `ENV_VAR`
+usada pelo pipeline. O bootstrap confere o agente Snap já fornecido pela AMI e,
+se necessário, solicita atualização pelo canal `stable`. Se a versão continuar
+insuficiente ou o serviço não iniciar, a preparação falha e bloqueia o Docker;
+o script não instala um segundo agente nem troca automaticamente para `candidate`.
+
+Em 2026-10-19, a assinatura do instalador oficial fixado foi validada localmente
+com a chave incorporada e uma cópia com um byte alterado foi rejeitada. Nenhum
+instalador foi executado nessa verificação. Para repetir com GnuPG já instalado:
+
+```sh
+python deploy/aws/verify_cli_download.py
+```
+
+O verificador baixa somente arquivos públicos em diretório temporário isolado.
+No Windows com o GnuPG do Git, informe `--gpg` com o caminho do executável e
+`--msys-paths`. Os testes offline também exercitam assinatura inválida, assinante
+incorreto e atualização insuficiente do SSM. Isso não substitui conferir a
+instalação e a conectividade na EC2 real.
+
 CloudFormation `CREATE_COMPLETE` não confirma o fim desse processo: a anexação
 EBS ocorre após a criação da EC2, e o bootstrap aguarda o disco e o Elastic IP.
 Antes de configurar a aplicação, confirme por SSM:
@@ -1333,8 +1361,8 @@ um release malicioso aprovado em código seguro.
 
 - [x] Medir E5 real no Linux com limite de 1536 MiB, dois CPUs e sem swap; manter t3.small/2 GiB para MVP de baixo tráfego, com validação final em produção.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
-- [ ] Instalar/verificar AWS CLI **v2** no host pelo instalador oficial com assinatura verificada. O bootstrap atual não a instala.
-- [ ] Verificar SSM Agent **3.3.2746.0 ou superior**. Sem `ENV_VAR`, o documento falha fechado.
+- [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
+- [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
 - [x] Criar backup consistente do schema público real, restaurá-lo localmente e aplicar a revisão 0023; preflight real de schema/RLS/vetores aprovado via TLS.
 - [ ] Conferir a conexão PostgreSQL de produção pela EC2/IPv4.
 - [ ] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.

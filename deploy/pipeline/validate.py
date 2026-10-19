@@ -21,7 +21,9 @@ container.append("echomind-infra-validation:local")
 for check in (
     ["actionlint", "-shellcheck=", "-pyflakes=", ".github/workflows/ci.yml", ".github/workflows/deploy-aws.yml"],
     ["cfn-lint", "-t", "deploy/aws/stack.yaml", "deploy/aws/pipeline.yaml", "-r", "us-east-1", "--format", "json"],
+    ["cfn-guard", "validate", "--data", "deploy/aws/stack.yaml", "--rules", "deploy/aws/security.guard", "--show-summary", "fail"],
     ["cfn-guard", "validate", "--data", "deploy/aws/pipeline.yaml", "--rules", "deploy/aws/security.guard", "--show-summary", "fail"],
+    ["python", "deploy/aws/check_infra.py"],
     ["python", "-m", "unittest", "discover", "-s", "deploy/pipeline", "-p", "test_release.py", "-v"],
 ):
     subprocess.run([*container, *check], check=True)

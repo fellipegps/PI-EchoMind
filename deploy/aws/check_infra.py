@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 
 import yaml
@@ -107,7 +108,50 @@ DEVICE=/dev/synthetic-test-only
 
     def test_shell_syntax_without_executing_bootstrap(self):
         script = self.resources["Node"]["Properties"]["UserData"]["Fn::Base64"]["Fn::Sub"][0]
+        # EC2 limits decoded user data to 16 KiB, independently of template size.
+        self.assertLess(len(script.encode("utf-8")), 16384)
         subprocess.run(["bash", "-n"], input=script, text=True, check=True, timeout=5)
+
+    def test_unverified_cli_is_never_extracted(self):
+        script = self.resources["Node"]["Properties"]["UserData"]["Fn::Base64"]["Fn::Sub"][0]
+        fragment = script[script.index("CLI_FINGERPRINT="):script.index('"$CLI_WORK/aws/install"')]
+        fingerprint = "FB5DB77FD5C118B80511ADA8A6310ACC4672475C"
+        for valid, signer, extracted in ((True, fingerprint, True), (False, fingerprint, False),
+                                         (True, "0" * 40, False)):
+            with self.subTest(valid=valid, signer=signer), tempfile.TemporaryDirectory() as work:
+                mocks = f'''set -euo pipefail
+CLI_WORK={work!r}
+gpg() {{
+  if test "$2" = --show-keys; then printf 'fpr:::::::::{fingerprint}:\\n';
+  elif test "$2" = --status-fd; then
+    printf '[GNUPG:] VALIDSIG {signer} other-public-fields\\n'
+    return {0 if valid else 1}
+  fi
+}}
+curl() {{ :; }}
+unzip() {{ printf 'EXTRACTED'; }}
+'''
+                result = subprocess.run(["bash", "-c", mocks + fragment], capture_output=True,
+                                        text=True, timeout=5)
+                self.assertEqual("EXTRACTED" in result.stdout, extracted)
+
+    def test_old_ssm_blocks_readiness_if_stable_refresh_is_insufficient(self):
+        script = self.resources["Node"]["Properties"]["UserData"]["Fn::Base64"]["Fn::Sub"][0]
+        fragment = script[script.index('SSM_VERSION=$("$SSM_AGENT"'):script.index("printf '%s\\n' 'Host ready")]
+        for initial, refreshed, expected in (("3.3.1000.0", "3.3.1000.0", False),
+                                            ("3.3.1000.0", "3.3.2746.0", True),
+                                            ("3.3.2746.0", "3.3.2746.0", True)):
+            with self.subTest(initial=initial, refreshed=refreshed):
+                mocks = f'''set -euo pipefail
+VERSION={initial}
+SSM_AGENT=mock_agent
+mock_agent() {{ printf 'SSM Agent version: %s\\n' "$VERSION"; }}
+snap() {{ VERSION={refreshed}; }}
+systemctl() {{ :; }}
+'''
+                result = subprocess.run(["bash", "-c", mocks + fragment + "printf READY"],
+                                        capture_output=True, text=True, timeout=5)
+                self.assertEqual("READY" in result.stdout, expected)
 
     def test_cost_calculator(self):
         result = estimate()

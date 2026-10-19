@@ -139,6 +139,7 @@ Resources:
         must:
           - IMDSv2 required; hop limit one deliberately keeps host credentials away from bridge containers.
           - CloudFormation completion is not bootstrap readiness; confirm SSM and the bootstrap marker.
+          - Install only signature-verified AWS CLI v2; SSM Agent must support ENV_VAR interpolation.
           - Termination protection and the attached retained disk prevent unattended node replacement.
     Properties:
       ImageId: !Ref ImageId
@@ -201,7 +202,57 @@ Resources:
               test -s /tmp/docker.asc
               export DEBIAN_FRONTEND=noninteractive
               apt-get -o Acquire::Retries=3 update
-              apt-get -o Acquire::Retries=3 install -y ca-certificates curl git
+              apt-get -o Acquire::Retries=3 install -y ca-certificates curl git gnupg unzip
+              # AWS CLI signing key from the official installation guide; fingerprint pinned below.
+              CLI_WORK=$(mktemp -d /tmp/echomind-awscli.XXXXXXXX)
+              export GNUPGHOME="$CLI_WORK/gnupg"
+              install -d -m 700 "$GNUPGHOME"
+              cat > "$CLI_WORK/awscli.asc" <<'AWS_CLI_KEY'
+              -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+              mQINBF2Cr7UBEADJZHcgusOJl7ENSyumXh85z0TRV0xJorM2B/JL0kHOyigQluUG
+              ZMLhENaG0bYatdrKP+3H91lvK050pXwnO/R7fB/FSTouki4ciIx5OuLlnJZIxSzx
+              PqGl0mkxImLNbGWoi6Lto0LYxqHN2iQtzlwTVmq9733zd3XfcXrZ3+LblHAgEt5G
+              TfNxEKJ8soPLyWmwDH6HWCnjZ/aIQRBTIQ05uVeEoYxSh6wOai7ss/KveoSNBbYz
+              gbdzoqI2Y8cgH2nbfgp3DSasaLZEdCSsIsK1u05CinE7k2qZ7KgKAUIcT/cR/grk
+              C6VwsnDU0OUCideXcQ8WeHutqvgZH1JgKDbznoIzeQHJD238GEu+eKhRHcz8/jeG
+              94zkcgJOz3KbZGYMiTh277Fvj9zzvZsbMBCedV1BTg3TqgvdX4bdkhf5cH+7NtWO
+              lrFj6UwAsGukBTAOxC0l/dnSmZhJ7Z1KmEWilro/gOrjtOxqRQutlIqG22TaqoPG
+              fYVN+en3Zwbt97kcgZDwqbuykNt64oZWc4XKCa3mprEGC3IbJTBFqglXmZ7l9ywG
+              EEUJYOlb2XrSuPWml39beWdKM8kzr1OjnlOm6+lpTRCBfo0wa9F8YZRhHPAkwKkX
+              XDeOGpWRj4ohOx0d2GWkyV5xyN14p2tQOCdOODmz80yUTgRpPVQUtOEhXQARAQAB
+              tCFBV1MgQ0xJIFRlYW0gPGF3cy1jbGlAYW1hem9uLmNvbT6JAlQEEwEIAD4CGwMF
+              CwkIBwIGFQoJCAsCBBYCAwECHgECF4AWIQT7Xbd/1cEYuAURraimMQrMRnJHXAUC
+              akV0ygUJDqP4lQAKCRCmMQrMRnJHXFHjD/9eyZLYcKuQOlLvtqSDtUBiEZf6ZZjM
+              i3ygYH8rJNtuToUH+HvSpe819urJCquXhDrlK6N+aqW0hCLtNABJG/vsafIgvIYJ
+              hSGgpgtNnQyMV1jViRWqPjbouw8OkYKBThUfT1i2Y+wn58ifs6ODBCmTexWtXspA
+              Si+Gt49xDOW0APmbOPnI+a4HJW6tVEo6MWS0WjzpiBayR3d1A4pt4YrPfSdDgpLo
+              h2SLQqlRqvvVZJaWBjhkErNFpfsBA06sDcPEOb0G8LBUbR4WOcdvhe5LubJbZuxC
+              AG9kNPCVeQP1ixwjgjXKysaxeQ6rv0VzIQgRp6tLVLWhy6AKDNvLjFSsmXZ1Wl08
+              Y/RlOHXlzLuQMRE6sR1wOdRxc9TsrNWTGiBK65cvSWOy03JeBkQQ8pesqltiyxI9
+              U21kkgiXtTSKNGfKK8pO27D81YANhRqPK7iTp6kuFiY2WtOg90KTMNlIT+Ff85Y2
+              b1rHj6Z0SrCkJujhWk3IBPic/wJgz01LEc/OAdUPlby90RJZcIBhSlWhT7mXnXIO
+              c0HWlNQrns2s3CTyYwZSiSlYe9ApeLwhjDo8NhbFuCAy61l6O5UsR4AfZxx/rGKv
+              2wFb1/RN/P4gNe6vmxZAPjR0AQcwD3tc2McimOLr/22kmPz8IH3I0X7WoSFr0Biz
+              E91G7bb0hOb/cA==
+              =knv7
+              -----END PGP PUBLIC KEY BLOCK-----
+              AWS_CLI_KEY
+              CLI_FINGERPRINT=FB5DB77FD5C118B80511ADA8A6310ACC4672475C
+              test "$(gpg --batch --show-keys --with-colons "$CLI_WORK/awscli.asc" | awk -F: '$1 == "fpr" {print $10; exit}')" = "$CLI_FINGERPRINT"
+              gpg --batch --import "$CLI_WORK/awscli.asc"
+              CLI_VERSION=2.38.0
+              CLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$CLI_VERSION.zip"
+              curl --proto '=https' -fsS --retry 3 --connect-timeout 10 --max-time 300 "$CLI_URL" -o "$CLI_WORK/awscliv2.zip"
+              curl --proto '=https' -fsS --retry 3 --connect-timeout 10 --max-time 120 "$CLI_URL.sig" -o "$CLI_WORK/awscliv2.zip.sig"
+              gpg --batch --status-fd 1 --verify "$CLI_WORK/awscliv2.zip.sig" "$CLI_WORK/awscliv2.zip" > "$CLI_WORK/verified.status"
+              grep -q "^\[GNUPG:\] VALIDSIG $CLI_FINGERPRINT " "$CLI_WORK/verified.status"
+              unzip -q "$CLI_WORK/awscliv2.zip" -d "$CLI_WORK"
+              "$CLI_WORK/aws/install" --install-dir /usr/local/aws-cli --bin-dir /usr/local/bin
+              /usr/local/bin/aws --version 2>&1 | grep -q "^aws-cli/$CLI_VERSION "
+              gpgconf --kill all
+              unset GNUPGHOME
+              rm -rf -- "$CLI_WORK"
               install -d -m 755 /etc/apt/keyrings
               install -m 644 /tmp/docker.asc /etc/apt/keyrings/docker.asc
               printf '%s\n' 'Types: deb' 'URIs: https://download.docker.com/linux/ubuntu' 'Suites: noble' 'Components: stable' 'Architectures: amd64' 'Signed-By: /etc/apt/keyrings/docker.asc' > /etc/apt/sources.list.d/docker.sources
@@ -222,7 +273,16 @@ Resources:
               systemctl enable --now containerd docker
               COMPOSE_VERSION=$(docker compose version --short | sed 's/^v//')
               dpkg --compare-versions "$COMPOSE_VERSION" ge 2.30.0
-              # Canonical's EC2 image ships SSM Agent; fail readiness if it is unavailable.
+              # Use the signed Snap stable channel; never run two agent installations.
+              SSM_AGENT=/snap/amazon-ssm-agent/current/amazon-ssm-agent
+              test -x "$SSM_AGENT"
+              SSM_VERSION=$("$SSM_AGENT" -version | awk '{print $NF}')
+              if ! dpkg --compare-versions "$SSM_VERSION" ge 3.3.2746.0; then
+                snap refresh amazon-ssm-agent --channel=stable
+                SSM_VERSION=$("$SSM_AGENT" -version | awk '{print $NF}')
+              fi
+              dpkg --compare-versions "$SSM_VERSION" ge 3.3.2746.0
+              snap start --enable amazon-ssm-agent
               systemctl is-active --quiet snap.amazon-ssm-agent.amazon-ssm-agent.service
               printf '%s\n' 'Host ready; application images, runtime secrets and database migrations are separate steps.' > /srv/echomind/bootstrap-ready
             - DiskId: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
