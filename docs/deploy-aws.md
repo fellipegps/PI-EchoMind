@@ -44,12 +44,12 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
 - [x] **6. Preparação da infraestrutura AWS:** revisar créditos e custos, definir identidade dedicada,
   EC2 por infraestrutura como código, acesso administrativo via Systems Manager,
   EBS criptografado e persistente, regras de rede, backup e orçamento/alertas.
-  Template validado; a identidade dedicada e os recursos ainda precisam ser criados.
+  Template validado; identidade dedicada e infraestrutura base criadas e conferidas.
 - [ ] **7. Banco e frontend:** conferir migrations com backup e acesso PostgreSQL,
   aplicar migrations como operação explícita, ajustar URL HTTPS da API na Vercel e
   URLs de autenticação no Supabase. Reindexação de embeddings continua manual.
-  Preparação local validada; aplicação no banco real e configuração dos serviços
-  continuam pendentes, conforme o registro da etapa 7 abaixo.
+  Banco real atualizado, serviços configurados e frontend publicado. Login,
+  chat e documentos aprovados; cadastro e recuperação por e-mail ainda pendentes.
 - [x] **8. Preparação da publicação por GitHub Actions:** testes antes de publicar, autenticação
   temporária OIDC, imagem identificada pelo commit, atualizações serializadas,
   drenagem de tarefas, verificação após deploy e recuperação da versão anterior.
@@ -1572,7 +1572,8 @@ da aplicação não foram desabilitadas para publicar.
 - [x] Conferir conexão privada IPv4/session pooler a partir da EC2.
 - [x] Conferir projeto e deployment Vercel via integração reconectada, usando o ID e o contexto padrão.
 - [x] Configurar valores reais de Vercel/CORS/Auth para produção, preservando retornos locais explícitos.
-- [ ] Refazer o build de produção da Vercel e testar login/cadastro/reset.
+- [x] Refazer o build de produção da Vercel e testar login, chat e documentos.
+- [ ] Testar cadastro real e o ciclo de recuperação de senha por e-mail.
 
 ## Etapa 8: publicação por GitHub Actions
 
@@ -1817,7 +1818,7 @@ cfn-guard 3.2.1 e actionlint 1.7.12; binários baixados com SHA-256 fixado.
 | Validador da imagem de produção usado no CI | Inicialização, limites, reinício, cache, recuperação de documento e manutenção aprovados |
 | Limpeza do ensaio | Apenas projeto descartável removido; volumes reais não utilizados |
 | OIDC, ECR, S3 de releases e documento SSM do pipeline | Ainda não criados/ativados/executados; a infraestrutura base e o agente SSM da EC2 já foram verificados |
-| HTTPS/banco real, chat, E5 e medição de recursos | HTTPS/banco e aquecimento E5 aprovados na EC2; chat/carga completa pendentes da etapa 9 |
+| HTTPS/banco real, chat, E5 e medição de recursos | HTTPS/banco, chat, E5 e documentos aprovados na EC2; capacidade sob carga ainda pendente |
 
 ## Medição prévia da capacidade - 2026-10-14
 
@@ -1953,8 +1954,80 @@ Relatório público: `docs/first-publication-verification.json`. O host guarda
 `/srv/echomind/manual-current.json` com revisão e IDs reais das imagens, sem
 credenciais. As configurações locais, envelopes e provas de tela ficam em
 `.publication/`, ignorada pelo Git. A automação `AWS_DEPLOY_ENABLED` continua
-desativada. Próximos passos: novo build Vercel, validação ponta a ponta da etapa
-9, ensaio de snapshot/restauração e conclusão do bootstrap/rollback da pipeline.
+desativada. O build Vercel e a validação funcional foram concluídos na seção
+seguinte. O relatório acima preserva o estado histórico da primeira publicação.
+
+## Publicação do frontend e validação funcional - 2026-10-19
+
+O frontend está publicado em **https://echomind-front.vercel.app** e integrado à
+API HTTPS da EC2. O domínio retornava `404 NOT_FOUND`; o projeto existente foi
+configurado como Next.js, raiz `echomind-front`, Node 22, instalação com lock
+congelado e build via pnpm. Os valores públicos aplicados estão registrados em
+`deploy/frontend/vercel-project-settings.json`; esse arquivo documenta os
+campos da configuração do projeto na Vercel, não é um `vercel.json` autoaplicado.
+As proteções dos deployments de preview foram preservadas.
+
+O deployment de produção `dpl_ARhU4VRHjc2cqNWMcW7pGGzgC59F` chegou a `READY`
+e recebeu o domínio verificado. Foram enviados 141 arquivos versionados do
+frontend no commit `7172218bca4957b1b8bc39b287837d93484dc690`, sem `.env`, Git,
+dependências locais ou artefatos privados. Antes da publicação, typecheck e lint
+passaram; a suíte do frontend aprovou **232 testes em 25 arquivos**. Não houve
+push, merge ou ativação da automação AWS.
+
+| Ensaio real | Resultado |
+| --- | --- |
+| Login feito pelo responsável | Painel autenticado carregou dados reais pela API e pelo Supabase |
+| Portal público | Instituição e FAQs carregaram; chat respondeu à FAQ selecionada |
+| Upload sintético `deploy-check.txt` | 214 bytes, status pronto e um chunk |
+| Chat autenticado com documento | Respondeu o identificador sintético correto, citando o arquivo |
+| Recriação autorizada do backend | Mesma imagem, drenagem, recriação e retomada; chat com documento aprovado novamente |
+| Persistência após recriação | Dois originais presentes e íntegros antes da limpeza |
+| Limpeza autorizada | Somente o documento sintético excluído; um documento real e seu original íntegro preservados |
+| Estado final | Backend/proxy saudáveis, zero reinícios automáticos/OOM, fila vazia e uploads liberados |
+| HTTPS público | Health 200, redirecionamento 308, TLS/cadeia/hostname válidos, HSTS e CORS exato aprovados |
+
+O registro de um documento anterior já tinha 20 chunks no banco, mas seu original
+não estava no volume da EC2. O responsável indicou o arquivo local; tamanho de
+12.837 bytes e SHA-256 coincidiram com o registro existente. O original foi
+transferido como CMS criptografado, validado e instalado atomicamente sem
+sobrescrever arquivos, mudar o banco ou reindexar. Sobreviveu à recriação. A chave
+temporária foi removida e nenhum conteúdo do documento entrou no Git ou nos
+relatórios públicos. Esse reparo de um original não equivale a restaurar backup
+completo do disco.
+
+O utilitário `deploy/manual/restore_document_original.py` implementa essa operação
+com ensaio por padrão e `--apply` explícito. `check_document_originals.py` confere
+hashes e tamanhos dentro do backend e emite somente contagens;
+`check_application_host.py` emite estado dos containers, memória cgroup e campos
+operacionais permitidos, sem ambientes ou logs brutos. Consulte o README manual
+antes de reutilizar essas ferramentas.
+
+Após a recriação e a nova consulta, o backend registrou **1.003.491.328 bytes
+atuais (957 MiB)** e **1.129.517.056 bytes de pico (1.077 MiB, cerca de 1,05 GiB)**,
+sob limite de 1.536 MiB. O proxy atingiu pico de cerca de 20 MiB. Não houve eventos
+OOM nem de alcance do limite. É um ensaio funcional pequeno; não determina a
+capacidade para documentos de 10 MiB, concorrência ou créditos de CPU.
+
+O navegador não registrou erros de console no intervalo observado. A leitura dos
+logs de build pelo conector Vercel retornou `403`, portanto não foi possível
+auditar esses logs; o estado `READY`, os testes locais e os fluxos reais foram
+verificados separadamente. O AWS MCP apresentou erro interno na execução de API;
+as verificações SSM desta etapa usaram o AWS CLI com o perfil dedicado existente,
+conforme o fallback permitido em `AGENTS.md`.
+
+Relatório sanitizado: `docs/frontend-publication-verification.json`. Capturas e
+envelopes locais ficam em `.publication/`, ignorada pelo Git.
+
+- [x] Publicar frontend e conferir integração de produção.
+- [x] Testar login, FAQ pública, upload e resposta baseada no documento.
+- [x] Recriar backend com autorização e comprovar persistência dos originais.
+- [x] Remover somente o arquivo sintético e conferir integridade final.
+- [ ] Testar cadastro e recuperação por e-mail com participação do responsável.
+- [ ] Medir capacidade com carga representativa, concorrência e créditos de CPU.
+- [ ] Conferir primeiro snapshot agendado e ensaiar restauração do EBS.
+- [ ] Concluir revisão de vulnerabilidades e observabilidade da etapa 9.
+- [ ] Concluir permissões/OIDC, proteção da branch, adoção da release manual e
+  ensaio real de deploy/rollback antes de habilitar `AWS_DEPLOY_ENABLED`.
 
 ## Referências
 

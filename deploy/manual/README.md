@@ -57,4 +57,36 @@ Checks trusted TLS/hostname, health, HTTP redirect, HSTS, exact-origin CORS and
 denial of anonymous access to `/auth/me`. It does not exercise login, model
 responses, uploads, certificate renewal or application capacity. The first
 installation was recorded in `docs/first-publication-verification.json`;
-production frontend rebuild and CI/CD activation remain separate steps.
+the frontend follow-up is in `docs/frontend-publication-verification.json`.
+CI/CD activation remains separate.
+
+## Read-only checks and a missing original
+
+`check_application_host.py` runs on the EC2 host with Docker inspection access.
+It emits container health, limits, cgroup memory and allowlisted operational
+event fields. It never emits Docker environment values or raw application logs.
+Its memory counters cover the lifetime of the current container, not a load test.
+
+`check_document_originals.py` runs inside the backend as its ordinary UID, using
+its existing runtime configuration. It checks ready-document sizes and digests
+without printing content, names, identities or credentials. `--absent-id` may
+check that a specific approved disposable fixture has been removed. It returns
+nonzero for missing/invalid originals, queued jobs, maintenance or a remaining
+fixture. Counts are a point-in-time observation; concurrent writes may change
+them. Neither checker changes database records or application configuration.
+
+`restore_document_original.py` repairs one missing original for an existing
+ready document. Run it inside the backend as its ordinary UID. Feed a version-1
+JSON envelope containing `document_id`, `sha256` and `original_b64` through a
+private pipe after the CMS transfer/digest verification described above.
+Never place plaintext/base64 user files in SSM command arguments, tool output,
+Git or shell history. Use a fresh recipient key and remove it and ciphertext
+with an exit trap after the transfer.
+
+The default is validation only; `--apply` explicitly installs the file. The tool
+matches the current database size/digest/status under the admission and row
+locks, refuses pending jobs and unsafe paths, creates an atomic no-clobber file
+with mode `600`, and verifies it again. It does not mutate the database, create
+job markers or reindex chunks. An existing valid original is left in place; an
+invalid existing original aborts the operation. Use only for the specific file
+authorized by its owner; this is not a volume or database backup restoration.
