@@ -922,10 +922,27 @@ trilha CloudTrail configurada; o histórico de eventos padrão de 90 dias não
 substitui retenção durável. A trilha prevista no template principal continua pendente.
 
 O novo template passou no cfn-lint e nas regras cfn-guard locais. A tentativa
-de registrar seu change set foi bloqueada pela revisão automática antes da
-execução, por exigir autorização específica para registrar a criação IAM.
-Nenhum change set, usuário, senha ou máquina foi criado nessa tentativa.
-A criação/revisão do change set e sua execução permanecem pendentes de aprovação.
+inicial de registrar seu change set foi bloqueada pela revisão automática antes
+da execução. Após autorização explícita do proprietário, em 2026-10-19, o change
+set `approved-human-operator-20261019` foi criado, revisado e executado. A revisão
+mostrou somente a inclusão do recurso `Operator`; `DescribeEvents` não retornou
+erros de validação. A stack `echomind-access` chegou a `CREATE_COMPLETE`.
+
+A conferência real confirmou `echomind-access-operator` com somente
+`SignInLocalDevelopmentAccess`, sem políticas inline, grupos, access keys,
+dispositivos MFA ou perfil de login do console. A criação não incluiu EC2 ou
+outros recursos da aplicação. O formulário de senha personalizada foi aberto
+para o proprietário preencher e enviar diretamente no console; o agente não
+gerou nem preencheu senha ou semente MFA.
+
+Na aba **Credenciais de segurança**, o proprietário deve definir a própria senha
+em **Habilitar acesso ao console**, mantendo desmarcada a opção de exigir nova
+senha no próximo login. Essa opção acrescentaria automaticamente a política
+`IAMUserChangePassword`, que não faz parte do plano inicial aprovado. Depois,
+usar **Atribuir dispositivo com MFA** nessa mesma aba para cadastrar seu
+autenticador ou chave de segurança. Não compartilhar senha, QR code, semente ou
+códigos MFA na conversa. Senha, MFA, autenticação com o novo usuário e permissões
+de provisionamento continuam pendentes de conclusão/verificação.
 
 `stack-policy.json` bloqueia substituição/exclusão por updates de Node, disco,
 Elastic IP, chave KMS e bucket de auditoria. Essa política precisa acompanhar
@@ -1390,7 +1407,8 @@ um release malicioso aprovado em código seguro.
 
 - [x] Medir E5 real no Linux com limite de 1536 MiB, dois CPUs e sem swap; manter t3.small/2 GiB para MVP de baixo tráfego, com validação final em produção.
 - [x] Preparar e validar o template do primeiro operador, sem credenciais embutidas ou privilégios administrativos.
-- [ ] Aprovar/criar o usuário dedicado, configurar senha e MFA no console e revisar separadamente o acesso para provisionamento.
+- [x] Criar e conferir o usuário dedicado por CloudFormation, após aprovação explícita, com somente a política de autenticação temporária.
+- [ ] Proprietário configura senha e MFA no console; conferir a autenticação do novo usuário e revisar separadamente o acesso para provisionamento.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
