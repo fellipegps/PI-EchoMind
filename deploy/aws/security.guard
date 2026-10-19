@@ -29,7 +29,9 @@ rule node_hardening when %nodes !empty {
         CreditSpecification.CPUCredits == 'standard'
         KeyName !exists
         BlockDeviceMappings.*.Ebs.Encrypted == true
+        PropagateTagsToVolumeOnCreation == true
     }
+    Resources.*.Type != /^AWS::IAM::/
 }
 rule durable_encryption when %disks !empty {
     %disks {

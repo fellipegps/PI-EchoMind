@@ -883,20 +883,18 @@ permissão para Fast Snapshot Restore, cópias entre regiões ou compartilhament
 de snapshots. As regras públicas 80/443 são uma escolha deliberada para a API
 pública com Caddy, conforme a etapa 5; os demais acessos continuam fechados.
 
-A política `SsmOperatorPolicy` destina-se a um **usuário IAM dedicado**, com
-MFA no login, para iniciar sessões apenas nessa EC2 e retomar/encerrar suas
-próprias sessões. Não cria usuário, senha ou access key. Criar a stack exige
-uma identidade de provisionamento separada com as permissões dos recursos
-descritos, `iam:PassRole` limitado às roles correspondentes e `CAPABILITY_IAM`.
-A política de operação do host não concede esses poderes de provisionamento.
+O plano `deploy/aws/provisioning.yaml` concentra as permissões do projeto no
+usuário dedicado com MFA. O mesmo login poderá revisar/aplicar mudanças na
+stack `echomind-prod`, acessar a EC2 por SSM e iniciar, parar ou reiniciar
+instâncias com a tag do projeto. CloudFormation usa automaticamente uma role
+de serviço fixa: o proprietário não precisa alternar identidades nessas tarefas.
+As políticas ainda precisam ser aplicadas conforme a revisão abaixo.
 
-Antes da criação, configure o usuário IAM pelo console privado, ative MFA e
-prepare a autenticação temporária. `SignInLocalDevelopmentAccess` permite o
-fluxo `aws login` para esse usuário; a troca do perfil será uma ação explícita
-quando essa identidade estiver pronta. Não gere ou cole access keys no chat.
+`SignInLocalDevelopmentAccess` permite o fluxo `aws login` com credenciais
+temporárias. Não gere ou cole access keys no chat.
 Não habilite Organizations, Control Tower ou uma configuração de SSO que crie
 Organizations para resolver esse login: isso pode converter o Free Plan para
-Paid automaticamente. Não houve criação ou troca de identidade nesta etapa.
+Paid automaticamente.
 
 #### Preparação do primeiro operador
 
@@ -911,9 +909,8 @@ O proprietário configura a senha e o MFA diretamente no console privado após
 a criação. Os valores não passam pela conversa, pelo template ou pelo Git.
 O usuário tem retenção em exclusão/substituição da stack; isso não substitui a
 revogação explícita de credenciais e permissões no desligamento do operador.
-Posteriormente, a política SSM da instância poderá ser concedida a esse usuário;
-as permissões de provisionamento exigem revisão própria. Criar o usuário
-inicial não libera o provisionamento do stack principal.
+As permissões de operação e provisionamento estão no plano complementar abaixo.
+Criar o usuário inicial não libera o provisionamento do stack principal.
 
 Em 2026-10-19, o console da conta existente e a conexão AWS Core foram
 autenticados novamente. A consulta confirmou plano FREE/ACTIVE com US$100 em
@@ -947,10 +944,59 @@ Ainda em 2026-10-19, após o proprietário concluir a configuração, as APIs IA
 confirmaram perfil de login ativo, `PasswordResetRequired=false`, um dispositivo
 MFA cadastrado e nenhuma access key. A única política anexada continuou sendo
 `SignInLocalDevelopmentAccess`, sem políticas inline ou grupos adicionais.
-O perfil local `default` ainda estava com a sessão anterior expirada; a
-autenticação temporária com o novo usuário e as permissões de provisionamento
-continuam pendentes. Ter senha e MFA configurados não concede autorização para
-criar os recursos do stack principal.
+O login temporário do perfil local `default` foi concluído e a identidade STS
+confirmada como esse usuário IAM. Os eventos de autenticação confirmaram MFA.
+A integração AWS Core mantém sessão própria de administrador: ela não comprova
+a identidade usada pelo CLI. `preflight_local.py --profile default` reutiliza
+as verificações somente de leitura com o perfil que fará a implantação; não
+exporta credenciais. As permissões de provisionamento continuam pendentes.
+
+#### Project permission bootstrap, service role separation and activation review
+
+O arquivo `deploy/aws/provisioning.yaml`, preparado em 19/10/2026, cria a stack
+`echomind-provisioning` com **sete recursos IAM**: três roles, um instance profile
+e três políticas gerenciadas. Uma política é anexada ao operador existente;
+duas à role de execução do CloudFormation. Não cria outro usuário, credenciais,
+EC2 ou armazenamento. Sua aplicação requer aprovação explícita do plano.
+
+A role de execução pode criar/configurar rede, EC2 `t3.small`, disco, auditoria,
+alertas e orçamento da aplicação na região configurada. Recursos novos usam
+tags ou nomes do projeto; alterações usam tags/ARNs correspondentes. Essa role
+não pode escrever em IAM, executar outras stacks ou expandir suas permissões.
+Só pode passar as roles fixas do host e dos snapshots aos serviços previstos.
+O operador não pode atualizar as stacks de acesso, criar usuários nem passar
+uma role arbitrária. O uso de SSM e alterações da aplicação exigem MFA.
+Consultas de metadados que exigem `Resource: '*'` podem mostrar outros recursos
+regionais da conta; o escopo de leitura não é exclusivamente a tag do projeto.
+
+A stack principal não contém mais recursos IAM. Ela recebe
+`NodeInstanceProfileName` e `SnapshotExecutionRoleArn` dos outputs do bootstrap.
+Toda criação/update/change set deve informar o output `ExecutionRoleArn` no
+argumento **RoleARN** do CloudFormation, além de manter o nome `echomind-prod`.
+Esses valores são identificadores públicos, não segredos. Preencher os parâmetros
+privados locais preservando o e-mail de alertas; não versionar esse arquivo.
+A interface de rede agora é explícita e marcada com `Project`, e as tags da EC2
+são propagadas ao disco raiz, permitindo conferir dependências nas políticas.
+
+Validação: cfn-lint dos quatro templates sem erros/avisos; cfn-guard aprovado;
+13 testes de infraestrutura e 20 de publicação aprovados; limites de tamanho
+IAM conferidos. A referência pública de autorização confirmou as 214 ações de
+17 serviços. `ValidatePolicy` do IAM Access Analyzer retornou zero apontamentos
+nas quatro políticas; `SimulateCustomPolicy` aprovou 25 cenários, incluindo
+negação de MFA ausente, IAM, outra role, VPC/ENI/disco de outro projeto e máquina
+maior. Evidências resumidas em `docs/provisioning-access-review.json`.
+ARNs físicos sintéticos foram usados nas simulações. Esses checks não comprovam
+que os provedores do CloudFormation executarão todas as operações reais;
+eventuais permissões adicionais exigem revisão, nunca concessão automática de
+administrador. `ValidateTemplate` aprovou os dois arquivos atuais: a aplicação
+sem capabilities IAM, o bootstrap com `CAPABILITY_IAM`. A validação de change
+set na conta ainda não foi executada.
+
+O pipeline continua desativado. `pipeline.yaml` ainda prevê anexar permissões de
+artefatos à role do host (`NodeReleasePolicy`); antes de ativá-lo, essa concessão
+deve ser movida para o bootstrap/revisão de acesso. Não acrescentar escrita IAM
+à role de execução da aplicação para contornar esse limite. O plano atual não
+autoriza criar o provedor OIDC nem os recursos do pipeline.
 
 `stack-policy.json` bloqueia substituição/exclusão por updates de Node, disco,
 Elastic IP, chave KMS e bucket de auditoria. Essa política precisa acompanhar
@@ -1089,9 +1135,9 @@ do projeto.
 
 | Camada | Resultado atual |
 | --- | --- |
-| Conta/preços/quota/AMI | Consultados por APIs somente de leitura; root permanece como impedimento de execução |
-| Invariantes e Bash | Dez testes passaram no container de validação, sem executar o bootstrap ou acessar discos reais |
-| API `ValidateTemplate` | Aprovou estrutura e informou `CAPABILITY_IAM`; não confere a execução do bootstrap nem toda a semântica |
+| Conta/preços/quota/AMI | Consultados por APIs somente de leitura; login IAM concluído em 19/10, concessão de provisionamento pendente |
+| Invariantes e Bash | 13 testes passaram no container de validação, sem executar o bootstrap ou acessar discos reais |
+| API `ValidateTemplate` | Templates atuais aprovados em 19/10: principal sem capability IAM; bootstrap com `CAPABILITY_IAM`. Não comprova execução ou toda a semântica |
 | cfn-lint 1.57.2 | Aprovado para `us-east-1`, sem erros ou avisos |
 | cfn-guard 3.2.1 | Template aprovado; seis regressões rejeitadas: SSH, faixa ampla de portas, disco sem criptografia, CPU ilimitada, IMDSv1 e bucket público |
 | Change set/validação da conta | Não criado; exige identidade não root, parâmetros finais e revisão antes de executar |
@@ -1417,7 +1463,9 @@ um release malicioso aprovado em código seguro.
 - [x] Preparar e validar o template do primeiro operador, sem credenciais embutidas ou privilégios administrativos.
 - [x] Criar e conferir o usuário dedicado por CloudFormation, após aprovação explícita, com somente a política de autenticação temporária.
 - [x] Proprietário configura senha e MFA; conferir pelas APIs que o perfil está ativo, possui MFA e não tem access keys ou políticas adicionais.
-- [ ] Autenticar as ferramentas com o novo usuário e revisar separadamente o acesso para provisionamento.
+- [x] Autenticar o perfil local `default` como o novo usuário; confirmar identidade e MFA.
+- [x] Preparar/revisar `provisioning.yaml` com permissões do projeto, roles fixas e 25 simulações de autorização.
+- [ ] Aprovar/aplicar `echomind-provisioning`; conferir permissões efetivas e executar o preflight com o perfil IAM local.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
@@ -1430,6 +1478,7 @@ um release malicioso aprovado em código seguro.
 - [ ] Proteger a branch `main` e as alterações do pipeline.
 - [ ] Verificar o `sub` OIDC real do repositório. Repositórios novos/opt-in podem incluir IDs imutáveis: informar o prefixo exato em `GitHubSubjectPrefix`, sem wildcard. Não imprimir o token.
 - [ ] Inspecionar o provedor OIDC GitHub já existente na conta. Reutilizar seu ARN; criar um apenas se não existir.
+- [ ] Separar a concessão `NodeReleasePolicy` do pipeline para o bootstrap de acesso, mantendo a execução da aplicação sem escrita IAM.
 - [ ] Criar/revisar change set de `deploy/aws/pipeline.yaml`, sem executar até conferir identidade, custos e permissões.
 - [ ] Configurar as variáveis públicas do repositório abaixo, usando outputs reais.
 - [ ] Habilitar `AWS_DEPLOY_ENABLED=true` somente quando os pré-requisitos estiverem atendidos; acompanhar a primeira publicação.

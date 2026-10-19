@@ -9,9 +9,18 @@ Metadata:
         has: Architecture, cost review, operator prerequisites and recovery procedures
     must:
       - Prepare only; deployment requires a non-root operator and a current credit review.
+      - No IAM resources in this application stack; fixed service roles come from the separately reviewed access stack.
       - One amd64 backend worker; public ingress is restricted to HTTP and HTTPS.
       - Disk and node replacement require drained uploads and an explicit recovery plan.
 Parameters:
+  NodeInstanceProfileName:
+    Type: String
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]{1,128}$'
+    Description: Fixed instance profile output from the separately reviewed provisioning access stack.
+  SnapshotExecutionRoleArn:
+    Type: String
+    AllowedPattern: '^arn:[a-z0-9-]+:iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_/-]+$'
+    Description: Fixed DLM execution role output from the provisioning access stack.
   AvailabilityZone:
     Type: AWS::EC2::AvailabilityZone::Name
     Description: Single AZ for the node and its durable EBS disk; must match a reused disk.
@@ -57,6 +66,7 @@ Resources:
       Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+    Properties: {Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]}
   GatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties: {VpcId: !Ref Vpc, InternetGatewayId: !Ref InternetGateway}
@@ -70,7 +80,7 @@ Resources:
       Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
   RouteTable:
     Type: AWS::EC2::RouteTable
-    Properties: {VpcId: !Ref Vpc}
+    Properties: {VpcId: !Ref Vpc, Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]}
   PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: GatewayAttachment
@@ -87,6 +97,7 @@ Resources:
     Properties:
       GroupDescription: EchoMind public HTTPS and HTTP challenge only
       VpcId: !Ref Vpc
+      Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
       SecurityGroupIngress:
         - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: HTTPS redirect and ACME HTTP challenge}
         - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: Public TLS API}
@@ -94,23 +105,16 @@ Resources:
         - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: Signed Ubuntu package repositories}
         - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: HTTPS dependencies and SSM}
         - {IpProtocol: tcp, FromPort: 5432, ToPort: 5432, CidrIp: 0.0.0.0/0, Description: Supabase PostgreSQL with required SSL}
-  NodeRole:
-    Type: AWS::IAM::Role
+  NodeNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
     Metadata:
       com.aws.cloudformation.Context:
-        why: The host runs SSM; application containers do not call AWS APIs.
-        must: [No static access keys or administrator policy; no instance credentials in application containers.]
+        why: An explicitly tagged interface lets IAM reject reuse of unrelated network interfaces.
+        must: [Project subnet and security group only; no automatic public IP.]
     Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - {Effect: Allow, Principal: {Service: ec2.amazonaws.com}, Action: 'sts:AssumeRole'}
-      ManagedPolicyArns:
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+      SubnetId: !Ref Subnet
+      GroupSet: [!Ref WebSecurityGroup]
       Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
-  NodeProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties: {Roles: [!Ref NodeRole]}
   DataVolume:
     Type: AWS::EC2::Volume
     Condition: NewDataVolume
@@ -144,13 +148,14 @@ Resources:
     Properties:
       ImageId: !Ref ImageId
       InstanceType: t3.small
-      IamInstanceProfile: !Ref NodeProfile
+      IamInstanceProfile: !Ref NodeInstanceProfileName
       DisableApiTermination: true
       CreditSpecification: {CPUCredits: standard}
       MetadataOptions: {HttpTokens: required, HttpPutResponseHopLimit: 1, InstanceMetadataTags: disabled}
       Monitoring: false
+      PropagateTagsToVolumeOnCreation: true
       NetworkInterfaces:
-        - {DeviceIndex: '0', SubnetId: !Ref Subnet, AssociatePublicIpAddress: false, GroupSet: [!Ref WebSecurityGroup]}
+        - {DeviceIndex: '0', NetworkInterfaceId: !Ref NodeNetworkInterface}
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs: {VolumeType: gp3, VolumeSize: 16, Encrypted: true, KmsKeyId: alias/aws/ebs, DeleteOnTermination: true}
@@ -301,72 +306,6 @@ Resources:
   IpAssociation:
     Type: AWS::EC2::EIPAssociation
     Properties: {AllocationId: !GetAtt PublicIp.AllocationId, InstanceId: !Ref Node}
-  SsmOperatorPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Metadata:
-      com.aws.cloudformation.Context:
-        why: Attach this to a dedicated non-root IAM user; no IAM or infrastructure-administration privileges.
-        must: [SSM shell access is privileged host administration; never attach to application credentials.]
-    Properties:
-      Description: EchoMind instance administration through SSM without SSH
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Action: ['ssm:StartSession']
-            Resource:
-              - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${Node}
-              - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:*:document/SSM-SessionManagerRunShell
-          - Effect: Allow
-            Action: ['ssmmessages:OpenDataChannel']
-            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:session/${!aws:username}-*'
-          - Effect: Allow
-            Action: ['ssm:ResumeSession', 'ssm:TerminateSession']
-            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:session/*'
-            Condition:
-              StringEquals:
-                ssm:resourceTag/aws:ssmmessages:target-id: !Ref Node
-                ssm:resourceTag/aws:ssmmessages:session-id: '${aws:userid}'
-          - Effect: Allow
-            Action: ['ssm:DescribeInstanceInformation', 'ssm:DescribeSessions', 'ec2:DescribeInstances']
-            Resource: '*'
-  SnapshotRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal: {Service: dlm.amazonaws.com}
-            Action: 'sts:AssumeRole'
-            Condition:
-              StringEquals: {'aws:SourceAccount': !Ref 'AWS::AccountId'}
-              ArnLike: {'aws:SourceArn': !Sub 'arn:${AWS::Partition}:dlm:${AWS::Region}:${AWS::AccountId}:policy/*'}
-      Policies:
-        - PolicyName: snapshots
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: ['ec2:DescribeInstances', 'ec2:DescribeVolumes', 'ec2:DescribeSnapshots', 'ec2:DescribeAvailabilityZones']
-                Resource: '*'
-              - Effect: Allow
-                Action: ['ec2:CreateSnapshot']
-                Resource:
-                  - !Sub
-                    - arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/${DiskId}
-                    - DiskId: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
-                  - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*
-              - Effect: Allow
-                Action: ['ec2:CreateTags']
-                Resource: !Sub arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*
-              - Effect: Allow
-                Action: ['ec2:DeleteSnapshot']
-                Resource: !Sub arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*
-                Condition: {StringEquals: {'ec2:ResourceTag/EchoMindBackup': !Ref 'AWS::StackName'}}
-              - Effect: Allow
-                Action: ['events:PutRule', 'events:DeleteRule', 'events:DescribeRule', 'events:EnableRule', 'events:DisableRule', 'events:ListTargetsByRule', 'events:PutTargets', 'events:RemoveTargets']
-                Resource: !Sub arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/AwsDataLifecycleRule.managed-cwe.*
   SnapshotPolicy:
     Type: AWS::DLM::LifecyclePolicy
     Metadata:
@@ -376,7 +315,8 @@ Resources:
     Properties:
       Description: EchoMind daily durable disk snapshot
       State: ENABLED
-      ExecutionRoleArn: !GetAtt SnapshotRole.Arn
+      ExecutionRoleArn: !Ref SnapshotExecutionRoleArn
+      Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
       PolicyDetails:
         PolicyType: EBS_SNAPSHOT_MANAGEMENT
         ResourceTypes: [VOLUME]
@@ -393,6 +333,7 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       Description: EchoMind operational notification encryption
+      Tags: [{Key: Project, Value: !Ref 'AWS::StackName'}]
       EnableKeyRotation: true
       KeyPolicy:
         Version: '2012-10-17'
@@ -409,6 +350,7 @@ Resources:
   AlertTopic:
     Type: AWS::SNS::Topic
     Properties:
+      TopicName: !Sub '${AWS::StackName}-ops'
       KmsMasterKeyId: !Ref AlertKey
       Subscription: [{Protocol: email, Endpoint: !Ref AlertEmail}]
   AlertTopicPolicy:
@@ -552,7 +494,6 @@ Outputs:
   DurableVolumeId:
     Description: Retained disk; record before any update or recovery.
     Value: !If [NewDataVolume, !Ref DataVolume, !Ref ExistingDataVolumeId]
-  OperatorPolicyArn: {Description: Attach to a dedicated non-root administrator identity, Value: !Ref SsmOperatorPolicy}
   SnapshotPolicyId: {Description: Daily snapshot policy to verify after provisioning, Value: !Ref SnapshotPolicy}
   AlertTopicArn: {Description: Operational email subscription must be confirmed, Value: !Ref AlertTopic}
   AuditBucketName: {Condition: EnableAuditTrail, Description: Private retained management event log bucket, Value: !Ref AuditBucket}

@@ -1,0 +1,223 @@
+{
+  "date": "2026-10-19",
+  "template": "deploy/aws/provisioning.yaml",
+  "state": "prepared-not-applied",
+  "scope": {
+    "region": "us-east-1",
+    "application_stack": "echomind-prod",
+    "bootstrap_stack": "echomind-provisioning",
+    "resources": 7
+  },
+  "public_service_reference": {
+    "distinct_actions": 214,
+    "services": 17,
+    "invalid_actions": [],
+    "source": "https://servicereference.us-east-1.amazonaws.com/"
+  },
+  "access_analyzer": [
+    {
+      "policy": "SnapshotRole/project-snapshots",
+      "findings": []
+    },
+    {
+      "policy": "NetworkPolicy",
+      "findings": []
+    },
+    {
+      "policy": "StorageAndServicesPolicy",
+      "findings": []
+    },
+    {
+      "policy": "OperatorPolicy",
+      "findings": []
+    }
+  ],
+  "iam_simulator": [
+    {
+      "case": "operator-plans-project",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-update-access",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-pass-another-execution-role",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-requires-mfa",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-create-users",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-administers-tagged-host",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-administer-unrelated-host",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-change-own-permissions",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-passes-only-node-to-ec2",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-pass-node-to-other-service",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-pass-foreign-role",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-uses-project-vpc",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-use-foreign-vpc",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-use-foreign-network-interface",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-manages-only-project-volume",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-manage-foreign-volume",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-read-audit-objects",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-creates-encrypted-tagged-volume",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-rejects-unencrypted-volume",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-runs-small-instance",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-rejects-larger-instance",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-resumes-own-session",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-resume-another-session",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-reboots-project",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-reboots-foreign",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    }
+  ],
+  "cloudformation_validate_template": {
+    "application": {"validated": true, "capabilities": []},
+    "provisioning": {"validated": true, "capabilities": ["CAPABILITY_IAM"]}
+  },
+  "limitations": [
+    "Synthetic physical names were used to resolve CloudFormation references for policy review.",
+    "Simulations do not validate service-provider behavior or successful resource provisioning.",
+    "Read-only metadata actions requiring Resource * can reveal regional account metadata.",
+    "The bootstrap IAM plan has not been applied; pipeline permissions require a separate review.",
+    "No durable CloudTrail trail exists yet; account Event History and AWS Core audit have limited retention."
+  ]
+}

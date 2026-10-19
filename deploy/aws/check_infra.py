@@ -51,7 +51,8 @@ class InfrastructureChecks(unittest.TestCase):
         self.assertEqual({(rule["FromPort"], rule["ToPort"]) for rule in ingress}, {(80, 80), (443, 443)})
         node = self.resources["Node"]["Properties"]
         self.assertNotIn("KeyName", node)
-        self.assertFalse(node["NetworkInterfaces"][0]["AssociatePublicIpAddress"])
+        self.assertEqual(node["NetworkInterfaces"][0]["NetworkInterfaceId"], {"Ref": "NodeNetworkInterface"})
+        self.assertFalse(self.resources["Subnet"]["Properties"]["MapPublicIpOnLaunch"])
 
     def test_container_credentials_and_burst_charges_are_blocked(self):
         node = self.resources["Node"]["Properties"]
@@ -59,6 +60,11 @@ class InfrastructureChecks(unittest.TestCase):
         self.assertEqual(node["MetadataOptions"]["HttpPutResponseHopLimit"], 1)
         self.assertEqual(node["CreditSpecification"]["CPUCredits"], "standard")
         self.assertTrue(node["DisableApiTermination"])
+
+    def test_application_cannot_change_its_own_iam_permissions(self):
+        self.assertFalse(any(resource["Type"].startswith("AWS::IAM::") for resource in self.resources.values()))
+        self.assertEqual(self.resources["Node"]["Properties"]["IamInstanceProfile"], {"Ref": "NodeInstanceProfileName"})
+        self.assertEqual(self.resources["SnapshotPolicy"]["Properties"]["ExecutionRoleArn"], {"Ref": "SnapshotExecutionRoleArn"})
 
     def test_retention_and_backup_cover_the_durable_disk(self):
         disk = self.resources["DataVolume"]
