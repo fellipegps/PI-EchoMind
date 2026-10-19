@@ -29,7 +29,6 @@ from types import SimpleNamespace
 from typing import Any, AsyncGenerator, Callable, Mapping, Sequence
 
 from langchain_community.embeddings import FastEmbedEmbeddings
-from langchain_community.vectorstores.pgvector import PGVector
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
@@ -37,6 +36,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .embedding_adapter import E5FastEmbedEmbeddings
+from .retrieval_store import RetrievalPGVector
 from .schemas import sao_paulo_today
 from .database import (
     DATABASE_URL,
@@ -237,7 +237,7 @@ def _vector_store_engine_args() -> dict[str, Any]:
 
 
 @lru_cache(maxsize=128)
-def _get_vector_store(tenant_id: str) -> PGVector:
+def _get_vector_store(tenant_id: str) -> RetrievalPGVector:
     """
     FIX Bug 3: singleton com @lru_cache garante que TODAS as operações
     (add_documents, similarity_search, delete) usam a mesma instância
@@ -255,7 +255,7 @@ def _get_vector_store(tenant_id: str) -> PGVector:
         stage="initialization",
         tenant_id=tenant_id,
     )
-    vector_store = PGVector(
+    vector_store = RetrievalPGVector(
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
         collection_name=_tenant_collection_name(tenant_id),
@@ -568,7 +568,7 @@ def _format_retrieved_document(document: Document) -> str:
 
 
 def _retrieval_candidate_k() -> int:
-    """Compensa o pos-filtro sem permitir overfetch sem limite."""
+    """Reserva candidatos elegiveis para a fusao hibrida e a revalidacao final."""
     return max(
         TOP_K_DOCS * _RETRIEVAL_OVERFETCH_MULTIPLIER,
         _MIN_RETRIEVAL_CANDIDATES,
@@ -993,7 +993,9 @@ async def _retrieve_docs(
 
     vector_task = loop.run_in_executor(
         None,
-        lambda: _get_vector_store(tenant_id).similarity_search_with_score(question, k=candidate_k),
+        lambda: _get_vector_store(tenant_id).similarity_search_ready_with_score(
+            question, tenant_id=tenant_id, today=reference_date, k=candidate_k,
+        ),
     )
     lexical_task = loop.run_in_executor(
         None,

@@ -77,7 +77,7 @@ async def test_same_local_day_for_vector_lexical_and_parent_fallbacks(
             pass
 
     class VectorStore:
-        def similarity_search_with_score(self, _question, *, k):
+        def similarity_search_ready_with_score(self, _question, *, k, tenant_id, today):
             return [(source, 0.1) for source in sources][:k]
 
     observed_dates = []
@@ -118,7 +118,7 @@ async def test_explicit_date_overrides_clock(persist_retrieval_sources, monkeypa
         "valid_until": "2020-01-01",
     })
     persist_retrieval_sources([source])
-    store = SimpleNamespace(similarity_search_with_score=lambda *args, **kwargs: [(source, 0.1)])
+    store = SimpleNamespace(similarity_search_ready_with_score=lambda *args, **kwargs: [(source, 0.1)])
     monkeypatch.setattr(rag_engine, "_get_vector_store", lambda _tenant: store)
     documents, _distance = await rag_engine._retrieve_docs("regra", "calendar-a", today=date(2020, 1, 1))
     assert documents == [source]

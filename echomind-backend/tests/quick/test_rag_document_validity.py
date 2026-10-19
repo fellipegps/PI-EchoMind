@@ -13,13 +13,13 @@ from langchain_core.documents import Document
 def rag_engine_module(quick_test_context, persist_retrieval_sources, monkeypatch):
     from app import rag_engine
 
-    original_search = _FakeVectorStore.similarity_search_with_score
+    original_search = _FakeVectorStore.similarity_search_ready_with_score
 
-    def search(store, question, *, k):
+    def search(store, question, *, k, tenant_id, today):
         persist_retrieval_sources([doc for doc, _distance in store.results])
-        return original_search(store, question, k=k)
+        return original_search(store, question, k=k, tenant_id=tenant_id, today=today)
 
-    monkeypatch.setattr(_FakeVectorStore, "similarity_search_with_score", search)
+    monkeypatch.setattr(_FakeVectorStore, "similarity_search_ready_with_score", search)
     return rag_engine
 
 
@@ -28,7 +28,7 @@ class _FakeVectorStore:
         self.results = results
         self.calls: list[tuple[str, int]] = []
 
-    def similarity_search_with_score(self, question: str, *, k: int):
+    def similarity_search_ready_with_score(self, question: str, *, k: int, tenant_id: str, today):
         self.calls.append((question, k))
         return self.results[:k]
 

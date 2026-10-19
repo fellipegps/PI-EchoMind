@@ -2204,10 +2204,57 @@ artefatos privados permanecem em `.publication/`, ignorada pelo Git.
 - [x] Testar consultas simultâneas e verificar conteúdo, além do HTTP.
 - [x] Conferir créditos de CPU e saúde pública após os ensaios.
 - [x] Limpar somente os arquivos autorizados e verificar o original real.
-- [ ] Corrigir e testar retrieval enquanto outro documento está em processamento.
+- [x] Corrigir e testar localmente retrieval enquanto outro documento está em processamento.
+- [ ] Publicar a correção de retrieval na AWS e repetir a verificação funcional em produção.
 - [ ] Otimizar e medir gravação vetorial por lotes antes de uploads grandes.
 - [ ] Validar carga sustentada, upload máximo completo, PDFs/DOCXs e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
+
+### Correção de elegibilidade antes do top-k - 19/10/2026
+
+A regressão foi reproduzida em PostgreSQL 17/pgvector 0.8.6 descartável:
+um documento pronto deixou de aparecer quando 50 vetores mais próximos pertenciam
+a um documento indisponível. As três variações (`pending`, `processing` e `error`)
+falharam no código anterior, mesmo com a busca lexical desativada para isolar
+o caminho vetorial.
+
+O adaptador `app/retrieval_store.py` mantém o armazenamento PGVector existente e
+aplica a elegibilidade relacional na consulta SQL, antes da ordenação e do limite.
+Um `EXISTS` confirma documento e trecho do mesmo tenant, estado `ready` e validade
+vigente no calendário informado pelo RAG. Fontes parent também exigem o vínculo
+com o filho correspondente. A consulta restringe coleção e tenant dos metadados;
+eventos legados são excluídos antes do corte. FAQs continuam no mesmo fluxo.
+A validação posterior permanece para rejeitar fontes removidas ou alteradas
+enquanto a consulta estava em andamento.
+
+O teste verifica também que os mesmos vetores passam a participar da busca ao
+mudar o documento para `ready`, sem reindexação. Os embeddings são determinísticos
+e locais, e o limiar do teste é ampliado para isolar a seleção de candidatos;
+isso não representa nova medição de qualidade do E5/Groq ou de carga sustentada.
+Os limites de candidatos, workers e memória da aplicação foram preservados.
+Não há alteração de schema, migração ou reindexação dos documentos existentes.
+
+A correção utiliza o binding e os modelos ORM da versão fixada
+`langchain-community==0.2.19`; uma atualização dessa dependência deve repetir os
+testes reais de integração do adaptador. A inclusão futura de índices vetoriais
+aproximados exige validar novamente o efeito de filtros e a recuperação de
+candidatos, incluindo a configuração de varredura iterativa do pgvector.
+
+Esta etapa prepara e valida a correção localmente. A imagem ainda precisa ser
+publicada na EC2; os resultados anteriores de capacidade continuam históricos.
+
+Validação local: **582 testes rápidos aprovados** e **90 testes de integração
+aprovados**, incluindo as três regressões novas. Três testes de permissões do
+host Linux foram ignorados pela própria suíte no Windows. O gate global atingiu
+**89,98% de cobertura**, acima dos 72% exigidos; os quatro módulos documentais
+também passaram no gate individual de 80%. O PostgreSQL usado nos ensaios foi
+local e descartável, com embeddings sintéticos, sem acesso ao banco de produção.
+A imagem `echomind-backend:retrieval-fix-20261019` foi construída localmente com
+as dependências travadas do deploy. O smoke Linux em containers descartáveis
+passou em inicialização saudável, limites e isolamento, persistência do cache e
+dos originais após recriação, recuperação de ingestão interrompida, reinício
+automático após falha, pausa/retomada de escritas e encerramento limpo.
+Os recursos descartáveis foram removidos ao final.
 
 ## Referências
 

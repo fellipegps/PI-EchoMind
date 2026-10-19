@@ -464,7 +464,7 @@ def test_script_rejects_old_embedding_before_opening_session(
 def test_new_collection_records_original_tenant_and_owner(monkeypatch, rag_modules):
     rag = rag_modules.rag_engine
     constructor = MagicMock()
-    monkeypatch.setattr(rag, "PGVector", constructor)
+    monkeypatch.setattr(rag, "RetrievalPGVector", constructor)
     monkeypatch.setattr(rag, "_get_embeddings", lambda: "local-embeddings")
     monkeypatch.setattr(rag, "_enable_langchain_rls_if_possible", lambda: None)
     rag._get_vector_store.cache_clear()

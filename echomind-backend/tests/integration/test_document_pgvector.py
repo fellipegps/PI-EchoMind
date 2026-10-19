@@ -983,6 +983,68 @@ def test_real_residual_vectors_require_ready_current_matching_document_and_chunk
         session.close()
 
 
+@pytest.mark.parametrize("blocked_status", ["pending", "processing", "error"])
+def test_ineligible_vectors_cannot_hide_ready_document_before_top_k(
+    monkeypatch, real_rag_runtime, blocked_status,
+) -> None:
+    """Mais de um top-k de chunks invisiveis nao pode esconder a fonte pronta."""
+    from app.database import Document, SessionLocal
+    from app.document_repository import DocumentChunkData, replace_document_chunks
+
+    runtime = real_rag_runtime.module
+    tenant_id = f"crowded-{uuid4()}"
+    ready_id = _create_ready_document_with_vector(real_rag_runtime, tenant_id)
+    blocked_id = _create_pending_processing_document(tenant_id)
+    question = "Pergunta sintetica com vetores mais proximos ainda indisponiveis."
+    count = runtime._retrieval_candidate_k() * 5
+    store = runtime._get_vector_store(tenant_id)
+    session = SessionLocal()
+    try:
+        blocked = session.query(Document).filter_by(id=blocked_id).one()
+        blocked.status = blocked_status
+        chunks = replace_document_chunks(
+            session, tenant_id=tenant_id, document_id=blocked_id,
+            chunks=[DocumentChunkData(content=question) for _ in range(count)],
+        )
+        session.commit()
+        store.add_embeddings(
+            texts=[question] * count,
+            embeddings=[store.embedding_function.embed_query(question)] * count,
+            metadatas=[{
+                "source_type": "document_chunk", "source_id": chunk.id,
+                "document_id": blocked_id, "tenant_id": tenant_id,
+            } for chunk in chunks],
+            ids=[runtime._make_vector_id(chunk.id, "document_chunk", tenant_id) for chunk in chunks],
+        )
+        # Prova que o caso reproduz o defeito, independentemente da busca lexical.
+        raw = store.similarity_search_with_score(question, k=runtime._retrieval_candidate_k())
+        assert len(raw) == runtime._retrieval_candidate_k()
+        assert all(doc.metadata["document_id"] == blocked_id for doc, _ in raw)
+        monkeypatch.setattr(runtime, "_search_lexical_documents", lambda *args, **kwargs: [])
+        monkeypatch.setattr(runtime, "SIMILARITY_THRESHOLD", 2.0)
+        retrieved, distance = asyncio.run(runtime._retrieve_docs(
+            question, tenant_id, today=date(2026, 9, 1),
+        ))
+        assert [doc.metadata["document_id"] for doc in retrieved] == [ready_id]
+        assert distance is not None
+        # Ao concluir a ingestao, os mesmos vetores entram na busca sem reindexar.
+        blocked.status = "ready"
+        session.commit()
+        retrieved, distance = asyncio.run(runtime._retrieve_docs(
+            question, tenant_id, today=date(2026, 9, 1),
+        ))
+        assert len(retrieved) == runtime.TOP_K_DOCS
+        assert all(doc.metadata["document_id"] == blocked_id for doc in retrieved)
+        assert distance == pytest.approx(0.0, abs=1e-6)
+    finally:
+        session.rollback()
+        session.query(Document).filter(
+            Document.tenant_id == tenant_id, Document.id.in_([ready_id, blocked_id]),
+        ).delete(synchronize_session=False)
+        session.commit()
+        session.close()
+
+
 def test_delete_document_endpoint_removes_real_record_chunks_and_vectors(
     monkeypatch,
     real_rag_runtime,
