@@ -2,7 +2,7 @@
   "reviewed_at": "2026-10-19T14:39:52.361151+00:00",
   "region": "us-east-1",
   "stack": "echomind-prod",
-  "state": "execution-failed-rolled-back",
+  "state": "recovered-infrastructure-and-host-verified",
   "change_set": {
     "name": "predeploy-application-20261019-v1",
     "status_at_review": "CREATE_COMPLETE",
@@ -145,7 +145,7 @@
     "template_matches_reviewed_file": true,
     "creator_uses_root": false,
     "execution_role_verified_from_stack": true,
-    "stack_status": "ROLLBACK_COMPLETE"
+    "first_attempt_stack_status": "ROLLBACK_COMPLETE"
   },
   "configuration": {
     "instance_type": "t3.small",
@@ -240,7 +240,7 @@
     "Price estimate excludes variable traffic, audit S3, SNS/KMS requests, pipeline ECR/S3 and external providers; promotional credits are finite.",
     "FreeTierEligible flags and available quota do not guarantee zero charges or live capacity.",
     "DescribeEvents was denied through the scoped local IAM policy with both change-set and stack selectors; validation events were read through AWS Core. No permission expansion was applied.",
-    "Change-set creation provisioned nothing; the later authorized execution failed. Four resources were retained after rollback; see docs/ec2-provisioning-recovery.json."
+    "The first attempt rolled back; explicit owner approval allowed bounded IAM correction, cleanup and a successful replacement execution. Historical failed-attempt records are preserved in the recovery report."
   ],
   "estimate": {
     "verified_at": "2026-10-19",
@@ -273,5 +273,12 @@
       "Free Plan ends at credit exhaustion or account-plan expiration, whichever occurs first.",
       "Budget alerts do not stop resources. Recheck pricing and credits before provisioning."
     ]
+  },
+  "latest_execution": {
+    "change_set": "predeploy-application-20261019-v2",
+    "stack_status": "CREATE_COMPLETE",
+    "resource_count": 26,
+    "host_and_reboot_verified": true,
+    "report": "docs/ec2-infrastructure-verification.json"
   }
 }

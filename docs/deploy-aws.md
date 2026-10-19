@@ -1168,8 +1168,8 @@ do projeto.
 | API `ValidateTemplate` | Templates atuais aprovados em 19/10: principal sem capability IAM; bootstrap com `CAPABILITY_IAM`. Não comprova execução ou toda a semântica |
 | cfn-lint 1.57.2 | Aprovado para `us-east-1`, sem erros ou avisos |
 | cfn-guard 3.2.1 | Template aprovado; seis regressões rejeitadas: SSH, faixa ampla de portas, disco sem criptografia, CPU ilimitada, IMDSv1 e bucket público |
-| Change set/validação da conta | Plano de 26 inclusões validado e executado após autorização; criação falhou no IAM do disco raiz e foi revertida; correção e recuperação preparadas |
-| EC2/SSM/backup/alertas reais | Não provisionados ou testados; dependem da execução aprovada da infraestrutura |
+| Change set/validação da conta | Após correção IAM e limpeza autorizadas, plano v2 criou os 26 recursos com `CREATE_COMPLETE`; stack policy aplicada e conferida |
+| EC2/SSM/backup/alertas reais | Host e reinício verificados por SSM; inscrição SNS confirmada e DLM habilitado. Snapshot/restauração reais ainda pendentes |
 
 A etapa 6 conclui a preparação e a validação local da infraestrutura. Não
 confirma o funcionamento de serviços ainda não criados. Antes da criação real:
@@ -1227,7 +1227,10 @@ conferir bootstrap/mounts/Docker/CLI/SSM, inscrição SNS e auditoria. Sucesso d
 CloudFormation não comprova que o bootstrap terminou nem que a API funciona.
 Não foi iniciada a etapa final nem habilitado o pipeline.
 
-### Tentativa autorizada e recuperação pendente - 19/10/2026
+### Primeira tentativa e plano de recuperação - 19/10/2026
+
+Esta seção preserva o diagnóstico e o plano inicialmente preparado após a falha.
+A autorização posterior e a recuperação concluída estão registradas na próxima seção.
 
 Após autorização explícita, o operador IAM executou o plano revisado. A chamada
 foi aceita, mas a criação de `Node` falhou: a role do CloudFormation não autorizou
@@ -1260,7 +1263,7 @@ de contornar o bloqueio. O arquivo local corrigido ainda difere da política ati
 
 A reversão respeitou `Retain` e preservou quatro recursos desta tentativa:
 
-| Recurso | Estado conferido | Recuperação proposta, ainda não autorizada |
+| Recurso | Estado após a primeira reversão | Recuperação inicialmente proposta |
 | --- | --- | --- |
 | Disco de dados gp3 20 GiB | Criptografado, criado nesta tentativa sem snapshot, disponível e sem anexos; o nó nunca foi criado | Excluir esse disco vazio antes de recriar |
 | Elastic IP | Reservado e sem associação | Liberar esse endereço antes de reservar o novo |
@@ -1277,14 +1280,78 @@ Revisar/aplicar somente `NetworkPolicy` na stack de acesso, conferir novamente
 recursos sem uso listados, mantendo ambas as stacks de acesso e a auditoria.
 Então registrar/revisar um novo plano da aplicação com a mesma configuração,
 executá-lo e conferir a inicialização. Mudanças adicionais fora desse escopo
-exigem nova análise. A criação da máquina continua pendente.
+exigem nova análise. Até a autorização dessa recuperação, a criação continuou pendente.
 
 `deploy/aws/verify_host.sh` foi preparado para verificações somente de leitura
 por SSM após a criação: cloud-init, marcador, mounts, diretórios privados,
 Docker/containerd em disco durável, versões CLI/Compose/SSM e serviços ativos.
 Não imprime arquivos de ambiente nem segredos. Sua sintaxe foi validada, mas
-ele ainda não foi executado em um host. Evidências e plano concreto em
+naquele momento ele ainda não havia sido executado em um host. Evidências e plano em
 `docs/ec2-provisioning-recovery.json`.
+
+### Infraestrutura criada e verificada - 19/10/2026
+
+O proprietário autorizou a correção e a recuperação. O change set
+`fix-root-volume-context-20261019` mostrou somente a alteração de `NetworkPolicy`,
+sem substituições, e não teve erros de validação. Após executar, a stack de
+acesso chegou a `UPDATE_COMPLETE`; a versão v2 da política aplicada coincide
+integralmente com o arquivo revisado. A simulação da role real autorizou o disco
+raiz com seu contexto próprio, sem `ec2:InstanceType` nem contexto ausente.
+
+Foi removido somente o registro da stack malsucedida, após conferir
+`ROLLBACK_COMPLETE` e seus recursos. O disco vazio de 20 GiB foi excluído e o
+Elastic IP sem associação foi liberado; a ausência de ambos foi confirmada.
+A chave de notificações dessa tentativa ficou `PendingDeletion`, com exclusão
+agendada para **26/10/2026**, após sete dias. Ela não era a chave AWS que cifra
+os discos. O bucket anterior e seus objetos foram preservados para auditoria;
+as stacks de acesso permaneceram intactas.
+
+O operador IAM registrou, revisou e executou
+`predeploy-application-20261019-v2`, com as mesmas 26 inclusões autorizadas e
+sem erros de validação. **`echomind-prod` está `CREATE_COMPLETE` e os 26 recursos
+também estão completos.** `stack-policy.json` foi aplicada após a criação e seu
+conteúdo foi conferido. A EC2 está protegida contra término, usa IMDSv2 com
+hop limit 1 e créditos de CPU em modo `standard`. Os dois discos gp3 de 16 e
+20 GiB estão criptografados, anexados e em uso; só 80/443 estão expostos.
+
+`verify_host.sh` passou por SSM usando o usuário dedicado. Cloud-init terminou,
+o marcador de bootstrap existe, `/srv/echomind` está em ext4 no disco de dados
+e `/etc/echomind` está ligado ao diretório privado desse mesmo disco, root 700.
+Docker e containerd guardam seus dados no volume durável. Versões observadas:
+**Docker 29.9.1, Compose 5.6.0, AWS CLI 2.38.0 e SSM Agent 3.3.4793.0**.
+Os três serviços estão ativos e habilitados para iniciar com o sistema.
+
+Foi criado um arquivo temporário sem dados sensíveis no volume durável. Uma
+reinicialização real, solicitada pelo operador IAM, preservou esse arquivo;
+as verificações completas passaram novamente, com mounts e serviços ativos.
+O arquivo de teste foi removido após a conferência. As verificações AWS de
+instância, sistema e EBS estão `ok`. A checagem foi feita por estados, versões
+e mounts, sem ler logs de bootstrap ou arquivos secretos. Ao enviar o script
+por SSM, preservar `#!/bin/bash` na primeira linha e normalizar CRLF para LF.
+
+O proprietário confirmou a inscrição de e-mail, e SNS confirmou o ARN da
+assinatura, sem `PendingConfirmation`. Os quatro alarmes existem; o orçamento
+mensal de US$30 está `HEALTHY` e observa custos antes dos créditos, sem funcionar
+como limite de gasto. CloudTrail está gravando, com entrega observada no S3;
+o bucket novo bloqueia acesso público, usa AES256 e versionamento. DLM está
+`ENABLED`, agendado a cada 24 horas às 03:00 UTC, retendo sete snapshots do disco
+de dados. O primeiro snapshot agendado e uma restauração real ainda precisam
+ser conferidos; essa política não faz backup do banco externo Supabase.
+
+Os identificadores físicos e o IP foram salvos em
+`deploy/aws/outputs.local.json`, ignorado pelo Git junto dos parâmetros privados.
+O último preflight informou plano FREE/ACTIVE, **US$120 em créditos** e vencimento
+em 13/04/2027; não se inferiu o motivo da alteração do saldo. A estimativa base
+continua US$24,11/mês antes de créditos e variáveis. A máquina foi deixada
+**ligada**, com consumo dos recursos em andamento.
+
+Esta etapa não instalou segredos de runtime, publicou a API, apontou DNS,
+habilitou o pipeline nem iniciou a validação final da aplicação. Próximas
+pendências: conexão de banco IPv4, variáveis privadas, domínio/HTTPS e ativação
+revisada do pipeline. A consulta `DescribeEvents` do CLI continua pendente de
+revisão; a integração AWS forneceu essa validação somente de leitura. O shell
+interativo SSM não foi testado; Run Command foi testado pelo usuário dedicado.
+Evidências públicas em `docs/ec2-infrastructure-verification.json`.
 
 ## Etapa 7: banco e frontend
 
@@ -1602,13 +1669,16 @@ um release malicioso aprovado em código seguro.
 - [x] Autenticar o perfil local `default` como o novo usuário; confirmar identidade e MFA.
 - [x] Preparar/revisar `provisioning.yaml` com permissões do projeto, roles fixas e 25 simulações de autorização.
 - [x] Aprovar/aplicar `echomind-provisioning`; conferir políticas e relações de confiança, simular os 25 cenários com as identidades reais e executar o preflight com o perfil IAM local.
-- [x] Rever créditos/preços/AMI/quota e registrar o change set da aplicação com identidade IAM: 26 inclusões, sem erros de validação, aguardando execução.
-- [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
-- [ ] Aprovar/aplicar a correção IAM do volume raiz e a limpeza da tentativa revertida; preservar auditoria e repetir a criação conforme o plano de recuperação.
-- [ ] Aplicar `stack-policy.json` após `CREATE_COMPLETE`, antes de qualquer update; conferir o documento aplicado.
+- [x] Rever créditos/preços/AMI/quota e executar o plano v2 com identidade IAM: 26 recursos criados, sem erros de validação.
+- [x] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
+- [x] Aprovar/aplicar a correção IAM do volume raiz e limpar a tentativa revertida; preservar auditoria e repetir a criação conforme o plano de recuperação.
+- [x] Aplicar `stack-policy.json` após `CREATE_COMPLETE`, antes de qualquer update; conferir o documento aplicado.
+- [x] Verificar uma reinicialização real, retorno dos serviços, mounts e preservação de arquivo no disco de dados.
+- [x] Proprietário confirma inscrição SNS; conferir assinatura, quatro alarmes, orçamento saudável e entrega CloudTrail.
+- [ ] Conferir o primeiro snapshot DLM agendado e ensaiar a restauração real do disco.
 - [ ] Revisar a autorização de leitura de `DescribeEvents` no perfil local; enquanto isso, usar AWS Core somente para consultar a validação.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
-- [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
+- [x] Confirmar na EC2 real AWS CLI **2.38.0**, SSM Agent **3.3.4793.0**, serviços ativos e marcador de bootstrap.
 - [x] Criar backup consistente do schema público real, restaurá-lo localmente e aplicar a revisão 0023; preflight real de schema/RLS/vetores aprovado via TLS.
 - [ ] Conferir a conexão PostgreSQL de produção pela EC2/IPv4.
 - [ ] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.
@@ -1741,7 +1811,7 @@ cfn-guard 3.2.1 e actionlint 1.7.12; binários baixados com SHA-256 fixado.
 | Originais e backup no ensaio | Conteúdo preservado e conferido após rollback |
 | Validador da imagem de produção usado no CI | Inicialização, limites, reinício, cache, recuperação de documento e manutenção aprovados |
 | Limpeza do ensaio | Apenas projeto descartável removido; volumes reais não utilizados |
-| OIDC, ECR, S3 e SSM reais | Ainda não criados/ativados/executados |
+| OIDC, ECR, S3 de releases e documento SSM do pipeline | Ainda não criados/ativados/executados; a infraestrutura base e o agente SSM da EC2 já foram verificados |
 | HTTPS/banco real, chat, E5 e medição de recursos | Pendentes das etapas 7/9 |
 
 ## Medição prévia da capacidade - 2026-10-14
@@ -1819,7 +1889,7 @@ Ferramentas adicionadas: `deploy/backup_production_database.py` e
 local existente dentro do processo e não as imprimem. Nenhum dump ou dado real
 foi incluído no commit. Este backup não cobre Auth, Storage, papéis ou configurações
 do projeto Supabase, nem substitui uma cópia externa criptografada periódica.
-A conexão session pooler IPv4 pela futura EC2 permanece pendente.
+A conexão session pooler IPv4 pela EC2 criada permanece pendente.
 
 ## Referências
 

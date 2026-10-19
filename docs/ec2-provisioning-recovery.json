@@ -1,7 +1,7 @@
 {
   "date": "2026-10-19",
   "stack": "echomind-prod",
-  "state": "ROLLBACK_COMPLETE",
+  "state": "recovered-infrastructure-and-host-verified",
   "creation_authorized_by_owner": true,
   "creation_attempt": "predeploy-application-20261019-v1",
   "actionable_failures": [
@@ -18,14 +18,14 @@
   "cascade_cancellations": [
     "AlertTopic"
   ],
-  "instance_created": false,
+  "instance_created": true,
   "correction": {
     "file": "deploy/aws/provisioning.yaml",
     "policy": "NetworkPolicy",
     "adds_api_actions": false,
     "instance_restriction": "Project tag and t3.small remain required on instance ARNs.",
     "volume_restriction": "Project tag, encrypted=true, gp3 and exactly 16 GiB on volume ARNs, without ec2:InstanceType.",
-    "state": "prepared-not-applied",
+    "state": "applied-and-full-policy-verified",
     "access_analyzer_findings": [],
     "simulations": [
       {
@@ -164,17 +164,35 @@
   "approval_review": {
     "blocked_action": "CreateChangeSet for the IAM correction",
     "reason": "Existing authorization covers application infrastructure but does not explicitly approve the IAM permission change.",
-    "workaround_attempted": false
+    "workaround_attempted": false,
+    "resolved_by_explicit_owner_approval": true
   },
   "cost_note": {
     "retained_resources_base_usd_month": "6.25",
     "assumptions": "20 GiB gp3, one reserved IPv4 for 730 hours, one KMS key, before credits; excludes audit S3/requests.",
-    "cleanup_pending": true
+    "cleanup_pending": false,
+    "observation_phase": "Historical estimate before authorized cleanup."
   },
   "limitations": [
     "Earlier 25 simulations supplied instance-only context to volume evaluations; they did not reproduce the failing service request.",
     "New positive root-volume simulation succeeds without instance context. Denial simulations retain any missing-context diagnostics in this report.",
-    "No host exists, so bootstrap, SSM and API checks have not run.",
-    "Corrected IAM update is not registered or executed because automatic approval review rejected registration. Resource cleanup has not been performed."
-  ]
+    "Infrastructure recovered and verified; application/HTTPS/pipeline and real scheduled backup restoration remain pending."
+  ],
+  "recovery_result": {
+    "iam_change_set": "fix-root-volume-context-20261019",
+    "iam_stack_status": "UPDATE_COMPLETE",
+    "modified_resources": [
+      "NetworkPolicy"
+    ],
+    "failed_stack_deleted": true,
+    "old_volume_deleted": true,
+    "old_ipv4_released": true,
+    "old_notification_key_deletion_date": "2026-10-26T15:50:15.481Z",
+    "old_audit_bucket_preserved": true,
+    "replacement_change_set": "predeploy-application-20261019-v2",
+    "replacement_stack_status": "CREATE_COMPLETE",
+    "verification": "docs/ec2-infrastructure-verification.json"
+  },
+  "first_attempt_instance_created": false,
+  "retained_resources_observation_phase": "Historical inventory immediately after first rollback; recovery_result records completed cleanup."
 }

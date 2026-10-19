@@ -1,7 +1,7 @@
 {
   "date": "2026-10-19",
   "template": "deploy/aws/provisioning.yaml",
-  "state": "initial-policy-applied-volume-context-correction-pending",
+  "state": "applied-and-verified-after-root-volume-context-correction",
   "scope": {
     "region": "us-east-1",
     "application_stack": "echomind-prod",
@@ -210,16 +210,30 @@
     }
   ],
   "cloudformation_validate_template": {
-    "application": {"validated": true, "capabilities": []},
-    "provisioning": {"validated": true, "capabilities": ["CAPABILITY_IAM"]}
+    "application": {
+      "validated": true,
+      "capabilities": []
+    },
+    "provisioning": {
+      "validated": true,
+      "capabilities": [
+        "CAPABILITY_IAM"
+      ]
+    }
   },
   "live_deployment": {
     "date": "2026-10-19",
     "explicit_owner_approval": true,
     "change_set": "approved-project-access-20261019",
     "change_set_resources": 7,
-    "change_set_actions": ["Add"],
-    "change_set_types": ["AWS::IAM::Role", "AWS::IAM::ManagedPolicy", "AWS::IAM::InstanceProfile"],
+    "change_set_actions": [
+      "Add"
+    ],
+    "change_set_types": [
+      "AWS::IAM::Role",
+      "AWS::IAM::ManagedPolicy",
+      "AWS::IAM::InstanceProfile"
+    ],
     "registered_template_matches_approved_file": true,
     "validation_error_events": [],
     "stack_status": "CREATE_COMPLETE",
@@ -255,13 +269,26 @@
     "operator_can_read_bootstrap_outputs": true,
     "operator_can_validate_application_template": true,
     "private_local_role_parameters_updated": true,
-    "application_resources_created": false
+    "application_resources_created": false,
+    "observation_phase": "Initial bootstrap verification; root_volume_correction records the later applied policy change."
   },
   "limitations": [
     "Synthetic physical names were used to resolve CloudFormation references for policy review.",
     "Simulations do not validate service-provider behavior or successful resource provisioning.",
     "Read-only metadata actions requiring Resource * can reveal regional account metadata.",
-    "Application provisioning and live SSM sessions remain untested; no EC2 exists yet. Pipeline permissions require a separate review.",
-    "No durable CloudTrail trail exists yet; account Event History and AWS Core audit have limited retention."
-  ]
+    "The initial 25 simulations did not reproduce the missing instance-type context on volume evaluation; subsequent targeted simulation and successful real EC2 provisioning verify the correction.",
+    "Interactive Session Manager shell and pipeline permissions still require their own verification/review. CloudTrail is now logging and delivery was observed."
+  ],
+  "root_volume_correction": {
+    "date": "2026-10-19",
+    "explicit_owner_approval": true,
+    "change_set": "fix-root-volume-context-20261019",
+    "stack_status": "UPDATE_COMPLETE",
+    "only_network_policy_modified": true,
+    "policy_default_version": "v2",
+    "full_applied_policy_matches_reviewed_file": true,
+    "real_role_volume_simulation": "allowed with no instance context and no missing context",
+    "application_creation_and_ssm_run_command": "verified",
+    "report": "docs/ec2-infrastructure-verification.json"
+  }
 }
