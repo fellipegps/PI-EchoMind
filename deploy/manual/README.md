@@ -10,7 +10,10 @@ releases remain governed by `deploy/pipeline`.
    documents, local backups, working-tree changes or Git metadata.
 2. Send the public source archive through authenticated SSM Run Command in
    bounded chunks. Verify its SHA256 before extracting into a new root-owned
-   `/srv/echomind/releases/<commit>` directory. Reject links and path traversal.
+   `/srv/echomind/releases/<commit>` directory (`700`). Reject links and path
+   traversal. Inside that protected root, use `755` for public source directories
+   and `644` for source files: Docker COPY preserves these modes and the non-root
+   application needs read/traverse access inside its image.
    Build using `bash deploy/manual/build_first_release.sh <commit>` from there.
    Build output stays in restricted host logs; images use the full source commit.
 3. Generate a fresh RSA 3072-bit one-day recipient certificate and private key

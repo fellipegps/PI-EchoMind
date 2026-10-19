@@ -52,7 +52,9 @@ def package(output: Path) -> dict:
                     if entry.name.endswith(".sh") and b"\r" in data:
                         raise ValueError("Shell build inputs must use LF; check committed .gitattributes.")
                     member = tarfile.TarInfo(entry.name)
-                    member.size, member.mode, member.mtime = len(data), 0o600, 0
+                    # These are public build inputs. COPY preserves permissions;
+                    # the non-root container must be able to read them.
+                    member.size, member.mode, member.mtime = len(data), 0o644, 0
                     outgoing.addfile(member, io.BytesIO(data))
                     names.append(entry.name)
     if not EXACT.issubset(names):
