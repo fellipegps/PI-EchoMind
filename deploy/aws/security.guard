@@ -4,6 +4,21 @@ let disks = Resources.*[ Type == 'AWS::EC2::Volume' ]
 let groups = Resources.*[ Type == 'AWS::EC2::SecurityGroup' ]
 let topics = Resources.*[ Type == 'AWS::SNS::Topic' ]
 let buckets = Resources.*[ Type == 'AWS::S3::Bucket' ]
+let human_operators = Resources.*[ Type == 'AWS::IAM::User' ]
+
+rule operator_has_no_embedded_credentials_or_admin when %human_operators !empty {
+    %human_operators {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties {
+            LoginProfile !exists
+            Policies !exists
+            Groups !exists
+            ManagedPolicyArns[0].'Fn::Sub' == 'arn:${AWS::Partition}:iam::aws:policy/SignInLocalDevelopmentAccess'
+            ManagedPolicyArns[1] !exists
+        }
+    }
+}
 
 rule node_hardening when %nodes !empty {
     %nodes.Properties {

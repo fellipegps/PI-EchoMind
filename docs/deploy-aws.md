@@ -898,6 +898,35 @@ Não habilite Organizations, Control Tower ou uma configuração de SSO que crie
 Organizations para resolver esse login: isso pode converter o Free Plan para
 Paid automaticamente. Não houve criação ou troca de identidade nesta etapa.
 
+#### Preparação do primeiro operador
+
+`deploy/aws/access.yaml` separa a identidade humana da infraestrutura da aplicação.
+O plano usa a stack `echomind-access`, na região `us-east-1`, para criar somente
+`echomind-access-operator`. A única política inicial é a política gerenciada AWS
+`SignInLocalDevelopmentAccess`: permite autorização e renovação de tokens de
+ferramentas, sem conceder acesso aos serviços da aplicação ou ao provisionamento.
+O template não cria senha, access key, dispositivo MFA ou privilégios de administrador.
+
+O proprietário configura a senha e o MFA diretamente no console privado após
+a criação. Os valores não passam pela conversa, pelo template ou pelo Git.
+O usuário tem retenção em exclusão/substituição da stack; isso não substitui a
+revogação explícita de credenciais e permissões no desligamento do operador.
+Posteriormente, a política SSM da instância poderá ser concedida a esse usuário;
+as permissões de provisionamento exigem revisão própria. Criar o usuário
+inicial não libera o provisionamento do stack principal.
+
+Em 2026-10-19, o console da conta existente e a conexão AWS Core foram
+autenticados novamente. A consulta confirmou plano FREE/ACTIVE com US$100 em
+créditos, nenhum usuário IAM e nenhuma stack ativa em `us-east-1`. Não havia
+trilha CloudTrail configurada; o histórico de eventos padrão de 90 dias não
+substitui retenção durável. A trilha prevista no template principal continua pendente.
+
+O novo template passou no cfn-lint e nas regras cfn-guard locais. A tentativa
+de registrar seu change set foi bloqueada pela revisão automática antes da
+execução, por exigir autorização específica para registrar a criação IAM.
+Nenhum change set, usuário, senha ou máquina foi criado nessa tentativa.
+A criação/revisão do change set e sua execução permanecem pendentes de aprovação.
+
 `stack-policy.json` bloqueia substituição/exclusão por updates de Node, disco,
 Elastic IP, chave KMS e bucket de auditoria. Essa política precisa acompanhar
 a criação da stack. Não existe Export/ImportValue entre stacks. Uma mudança
@@ -1360,6 +1389,8 @@ um release malicioso aprovado em código seguro.
 ### Pré-requisitos de ativação - ainda pendentes
 
 - [x] Medir E5 real no Linux com limite de 1536 MiB, dois CPUs e sem swap; manter t3.small/2 GiB para MVP de baixo tráfego, com validação final em produção.
+- [x] Preparar e validar o template do primeiro operador, sem credenciais embutidas ou privilégios administrativos.
+- [ ] Aprovar/criar o usuário dedicado, configurar senha e MFA no console e revisar separadamente o acesso para provisionamento.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.

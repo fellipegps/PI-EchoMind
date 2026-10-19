@@ -4,7 +4,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 FILES = [
-    "deploy/aws/stack.yaml", "deploy/aws/pipeline.yaml", "deploy/aws/security.guard",
+    "deploy/aws/stack.yaml", "deploy/aws/pipeline.yaml", "deploy/aws/access.yaml", "deploy/aws/security.guard",
     "deploy/aws/check_infra.py", "deploy/aws/estimate_cost.py",
     "deploy/compose.yaml", "deploy/compose.https.yaml", ".github/workflows/deploy-aws.yml", ".github/workflows/ci.yml",
     *["deploy/pipeline/" + name for name in (
@@ -20,9 +20,10 @@ for relative in FILES:
 container.append("echomind-infra-validation:local")
 for check in (
     ["actionlint", "-shellcheck=", "-pyflakes=", ".github/workflows/ci.yml", ".github/workflows/deploy-aws.yml"],
-    ["cfn-lint", "-t", "deploy/aws/stack.yaml", "deploy/aws/pipeline.yaml", "-r", "us-east-1", "--format", "json"],
+    ["cfn-lint", "-t", "deploy/aws/stack.yaml", "deploy/aws/pipeline.yaml", "deploy/aws/access.yaml", "-r", "us-east-1", "--format", "json"],
     ["cfn-guard", "validate", "--data", "deploy/aws/stack.yaml", "--rules", "deploy/aws/security.guard", "--show-summary", "fail"],
     ["cfn-guard", "validate", "--data", "deploy/aws/pipeline.yaml", "--rules", "deploy/aws/security.guard", "--show-summary", "fail"],
+    ["cfn-guard", "validate", "--data", "deploy/aws/access.yaml", "--rules", "deploy/aws/security.guard", "--show-summary", "fail"],
     ["python", "deploy/aws/check_infra.py"],
     ["python", "-m", "unittest", "discover", "-s", "deploy/pipeline", "-p", "test_release.py", "-v"],
 ):
