@@ -1,7 +1,7 @@
 {
   "date": "2026-10-19",
   "template": "deploy/aws/provisioning.yaml",
-  "state": "applied-and-verified",
+  "state": "initial-policy-applied-volume-context-correction-pending",
   "scope": {
     "region": "us-east-1",
     "application_stack": "echomind-prod",

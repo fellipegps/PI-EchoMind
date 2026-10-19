@@ -85,6 +85,10 @@ Resources:
       Tags: [{Key: Project, Value: !Ref ApplicationStackName}]
   NetworkPolicy:
     Type: AWS::IAM::ManagedPolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: EC2 evaluates each RunInstances resource separately; instance type is not a volume context key.
+        must: [Keep instance sizing on instance ARNs; root volume requires the project tag, encryption, gp3 and exactly 16 GiB.]
     Properties:
       Description: Create tagged project network and compute resources; modify only matching resources.
       Roles: [!Ref ExecutionRole]
@@ -118,11 +122,19 @@ Resources:
               StringEqualsIfExists:
                 ec2:CreateAction: [AllocateAddress, CreateInternetGateway, CreateNetworkInterface, CreateRouteTable, CreateSecurityGroup, CreateSubnet, CreateVolume, CreateVpc, RunInstances]
               'Null': {'ec2:CreateAction': 'false'}
-          - Sid: RunSmallTaggedInstanceAndVolumes
+          - Sid: RunSmallTaggedInstance
             Effect: Allow
             Action: ec2:RunInstances
-            Resource: [!Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*', !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*']
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
             Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName, 'ec2:InstanceType': t3.small}}
+          - Sid: RunEncryptedTaggedRootVolume
+            Effect: Allow
+            Action: ec2:RunInstances
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*'
+            Condition:
+              StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName, 'ec2:VolumeType': gp3}
+              NumericEquals: {'ec2:VolumeSize': 16}
+              Bool: {'ec2:Encrypted': true}
           - Sid: RunInstanceDependencies
             Effect: Allow
             Action: ec2:RunInstances

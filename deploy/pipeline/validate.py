@@ -7,6 +7,7 @@ FILES = [
     "deploy/aws/stack.yaml", "deploy/aws/pipeline.yaml", "deploy/aws/access.yaml", "deploy/aws/provisioning.yaml", "deploy/aws/security.guard",
     "deploy/aws/check_infra.py", "deploy/aws/estimate_cost.py",
     "deploy/aws/render_provisioning_policies.py", "deploy/aws/preflight_local.py", "deploy/aws/preflight.mcp.py",
+    "deploy/aws/verify_host.sh",
     "deploy/compose.yaml", "deploy/compose.https.yaml", ".github/workflows/deploy-aws.yml", ".github/workflows/ci.yml",
     *["deploy/pipeline/" + name for name in (
         "package_release.py", "publish_release.py", "ensure_main.py", "send_release.py",
@@ -28,6 +29,7 @@ for check in (
     ["cfn-guard", "validate", "--data", "deploy/aws/provisioning.yaml", "--rules", "deploy/aws/security.guard", "--show-summary", "fail"],
     ["python", "deploy/aws/check_infra.py"],
     ["python", "deploy/aws/render_provisioning_policies.py", "--check"],
+    ["bash", "-n", "deploy/aws/verify_host.sh"],
     ["python", "-m", "unittest", "discover", "-s", "deploy/pipeline", "-p", "test_release.py", "-v"],
 ):
     subprocess.run([*container, *check], check=True)

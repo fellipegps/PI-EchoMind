@@ -1168,7 +1168,7 @@ do projeto.
 | API `ValidateTemplate` | Templates atuais aprovados em 19/10: principal sem capability IAM; bootstrap com `CAPABILITY_IAM`. Não comprova execução ou toda a semântica |
 | cfn-lint 1.57.2 | Aprovado para `us-east-1`, sem erros ou avisos |
 | cfn-guard 3.2.1 | Template aprovado; seis regressões rejeitadas: SSH, faixa ampla de portas, disco sem criptografia, CPU ilimitada, IMDSv1 e bucket público |
-| Change set/validação da conta | Bootstrap executado; change set da aplicação disponível, com 26 inclusões e sem erros de validação; execução pendente |
+| Change set/validação da conta | Plano de 26 inclusões validado e executado após autorização; criação falhou no IAM do disco raiz e foi revertida; correção e recuperação preparadas |
 | EC2/SSM/backup/alertas reais | Não provisionados ou testados; dependem da execução aprovada da infraestrutura |
 
 A etapa 6 conclui a preparação e a validação local da infraestrutura. Não
@@ -1183,13 +1183,13 @@ o registro do plano real está descrito abaixo.
 
 O usuário IAM `echomind-access-operator`, pelo perfil `default`, registrou o
 change set **`predeploy-application-20261019-v1`** da stack `echomind-prod`.
-O plano está `CREATE_COMPLETE`/`AVAILABLE`, com exatamente **26 inclusões**:
+Na revisão inicial, o plano estava `CREATE_COMPLETE`/`AVAILABLE`, com exatamente **26 inclusões**:
 uma EC2, rede dedicada, interface, Elastic IP, disco de dados e associação,
 política DLM, quatro alarmes, SNS/KMS, orçamento e auditoria S3/CloudTrail.
 O disco raiz de 16 GiB está dentro da definição da EC2; o disco de dados tem
-20 GiB. Não há novos recursos IAM no plano. A stack está `REVIEW_IN_PROGRESS`:
-nenhum recurso da aplicação foi provisionado. Não tentar criar outra stack
-com esse mesmo nome; reutilizar o change set existente para a execução aprovada.
+20 GiB. Não havia novos recursos IAM no plano. Naquele momento a stack estava
+`REVIEW_IN_PROGRESS`, sem recursos provisionados. A tentativa de execução e
+o estado atual estão registrados na seção de recuperação abaixo.
 
 O template registrado coincide com o arquivo revisado e a stack usa a role de
 execução fixa do bootstrap. A AMI resolvida é `ami-02a9cdd4e98bc3c78`, Ubuntu
@@ -1226,6 +1226,65 @@ Após `CREATE_COMPLETE`, aplicar a stack policy antes de qualquer update,
 conferir bootstrap/mounts/Docker/CLI/SSM, inscrição SNS e auditoria. Sucesso do
 CloudFormation não comprova que o bootstrap terminou nem que a API funciona.
 Não foi iniciada a etapa final nem habilitado o pipeline.
+
+### Tentativa autorizada e recuperação pendente - 19/10/2026
+
+Após autorização explícita, o operador IAM executou o plano revisado. A chamada
+foi aceita, mas a criação de `Node` falhou: a role do CloudFormation não autorizou
+`ec2:RunInstances` sobre o volume raiz. A reversão automática terminou em
+**`ROLLBACK_COMPLETE`**, sem uma EC2 criada. O filtro `FailedEvents=true` mostrou
+essa única falha acionável; o cancelamento de `AlertTopic` foi consequência da
+reversão, sem provar que sua criação teria terminado normalmente.
+
+O erro estava na política que preparamos: a mesma condição `ec2:InstanceType`
+era exigida em ARNs de instância e volume. A referência de autorização da AWS
+não oferece essa chave no contexto de volume. CloudTrail confirmou que o
+pedido real continha corretamente `Project=echomind-prod` no disco, portanto
+não se tratava de uma tag ausente. As simulações anteriores forneciam contexto
+de instância também para o volume e não reproduziam essa diferença real.
+
+A correção local em `provisioning.yaml` separa as duas avaliações: instância
+continua limitada a `t3.small` e à tag do projeto; volume exige a mesma tag,
+criptografia, gp3 e exatamente 16 GiB, sem a chave de contexto da instância.
+Não acrescenta ações de API nem permissões de administrador. Access Analyzer
+retornou zero apontamentos; oito simulações específicas tiveram a decisão
+esperada, incluindo o caso positivo sem contexto de instância. O relatório
+preserva os diagnósticos de contexto ausente dos casos negativos. Os 13 testes
+de infraestrutura e 20 de publicação, cfn-lint, cfn-guard e limites IAM passaram.
+
+A tentativa de registrar o change set dessa correção foi **bloqueada pela
+revisão automática**: a autorização existente cobre a infraestrutura da
+aplicação, mas não aprova explicitamente a alteração de permissões IAM.
+Nenhuma atualização da política foi registrada ou aplicada e não houve tentativa
+de contornar o bloqueio. O arquivo local corrigido ainda difere da política ativa.
+
+A reversão respeitou `Retain` e preservou quatro recursos desta tentativa:
+
+| Recurso | Estado conferido | Recuperação proposta, ainda não autorizada |
+| --- | --- | --- |
+| Disco de dados gp3 20 GiB | Criptografado, criado nesta tentativa sem snapshot, disponível e sem anexos; o nó nunca foi criado | Excluir esse disco vazio antes de recriar |
+| Elastic IP | Reservado e sem associação | Liberar esse endereço antes de reservar o novo |
+| Chave KMS de notificações | Habilitada; distinta da chave AWS EBS que cifra o disco | Agendar exclusão com espera de sete dias |
+| Bucket de auditoria | Preservado com seus objetos | Manter bucket e conteúdo para auditoria |
+
+Enquanto aguardam limpeza, disco/IP/chave têm custo base ilustrativo de
+**US$6,25/mês**, antes dos créditos e do S3 variável; não há cobrança de CPU
+de uma máquina nesta tentativa. Não foram removidos recursos retidos.
+
+Para recuperar, aprovar primeiro a correção IAM e a limpeza delimitada acima.
+Revisar/aplicar somente `NetworkPolicy` na stack de acesso, conferir novamente
+`ROLLBACK_COMPLETE`, remover apenas a stack malsucedida `echomind-prod` e seus
+recursos sem uso listados, mantendo ambas as stacks de acesso e a auditoria.
+Então registrar/revisar um novo plano da aplicação com a mesma configuração,
+executá-lo e conferir a inicialização. Mudanças adicionais fora desse escopo
+exigem nova análise. A criação da máquina continua pendente.
+
+`deploy/aws/verify_host.sh` foi preparado para verificações somente de leitura
+por SSM após a criação: cloud-init, marcador, mounts, diretórios privados,
+Docker/containerd em disco durável, versões CLI/Compose/SSM e serviços ativos.
+Não imprime arquivos de ambiente nem segredos. Sua sintaxe foi validada, mas
+ele ainda não foi executado em um host. Evidências e plano concreto em
+`docs/ec2-provisioning-recovery.json`.
 
 ## Etapa 7: banco e frontend
 
@@ -1545,6 +1604,7 @@ um release malicioso aprovado em código seguro.
 - [x] Aprovar/aplicar `echomind-provisioning`; conferir políticas e relações de confiança, simular os 25 cenários com as identidades reais e executar o preflight com o perfil IAM local.
 - [x] Rever créditos/preços/AMI/quota e registrar o change set da aplicação com identidade IAM: 26 inclusões, sem erros de validação, aguardando execução.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
+- [ ] Aprovar/aplicar a correção IAM do volume raiz e a limpeza da tentativa revertida; preservar auditoria e repetir a criação conforme o plano de recuperação.
 - [ ] Aplicar `stack-policy.json` após `CREATE_COMPLETE`, antes de qualquer update; conferir o documento aplicado.
 - [ ] Revisar a autorização de leitura de `DescribeEvents` no perfil local; enquanto isso, usar AWS Core somente para consultar a validação.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.

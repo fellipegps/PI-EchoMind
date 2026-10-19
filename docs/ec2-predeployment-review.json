@@ -2,11 +2,12 @@
   "reviewed_at": "2026-10-19T14:39:52.361151+00:00",
   "region": "us-east-1",
   "stack": "echomind-prod",
-  "state": "change-set-ready-not-executed",
+  "state": "execution-failed-rolled-back",
   "change_set": {
     "name": "predeploy-application-20261019-v1",
-    "status": "CREATE_COMPLETE",
-    "execution_status": "AVAILABLE",
+    "status_at_review": "CREATE_COMPLETE",
+    "execution_status_at_review": "AVAILABLE",
+    "current_lookup": "ChangeSetNotFound after failed execution and rollback",
     "resource_count": 26,
     "changes": [
       {
@@ -144,7 +145,7 @@
     "template_matches_reviewed_file": true,
     "creator_uses_root": false,
     "execution_role_verified_from_stack": true,
-    "stack_status": "REVIEW_IN_PROGRESS"
+    "stack_status": "ROLLBACK_COMPLETE"
   },
   "configuration": {
     "instance_type": "t3.small",
@@ -239,7 +240,7 @@
     "Price estimate excludes variable traffic, audit S3, SNS/KMS requests, pipeline ECR/S3 and external providers; promotional credits are finite.",
     "FreeTierEligible flags and available quota do not guarantee zero charges or live capacity.",
     "DescribeEvents was denied through the scoped local IAM policy with both change-set and stack selectors; validation events were read through AWS Core. No permission expansion was applied.",
-    "No instance, EBS disk, EIP, KMS key or other application resource has been provisioned by change-set creation."
+    "Change-set creation provisioned nothing; the later authorized execution failed. Four resources were retained after rollback; see docs/ec2-provisioning-recovery.json."
   ],
   "estimate": {
     "verified_at": "2026-10-19",
