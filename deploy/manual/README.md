@@ -44,3 +44,17 @@ service. It does not change IAM or create new AWS resources.
 Offline checks: `deploy/manual/test_private_transfer.py` uses synthetic values
 only and an OpenSSL binary selected by `TEST_OPENSSL`. Real Linux permissions,
 database connectivity and public TLS must also be verified on the actual host.
+
+External verification (no credentials or user records):
+
+```sh
+python deploy/manual/verify_public.py \
+  --domain echomind-api.duckdns.org \
+  --origin https://echomind-front.vercel.app
+```
+
+Checks trusted TLS/hostname, health, HTTP redirect, HSTS, exact-origin CORS and
+denial of anonymous access to `/auth/me`. It does not exercise login, model
+responses, uploads, certificate renewal or application capacity. The first
+installation was recorded in `docs/first-publication-verification.json`;
+production frontend rebuild and CI/CD activation remain separate steps.

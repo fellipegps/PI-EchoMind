@@ -1566,20 +1566,23 @@ da aplicação não foram desabilitadas para publicar.
 - [x] Ensaio sintético de backup, migration e restauração.
 - [x] Validação das variáveis públicas e build de produção do frontend.
 - [x] Escolher domínio da API: `echomind-api.duckdns.org`, informado como reservado pelo responsável.
-- [ ] Apontar o DNS para o Elastic IP e validar HTTPS/health na EC2 real.
+- [x] Apontar o DNS para o Elastic IP e validar HTTPS/health na EC2 real.
 - [x] Criar backup real consistente do schema público e testar a restauração em banco local separado.
 - [x] Aplicar `0023` e conferir o banco real depois da manutenção.
-- [ ] Conferir conexão privada IPv4/session pooler a partir da EC2.
+- [x] Conferir conexão privada IPv4/session pooler a partir da EC2.
 - [x] Conferir projeto e deployment Vercel via integração reconectada, usando o ID e o contexto padrão.
-- [ ] Configurar valores reais de Vercel/CORS/Auth e testar login/cadastro/reset.
+- [x] Configurar valores reais de Vercel/CORS/Auth para produção, preservando retornos locais explícitos.
+- [ ] Refazer o build de produção da Vercel e testar login/cadastro/reset.
 
 ## Etapa 8: publicação por GitHub Actions
 
 **Situação: preparação concluída e validada localmente. Automação ainda não
-ativada e nenhum recurso AWS criado nesta etapa.** As pendências de banco,
-infraestrutura, identidade dedicada e DNS continuam necessárias para publicar.
-O hostname escolhido é `echomind-api.duckdns.org`; o domínio do frontend é
-`echomind-front.vercel.app`. A reserva do DuckDNS não comprova apontamento ou TLS.
+ativada e nenhum recurso AWS criado pela automação.** Em 2026-10-19, a primeira
+instalação manual da API foi publicada na infraestrutura da etapa 6, com banco,
+identidade dedicada, DNS e TLS verificados. O hostname é
+`echomind-api.duckdns.org`; o domínio do frontend é `echomind-front.vercel.app`.
+Essa instalação não ativa a publicação por commits. Consulte o registro de
+primeira publicação abaixo e as pendências de CI/CD desta seção.
 
 ### Fluxo preparado
 
@@ -1680,10 +1683,12 @@ um release malicioso aprovado em código seguro.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [x] Confirmar na EC2 real AWS CLI **2.38.0**, SSM Agent **3.3.4793.0**, serviços ativos e marcador de bootstrap.
 - [x] Criar backup consistente do schema público real, restaurá-lo localmente e aplicar a revisão 0023; preflight real de schema/RLS/vetores aprovado via TLS.
-- [ ] Conferir a conexão PostgreSQL de produção pela EC2/IPv4.
-- [ ] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.
-- [ ] Configurar `API_DOMAIN=echomind-api.duckdns.org` e e-mail ACME real no `deploy.env`; CORS exato no backend.
-- [ ] Apontar DuckDNS para o Elastic IP; conferir propagação e portas 80/443. O primeiro deploy requer DNS correto para emitir TLS.
+- [x] Conferir a conexão PostgreSQL de produção pela EC2/IPv4.
+- [x] Instalar `/etc/echomind/backend.env` e `/etc/echomind/deploy.env`, root `600`, diretórios/mounts privados.
+- [x] Configurar `API_DOMAIN=echomind-api.duckdns.org` e e-mail ACME real no `deploy.env`; CORS exato no backend.
+- [x] Apontar DuckDNS para o Elastic IP; conferir propagação, portas 80/443 e certificado público válido.
+- [x] Publicar a primeira versão manual, conferir limites/volumes e preservar o certificado após recriação real do proxy.
+- [ ] Incorporar a versão manual atual ao procedimento de rollback antes de ativar a primeira publicação automática. Não tratar o servidor como vazio.
 - [x] Criar os ambientes GitHub `aws-build` e `aws-production`, ambos restritos exclusivamente à branch `main`, sem tags permitidas.
 - [ ] Proteger a branch `main` e as alterações do pipeline.
 - [ ] Verificar o `sub` OIDC real do repositório. Repositórios novos/opt-in podem incluir IDs imutáveis: informar o prefixo exato em `GitHubSubjectPrefix`, sem wildcard. Não imprimir o token.
@@ -1812,7 +1817,7 @@ cfn-guard 3.2.1 e actionlint 1.7.12; binários baixados com SHA-256 fixado.
 | Validador da imagem de produção usado no CI | Inicialização, limites, reinício, cache, recuperação de documento e manutenção aprovados |
 | Limpeza do ensaio | Apenas projeto descartável removido; volumes reais não utilizados |
 | OIDC, ECR, S3 de releases e documento SSM do pipeline | Ainda não criados/ativados/executados; a infraestrutura base e o agente SSM da EC2 já foram verificados |
-| HTTPS/banco real, chat, E5 e medição de recursos | Pendentes das etapas 7/9 |
+| HTTPS/banco real, chat, E5 e medição de recursos | HTTPS/banco e aquecimento E5 aprovados na EC2; chat/carga completa pendentes da etapa 9 |
 
 ## Medição prévia da capacidade - 2026-10-14
 
@@ -1889,7 +1894,67 @@ Ferramentas adicionadas: `deploy/backup_production_database.py` e
 local existente dentro do processo e não as imprimem. Nenhum dump ou dado real
 foi incluído no commit. Este backup não cobre Auth, Storage, papéis ou configurações
 do projeto Supabase, nem substitui uma cópia externa criptografada periódica.
-A conexão session pooler IPv4 pela EC2 criada permanece pendente.
+A conexão session pooler IPv4 pela EC2 foi aprovada na primeira publicação de 2026-10-19.
+
+## Primeira publicação da API - 2026-10-19
+
+API publicada em **https://echomind-api.duckdns.org**, com health público
+**https://echomind-api.duckdns.org/health**. O Supabase estava pausado e foi
+retomado; confirmou `ACTIVE_HEALTHY`. O painel Connect forneceu o session pooler
+real `aws-1-sa-east-1.pooler.supabase.com:5432`. A EC2 conectou por IPv4 e TLS 1.3;
+o preflight da imagem informou revisão `0023`, nenhuma migration pendente,
+schema/RLS/vetores compatíveis e `ready=true`. Nenhuma migration ou reindexação
+foi executada nesta publicação.
+
+A instalação usou o usuário IAM dedicado pelo AWS MCP oficial. Não houve
+alteração IAM nem criação de recursos AWS adicionais. As imagens foram montadas
+na EC2 a partir de 66 arquivos públicos allowlisted do commit
+`ed86db754495d3b1c7b13b1b0ea40d9e7fec5060`, transferidos pelo SSM e conferidos por
+SHA256. O pacote não contém `.env`, Git, backups ou documentos. A primeira
+tentativa revelou CRLF no arquivo Shell e permissões restritivas nos arquivos
+públicos copiados para a imagem. Corrigimos `.gitattributes`, conferimos LF e
+normalizamos os arquivos públicos para `644`/diretórios `755`, sob a pasta da
+release root `700`. Os próximos pacotes preservam essas permissões de leitura
+para o UID 10001. Isso não altera o conteúdo do código implantado.
+
+As credenciais locais existentes foram processadas em memória e criptografadas
+para um certificado temporário RSA gerado na EC2. Apenas ciphertext passou nos
+comandos SSM. O host conferiu o digest, decriptou em memória e instalou o runtime
+validado de forma atômica. A chave privada temporária e o envelope foram
+removidos; os arquivos de configuração persistentes permanecem root `600` em
+`/etc/echomind`, no disco de dados criptografado. Nenhum valor secreto entrou
+em exemplos, relatórios ou commits. Ferramentas e limitações desse primeiro
+procedimento estão em `deploy/manual/README.md`.
+
+Backend e Caddy estão saudáveis, com UID 10001, filesystem raiz somente leitura,
+política `unless-stopped`, limites de 1536/128 MiB e volumes persistentes. A porta
+8000 não é publicada no host. O aquecimento real de embeddings terminou sem
+erro em aproximadamente 10,9 segundos. Uma amostra após iniciar mediu backend
+944 MiB e proxy 56,36 MiB, sem OOM ou reinícios. É uma amostra de inicialização,
+não um teste de capacidade, concorrência ou ingestão de documentos.
+
+O DuckDNS confirmou o IP reservado da EC2 e o DNS público foi conferido.
+Certificado Let's Encrypt válido, hostname/cadeia verificados sem desabilitar
+TLS, expiração em 2027-01-17; renovação automática configurada pelo Caddy.
+HTTP redireciona para HTTPS com `308`, health responde `200`, HSTS está ativo,
+CORS permite a origem exata da Vercel e recusa uma origem externa. `/auth/me`
+sem credenciais responde `403`, comportamento do HTTPBearer da versão FastAPI
+fixada. A recriação real apenas do proxy preservou o número de série do
+certificado e a API saudável; o backend permaneceu no mesmo container.
+
+No Supabase, a Site URL agora é `https://echomind-front.vercel.app`. Retornos
+autorizados: `/redefinir-senha` nessa origem e os endereços locais explícitos
+`http://localhost:3000` e `http://localhost:3000/redefinir-senha`. Na Vercel,
+**Production** recebeu `NEXT_PUBLIC_API_URL=https://echomind-api.duckdns.org`
+e `ECHOMIND_REQUIRE_API_URL=true`. Essas variáveis só entram no frontend após
+um novo build; **nenhum novo deployment do frontend foi executado nesta etapa**.
+
+Relatório público: `docs/first-publication-verification.json`. O host guarda
+`/srv/echomind/manual-current.json` com revisão e IDs reais das imagens, sem
+credenciais. As configurações locais, envelopes e provas de tela ficam em
+`.publication/`, ignorada pelo Git. A automação `AWS_DEPLOY_ENABLED` continua
+desativada. Próximos passos: novo build Vercel, validação ponta a ponta da etapa
+9, ensaio de snapshot/restauração e conclusão do bootstrap/rollback da pipeline.
 
 ## Referências
 
