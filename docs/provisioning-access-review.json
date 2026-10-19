@@ -1,7 +1,7 @@
 {
   "date": "2026-10-19",
   "template": "deploy/aws/provisioning.yaml",
-  "state": "prepared-not-applied",
+  "state": "applied-and-verified",
   "scope": {
     "region": "us-east-1",
     "application_stack": "echomind-prod",
@@ -213,11 +213,55 @@
     "application": {"validated": true, "capabilities": []},
     "provisioning": {"validated": true, "capabilities": ["CAPABILITY_IAM"]}
   },
+  "live_deployment": {
+    "date": "2026-10-19",
+    "explicit_owner_approval": true,
+    "change_set": "approved-project-access-20261019",
+    "change_set_resources": 7,
+    "change_set_actions": ["Add"],
+    "change_set_types": ["AWS::IAM::Role", "AWS::IAM::ManagedPolicy", "AWS::IAM::InstanceProfile"],
+    "registered_template_matches_approved_file": true,
+    "validation_error_events": [],
+    "stack_status": "CREATE_COMPLETE",
+    "all_seven_resources_complete": true,
+    "all_four_applied_policy_documents_match": true,
+    "trust_profile_and_policy_attachments_verified": true,
+    "operator_managed_policy_count": 2,
+    "operator_inline_policy_count": 0,
+    "operator_group_count": 0,
+    "operator_access_key_count": 0,
+    "operator_mfa_device_count": 1,
+    "principal_policy_simulation": {
+      "operation": "SimulatePrincipalPolicy",
+      "existing_user_and_execution_role": true,
+      "case_count": 25,
+      "all_passed": true,
+      "failures": [],
+      "missing_context": []
+    },
+    "local_cli_preflight": {
+      "profile": "default",
+      "checked_at": "2026-10-19T14:27:48.993839+00:00",
+      "uses_root": false,
+      "read_check_count": 9,
+      "blockers": [],
+      "account_plan": "FREE",
+      "account_plan_status": "ACTIVE",
+      "remaining_credits_usd": 100,
+      "plan_expiration_date": "2027-04-13",
+      "standard_vcpu_quota": 5,
+      "region_instances": 0
+    },
+    "operator_can_read_bootstrap_outputs": true,
+    "operator_can_validate_application_template": true,
+    "private_local_role_parameters_updated": true,
+    "application_resources_created": false
+  },
   "limitations": [
     "Synthetic physical names were used to resolve CloudFormation references for policy review.",
     "Simulations do not validate service-provider behavior or successful resource provisioning.",
     "Read-only metadata actions requiring Resource * can reveal regional account metadata.",
-    "The bootstrap IAM plan has not been applied; pipeline permissions require a separate review.",
+    "Application provisioning and live SSM sessions remain untested; no EC2 exists yet. Pipeline permissions require a separate review.",
     "No durable CloudTrail trail exists yet; account Event History and AWS Core audit have limited retention."
   ]
 }

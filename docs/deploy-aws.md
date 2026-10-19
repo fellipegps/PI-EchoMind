@@ -888,7 +888,7 @@ usuário dedicado com MFA. O mesmo login poderá revisar/aplicar mudanças na
 stack `echomind-prod`, acessar a EC2 por SSM e iniciar, parar ou reiniciar
 instâncias com a tag do projeto. CloudFormation usa automaticamente uma role
 de serviço fixa: o proprietário não precisa alternar identidades nessas tarefas.
-As políticas ainda precisam ser aplicadas conforme a revisão abaixo.
+As políticas foram aplicadas e conferidas conforme o registro abaixo.
 
 `SignInLocalDevelopmentAccess` permite o fluxo `aws login` com credenciais
 temporárias. Não gere ou cole access keys no chat.
@@ -949,7 +949,8 @@ confirmada como esse usuário IAM. Os eventos de autenticação confirmaram MFA.
 A integração AWS Core mantém sessão própria de administrador: ela não comprova
 a identidade usada pelo CLI. `preflight_local.py --profile default` reutiliza
 as verificações somente de leitura com o perfil que fará a implantação; não
-exporta credenciais. As permissões de provisionamento continuam pendentes.
+exporta credenciais. As permissões de provisionamento foram aplicadas após a
+autorização explícita do proprietário, conforme o registro abaixo.
 
 #### Project permission bootstrap, service role separation and activation review
 
@@ -957,7 +958,7 @@ O arquivo `deploy/aws/provisioning.yaml`, preparado em 19/10/2026, cria a stack
 `echomind-provisioning` com **sete recursos IAM**: três roles, um instance profile
 e três políticas gerenciadas. Uma política é anexada ao operador existente;
 duas à role de execução do CloudFormation. Não cria outro usuário, credenciais,
-EC2 ou armazenamento. Sua aplicação requer aprovação explícita do plano.
+EC2 ou armazenamento. O proprietário autorizou explicitamente sua aplicação.
 
 A role de execução pode criar/configurar rede, EC2 `t3.small`, disco, auditoria,
 alertas e orçamento da aplicação na região configurada. Recursos novos usam
@@ -989,8 +990,32 @@ ARNs físicos sintéticos foram usados nas simulações. Esses checks não compr
 que os provedores do CloudFormation executarão todas as operações reais;
 eventuais permissões adicionais exigem revisão, nunca concessão automática de
 administrador. `ValidateTemplate` aprovou os dois arquivos atuais: a aplicação
-sem capabilities IAM, o bootstrap com `CAPABILITY_IAM`. A validação de change
-set na conta ainda não foi executada.
+sem capabilities IAM, o bootstrap com `CAPABILITY_IAM`.
+
+Após a autorização, o change set `approved-project-access-20261019` foi criado
+e conferido: exatamente sete inclusões IAM, com o template original idêntico
+ao arquivo revisado. `DescribeEvents` não retornou `VALIDATION_ERROR`. A execução
+foi concluída e `echomind-provisioning` chegou a `CREATE_COMPLETE`, com os sete
+recursos no mesmo estado. Os documentos das quatro políticas aplicadas foram
+comparados com o plano aprovado e coincidiram, usando os ARNs físicos reais.
+As relações de confiança, instance profile e anexos de políticas também foram
+conferidos. O operador possui somente a política inicial de login e a política
+do projeto, sem grupos, políticas inline ou access keys; mantém MFA ativo.
+
+`SimulatePrincipalPolicy`, agora usando o usuário e a role existentes na conta,
+aprovou os mesmos 25 cenários sem contexto ausente. O preflight local executado
+com `default` confirmou a identidade IAM, nove consultas somente de leitura
+sem erros e nenhum bloqueio nesses checks. O plano FREE permanece ACTIVE, com
+US$100 de créditos, vencimento em 13/04/2027 e quota regional de cinco vCPUs
+Standard; nenhuma EC2 está provisionada na região. Não há ainda trilha durável
+CloudTrail, somente histórico padrão e auditoria da integração.
+
+O usuário IAM conseguiu ler os outputs do bootstrap e validar `stack.yaml`.
+`NodeInstanceProfileName` e `SnapshotExecutionRoleArn` foram atualizados em
+`parameters.local.json`, preservando o e-mail e os demais parâmetros privados.
+Esse arquivo permanece ignorado pelo Git. Não foram criados recursos da
+aplicação, nem iniciada a etapa final. A criação real da EC2 ainda exige revisão
+atual de custos, parâmetros e change set da aplicação.
 
 O pipeline continua desativado. `pipeline.yaml` ainda prevê anexar permissões de
 artefatos à role do host (`NodeReleasePolicy`); antes de ativá-lo, essa concessão
@@ -1135,12 +1160,12 @@ do projeto.
 
 | Camada | Resultado atual |
 | --- | --- |
-| Conta/preços/quota/AMI | Consultados por APIs somente de leitura; login IAM concluído em 19/10, concessão de provisionamento pendente |
+| Conta/preços/quota/AMI | Preflight local IAM aprovado em 19/10; acesso de provisionamento aplicado e conferido. Rever preços antes de criar a aplicação |
 | Invariantes e Bash | 13 testes passaram no container de validação, sem executar o bootstrap ou acessar discos reais |
 | API `ValidateTemplate` | Templates atuais aprovados em 19/10: principal sem capability IAM; bootstrap com `CAPABILITY_IAM`. Não comprova execução ou toda a semântica |
 | cfn-lint 1.57.2 | Aprovado para `us-east-1`, sem erros ou avisos |
 | cfn-guard 3.2.1 | Template aprovado; seis regressões rejeitadas: SSH, faixa ampla de portas, disco sem criptografia, CPU ilimitada, IMDSv1 e bucket público |
-| Change set/validação da conta | Não criado; exige identidade não root, parâmetros finais e revisão antes de executar |
+| Change set/validação da conta | Bootstrap de acesso validado e executado; change set da aplicação ainda não criado |
 | EC2/SSM/backup/alertas reais | Não provisionados ou testados; dependem da execução aprovada da infraestrutura |
 
 A etapa 6 conclui a preparação e a validação local da infraestrutura. Não
@@ -1465,7 +1490,7 @@ um release malicioso aprovado em código seguro.
 - [x] Proprietário configura senha e MFA; conferir pelas APIs que o perfil está ativo, possui MFA e não tem access keys ou políticas adicionais.
 - [x] Autenticar o perfil local `default` como o novo usuário; confirmar identidade e MFA.
 - [x] Preparar/revisar `provisioning.yaml` com permissões do projeto, roles fixas e 25 simulações de autorização.
-- [ ] Aprovar/aplicar `echomind-provisioning`; conferir permissões efetivas e executar o preflight com o perfil IAM local.
+- [x] Aprovar/aplicar `echomind-provisioning`; conferir políticas e relações de confiança, simular os 25 cenários com as identidades reais e executar o preflight com o perfil IAM local.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
