@@ -49,6 +49,8 @@ def package(output: Path) -> dict:
                     if not entry.isfile() or not allowed(entry.name):
                         continue
                     data = incoming.extractfile(entry).read()
+                    if entry.name.endswith(".sh") and b"\r" in data:
+                        raise ValueError("Shell build inputs must use LF; check committed .gitattributes.")
                     member = tarfile.TarInfo(entry.name)
                     member.size, member.mode, member.mtime = len(data), 0o600, 0
                     outgoing.addfile(member, io.BytesIO(data))
