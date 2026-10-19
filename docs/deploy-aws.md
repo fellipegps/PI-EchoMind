@@ -45,11 +45,12 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   EC2 por infraestrutura como código, acesso administrativo via Systems Manager,
   EBS criptografado e persistente, regras de rede, backup e orçamento/alertas.
   Template validado; identidade dedicada e infraestrutura base criadas e conferidas.
-- [ ] **7. Banco e frontend:** conferir migrations com backup e acesso PostgreSQL,
+- [x] **7. Banco e frontend:** conferir migrations com backup e acesso PostgreSQL,
   aplicar migrations como operação explícita, ajustar URL HTTPS da API na Vercel e
   URLs de autenticação no Supabase. Reindexação de embeddings continua manual.
   Banco real atualizado, serviços configurados e frontend publicado. Login,
-  chat e documentos aprovados; cadastro e recuperação por e-mail ainda pendentes.
+  chat, documentos, cadastro e recuperação por e-mail aprovados. A correção da
+  orientação de cadastro aguarda publicação, conforme o registro de autenticação.
 - [x] **8. Preparação da publicação por GitHub Actions:** testes antes de publicar, autenticação
   temporária OIDC, imagem identificada pelo commit, atualizações serializadas,
   drenagem de tarefas, verificação após deploy e recuperação da versão anterior.
@@ -1573,7 +1574,7 @@ da aplicação não foram desabilitadas para publicar.
 - [x] Conferir projeto e deployment Vercel via integração reconectada, usando o ID e o contexto padrão.
 - [x] Configurar valores reais de Vercel/CORS/Auth para produção, preservando retornos locais explícitos.
 - [x] Refazer o build de produção da Vercel e testar login, chat e documentos.
-- [ ] Testar cadastro real e o ciclo de recuperação de senha por e-mail.
+- [x] Testar cadastro real e o ciclo de recuperação de senha por e-mail.
 
 ## Etapa 8: publicação por GitHub Actions
 
@@ -2022,12 +2023,64 @@ envelopes locais ficam em `.publication/`, ignorada pelo Git.
 - [x] Testar login, FAQ pública, upload e resposta baseada no documento.
 - [x] Recriar backend com autorização e comprovar persistência dos originais.
 - [x] Remover somente o arquivo sintético e conferir integridade final.
-- [ ] Testar cadastro e recuperação por e-mail com participação do responsável.
+- [x] Testar cadastro e recuperação por e-mail com participação do responsável.
 - [ ] Medir capacidade com carga representativa, concorrência e créditos de CPU.
 - [ ] Conferir primeiro snapshot agendado e ensaiar restauração do EBS.
 - [ ] Concluir revisão de vulnerabilidades e observabilidade da etapa 9.
 - [ ] Concluir permissões/OIDC, proteção da branch, adoção da release manual e
   ensaio real de deploy/rollback antes de habilitar `AWS_DEPLOY_ENABLED`.
+
+## Cadastro e recuperação de senha em produção - 2026-10-19
+
+O responsável criou uma conta própria de teste no formulário de produção,
+definindo pessoalmente a senha. O retorno para o login foi observado e o banco
+confirmou a existência da conta criada nesta data. Uma única solicitação de
+recuperação foi enviada pelo formulário à caixa indicada pelo responsável.
+O site exibiu sucesso; os logs agregados do Supabase mostraram um pedido
+`/recover` aceito com `200`, um evento de e-mail de recuperação e nenhum erro
+no intervalo examinado. O responsável confirmou recebimento do link, redefinição
+e entrada com a nova senha. Senhas, links, sessões e endereços da conta de teste
+não foram incluídos no Git ou neste relatório.
+
+A Site URL e o retorno de recuperação correspondem à origem de produção já
+documentada. Cadastro por e-mail está habilitado, confirmação inicial de e-mail
+está desabilitada e SMTP próprio não está configurado. Nenhuma dessas opções
+foi alterada nesta etapa. A marcação de e-mail confirmado no banco, nesse modo,
+é automática e não comprova recebimento de confirmação de cadastro; o ensaio
+de recebimento realizado foi o de recuperação. A documentação atual restringe
+o SMTP padrão a testes com endereços autorizados e limita o volume; o sucesso
+observado com esta caixa não comprova entrega geral para futuros usuários.
+Antes de ampliar o uso público, preparar SMTP próprio e validar confirmação,
+limites e entregabilidade. Não conceder acesso administrativo ao projeto apenas
+para permitir que uma pessoa receba mensagens de autenticação.
+
+Foi corrigida uma orientação incompatível com a configuração real: o cadastro
+sempre pedia confirmação de e-mail, mesmo quando o Supabase já retornava uma
+sessão e liberava o acesso. `authApi.register` agora informa se há confirmação
+pendente com base na resposta do provedor; o formulário mostra a orientação
+correspondente e mantém o destino de login. A correção não muda as regras de
+confirmação, credenciais ou permissões do Supabase. Testes cobrem os dois modos
+e erro do provedor: **236 testes em 26 arquivos**, typecheck e lint aprovados.
+
+Código da correção: commit `df559e6663feae1b53ea7e110cd8b5d5e9ace11f`.
+**Publicação dessa correção ainda pendente:** o conector Vercel retornou `403`
+ao consultar o deployment existente sob o escopo da equipe correta. O CLI local
+não está disponível. Não houve nova tentativa de deploy, mudança de escopo,
+push ou merge. Os testes reais de cadastro/recuperação acima usam a versão já
+publicada anteriormente; a nova orientação foi verificada localmente.
+
+Relatório: `docs/auth-publication-verification.json`. A conta de teste permanece
+existente, sem exclusão solicitada. A próxima validação independente é o ensaio
+de capacidade; snapshot/restauração, observabilidade e ativação da automação
+continuam pendentes. `AWS_DEPLOY_ENABLED` segue desativado.
+
+- [x] Conferir configurações reais de cadastro e retorno de recuperação.
+- [x] Cadastrar conta de teste com senha definida pelo responsável.
+- [x] Solicitar recuperação uma vez e conferir resposta e eventos agregados.
+- [x] Confirmar recebimento, redefinição e login com participação do responsável.
+- [x] Corrigir orientação de cadastro e validar os dois modos localmente.
+- [ ] Publicar a correção de orientação quando o acesso à Vercel estiver disponível.
+- [ ] Configurar SMTP próprio e validar confirmação antes de ampliar o uso público.
 
 ## Referências
 
@@ -2041,6 +2094,8 @@ envelopes locais ficam em `.publication/`, ignorada pelo Git.
 - [Tratamento de sinais no Uvicorn 0.29](https://github.com/encode/uvicorn/blob/0.29.0/uvicorn/server.py)
 - [Sintaxe e formato raw de env_file no Compose](https://docs.docker.com/reference/compose-file/services/#env_file)
 - [Chaves públicas e secretas do Supabase](https://supabase.com/docs/guides/getting-started/api-keys)
+- [Autenticação por senha e recuperação no Supabase](https://supabase.com/docs/guides/auth/passwords)
+- [Envio de e-mails por SMTP próprio no Supabase](https://supabase.com/docs/guides/auth/auth-smtp)
 - [Conexões PostgreSQL do Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres)
 - [Interpolação do ConfigParser](https://docs.python.org/3.12/library/configparser.html#interpolation-of-values)
 - [HTTPS automático no Caddy](https://caddyserver.com/docs/automatic-https)
