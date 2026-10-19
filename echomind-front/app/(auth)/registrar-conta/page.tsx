@@ -25,8 +25,10 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await authApi.register(email, password, { fullName, companyName });
-      toast.success("Cadastro realizado! Verifique seu email para confirmar a conta.");
+      const result = await authApi.register(email, password, { fullName, companyName });
+      toast.success(result.requiresEmailConfirmation
+        ? "Cadastro realizado! Verifique seu email para confirmar a conta."
+        : "Cadastro realizado! Você já pode entrar na sua conta.");
       router.push("/login");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao criar conta. Tente novamente.");

@@ -357,7 +357,7 @@ export const authApi = {
       throw new Error(error.message);
     }
 
-    return { email: data.user?.email };
+    return { email: data.user?.email, requiresEmailConfirmation: !data.session };
   },
 
   resetPassword: async (email: string) => {
