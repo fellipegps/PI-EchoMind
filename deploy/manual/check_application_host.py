@@ -8,6 +8,22 @@ def run(*args):
     return subprocess.check_output(args, stderr=subprocess.DEVNULL, text=True)
 
 
+def public_event(event):
+    if event.get('event') not in {'rag.warmup', 'rag.retrieval', 'rag.ingestion',
+                                 'rag.chat', 'document.ingestion', 'rag.generation'}:
+        return None
+    output = {key: event[key] for key in
+              ('event', 'status', 'stage', 'duration_ms', 'error_code') if key in event}
+    counts = event.get('counts', {})
+    if isinstance(counts, dict):
+        allowed = {'persisted_chunks', 'persisted_parents', 'vector_candidates',
+                   'current_candidates', 'approved_candidates', 'lexical_candidates',
+                   'returned_results', 'retrieved_results'}
+        output['counts'] = {key: value for key, value in counts.items()
+                            if key in allowed and type(value) is int and value >= 0}
+    return output
+
+
 def inspect_application():
     report = {"containers": []}
     for service in ("backend", "proxy"):
@@ -27,6 +43,7 @@ def inspect_application():
             "health": item["State"]["Health"]["Status"],
             "oom_killed": item["State"]["OOMKilled"], "restarts": item["RestartCount"],
             "memory_limit_bytes": item["HostConfig"]["Memory"], "cgroup": metrics,
+            "cpu_limit": item["HostConfig"]["NanoCpus"] / 1_000_000_000,
         })
     # Only operational events/fields leave this process, never question text,
     # tenant identity, authorization headers or raw provider diagnostics.
@@ -41,9 +58,9 @@ def inspect_application():
             event = json.loads(line[start:])
         except ValueError:
             continue
-        if event.get("event") in {"rag.warmup", "rag.retrieval", "document.ingestion", "rag.generation"}:
-            events.append({key: event[key] for key in
-                           ("event", "status", "stage", "duration_ms", "error_code") if key in event})
+        allowed = public_event(event)
+        if allowed is not None:
+            events.append(allowed)
     report["operational_events"] = events[-25:]
     return report
 

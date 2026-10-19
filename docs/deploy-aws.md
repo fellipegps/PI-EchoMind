@@ -13,10 +13,11 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
 - Geração das respostas continua na Groq; embeddings E5 rodam na CPU da EC2.
 - Uma instância e um worker. O limitador em memória bloqueia configurações com
   mais workers ou réplicas; escalar exige primeiro um store compartilhado.
-- `t3.small` com 2 GiB permanece como candidata para o MVP de baixo tráfego;
-  o tamanho definitivo depende da medição no container com o modelo real e da
-  margem para o sistema operacional e o proxy. A medição local anterior não
-  equivale a um teste em Linux limitado a 2 GiB. Não é necessário usar GPU.
+- `t3.small` com 2 GiB é a configuração inicial do MVP de baixo tráfego,
+  mantida após os ensaios controlados na EC2 descritos abaixo. Os ensaios
+  cobriram documentos sintéticos de até 256 KiB e rajadas curtas de quatro
+  consultas; carga sustentada e uploads máximos ainda precisam de validação.
+  Não é necessário usar GPU.
 - A disponibilidade e a validade dos créditos da conta precisam ser verificadas
   antes de provisionar. Esta configuração não promete hospedagem gratuita permanente.
 
@@ -60,6 +61,8 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
 - [ ] **9. Validação em produção:** login, recuperação de senha, chat, upload e
   consulta de documentos, memória/CPU/disco com embeddings reais, revisão de
   vulnerabilidades das dependências, logs e recuperação após reinício.
+  Fluxos funcionais e carga controlada medidos; corrigir busca durante ingestão,
+  validar carga sustentada/documentos máximos e ensaiar restauração do EBS.
 
 ## Diagnóstico inicial, antes das etapas de preparação
 
@@ -2024,7 +2027,9 @@ envelopes locais ficam em `.publication/`, ignorada pelo Git.
 - [x] Recriar backend com autorização e comprovar persistência dos originais.
 - [x] Remover somente o arquivo sintético e conferir integridade final.
 - [x] Testar cadastro e recuperação por e-mail com participação do responsável.
-- [ ] Medir capacidade com carga representativa, concorrência e créditos de CPU.
+- [x] Medir memória/CPU/disco na EC2 com ingestões de 64/256 KiB, lotes curtos
+  de 1/2/4 consultas e métricas de créditos de CPU.
+- [ ] Validar carga sustentada, ingestão completa de 10 MiB e créditos esgotados.
 - [ ] Conferir primeiro snapshot agendado e ensaiar restauração do EBS.
 - [ ] Concluir revisão de vulnerabilidades e observabilidade da etapa 9.
 - [ ] Concluir permissões/OIDC, proteção da branch, adoção da release manual e
@@ -2070,8 +2075,8 @@ push ou merge. Os testes reais de cadastro/recuperação acima usam a versão j�
 publicada anteriormente; a nova orientação foi verificada localmente.
 
 Relatório: `docs/auth-publication-verification.json`. A conta de teste permanece
-existente, sem exclusão solicitada. A próxima validação independente é o ensaio
-de capacidade; snapshot/restauração, observabilidade e ativação da automação
+existente, sem exclusão solicitada. O ensaio de capacidade está registrado na
+seção seguinte; snapshot/restauração, observabilidade e ativação da automação
 continuam pendentes. `AWS_DEPLOY_ENABLED` segue desativado.
 
 - [x] Conferir configurações reais de cadastro e retorno de recuperação.
@@ -2081,6 +2086,128 @@ continuam pendentes. `AWS_DEPLOY_ENABLED` segue desativado.
 - [x] Corrigir orientação de cadastro e validar os dois modos localmente.
 - [ ] Publicar a correção de orientação quando o acesso à Vercel estiver disponível.
 - [ ] Configurar SMTP próprio e validar confirmação antes de ampliar o uso público.
+
+## Medição controlada na EC2 - 2026-10-19
+
+**Decisão de dimensionamento inicial:** manter `t3.small`, dois vCPUs e 2 GiB,
+um worker e uma ingestão por vez. Backend com teto de 1.536 MiB/dois CPUs,
+Caddy com 128 MiB/0,5 CPU, cache persistente do E5 e reranker desligado.
+Uma instância de 1 GiB não oferece margem para esse backend mais o sistema
+operacional e o proxy. Os resultados abaixo não estabelecem um limite geral de
+usuários, requisições por segundo ou desempenho após esgotar créditos de CPU.
+
+O AWS MCP oficial confirmou a instância em execução e modo de créditos de CPU
+`standard`. A observação do host cobriu cerca de **11min32s**, com **336 amostras**
+a cada dois segundos mais o tempo de coleta. O observador lê os cgroups dos
+containers existentes e os contadores do host; não carrega outro modelo nem
+outro backend na máquina. Não houve mudança de instância, IAM, limites, imagem
+ou configuração de produção, nem criação de recursos AWS nesta etapa.
+
+| Métrica observada | Resultado |
+| --- | --- |
+| Pico de memória do backend nas amostras do ensaio | 984,21 MiB |
+| Pico histórico do cgroup, antes e depois | 1.077,19 MiB; não aumentou neste ensaio |
+| Pico amostrado do Caddy | 34,55 MiB |
+| Menor memória disponível no host | 405,91 MiB |
+| Swap utilizado | Zero |
+| CPU média do backend na janela inteira, incluindo intervalos ociosos | 5,04% dos dois vCPUs |
+| Maior CPU ocupada do host em uma amostra curta | 62% |
+| Espaço livre mínimo no disco raiz/dados | 11,45 / 16,05 GiB |
+| OOM, eventos de teto de memória, reinícios ou amostras de containers não saudáveis | Zero |
+
+O contador de pico do cgroup inclui toda a vida do container; não foi zerado.
+Por isso o pico histórico de 1.077 MiB, anterior ao ensaio, não foi atribuído à
+carga nova. A amostragem pode perder picos muito curtos; o contador histórico
+permaneceu igual. RSS, memória disponível do host e memória cgroup têm critérios
+diferentes e não devem ser somados como se fossem a mesma medida.
+
+Dois TXT sintéticos foram enviados pela interface autenticada da conta de teste,
+separada da instituição real. Todos os trechos foram indexados no Supabase real,
+usando o E5 existente na EC2. Os arquivos não contêm dados pessoais ou reais.
+
+| Arquivo | Tamanho | Trechos / vetores documentais | Aceite até estado pronto |
+| --- | --- | --- | --- |
+| `capacity-64k.txt` | 65.536 bytes | 104 / 104 | 92,600 s |
+| `capacity-256k.txt` | 262.144 bytes | 335 / 335 | 281,578 s |
+
+A segunda carga foi limitada a 256 KiB após medir a indexação sequencial do
+primeiro arquivo. O ensaio não executou ingestão de 1 MiB ou 10 MiB em produção,
+nem PDF/DOCX. O teste local anterior de 10 MiB apenas dividia o arquivo inteiro
+e codificava 40 trechos; continua sem equivaler a indexar o upload máximo.
+O processamento faz inserções de vetores trecho a trecho. CPU e memória com
+folga, combinadas com esse caminho e o tempo total medido, apontam as operações
+sequenciais de banco como prioridade de investigação/otimização; não foi feita
+uma medição isolada para atribuir todo o tempo à rede entre regiões.
+
+As consultas passaram pelo HTTPS público da conta sintética, com banco,
+retrieval e Groq reais. Não houve cópia de sessões ou tokens do navegador.
+Tempos incluem a conexão/TLS do cliente e os serviços externos.
+
+| Lote | Contexto | Respostas corretas | Tempo médio / máximo |
+| --- | --- | --- | --- |
+| Uma consulta, pergunta de controle | Primeiro arquivo pronto | 1/1 | 4,724 / 4,724 s |
+| Duas consultas, duas formulações | Segundo arquivo em processamento | 2/2 | 6,393 / 6,651 s |
+| Quatro consultas, quatro formulações | Segundo arquivo em processamento | 2/4 | 9,408 / 9,656 s |
+| Quatro consultas, mesma pergunta de controle | Segundo arquivo em processamento | 4/4 | 10,294 / 11,037 s |
+| Mesmas quatro formulações do lote misto | Ambos os arquivos prontos | 4/4 | 11,034 / 11,828 s |
+
+Todas as solicitações responderam HTTP `200`, inclusive as respostas sem a
+informação pedida. O verificador exige também o identificador sintético correto;
+HTTP 200 isoladamente não aprova o teste. Uma primeira resposta correta usou
+hífen tipográfico, levando à correção do verificador e inclusão de regressão
+para essa formatação. Foram enviados 17 pedidos no total, incluindo esse
+diagnóstico e uma reprodução isolada da pergunta que falhou.
+Os lotes são pequenos e não sustentados; não calcular P95/P99 nem extrapolar
+capacidade contínua a partir deles. O lote de duas formulações não é uma
+comparação estrita com o lote de pergunta única.
+
+**Problema de retrieval encontrado:** uma das perguntas sem informação também
+falhou com apenas uma solicitação durante a ingestão. Eventos operacionais
+mostraram dez candidatos vetoriais e zero candidatos elegíveis/resultados.
+Depois de concluir a ingestão, as mesmas quatro formulações passaram. O código
+busca os primeiros candidatos vetoriais e valida o estado do documento depois;
+os resultados são compatíveis com trechos ainda em processamento ocupando o
+top-k e ocultando fontes prontas. Corrigir a elegibilidade antes do corte de
+candidatos e adicionar regressão de documento pronto + documento em processamento
+é prioridade antes de ampliar o uso público. Nenhuma correção da aplicação ou
+troca de imagem foi feita nesta etapa de medição.
+
+O CloudWatch forneceu amostras de cinco minutos entre 19:40 e 19:55 UTC,
+consultadas às 20:00 UTC. CPU média máxima nesses intervalos: **11,80%**;
+saldo mínimo/último de **83,47 / 88,17 créditos de CPU**, com zero saldo excedente
+e zero créditos excedentes cobrados nas amostras disponíveis. Essas métricas
+têm atraso e não são a mesma janela/granularidade dos contadores locais.
+Não foi provocado esgotamento de créditos; desempenho em throttling continua
+sem ensaio. Os valores são créditos de CPU, não o saldo financeiro da conta.
+
+Após autorização específica, somente os dois arquivos sintéticos foram
+excluídos: dois documentos, 439 trechos e 439 vetores, além dos originais.
+A sessão do navegador terminou durante a coleta; a limpeza usou SSM com o
+operador existente. Antes de remover, um ensaio confirmou nomes, tamanhos e
+SHA-256, arquivos íntegros e runtime ocioso. A operação adquiriu as travas de
+admissão/processamento e das linhas do banco, removeu vetores e documentos na
+mesma transação e usou marcadores duráveis para concluir os originais.
+Não foi carregada outra instância do modelo. O verificador final encontrou um
+documento real, 20 trechos e seu original íntegro, nenhum arquivo sintético ou
+vetor remanescente, fila vazia e uploads liberados. Interações/métricas sintéticas
+continuam na conta de teste. API/proxy saudáveis; HTTPS/health/CORS aprovados.
+
+Ferramentas: `deploy/manual/observe_capacity.py`, `deploy/measure_public_chat.py`
+e `deploy/test_capacity_tools.py`. O leitor de eventos do host passou a exportar
+somente contagens operacionais reconhecidas, incluindo os nomes reais de eventos
+de ingestão/chat. Cinco testes dos medidores passaram, junto da verificação de
+sintaxe. Relatório sanitizado: `docs/capacity-aws-production.json`; arquivos e
+artefatos privados permanecem em `.publication/`, ignorada pelo Git.
+
+- [x] Medir host/containers e conferir limites na EC2 existente.
+- [x] Indexar integralmente os dois arquivos sintéticos e medir conclusão.
+- [x] Testar consultas simultâneas e verificar conteúdo, além do HTTP.
+- [x] Conferir créditos de CPU e saúde pública após os ensaios.
+- [x] Limpar somente os arquivos autorizados e verificar o original real.
+- [ ] Corrigir e testar retrieval enquanto outro documento está em processamento.
+- [ ] Otimizar e medir gravação vetorial por lotes antes de uploads grandes.
+- [ ] Validar carga sustentada, upload máximo completo, PDFs/DOCXs e créditos esgotados.
+- [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
 
 ## Referências
 

@@ -90,3 +90,36 @@ with mode `600`, and verifies it again. It does not mutate the database, create
 job markers or reindex chunks. An existing valid original is left in place; an
 invalid existing original aborts the operation. Use only for the specific file
 authorized by its owner; this is not a volume or database backup restoration.
+
+## Controlled capacity observation
+
+`observe_capacity.py` runs on the existing EC2 host without importing the model,
+reading runtime secrets or creating another application container. It samples
+host memory/swap/disks/CPU and the existing backend/proxy cgroups every two
+seconds. Its JSON output contains counters only and is replaced atomically.
+`--duration` is bounded to 30 minutes; `--stop-file` finishes observation early.
+Use a private host directory for the output and a fresh stop-marker path.
+
+The `load_guard_ok` flag rejects additional load when sampled memory reaches
+90% of a container limit, host available memory drops below 192 MiB, a container
+is replaced/restarted/unhealthy, or new OOM/limit events occur. The observer is
+read-only: it does not cancel uploads, kill processes or stop an active workload.
+Check its current report between separately bounded phases. Keep cold-model
+benchmarks in an isolated local container; a second model process on the 2 GiB
+production host would measure a different workload and compete with the API.
+
+`../measure_public_chat.py` sends one batch of 1, 2 or 4 public synthetic requests
+to the existing EchoMind API, without credentials, cookies or session extraction.
+Use only a test account's public slug and previously approved synthetic content.
+The default uses the same question in every request so concurrency comparisons
+do not change question wording. `--question-index` selects another fixed control;
+`--mixed-questions` tests wording separately. Do not treat a mixed batch as a
+controlled concurrency comparison.
+
+The verifier requires HTTP 200 and the expected synthetic identifier, normalizing
+Unicode hyphens from generated prose. It never prints response text. The measured
+duration includes client network/TLS, database/retrieval and the LLM; isolated
+batches do not establish sustained throughput, percentile latency or capacity
+after CPU credits run out. Account for synthetic interaction/metric records left
+in the test account, and obtain the required confirmation before permanent file
+cleanup. Run `python deploy/test_capacity_tools.py` for counter and output checks.

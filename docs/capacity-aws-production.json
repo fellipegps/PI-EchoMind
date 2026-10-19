@@ -1,0 +1,476 @@
+{
+  "date": "2026-10-19",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Bounded production capacity sample with synthetic documents in a separate test tenant; not a sustained-throughput or maximum-upload acceptance test",
+  "backend_source_revision": "ed86db754495d3b1c7b13b1b0ea40d9e7fec5060",
+  "aws_region": "us-east-1",
+  "instance": {
+    "type": "t3.small",
+    "vcpus": 2,
+    "nominal_memory_gib": 2,
+    "cpu_credit_mode": "standard"
+  },
+  "workload": {
+    "documents": [
+      {
+        "name": "capacity-64k.txt",
+        "bytes": 65536,
+        "chunks": 104,
+        "indexed_chunks": 104,
+        "ingestion_seconds": 92.6
+      },
+      {
+        "name": "capacity-256k.txt",
+        "bytes": 262144,
+        "chunks": 335,
+        "indexed_chunks": 335,
+        "ingestion_seconds": 281.578
+      }
+    ],
+    "all_document_chunks_indexed": true,
+    "account_isolated_from_real_institution": true,
+    "total_public_requests_sent": 17,
+    "first_identifier_format_check": "One correct answer used a Unicode hyphen; the verifier was corrected and regression tested before controlled comparison",
+    "larger_workload_deferred": "1 MiB production ingestion deferred after observing per-chunk indexing duration; bounded second document to 256 KiB. Full 10 MiB ingestion, PDFs and DOCXs remain untested."
+  },
+  "host_observation": {
+    "started_at": "2026-10-19T19:49:07.605908+00:00",
+    "ended_at": "2026-10-19T20:00:39.480967+00:00",
+    "samples": 336,
+    "elapsed_seconds": 691.875,
+    "sample_interval_cpu_peak_percent": 62,
+    "host_memory_total_bytes": 1998573568,
+    "host_memory_available_min_bytes": 425631744,
+    "host_swap_used_max_bytes": 0,
+    "root_free_min_bytes": 12293808128,
+    "data_free_min_bytes": 17237663744,
+    "containers": {
+      "backend": {
+        "container_replaced": false,
+        "healthy_at_end": true,
+        "unhealthy_samples": 0,
+        "oom_killed": false,
+        "restarts_before": 0,
+        "restarts_after": 0,
+        "memory_at_start_bytes": 1004318720,
+        "memory_at_end_bytes": 971862016,
+        "sampled_memory_peak_bytes": 1032024064,
+        "lifetime_memory_peak_before_bytes": 1129517056,
+        "lifetime_memory_peak_after_bytes": 1129517056,
+        "memory_limit_bytes": 1610612736,
+        "cpu_seconds": 69.764,
+        "average_cpu_percent_of_two_vcpus": 5.04,
+        "memory_limit_events_delta": 0,
+        "oom_events_delta": 0,
+        "oom_kill_events_delta": 0
+      },
+      "proxy": {
+        "container_replaced": false,
+        "healthy_at_end": true,
+        "unhealthy_samples": 0,
+        "oom_killed": false,
+        "restarts_before": 0,
+        "restarts_after": 0,
+        "memory_at_start_bytes": 21970944,
+        "memory_at_end_bytes": 35966976,
+        "sampled_memory_peak_bytes": 36229120,
+        "lifetime_memory_peak_before_bytes": 27107328,
+        "lifetime_memory_peak_after_bytes": 40476672,
+        "memory_limit_bytes": 134217728,
+        "cpu_seconds": 1.215,
+        "average_cpu_percent_of_two_vcpus": 0.09,
+        "memory_limit_events_delta": 0,
+        "oom_events_delta": 0,
+        "oom_kill_events_delta": 0
+      }
+    },
+    "load_guard_ok": true
+  },
+  "cloudwatch": {
+    "requested_start": "2026-10-19T19:40:00+00:00",
+    "requested_end": "2026-10-19T20:00:42.414942+00:00",
+    "period_seconds": 300,
+    "series": [
+      {
+        "metric": "CPUUtilization",
+        "timestamps": [
+          "2026-10-19T19:40:00+00:00",
+          "2026-10-19T19:45:00+00:00",
+          "2026-10-19T19:50:00+00:00",
+          "2026-10-19T19:55:00+00:00"
+        ],
+        "values": [
+          1.3102329977611198,
+          1.9254924117104804,
+          6.015788535170502,
+          11.801943412168281
+        ],
+        "status": "Complete"
+      },
+      {
+        "metric": "CPUCreditBalance",
+        "timestamps": [
+          "2026-10-19T19:40:00+00:00",
+          "2026-10-19T19:45:00+00:00",
+          "2026-10-19T19:50:00+00:00",
+          "2026-10-19T19:55:00+00:00"
+        ],
+        "values": [
+          83.47288943333334,
+          85.34159186666666,
+          87.03479045,
+          88.17000141666666
+        ],
+        "status": "Complete"
+      },
+      {
+        "metric": "CPUCreditUsage",
+        "timestamps": [
+          "2026-10-19T19:40:00+00:00",
+          "2026-10-19T19:45:00+00:00",
+          "2026-10-19T19:50:00+00:00",
+          "2026-10-19T19:55:00+00:00"
+        ],
+        "values": [
+          0.13045383333333332,
+          0.13136423333333333,
+          0.3065280833333333,
+          0.8633623666666667
+        ],
+        "status": "Complete"
+      },
+      {
+        "metric": "CPUSurplusCreditBalance",
+        "timestamps": [
+          "2026-10-19T19:40:00+00:00",
+          "2026-10-19T19:45:00+00:00",
+          "2026-10-19T19:50:00+00:00",
+          "2026-10-19T19:55:00+00:00"
+        ],
+        "values": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "status": "Complete"
+      },
+      {
+        "metric": "CPUSurplusCreditsCharged",
+        "timestamps": [
+          "2026-10-19T19:40:00+00:00",
+          "2026-10-19T19:45:00+00:00",
+          "2026-10-19T19:50:00+00:00",
+          "2026-10-19T19:55:00+00:00"
+        ],
+        "values": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "status": "Complete"
+      }
+    ],
+    "delayed_and_coarse_samples": true
+  },
+  "http_batches": {
+    "capacity-chat-1.json": {
+      "started_at": "2026-10-19T19:53:09.591724+00:00",
+      "ended_at": "2026-10-19T19:53:14.321823+00:00",
+      "api_origin": "https://echomind-api.duckdns.org",
+      "concurrency": 1,
+      "requests": [
+        {
+          "request": 1,
+          "status": 200,
+          "bytes": 134,
+          "expected_marker_found": true,
+          "first_byte_seconds": 4.189,
+          "duration_seconds": 4.724
+        }
+      ],
+      "mean_duration_seconds": 4.724,
+      "max_duration_seconds": 4.724,
+      "all_expected_answers": true,
+      "scope": "Single synthetic batch, including client network/TLS and upstream services; not sustained capacity or a percentile estimate"
+    },
+    "capacity-chat-2.json": {
+      "started_at": "2026-10-19T19:53:38.992498+00:00",
+      "ended_at": "2026-10-19T19:53:45.648673+00:00",
+      "api_origin": "https://echomind-api.duckdns.org",
+      "concurrency": 2,
+      "requests": [
+        {
+          "request": 1,
+          "status": 200,
+          "bytes": 134,
+          "expected_marker_found": true,
+          "first_byte_seconds": 5.565,
+          "duration_seconds": 6.135
+        },
+        {
+          "request": 2,
+          "status": 200,
+          "bytes": 95,
+          "expected_marker_found": true,
+          "first_byte_seconds": 6.158,
+          "duration_seconds": 6.651
+        }
+      ],
+      "mean_duration_seconds": 6.393,
+      "max_duration_seconds": 6.651,
+      "all_expected_answers": true,
+      "scope": "Single synthetic batch, including client network/TLS and upstream services; not sustained capacity or a percentile estimate"
+    },
+    "capacity-chat-4-mixed.json": {
+      "started_at": "2026-10-19T19:54:26.302329+00:00",
+      "ended_at": "2026-10-19T19:54:35.966852+00:00",
+      "api_origin": "https://echomind-api.duckdns.org",
+      "concurrency": 4,
+      "requests": [
+        {
+          "request": 1,
+          "status": 200,
+          "bytes": 134,
+          "expected_marker_found": true,
+          "first_byte_seconds": 8.682,
+          "duration_seconds": 9.653
+        },
+        {
+          "request": 2,
+          "status": 200,
+          "bytes": 93,
+          "expected_marker_found": true,
+          "first_byte_seconds": 8.169,
+          "duration_seconds": 9.161
+        },
+        {
+          "request": 3,
+          "status": 200,
+          "bytes": 106,
+          "expected_marker_found": false,
+          "first_byte_seconds": 8.167,
+          "duration_seconds": 9.656
+        },
+        {
+          "request": 4,
+          "status": 200,
+          "bytes": 106,
+          "expected_marker_found": false,
+          "first_byte_seconds": 7.597,
+          "duration_seconds": 9.163
+        }
+      ],
+      "mean_duration_seconds": 9.408,
+      "max_duration_seconds": 9.656,
+      "all_expected_answers": false,
+      "scope": "Single synthetic batch, including client network/TLS and upstream services; not sustained capacity or a percentile estimate",
+      "question_set": "mixed"
+    },
+    "capacity-chat-4.json": {
+      "started_at": "2026-10-19T19:55:28.087629+00:00",
+      "ended_at": "2026-10-19T19:55:39.130543+00:00",
+      "api_origin": "https://echomind-api.duckdns.org",
+      "concurrency": 4,
+      "requests": [
+        {
+          "request": 1,
+          "status": 200,
+          "bytes": 145,
+          "expected_marker_found": true,
+          "first_byte_seconds": 9.559,
+          "duration_seconds": 10.563
+        },
+        {
+          "request": 2,
+          "status": 200,
+          "bytes": 145,
+          "expected_marker_found": true,
+          "first_byte_seconds": 8.978,
+          "duration_seconds": 9.522
+        },
+        {
+          "request": 3,
+          "status": 200,
+          "bytes": 147,
+          "expected_marker_found": true,
+          "first_byte_seconds": 9.532,
+          "duration_seconds": 10.056
+        },
+        {
+          "request": 4,
+          "status": 200,
+          "bytes": 134,
+          "expected_marker_found": true,
+          "first_byte_seconds": 9.583,
+          "duration_seconds": 11.037
+        }
+      ],
+      "question_set": "fixed",
+      "mean_duration_seconds": 10.294,
+      "max_duration_seconds": 11.037,
+      "all_expected_answers": true,
+      "scope": "Single synthetic batch, including client network/TLS and upstream services; not sustained capacity or a percentile estimate"
+    },
+    "capacity-query-3-during.json": {
+      "started_at": "2026-10-19T19:56:32.426622+00:00",
+      "ended_at": "2026-10-19T19:56:36.844722+00:00",
+      "api_origin": "https://echomind-api.duckdns.org",
+      "concurrency": 1,
+      "requests": [
+        {
+          "request": 1,
+          "status": 200,
+          "bytes": 106,
+          "expected_marker_found": false,
+          "first_byte_seconds": 3.225,
+          "duration_seconds": 4.413
+        }
+      ],
+      "question_set": "fixed",
+      "question_index": 3,
+      "mean_duration_seconds": 4.413,
+      "max_duration_seconds": 4.413,
+      "all_expected_answers": false,
+      "scope": "Single synthetic batch, including client network/TLS and upstream services; not sustained capacity or a percentile estimate"
+    },
+    "capacity-chat-4-after-ready.json": {
+      "started_at": "2026-10-19T19:58:41.118556+00:00",
+      "ended_at": "2026-10-19T19:58:52.954011+00:00",
+      "api_origin": "https://echomind-api.duckdns.org",
+      "concurrency": 4,
+      "requests": [
+        {
+          "request": 1,
+          "status": 200,
+          "bytes": 147,
+          "expected_marker_found": true,
+          "first_byte_seconds": 10.781,
+          "duration_seconds": 11.295
+        },
+        {
+          "request": 2,
+          "status": 200,
+          "bytes": 178,
+          "expected_marker_found": true,
+          "first_byte_seconds": 9.779,
+          "duration_seconds": 10.755
+        },
+        {
+          "request": 3,
+          "status": 200,
+          "bytes": 220,
+          "expected_marker_found": true,
+          "first_byte_seconds": 11.319,
+          "duration_seconds": 11.828
+        },
+        {
+          "request": 4,
+          "status": 200,
+          "bytes": 158,
+          "expected_marker_found": true,
+          "first_byte_seconds": 9.702,
+          "duration_seconds": 10.256
+        }
+      ],
+      "question_set": "mixed",
+      "question_index": null,
+      "mean_duration_seconds": 11.034,
+      "max_duration_seconds": 11.828,
+      "all_expected_answers": true,
+      "scope": "Single synthetic batch, including client network/TLS and upstream services; not sustained capacity or a percentile estimate"
+    }
+  },
+  "retrieval_finding": {
+    "mixed_during_ingestion_correct": 2,
+    "mixed_during_ingestion_total": 4,
+    "same_question_four_concurrent_correct": 4,
+    "same_question_four_concurrent_total": 4,
+    "failed_wording_reproduced_with_single_request_during_ingestion": true,
+    "mixed_after_ingestion_correct": 4,
+    "mixed_after_ingestion_total": 4,
+    "operational_log_evidence": "Retrieval events during ingestion included 10 vector candidates and 0 current/approved/returned results.",
+    "interpretation": "Evidence is consistent with in-progress chunks occupying top-k candidates before document-status filtering. Failure reproduced without concurrency, and the same mixed batch passed once indexing completed. This is a retrieval eligibility issue to address, not evidence of memory exhaustion.",
+    "fix_required_before_broader_public_use": true,
+    "application_fix_implemented_in_this_step": false
+  },
+  "recommendation": {
+    "initial_mvp_instance": "Keep t3.small (2 vCPU, 2 GiB) for low traffic",
+    "backend_memory_limit_mib": 1536,
+    "backend_cpu_limit": 2,
+    "proxy_memory_limit_mib": 128,
+    "proxy_cpu_limit": 0.5,
+    "workers": 1,
+    "ingestions_at_once": 1,
+    "reranker": "Keep disabled",
+    "gpu_required": false,
+    "one_gib_instance_recommended": false,
+    "scale_claim": "A four-request burst is not a guarantee for four continuously active users, a throughput SLA or performance with exhausted CPU credits.",
+    "priorities": [
+      "Correct retrieval eligibility during ingestion",
+      "Batch embedding/vector persistence to reduce sequential per-chunk round trips",
+      "Validate representative maximum-size documents and sustained traffic before increasing load"
+    ]
+  },
+  "cleanup": {
+    "matched_documents": 2,
+    "matched_chunks": 439,
+    "matched_vectors": 439,
+    "all_originals_valid": true,
+    "applied": true,
+    "originals_removed": true,
+    "queued_jobs_after": 0,
+    "method": "Authorized administrative SSM cleanup after browser session ended; checked exact synthetic names, sizes and digests under admission/processing and database row locks, with durable delete markers and a dry run.",
+    "remaining_capacity_documents": 0,
+    "remaining_capacity_vectors": 0,
+    "remaining_ready_documents": 1,
+    "remaining_ready_chunks": 20,
+    "final_integrity": {
+      "ready_documents": 1,
+      "valid_originals": 1,
+      "missing_originals": 0,
+      "invalid_originals": 0,
+      "original_files": 1,
+      "queued_jobs": 0,
+      "draining": false
+    },
+    "synthetic_interactions_and_metrics_retained_in_test_account": true
+  },
+  "public_api_after_test": {
+    "checked_at": "2026-10-19T20:05:01.787927+00:00",
+    "domain": "echomind-api.duckdns.org",
+    "health_status": 200,
+    "http_redirect_status": 308,
+    "certificate_hostname_and_chain_valid": true,
+    "tls_protocol": "TLSv1.3",
+    "certificate_not_after": "Jan 17 17:17:59 2027 GMT",
+    "certificate_serial": "05C95EF8B85CD5E4646DE5AAA7397D3E303A",
+    "certificate_issuer": {
+      "countryName": "US",
+      "organizationName": "Let's Encrypt",
+      "commonName": "YE2"
+    },
+    "cors_production_origin": true,
+    "cors_untrusted_origin_rejected": true,
+    "hsts": true,
+    "protected_endpoint_without_credentials": 403
+  },
+  "local_verification": {
+    "capacity_tool_tests_passed": 5,
+    "python_syntax": "passed"
+  },
+  "changes": {
+    "new_aws_resources": 0,
+    "iam_or_instance_type_changes": false,
+    "application_recreation_or_new_release": false,
+    "aws_deploy_enabled": false
+  },
+  "remaining": [
+    "Retrieval eligibility correction during document ingestion",
+    "Sustained traffic, maximum-size full ingestion and CPU-credit exhaustion tests",
+    "Scheduled EBS snapshot and restore rehearsal",
+    "Remaining dependency/observability review",
+    "Pending signup-guidance publication and CI/CD activation prerequisites"
+  ]
+}
