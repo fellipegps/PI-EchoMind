@@ -1,0 +1,276 @@
+{
+  "reviewed_at": "2026-10-19T14:39:52.361151+00:00",
+  "region": "us-east-1",
+  "stack": "echomind-prod",
+  "state": "change-set-ready-not-executed",
+  "change_set": {
+    "name": "predeploy-application-20261019-v1",
+    "status": "CREATE_COMPLETE",
+    "execution_status": "AVAILABLE",
+    "resource_count": 26,
+    "changes": [
+      {
+        "Action": "Add",
+        "Name": "AlertKey",
+        "Type": "AWS::KMS::Key"
+      },
+      {
+        "Action": "Add",
+        "Name": "AlertTopicPolicy",
+        "Type": "AWS::SNS::TopicPolicy"
+      },
+      {
+        "Action": "Add",
+        "Name": "AlertTopic",
+        "Type": "AWS::SNS::Topic"
+      },
+      {
+        "Action": "Add",
+        "Name": "AuditBucketPolicy",
+        "Type": "AWS::S3::BucketPolicy"
+      },
+      {
+        "Action": "Add",
+        "Name": "AuditBucket",
+        "Type": "AWS::S3::Bucket"
+      },
+      {
+        "Action": "Add",
+        "Name": "AuditTrail",
+        "Type": "AWS::CloudTrail::Trail"
+      },
+      {
+        "Action": "Add",
+        "Name": "BackupAlarm",
+        "Type": "AWS::CloudWatch::Alarm"
+      },
+      {
+        "Action": "Add",
+        "Name": "Budget",
+        "Type": "AWS::Budgets::Budget"
+      },
+      {
+        "Action": "Add",
+        "Name": "CpuAlarm",
+        "Type": "AWS::CloudWatch::Alarm"
+      },
+      {
+        "Action": "Add",
+        "Name": "CreditAlarm",
+        "Type": "AWS::CloudWatch::Alarm"
+      },
+      {
+        "Action": "Add",
+        "Name": "DataVolume",
+        "Type": "AWS::EC2::Volume"
+      },
+      {
+        "Action": "Add",
+        "Name": "DiskAttachment",
+        "Type": "AWS::EC2::VolumeAttachment"
+      },
+      {
+        "Action": "Add",
+        "Name": "GatewayAttachment",
+        "Type": "AWS::EC2::VPCGatewayAttachment"
+      },
+      {
+        "Action": "Add",
+        "Name": "InternetGateway",
+        "Type": "AWS::EC2::InternetGateway"
+      },
+      {
+        "Action": "Add",
+        "Name": "IpAssociation",
+        "Type": "AWS::EC2::EIPAssociation"
+      },
+      {
+        "Action": "Add",
+        "Name": "NodeNetworkInterface",
+        "Type": "AWS::EC2::NetworkInterface"
+      },
+      {
+        "Action": "Add",
+        "Name": "Node",
+        "Type": "AWS::EC2::Instance"
+      },
+      {
+        "Action": "Add",
+        "Name": "PublicIp",
+        "Type": "AWS::EC2::EIP"
+      },
+      {
+        "Action": "Add",
+        "Name": "PublicRoute",
+        "Type": "AWS::EC2::Route"
+      },
+      {
+        "Action": "Add",
+        "Name": "RouteTable",
+        "Type": "AWS::EC2::RouteTable"
+      },
+      {
+        "Action": "Add",
+        "Name": "SnapshotPolicy",
+        "Type": "AWS::DLM::LifecyclePolicy"
+      },
+      {
+        "Action": "Add",
+        "Name": "StatusAlarm",
+        "Type": "AWS::CloudWatch::Alarm"
+      },
+      {
+        "Action": "Add",
+        "Name": "SubnetRoute",
+        "Type": "AWS::EC2::SubnetRouteTableAssociation"
+      },
+      {
+        "Action": "Add",
+        "Name": "Subnet",
+        "Type": "AWS::EC2::Subnet"
+      },
+      {
+        "Action": "Add",
+        "Name": "Vpc",
+        "Type": "AWS::EC2::VPC"
+      },
+      {
+        "Action": "Add",
+        "Name": "WebSecurityGroup",
+        "Type": "AWS::EC2::SecurityGroup"
+      }
+    ],
+    "validation_error_events": [],
+    "template_matches_reviewed_file": true,
+    "creator_uses_root": false,
+    "execution_role_verified_from_stack": true,
+    "stack_status": "REVIEW_IN_PROGRESS"
+  },
+  "configuration": {
+    "instance_type": "t3.small",
+    "vcpus": 2,
+    "memory_mib": 2048,
+    "os": "Ubuntu 24.04 amd64",
+    "availability_zone": "us-east-1a",
+    "ami": "ami-02a9cdd4e98bc3c78",
+    "ami_available": true,
+    "instance_type_offered_in_az": true,
+    "live_capacity_guaranteed": false,
+    "root_gib": 16,
+    "durable_data_gib": 20,
+    "encrypted_ebs": true,
+    "public_ipv4_count": 1,
+    "inbound_ports": [
+      80,
+      443
+    ],
+    "ssh": false,
+    "cpu_credit_mode": "standard",
+    "snapshot_schedule_hours": 24,
+    "snapshots_retained": 7,
+    "standard_alarms": 4,
+    "monthly_alert_budget_usd": 30,
+    "audit_trail": true,
+    "existing_data_volume_reused": false
+  },
+  "account": {
+    "plan": "FREE",
+    "status": "ACTIVE",
+    "remaining_credits_usd": 100,
+    "expires_at": "2027-04-13",
+    "standard_vcpu_quota": 5,
+    "preflight_read_errors": [],
+    "preflight_blockers": [],
+    "region_instances_before_execution": 0
+  },
+  "pricing_api": [
+    {
+      "name": "ec2",
+      "sku": "QA3NBPZEQKZ2K9AR",
+      "unit": "Hrs",
+      "usd": "0.0208000000",
+      "description": "$0.0208 per On Demand Linux t3.small Instance Hour"
+    },
+    {
+      "name": "gp3",
+      "sku": "JG3KUJMBRGHV3N8G",
+      "unit": "GB-Mo",
+      "usd": "0.0800000000",
+      "description": "$0.08 per GB-month of General Purpose (gp3) provisioned storage - US East (N. Virginia)"
+    },
+    {
+      "name": "snapshot",
+      "sku": "7U7TWP44UP36AT3R",
+      "unit": "GB-Mo",
+      "usd": "0.0500000000",
+      "description": "$0.05 per GB-Month of snapshot data stored - US East (Northern Virginia)"
+    },
+    {
+      "name": "ipv4",
+      "sku": "4GQUNXTFWVSGPUZK",
+      "unit": "Hrs",
+      "usd": "0.0050000000",
+      "description": "$0.005 per In-use public IPv4 address per hour"
+    },
+    {
+      "name": "kms",
+      "sku": "U553K98XGDXCYHWS",
+      "unit": "Keys",
+      "usd": "1.0000000000",
+      "description": "$1 per customer managed KMS key version in US East (N. Virginia)"
+    },
+    {
+      "name": "alarms",
+      "sku": "EVETVUGEN3MUTMXM",
+      "unit": "Alarms",
+      "usd": "0.1000000000",
+      "description": "Standard resolution alarm metric per month, us-east-1"
+    }
+  ],
+  "execution_requirements": [
+    "Explicit owner approval before executing this change set.",
+    "Recheck session, plan availability and costs if execution is delayed.",
+    "Set deploy/aws/stack-policy.json immediately after CREATE_COMPLETE and before any update; AWS rejects SetStackPolicy in REVIEW_IN_PROGRESS.",
+    "Verify cloud-init, mounts, Docker, AWS CLI and SSM after provisioning; stack completion does not prove bootstrap success.",
+    "Confirm SNS subscription using the owner's email.",
+    "Review live-provider permission failures without granting administrator access."
+  ],
+  "limitations": [
+    "Price estimate excludes variable traffic, audit S3, SNS/KMS requests, pipeline ECR/S3 and external providers; promotional credits are finite.",
+    "FreeTierEligible flags and available quota do not guarantee zero charges or live capacity.",
+    "DescribeEvents was denied through the scoped local IAM policy with both change-set and stack selectors; validation events were read through AWS Core. No permission expansion was applied.",
+    "No instance, EBS disk, EIP, KMS key or other application resource has been provisioned by change-set creation."
+  ],
+  "estimate": {
+    "verified_at": "2026-10-19",
+    "region": "us-east-1",
+    "currency": "USD",
+    "hours": 730,
+    "gross_monthly": {
+      "ec2": "15.18",
+      "ebs_root_and_data": "2.88",
+      "public_ipv4": "3.65",
+      "kms_notifications": "1.00",
+      "alarms_before_free_allowances": "0.40",
+      "illustrative_snapshot_storage": "1.00"
+    },
+    "gross_monthly_total": "24.11",
+    "illustrative_credit_months": "4.15",
+    "snapshot_assumption_gib_month": 20,
+    "excluded": [
+      "traffic beyond applicable allowances",
+      "S3 audit storage and requests",
+      "SNS deliveries and KMS API requests",
+      "domain and DNS provider",
+      "taxes/foreign exchange",
+      "Supabase, Groq and Vercel",
+      "future key rotations",
+      "pipeline ECR images and S3 release/backup storage and requests"
+    ],
+    "notes": [
+      "Snapshots are incremental; seven copies do not mean seven full disks.",
+      "Free Plan ends at credit exhaustion or account-plan expiration, whichever occurs first.",
+      "Budget alerts do not stop resources. Recheck pricing and credits before provisioning."
+    ]
+  }
+}

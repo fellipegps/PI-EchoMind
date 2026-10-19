@@ -1,6 +1,6 @@
 """Point-in-time gross estimate, before credits/free allowances, in USD.
 
-Rates verified 2026-10-14 in us-east-1 using AWS Price List and official pricing.
+Rates verified 2026-10-19 in us-east-1 using AWS Price List and official pricing.
 This calculator does not call AWS or claim the credits cover every service.
 """
 
@@ -33,13 +33,14 @@ def estimate(*, hours=730, root_gib=16, data_gib=20, snapshot_gib_month=20, cred
     total = sum(entries.values(), Decimal(0))
     money = lambda value: str(value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
     return {
-        "verified_at": "2026-10-14", "region": "us-east-1", "currency": "USD", "hours": hours,
+        "verified_at": "2026-10-19", "region": "us-east-1", "currency": "USD", "hours": hours,
         "gross_monthly": {key: money(value) for key, value in entries.items()},
         "gross_monthly_total": money(total),
         "illustrative_credit_months": money(Decimal(str(credits)) / total) if total else None,
         "snapshot_assumption_gib_month": snapshot_gib_month,
         "excluded": ["traffic beyond applicable allowances", "S3 audit storage and requests", "SNS deliveries and KMS API requests",
-                     "domain and DNS provider", "taxes/foreign exchange", "Supabase, Groq and Vercel", "future key rotations"],
+                     "domain and DNS provider", "taxes/foreign exchange", "Supabase, Groq and Vercel", "future key rotations",
+                     "pipeline ECR images and S3 release/backup storage and requests"],
         "notes": ["Snapshots are incremental; seven copies do not mean seven full disks.",
                   "Free Plan ends at credit exhaustion or account-plan expiration, whichever occurs first.",
                   "Budget alerts do not stop resources. Recheck pricing and credits before provisioning."],

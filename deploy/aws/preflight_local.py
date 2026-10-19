@@ -26,8 +26,12 @@ PUBLIC_IMAGE = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/
 
 
 async def preflight(profile):
+    cached_identity = None
+
     async def read(*, service_name, operation_name, region_name, params):
         service, operation = READS[(service_name, operation_name)]
+        if operation == "get-caller-identity" and cached_identity is not None:
+            return cached_identity
         if operation == "get-parameter" and params != {"Name": PUBLIC_IMAGE}:
             raise ValueError("Only the public Canonical image parameter is allowed.")
         process = await asyncio.create_subprocess_exec(
@@ -40,6 +44,10 @@ async def preflight(profile):
             raise RuntimeError(stderr.decode(errors="replace").strip())
         return json.loads(stdout)
 
+    # Let one CLI process renew the temporary session before parallel checks.
+    # Concurrent renewals can exhaust the sign-in token endpoint rate limit.
+    cached_identity = await read(service_name="sts", operation_name="GetCallerIdentity",
+                                 region_name="us-east-1", params={})
     source = Path(__file__).with_name("preflight.mcp.py")
     namespace = {"asyncio": asyncio, "call_boto3": read}
     program = compile(source.read_text(encoding="utf-8"), str(source), "exec", flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)

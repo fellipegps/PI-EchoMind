@@ -1024,8 +1024,11 @@ deve ser movida para o bootstrap/revisão de acesso. Não acrescentar escrita IA
 autoriza criar o provedor OIDC nem os recursos do pipeline.
 
 `stack-policy.json` bloqueia substituição/exclusão por updates de Node, disco,
-Elastic IP, chave KMS e bucket de auditoria. Essa política precisa acompanhar
-a criação da stack. Não existe Export/ImportValue entre stacks. Uma mudança
+Elastic IP, chave KMS e bucket de auditoria. No fluxo por change set, aplicar
+essa política imediatamente após `CREATE_COMPLETE`, antes de qualquer update:
+a AWS rejeita `SetStackPolicy` enquanto a stack está `REVIEW_IN_PROGRESS` e o
+change set não recebe esse documento. Ela protege updates, não o rollback da
+criação inicial. Não existe Export/ImportValue entre stacks. Uma mudança
 de AMI pode exigir substituir a EC2; um disco de uma AZ não se move para outra
 AZ por simples edição. Planeje drenagem, backup e recuperação antes de liberar
 uma mudança protegida. A proteção de término também exige operação explícita
@@ -1165,15 +1168,64 @@ do projeto.
 | API `ValidateTemplate` | Templates atuais aprovados em 19/10: principal sem capability IAM; bootstrap com `CAPABILITY_IAM`. Não comprova execução ou toda a semântica |
 | cfn-lint 1.57.2 | Aprovado para `us-east-1`, sem erros ou avisos |
 | cfn-guard 3.2.1 | Template aprovado; seis regressões rejeitadas: SSH, faixa ampla de portas, disco sem criptografia, CPU ilimitada, IMDSv1 e bucket público |
-| Change set/validação da conta | Bootstrap de acesso validado e executado; change set da aplicação ainda não criado |
+| Change set/validação da conta | Bootstrap executado; change set da aplicação disponível, com 26 inclusões e sem erros de validação; execução pendente |
 | EC2/SSM/backup/alertas reais | Não provisionados ou testados; dependem da execução aprovada da infraestrutura |
 
 A etapa 6 conclui a preparação e a validação local da infraestrutura. Não
 confirma o funcionamento de serviços ainda não criados. Antes da criação real:
 rever crédito/custos, medir o E5 no limite candidato, conferir os parâmetros
 privados, usar identidade não root, revisar o change
-set e aplicar `stack-policy.json`. A confirmação SNS só é enviada ao criar o
-tópico. Não foram enviados alertas ou feitas alterações na conta.
+set; aplicar `stack-policy.json` após a criação, antes de updates. A confirmação SNS só é enviada ao criar o
+tópico. A preparação local original não enviou alertas nem alterou a conta;
+o registro do plano real está descrito abaixo.
+
+### Revisão real da criação da EC2 - 19/10/2026
+
+O usuário IAM `echomind-access-operator`, pelo perfil `default`, registrou o
+change set **`predeploy-application-20261019-v1`** da stack `echomind-prod`.
+O plano está `CREATE_COMPLETE`/`AVAILABLE`, com exatamente **26 inclusões**:
+uma EC2, rede dedicada, interface, Elastic IP, disco de dados e associação,
+política DLM, quatro alarmes, SNS/KMS, orçamento e auditoria S3/CloudTrail.
+O disco raiz de 16 GiB está dentro da definição da EC2; o disco de dados tem
+20 GiB. Não há novos recursos IAM no plano. A stack está `REVIEW_IN_PROGRESS`:
+nenhum recurso da aplicação foi provisionado. Não tentar criar outra stack
+com esse mesmo nome; reutilizar o change set existente para a execução aprovada.
+
+O template registrado coincide com o arquivo revisado e a stack usa a role de
+execução fixa do bootstrap. A AMI resolvida é `ami-02a9cdd4e98bc3c78`, Ubuntu
+24.04 amd64, disponível no catálogo; `t3.small` é oferecida em `us-east-1a`.
+Isso não reserva capacidade física. A consulta real confirmou quota de cinco
+vCPUs Standard, plano FREE/ACTIVE e US$100 em créditos, válidos até 13/04/2027
+ou seu esgotamento. O preflight local passou em todas as nove consultas.
+
+A execução inicial do preflight encontrou limite de requisições de renovação
+OAuth: vários processos CLI tentavam renovar a mesma sessão simultaneamente.
+O adaptador agora consulta a identidade primeiro, deixa essa renovação terminar
+e reutiliza o resultado STS nas verificações paralelas. A repetição real passou
+sem erros, sem pedir outro login ou exportar credenciais.
+
+Os seis preços foram reconferidos no AWS Price List: EC2 US$0,0208/h, gp3
+US$0,08/GiB-mês, IPv4 US$0,005/h, snapshots US$0,05/GiB-mês, chave KMS US$1/mês
+e alarmes padrão US$0,10 por métrica/mês. O cálculo continua **US$24,11/mês**
+para 730 horas e 20 GiB-mês ilustrativos de snapshots, antes dos créditos e
+franquias. Tráfego, armazenamento/requisições de auditoria e pipeline, entregas
+SNS, chamadas KMS e provedores externos continuam variáveis/excluídos. Não é
+hospedagem gratuita permanente; o orçamento de US$30 envia alertas e não
+interrompe os recursos.
+
+`DescribeEvents` foi negado ao perfil IAM com os seletores de change set e de
+stack. A integração AWS Core leu os eventos somente para conferência: operação
+concluída sem `VALIDATION_ERROR`. Nenhuma permissão foi ampliada para contornar
+a negação; o acesso do CLI a essa API nova ainda precisa de revisão específica.
+O template passou novamente no cfn-lint, nas regras Guard, nas seis regressões
+de segurança e nos 13 testes de infraestrutura. Evidências públicas em
+`docs/ec2-predeployment-review.json`, sem e-mail ou identificadores da conta.
+
+Antes de executar: obter aprovação explícita para este change set e seu custo.
+Após `CREATE_COMPLETE`, aplicar a stack policy antes de qualquer update,
+conferir bootstrap/mounts/Docker/CLI/SSM, inscrição SNS e auditoria. Sucesso do
+CloudFormation não comprova que o bootstrap terminou nem que a API funciona.
+Não foi iniciada a etapa final nem habilitado o pipeline.
 
 ## Etapa 7: banco e frontend
 
@@ -1491,7 +1543,10 @@ um release malicioso aprovado em código seguro.
 - [x] Autenticar o perfil local `default` como o novo usuário; confirmar identidade e MFA.
 - [x] Preparar/revisar `provisioning.yaml` com permissões do projeto, roles fixas e 25 simulações de autorização.
 - [x] Aprovar/aplicar `echomind-provisioning`; conferir políticas e relações de confiança, simular os 25 cenários com as identidades reais e executar o preflight com o perfil IAM local.
+- [x] Rever créditos/preços/AMI/quota e registrar o change set da aplicação com identidade IAM: 26 inclusões, sem erros de validação, aguardando execução.
 - [ ] Provisionar a infraestrutura da etapa 6 com identidade não-root, créditos/custos revisados e bootstrap pronto.
+- [ ] Aplicar `stack-policy.json` após `CREATE_COMPLETE`, antes de qualquer update; conferir o documento aplicado.
+- [ ] Revisar a autorização de leitura de `DescribeEvents` no perfil local; enquanto isso, usar AWS Core somente para consultar a validação.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [ ] Confirmar na EC2 real o AWS CLI **v2**, SSM Agent **3.3.2746.0 ou superior**, serviço ativo e marcador de bootstrap. Sem `ENV_VAR`, o documento falha fechado.
 - [x] Criar backup consistente do schema público real, restaurá-lo localmente e aplicar a revisão 0023; preflight real de schema/RLS/vetores aprovado via TLS.
