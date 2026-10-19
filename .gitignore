@@ -9,6 +9,7 @@
 pgpass
 pg_service.conf
 .database-backups/
+.publication/
 deploy/aws/parameters.json
 deploy/aws/parameters.local.json
 deploy/aws/outputs.local.json
