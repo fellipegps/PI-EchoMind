@@ -1,0 +1,294 @@
+{
+  "date": "2026-10-19",
+  "template": "deploy/aws/provisioning.yaml",
+  "state": "applied-and-verified-after-root-volume-context-correction",
+  "scope": {
+    "region": "us-east-1",
+    "application_stack": "echomind-prod",
+    "bootstrap_stack": "echomind-provisioning",
+    "resources": 7
+  },
+  "public_service_reference": {
+    "distinct_actions": 214,
+    "services": 17,
+    "invalid_actions": [],
+    "source": "https://servicereference.us-east-1.amazonaws.com/"
+  },
+  "access_analyzer": [
+    {
+      "policy": "SnapshotRole/project-snapshots",
+      "findings": []
+    },
+    {
+      "policy": "NetworkPolicy",
+      "findings": []
+    },
+    {
+      "policy": "StorageAndServicesPolicy",
+      "findings": []
+    },
+    {
+      "policy": "OperatorPolicy",
+      "findings": []
+    }
+  ],
+  "iam_simulator": [
+    {
+      "case": "operator-plans-project",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-update-access",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-pass-another-execution-role",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-requires-mfa",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-create-users",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-administers-tagged-host",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-administer-unrelated-host",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-change-own-permissions",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-passes-only-node-to-ec2",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-pass-node-to-other-service",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-pass-foreign-role",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-uses-project-vpc",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-use-foreign-vpc",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-use-foreign-network-interface",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-manages-only-project-volume",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-manage-foreign-volume",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-cannot-read-audit-objects",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-creates-encrypted-tagged-volume",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-rejects-unencrypted-volume",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-runs-small-instance",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "execution-rejects-larger-instance",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-resumes-own-session",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-cannot-resume-another-session",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-reboots-project",
+      "expected": "allowed",
+      "decision": "allowed",
+      "missing_context": [],
+      "passed": true
+    },
+    {
+      "case": "operator-reboots-foreign",
+      "expected": "implicitDeny",
+      "decision": "implicitDeny",
+      "missing_context": [],
+      "passed": true
+    }
+  ],
+  "cloudformation_validate_template": {
+    "application": {
+      "validated": true,
+      "capabilities": []
+    },
+    "provisioning": {
+      "validated": true,
+      "capabilities": [
+        "CAPABILITY_IAM"
+      ]
+    }
+  },
+  "live_deployment": {
+    "date": "2026-10-19",
+    "explicit_owner_approval": true,
+    "change_set": "approved-project-access-20261019",
+    "change_set_resources": 7,
+    "change_set_actions": [
+      "Add"
+    ],
+    "change_set_types": [
+      "AWS::IAM::Role",
+      "AWS::IAM::ManagedPolicy",
+      "AWS::IAM::InstanceProfile"
+    ],
+    "registered_template_matches_approved_file": true,
+    "validation_error_events": [],
+    "stack_status": "CREATE_COMPLETE",
+    "all_seven_resources_complete": true,
+    "all_four_applied_policy_documents_match": true,
+    "trust_profile_and_policy_attachments_verified": true,
+    "operator_managed_policy_count": 2,
+    "operator_inline_policy_count": 0,
+    "operator_group_count": 0,
+    "operator_access_key_count": 0,
+    "operator_mfa_device_count": 1,
+    "principal_policy_simulation": {
+      "operation": "SimulatePrincipalPolicy",
+      "existing_user_and_execution_role": true,
+      "case_count": 25,
+      "all_passed": true,
+      "failures": [],
+      "missing_context": []
+    },
+    "local_cli_preflight": {
+      "profile": "default",
+      "checked_at": "2026-10-19T14:27:48.993839+00:00",
+      "uses_root": false,
+      "read_check_count": 9,
+      "blockers": [],
+      "account_plan": "FREE",
+      "account_plan_status": "ACTIVE",
+      "remaining_credits_usd": 100,
+      "plan_expiration_date": "2027-04-13",
+      "standard_vcpu_quota": 5,
+      "region_instances": 0
+    },
+    "operator_can_read_bootstrap_outputs": true,
+    "operator_can_validate_application_template": true,
+    "private_local_role_parameters_updated": true,
+    "application_resources_created": false,
+    "observation_phase": "Initial bootstrap verification; root_volume_correction records the later applied policy change."
+  },
+  "limitations": [
+    "Synthetic physical names were used to resolve CloudFormation references for policy review.",
+    "Simulations do not validate service-provider behavior or successful resource provisioning.",
+    "Read-only metadata actions requiring Resource * can reveal regional account metadata.",
+    "The initial 25 simulations did not reproduce the missing instance-type context on volume evaluation; subsequent targeted simulation and successful real EC2 provisioning verify the correction.",
+    "Interactive Session Manager shell and pipeline permissions still require their own verification/review. CloudTrail is now logging and delivery was observed."
+  ],
+  "root_volume_correction": {
+    "date": "2026-10-19",
+    "explicit_owner_approval": true,
+    "change_set": "fix-root-volume-context-20261019",
+    "stack_status": "UPDATE_COMPLETE",
+    "only_network_policy_modified": true,
+    "policy_default_version": "v2",
+    "full_applied_policy_matches_reviewed_file": true,
+    "real_role_volume_simulation": "allowed with no instance context and no missing context",
+    "application_creation_and_ssm_run_command": "verified",
+    "report": "docs/ec2-infrastructure-verification.json"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-20",
+  "timezone": "America/Sao_Paulo",
+  "state": "ebs_read_only_restore_rehearsal_passed_temporary_copy_deleted",
+  "region": "us-east-1",
+  "operator": "echomind-access-operator",
+  "initial_access_stack": {
+    "name": "echomind-restore-access",
+    "status": "UPDATE_COMPLETE",
+    "managed_policies": 2,
+    "new_accounts_users_or_roles": 0,
+    "snapshot_and_dlm_reads_verified_as_operator": true
+  },
+  "scheduled_backup": {
+    "policy_id": "policy-024ba8c3111541f04",
+    "enabled": true,
+    "interval_hours": 24,
+    "schedule_utc": "03:00",
+    "retained_snapshot_count": 7,
+    "snapshot_id": "snap-0256fd1981e0df8a0",
+    "source_volume_id": "vol-0de6c4c109eb08ba4",
+    "state": "completed",
+    "encrypted": true,
+    "volume_size_gib": 20,
+    "started_at": "2026-10-20T03:36:38.151Z",
+    "completed_at": "2026-10-20T03:39:58.016Z",
+    "owned_by_current_account": true,
+    "expected_project_and_dlm_tags_verified": true
+  },
+  "first_copy_attempt": {
+    "started_at": "2026-10-20T12:42:34.152Z",
+    "result": "CreateVolume denied on the source snapshot ARN before a volume was allocated",
+    "error_code": "AccessDenied",
+    "failed_stack_cleanup_status": "DELETE_COMPLETE",
+    "temporary_volumes_remaining_at_check": 0,
+    "copy_mounted": false,
+    "live_disks_detached_or_modified": false
+  },
+  "prepared_correction": {
+    "template": "deploy/aws/restore-access.yaml",
+    "new_parameter": "SourceSnapshotId",
+    "selected_snapshot_id": "snap-0256fd1981e0df8a0",
+    "action": "ec2:CreateVolume",
+    "principal": "existing CloudFormation execution role only",
+    "resource_scope": "one exact source snapshot ARN in us-east-1",
+    "source_encryption_required": true,
+    "new_operator_ec2_write_permissions": false,
+    "new_iam_or_kms_permissions": false,
+    "applied": true,
+    "update_started_at": "2026-10-20T13:08:28.180Z",
+    "change_set": {
+      "name": "echomind-restore-source-20261020",
+      "id": "arn:aws:cloudformation:us-east-1:255530396291:changeSet/echomind-restore-source-20261020/403a4146-2a10-4731-98ae-6b671c604576",
+      "status": "CREATE_COMPLETE",
+      "execution_requested": true,
+      "resulting_stack_status": "UPDATE_COMPLETE",
+      "changes": 1,
+      "logical_resource": "RecoveryExecutionInspectionPolicy",
+      "action": "Modify",
+      "replacement": false,
+      "operator_policy_changed": false,
+      "resolved_policy_difference_reviewed": true
+    },
+    "reference": "https://aws.amazon.com/blogs/storage/enhancing-resource-level-permission-for-creating-an-amazon-ebs-volume-from-a-snapshot/"
+  },
+  "validation": {
+    "cfn_lint_1_57_2": "two templates passed without errors or warnings",
+    "cfn_guard_3_2_1_and_scope_regressions": "five test cases passed",
+    "read_only_inspector_windows": "four test cases passed",
+    "read_only_inspector_linux": "four test cases passed",
+    "aws_validate_template": "passed",
+    "private_reference_archive_digest_verified_on_live_host": true,
+    "pending_application_release": false,
+    "actual_recovery_stack_creation": "CREATE_COMPLETE"
+  },
+  "successful_drill": {
+    "stack_name": "echomind-prod-restore-drill",
+    "stack_id": "arn:aws:cloudformation:us-east-1:255530396291:stack/echomind-prod-restore-drill/87997b30-cc87-11f1-badc-12ffec2208cd",
+    "performed_by": "echomind-access-operator with the existing CloudFormation execution role",
+    "source_snapshot_id": "snap-0256fd1981e0df8a0",
+    "temporary_volume_id": "vol-049ca7831c1074993",
+    "size_gib": 20,
+    "volume_type": "gp3",
+    "encrypted": true,
+    "iops": 3000,
+    "throughput_mib_s": 125,
+    "availability_zone": "us-east-1a",
+    "attachment_slot": "/dev/sdg",
+    "project_and_restore_tags_verified": true,
+    "automatic_backup_tag_absent": true,
+    "volume_created_at": "2026-10-20T13:09:53.331Z",
+    "stack_created_at": "2026-10-20T13:10:08.999Z",
+    "inspection_command_status": "Success",
+    "inspection_exit_code": 0,
+    "inspection": {
+      "restored_originals": 1,
+      "all_hashes_and_sizes_match": true,
+      "live_and_copy_inventory_match": true,
+      "pending_jobs": 0,
+      "copy_block_device_read_only": true,
+      "mount_options": ["ro", "noload", "nodev", "nosuid", "noexec"],
+      "journal_replayed": false,
+      "copy_unmounted": true,
+      "mount_directory_removed": true,
+      "live_volume_restored": false,
+      "database_accessed": false,
+      "additional_backend_started": false
+    },
+    "cleanup": {
+      "volume_deleted_at": "2026-10-20T13:11:48.756Z",
+      "stack_deleted_at": "2026-10-20T13:11:49.055Z",
+      "stack_status": "DELETE_COMPLETE",
+      "exact_copy_lookup_result": "InvalidVolume.NotFound",
+      "remaining_restore_tagged_volumes": 0,
+      "source_snapshot_preserved": true,
+      "protected_live_attachments_unchanged": true,
+      "temporary_host_mount_absent": true
+    },
+    "cost_scope": "The temporary 20 GiB gp3 copy existed for under two minutes; actual billed cost was not queried. The copy was deleted; the scheduled source snapshot remains under the existing retention policy."
+  },
+  "final_live_integrity": {
+    "valid_originals": 1,
+    "missing_or_invalid_originals": 0,
+    "queued_jobs": 0,
+    "healthy_containers": 2,
+    "oom_events": 0,
+    "container_restarts": 0,
+    "protected_root_and_data_attachments_unchanged": true,
+    "temporary_mount_directory_absent": true,
+    "protected_live_disks_remain_read_write": true,
+    "application_images_unchanged": true
+  },
+  "public_verification": {
+    "checked_at": "2026-10-20T13:12:13.211883Z",
+    "health_status": 200,
+    "http_redirect_status": 308,
+    "certificate_hostname_and_chain_valid": true,
+    "tls_protocol": "TLSv1.3",
+    "cors_production_origin": true,
+    "cors_untrusted_origin_rejected": true,
+    "hsts": true,
+    "protected_endpoint_without_credentials": 403
+  },
+  "remaining": [
+    "Rehearse full service recovery and measure actual service restoration time",
+    "Define and test coordinated Supabase database/Auth/external configuration recovery separately"
+  ],
+  "scope_limits": [
+    "The EBS copy and original-file inspection passed; full service cutover and service RTO were not tested",
+    "This does not restore or coordinate Supabase database/Auth/external configuration",
+    "The snapshot is a point-in-time copy of the EBS data disk; filesystem/archive integrity does not prove full service recovery"
+  ]
+}

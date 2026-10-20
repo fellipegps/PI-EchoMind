@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EchoMind human operator identity - bootstrap temporary sign-in without application or provisioning privileges.
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@3
+  com.aws.cloudformation.Context:
+    ref:
+      - at: docs/deploy-aws.md
+        has: First operator setup, human password and MFA handoff, and separate provisioning permissions
+    must:
+      - This identity stack may bootstrap the first non-root user; it does not provision the application.
+      - Password and MFA enrollment are completed by the owner in the private AWS console.
+      - Review any later permissions separately; local sign-in alone does not authorize AWS services.
+Resources:
+  Operator:
+    Type: AWS::IAM::User
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: A distinct human identity can later receive the instance-scoped SSM policy without using root daily.
+        must:
+          - No login password, MFA seed, access key, administrator policy or application secret in this template.
+          - Keep the user when the stack is deleted; offboarding is an explicit credential and access review.
+    Properties:
+      UserName: !Sub '${AWS::StackName}-operator'
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/SignInLocalDevelopmentAccess'
+      Tags:
+        - {Key: Project, Value: EchoMind}
+Outputs:
+  OperatorUserName:
+    Description: Owner sets the console password and MFA for this user before signing in.
+    Value: !Ref Operator
+  OperatorUserArn:
+    Description: Human operator without application or provisioning privileges at bootstrap.
+    Value: !GetAtt Operator.Arn

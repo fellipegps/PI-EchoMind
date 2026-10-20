@@ -1,6 +1,9 @@
 import os
 
 from supabase import Client, create_client
+from .runtime_config import load_runtime_environment
+
+load_runtime_environment()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY")

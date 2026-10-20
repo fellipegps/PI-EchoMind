@@ -1,6 +1,18 @@
 # Segredos e configuração local (mantenha apenas exemplos versionados)
 .env
 .env.*
+*.env
+.document-data/
+*.documents.tar
+*.dump
+*.pgpass
+pgpass
+pg_service.conf
+.database-backups/
+.publication/
+deploy/aws/parameters.json
+deploy/aws/parameters.local.json
+deploy/aws/outputs.local.json
 !.env.example
 !**/.env.example
 

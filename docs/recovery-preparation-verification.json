@@ -1,0 +1,199 @@
+{
+  "date": "2026-10-20",
+  "timezone": "America/Sao_Paulo",
+  "state": "archive_rehearsal_passed_ebs_drill_prepared_waiting_for_admin_access",
+  "scope": "Restore a pinned private original-document archive to an isolated temporary directory and prepare an EBS snapshot drill; EBS restoration was not performed",
+  "application_source_revision": "55a1b1bea118f05a708439fd6f68c1bccd9cfcd7",
+  "region": "us-east-1",
+  "source_volume": {
+    "id": "vol-0de6c4c109eb08ba4",
+    "availability_zone": "us-east-1a",
+    "size_gib": 20,
+    "type": "gp3",
+    "encrypted": true,
+    "state_at_inspection": "in-use",
+    "retained": true
+  },
+  "private_archive_inventory": {
+    "archives": 2,
+    "bytes_each": 20480,
+    "matching_sha256": true,
+    "owner_root": true,
+    "mode": "0600",
+    "storage": "existing encrypted application data EBS"
+  },
+  "archive_rehearsal": {
+    "restored_originals": 1,
+    "all_hashes_and_sizes_match": true,
+    "temporary_directory_removed": true,
+    "scope": "Application document archive, not EBS snapshot or external database recovery",
+    "archive_bytes": 20480,
+    "archive_sha256": "026d3579e42e396ecac70bb504b49d7df10e309d483dbfa40a34ab7cfa0f77c8",
+    "live_originals_valid_before_and_after": true,
+    "database_writes": false,
+    "live_volume_restored": false,
+    "additional_embedding_model_loaded": false
+  },
+  "access_blockers": [
+    {
+      "action": "ec2:DescribeSnapshots",
+      "code": "UnauthorizedOperation"
+    },
+    {
+      "action": "dlm:GetLifecyclePolicy",
+      "code": "AccessDeniedException"
+    }
+  ],
+  "snapshot_inventory_verified": false,
+  "first_scheduled_snapshot_verified": false,
+  "ebs_restore_volume_created": false,
+  "ebs_read_only_mount_tested": false,
+  "proposed_access": {
+    "template": "deploy/aws/restore-access.yaml",
+    "resources": [
+      "RecoveryOperatorPolicy",
+      "RecoveryExecutionInspectionPolicy"
+    ],
+    "administrator_session_required": true,
+    "applied": false,
+    "operator_scope": "Regional snapshot descriptions, project-tagged DLM inspection, MFA create/read/delete of echomind-prod-restore-drill with the existing fixed execution role",
+    "execution_role_scope": "DescribeSnapshots in the current Region only; existing project-scoped volume permissions reused",
+    "no_new_user_role_or_static_credentials": true,
+    "operator_iam_writes": false,
+    "operator_direct_ec2_writes": false,
+    "production_stack_delete": false,
+    "snapshot_delete": false
+  },
+  "proposed_drill": {
+    "template": "deploy/aws/restore-drill.yaml",
+    "state": "prepared_not_executed",
+    "resources": [
+      "RestoreVolume",
+      "RestoreAttachment"
+    ],
+    "size_gib": 20,
+    "encrypted": true,
+    "volume_type": "gp3",
+    "iops": 3000,
+    "throughput_mib_s": 125,
+    "device_slot": "/dev/sdg",
+    "snapshot": "Select a completed encrypted owned snapshot of the retained data volume after access is granted",
+    "mount_options": [
+      "ro",
+      "noload",
+      "nodev",
+      "nosuid",
+      "noexec"
+    ],
+    "cleanup": "Unmount and delete only the disposable recovery stack/copy with specific authorization; preserve source snapshot and live volumes",
+    "cost": "Provisioned gp3 storage incurs charges while the temporary copy exists; no price or credit-coverage guarantee",
+    "pricing_reference": "https://aws.amazon.com/ebs/pricing/"
+  },
+  "validation": {
+    "cfn_lint": {
+      "version": "1.57.2",
+      "templates": 2,
+      "result": "passed_no_errors_or_warnings"
+    },
+    "cfn_guard": {
+      "version": "3.2.1",
+      "positive_templates": 2,
+      "mutation_and_scope_test_cases": 4,
+      "result": "passed"
+    },
+    "archive_safety_test_cases": {
+      "windows": 4,
+      "linux": 4,
+      "result": "passed"
+    },
+    "aws_validate_template": [
+      {
+        "template": "restore-access.yaml",
+        "description": "EchoMind supplemental access for inspecting backups and one isolated restoration stack. An existing IAM administrator installs this template.",
+        "capabilities": [
+          "CAPABILITY_IAM"
+        ],
+        "parameters": [
+          "ApplicationStackName",
+          "OperatorUserName",
+          "ExecutionRoleName"
+        ]
+      },
+      {
+        "template": "restore-drill.yaml",
+        "description": "Isolated encrypted copy of an existing EchoMind data snapshot, attached in an unused slot for read-only inspection. Never replaces a live volume.",
+        "capabilities": [],
+        "parameters": [
+          "SnapshotId",
+          "ApplicationStackName",
+          "InstanceId",
+          "AvailabilityZone"
+        ]
+      }
+    ],
+    "account_aware_create_stack_validation": "pending access and confirmed snapshot",
+    "validation_image_pulled_or_installed_this_phase": false
+  },
+  "final_live_integrity": {
+    "ready_documents": 1,
+    "valid_originals": 1,
+    "missing_originals": 0,
+    "invalid_originals": 0,
+    "original_files": 1,
+    "queued_jobs": 0,
+    "draining": false,
+    "fixture_absent": null
+  },
+  "final_host": {
+    "pending_deployment": false,
+    "documents": {
+      "draining": false,
+      "active": false,
+      "queued_jobs": 0
+    },
+    "containers": [
+      {
+        "name": "echomind-backend-1",
+        "image": "sha256:e1250dcf3d2baa61171bb2674ceff2a0d0ea8f89a58aefc5c5440cd0dc7421ee",
+        "running": true,
+        "health": "healthy",
+        "oom": false,
+        "restarts": 0
+      },
+      {
+        "name": "echomind-proxy-1",
+        "image": "sha256:fc9243ab5a709befc3d0806a92f831fb3bb85d15ce9199b386e512496daf7984",
+        "running": true,
+        "health": "healthy",
+        "oom": false,
+        "restarts": 0
+      }
+    ]
+  },
+  "public_verification": {
+    "checked_at": "2026-10-20T03:04:17.680530+00:00",
+    "domain": "echomind-api.duckdns.org",
+    "health_status": 200,
+    "http_redirect_status": 308,
+    "certificate_hostname_and_chain_valid": true,
+    "tls_protocol": "TLSv1.3",
+    "certificate_not_after": "Jan 17 17:17:59 2027 GMT",
+    "certificate_serial": "05C95EF8B85CD5E4646DE5AAA7397D3E303A",
+    "certificate_issuer": {
+      "countryName": "US",
+      "organizationName": "Let's Encrypt",
+      "commonName": "YE2"
+    },
+    "cors_production_origin": true,
+    "cors_untrusted_origin_rejected": true,
+    "hsts": true,
+    "protected_endpoint_without_credentials": 403
+  },
+  "limits": [
+    "The application archive is on the same EBS as the originals and is not an off-host disaster backup",
+    "No completed scheduled snapshot, EBS copy, filesystem mount or service cutover was verified",
+    "Supabase database/Auth/configuration restoration and point-in-time coordination are separate",
+    "No IAM access policies, EBS restore resources, automatic deployment or application release were applied in this phase"
+  ]
+}
+

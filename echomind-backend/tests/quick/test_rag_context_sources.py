@@ -168,7 +168,7 @@ async def test_retrieve_docs_ignores_legacy_event_vectors(
         metadata={"source_type": "faq", "tenant_id": "tenant-a"},
     )
     vector_store = SimpleNamespace(
-        similarity_search_with_score=lambda *_args, **_kwargs: [(event, 0.05), (faq, 0.1)]
+        similarity_search_ready_with_score=lambda *_args, **_kwargs: [(event, 0.05), (faq, 0.1)]
     )
     monkeypatch.setattr(rag_engine_module, "_get_vector_store", lambda _tenant_id: vector_store)
     monkeypatch.setattr(rag_engine_module, "_search_lexical_documents", lambda *_args, **_kwargs: [])

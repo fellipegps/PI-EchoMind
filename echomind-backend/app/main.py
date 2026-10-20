@@ -26,6 +26,7 @@ from starlette.datastructures import UploadFile as StarletteUploadFile
 import asyncio
 import logging
 import os
+from pathlib import Path
 
 from .database import get_db
 from .campus_map_routes import router_campuses, router_public_geo
@@ -57,6 +58,8 @@ from .document_ingestion import (
     validate_document_for_tenant,
 )
 from .document_processing import process_document
+from .document_runtime import DocumentRuntime
+from .document_storage import DocumentStorage, DocumentStorageError, DocumentMaintenanceError
 from .document_upload import DocumentUploadLimitMiddleware, DocumentUploadRoute
 from .document_repository import (
     DocumentCreateData,
@@ -98,17 +101,27 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("echomind")
 
 
+def warm_up_then_start_documents(document_runtime: DocumentRuntime) -> None:
+    # wait_for can time out without stopping its thread. Keep recovery behind
+    # that same warmup, so both paths cannot load a heavy embedding model at once.
+    try:
+        warm_up_rag_runtime()
+    finally:
+        document_runtime.start()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Iniciando EchoMind Backend...")
     logger.info("Schema gerenciado por Alembic. Execute `alembic upgrade head` antes de subir a API.")
     configure_metric_sink(enqueue_metric_event)
     start_metric_writer()
+    document_runtime = DocumentRuntime(processor=process_document)
     try:
         warmup_timeout = float(os.getenv("RAG_WARMUP_TIMEOUT_SECONDS", "30"))
         try:
             await asyncio.wait_for(
-                asyncio.to_thread(warm_up_rag_runtime),
+                asyncio.to_thread(warm_up_then_start_documents, document_runtime),
                 timeout=warmup_timeout,
             )
         except asyncio.TimeoutError:
@@ -130,6 +143,7 @@ async def lifespan(app: FastAPI):
             )
         yield
     finally:
+        await asyncio.to_thread(document_runtime.stop)
         configure_metric_sink(None)
         await asyncio.to_thread(stop_metric_writer)
 
@@ -690,6 +704,19 @@ def get_dashboard_rag_metrics(
 #  DOCUMENTOS  /documents
 # ══════════════════════════════════════════════════════════════════════════════
 
+def process_stored_document(job_path: Path) -> None:
+    # The task receives an identity/path only; original bytes are loaded from disk
+    # after acquiring the single ingestion slot, never kept in a pending task.
+    DocumentRuntime(processor=process_document).run_job(job_path)
+
+
+def document_storage() -> DocumentStorage:
+    try:
+        return DocumentStorage()
+    except OSError as exc:
+        raise HTTPException(status_code=503, detail="Armazenamento de documentos indisponível.") from exc
+
+
 @router_document_upload.post(
     "/upload",
     response_model=DocumentResponse,
@@ -708,6 +735,9 @@ async def upload_document(
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user),
 ):
+    storage = document_storage()
+    if storage.draining:
+        raise HTTPException(status_code=503, detail="Documentos em manutenção. Tente novamente mais tarde.", headers={"Retry-After": "30"})
     form = await request.form()
     if "tenant_id" in form:
         raise HTTPException(status_code=422, detail="tenant_id não é permitido.")
@@ -734,29 +764,38 @@ async def upload_document(
             mime_type=file.content_type,
             content=content,
         )
-        document = create_document(
-            db,
-            tenant_id=current_user.id,
-            data=DocumentCreateData(
-                filename=validated.filename,
-                mime_type=validated.mime_type,
-                size_bytes=validated.size_bytes,
-                sha256=validated.sha256,
-                document_type=_optional_form_text(document_type),
-                document_number=_optional_form_text(document_number),
-                department=_optional_form_text(department),
-                published_at=_optional_form_date(
-                    published_at,
-                    field_name="published_at",
+        with storage.admission():
+            document = create_document(
+                db,
+                tenant_id=current_user.id,
+                data=DocumentCreateData(
+                    filename=validated.filename,
+                    mime_type=validated.mime_type,
+                    size_bytes=validated.size_bytes,
+                    sha256=validated.sha256,
+                    document_type=_optional_form_text(document_type),
+                    document_number=_optional_form_text(document_number),
+                    department=_optional_form_text(department),
+                    published_at=_optional_form_date(published_at, field_name="published_at"),
+                    valid_until=_optional_form_date(valid_until, field_name="valid_until"),
                 ),
-                valid_until=_optional_form_date(
-                    valid_until,
-                    field_name="valid_until",
-                ),
-            ),
-        )
-        db.commit()
-        db.refresh(document)
+            )
+            # Durable file and job marker precede the relational commit and HTTP 202.
+            # Preserve originals on ambiguous DB commit errors; never discard data
+            # that a reconnecting recovery worker might still need.
+            job_path = storage.save(
+                tenant_id=current_user.id, document_id=document.id,
+                content=content, digest=validated.sha256,
+            )
+            db.commit()
+            db.refresh(document)
+    except DocumentMaintenanceError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Documentos em manutenção. Tente novamente mais tarde.", headers={"Retry-After": "30"}) from exc
+    except (DocumentStorageError, OSError) as exc:
+        db.rollback()
+        emit_event(event="rag.ingestion-api", status="error", stage="original-storage", tenant_id=current_user.id, error_code=safe_error_code(exc))
+        raise HTTPException(status_code=503, detail="Não foi possível armazenar o arquivo original.") from exc
     except HTTPException:
         db.rollback()
         raise
@@ -802,13 +841,7 @@ async def upload_document(
             detail="Não foi possível criar o documento.",
         ) from exc
 
-    durable_content = bytes(content)
-    background_tasks.add_task(
-        process_document,
-        document_id=document.id,
-        tenant_id=current_user.id,
-        content=durable_content,
-    )
+    background_tasks.add_task(process_stored_document, job_path)
     return document
 
 
@@ -902,6 +935,19 @@ def delete_stored_document(
     rag = Depends(get_document_rag),
     current_user: CurrentUser = Depends(get_current_user),
 ):
+    storage = document_storage()
+    try:
+        # Serialize deletion with ingestion and recovery so an old acknowledgement
+        # cannot erase a new durable deletion marker during a crash window.
+        with storage.admission(), storage.lock("processing"):
+            return _delete_stored_document(document_id, db, rag, current_user, storage)
+    except DocumentMaintenanceError as exc:
+        raise HTTPException(status_code=503, detail="Documentos em manutenção. Tente novamente mais tarde.", headers={"Retry-After": "30"}) from exc
+    except (DocumentStorageError, OSError) as exc:
+        raise HTTPException(status_code=503, detail="Não foi possível atualizar o armazenamento do documento.") from exc
+
+
+def _delete_stored_document(document_id, db, rag, current_user, storage):
     document = get_document(
         db,
         tenant_id=current_user.id,
@@ -962,6 +1008,9 @@ def delete_stored_document(
             status_code=409,
             detail="O estado do documento mudou durante a exclusão; tente novamente.",
         )
+    # Leave a durable cleanup marker before the relational deletion. Recovery
+    # removes originals only after confirming that the database row is gone.
+    storage.write_job(current_user.id, document_id, action="delete")
     chunks = list_document_chunks(
         db,
         tenant_id=current_user.id,
@@ -1029,6 +1078,8 @@ def delete_stored_document(
             status_code=500,
             detail="Não foi possível excluir o documento.",
         ) from exc
+
+    storage.delete(current_user.id, document_id)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

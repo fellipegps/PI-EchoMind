@@ -127,6 +127,18 @@ def quick_test_context() -> Generator[QuickTestContext, None, None]:
 
 
 @pytest.fixture()
+def document_storage_directory(tmp_path, monkeypatch):
+    monkeypatch.setenv("DOCUMENT_STORAGE_DIR", str(tmp_path / "documents"))
+    monkeypatch.setenv("DOCUMENT_RECOVERY_ENABLED", "false")
+    return tmp_path / "documents"
+
+
+@pytest.fixture(autouse=True)
+def isolate_document_storage(document_storage_directory):
+    """API and storage tests never write originals outside their temporary directory."""
+
+
+@pytest.fixture()
 def db(quick_test_context: QuickTestContext) -> Generator[Session, None, None]:
     """Sessão de banco isolada por teste (rollback ao final)."""
     connection = quick_test_context.engine.connect()

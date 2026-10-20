@@ -130,7 +130,7 @@ async def test_lexical_failure_falls_back_to_tenant_scoped_current_vector_result
     expired.metadata["valid_until"] = "2026-08-29"
 
     class VectorStore:
-        def similarity_search_with_score(self, question: str, *, k: int):
+        def similarity_search_ready_with_score(self, question: str, *, k: int, tenant_id: str, today):
             assert question == "pergunta"
             assert k >= 10
             return [(cross_tenant, 0.01), (expired, 0.02), (current, 0.10)]
@@ -166,7 +166,7 @@ async def test_vector_failure_remains_an_error(quick_test_context, monkeypatch) 
     from app import rag_engine
 
     class VectorStore:
-        def similarity_search_with_score(self, question: str, *, k: int):
+        def similarity_search_ready_with_score(self, question: str, *, k: int, tenant_id: str, today):
             raise RuntimeError("pgvector indisponivel")
 
     monkeypatch.setattr(rag_engine, "_get_vector_store", lambda tenant_id: VectorStore())

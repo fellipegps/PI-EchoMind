@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Isolated encrypted copy of an existing EchoMind data snapshot, attached in an unused slot for read-only inspection. Never replaces a live volume.
+Metadata:
+  AWSToolsMetrics: {AWSAgentToolkit: aws-cloudformation@3}
+Parameters:
+  ApplicationStackName:
+    Type: String
+    Default: echomind-prod
+    AllowedPattern: '^echomind-[a-z0-9-]{1,20}$'
+  SnapshotId:
+    Type: String
+    AllowedPattern: '^snap-[a-f0-9]{8,17}$'
+    Description: Completed encrypted owned snapshot of the retained application data volume; verify before creation.
+  InstanceId:
+    Type: AWS::EC2::Instance::Id
+    Description: Existing project instance; verify that /dev/sdg is unused.
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Same Availability Zone as the existing instance.
+Resources:
+  RestoreVolume:
+    Type: AWS::EC2::Volume
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: A disposable copy proves snapshot readability without disconnecting the retained application disk.
+        must:
+          - Verify source volume, ownership, encryption, completed state and project backup tags outside this template.
+          - Delete policies are intentional for this temporary copy only; preserve the source snapshot and live disk.
+          - Do not add the EchoMindBackup tag, format the disk, run Docker from it or mount it read-write.
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      SnapshotId: !Ref SnapshotId
+      Size: 20
+      Encrypted: true
+      VolumeType: gp3
+      Iops: 3000
+      Throughput: 125
+      Tags:
+        - {Key: Name, Value: !Sub '${AWS::StackName}-copy'}
+        - {Key: Project, Value: !Ref ApplicationStackName}
+        - {Key: RestoreDrill, Value: !Ref ApplicationStackName}
+  RestoreAttachment:
+    Type: AWS::EC2::VolumeAttachment
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: The copy uses a new device slot; the live data and root attachments are not managed here.
+        must:
+          - Identify the Linux NVMe device by the restored VolumeId, never by UUID or assumed NVMe order.
+          - Mount only the copy with ro,noload,nodev,nosuid,noexec; unmount before deleting this stack.
+    Properties:
+      Device: /dev/sdg
+      InstanceId: !Ref InstanceId
+      VolumeId: !Ref RestoreVolume
+Outputs:
+  RestoreVolumeId:
+    Description: Only volume this drill may mount or delete; compare to the protected live IDs before acting.
+    Value: !Ref RestoreVolume

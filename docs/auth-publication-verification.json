@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-19",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Production registration and password recovery with owner-operated credentials",
+  "production_origin": "https://echomind-front.vercel.app",
+  "tested_production_source_revision": "7172218bca4957b1b8bc39b287837d93484dc690",
+  "configuration_observed": {
+    "email_provider_enabled": true,
+    "new_signups_enabled": true,
+    "confirm_email_enabled": false,
+    "custom_smtp_enabled": false,
+    "site_url": "https://echomind-front.vercel.app",
+    "recovery_redirect": "https://echomind-front.vercel.app/redefinir-senha",
+    "configuration_changed": false,
+    "test_address_is_organization_team_member": false
+  },
+  "registration": {
+    "owner_created_account_and_entered_password_directly": true,
+    "redirect_to_login_observed": true,
+    "new_test_account_present_in_database": true,
+    "database_email_marked_confirmed": true,
+    "signup_confirmation_email_requested": false,
+    "confirmation_note": "Email is automatically marked confirmed when signup confirmation is disabled; this is not proof of a confirmation email round trip",
+    "test_account_deleted": false
+  },
+  "recovery": {
+    "requests_submitted_by_agent": 1,
+    "success_message_observed": true,
+    "database_recovery_request_recorded": true,
+    "auth_logs_window_utc": {
+      "start": "2026-10-19T19:10:00Z",
+      "end": "2026-10-19T19:15:19Z"
+    },
+    "accepted_requests_in_observed_logs": 1,
+    "recovery_mail_events_in_observed_logs": 1,
+    "errors_in_observed_recovery_logs": 0,
+    "unauthorized_address_errors_in_observed_recovery_logs": 0,
+    "owner_confirmed_email_receipt": true,
+    "owner_confirmed_password_reset_and_new_password_login": true,
+    "credential_entry_method": "Owner completed password creation/reset/login directly; agent did not retrieve credentials or recovery links"
+  },
+  "signup_guidance_fix": {
+    "problem": "UI always instructed email confirmation even when provider returned an active signup session",
+    "behavior": "UI now selects confirmation or login guidance from the provider response without changing authentication policy",
+    "source_revision": "df559e6663feae1b53ea7e110cd8b5d5e9ace11f",
+    "typecheck": "passed",
+    "lint": "passed",
+    "frontend_tests_passed": 236,
+    "frontend_test_files_passed": 26,
+    "published": false,
+    "publication_blocker": "Vercel deployment inspection returned 403 for the known team scope; local Vercel CLI unavailable",
+    "new_deployment_attempted": false,
+    "git_push_or_merge_performed": false
+  },
+  "email_delivery_limit": "Current Supabase documentation restricts default SMTP to authorized test recipients and low volume. The observed successful delivery for this one address does not establish general production deliverability. Configure custom SMTP and verify confirmation before broader public use.",
+  "privacy": {
+    "test_email_or_account_identifiers_in_report": false,
+    "passwords_recovery_links_or_session_tokens_in_git": false
+  },
+  "aws_deploy_enabled": false,
+  "remaining": [
+    "Publish the committed signup guidance fix when intended Vercel team access is available",
+    "Custom SMTP and confirmation/deliverability validation before broader public use",
+    "Representative capacity and CPU-credit measurements",
+    "Scheduled EBS snapshot verification and restore rehearsal",
+    "Remaining vulnerability, observability and CI/CD activation checks"
+  ],
+  "references": [
+    "https://supabase.com/docs/guides/auth/passwords",
+    "https://supabase.com/docs/guides/auth/auth-smtp"
+  ]
+}

@@ -124,7 +124,7 @@ def test_two_independent_sessions_cannot_commit_same_hash(postgres_engine, tenan
 
 
 @pytest.fixture()
-def upload_api(postgres_engine, tenant, monkeypatch):
+def upload_api(postgres_engine, tenant, monkeypatch, tmp_path):
     from app import main
     from app.auth import CurrentUser, get_current_user
     from app.database import get_db
@@ -134,6 +134,9 @@ def upload_api(postgres_engine, tenant, monkeypatch):
             yield session
 
     scheduled = []
+    monkeypatch.setenv("DOCUMENT_STORAGE_DIR", str(tmp_path / "originals"))
+    monkeypatch.setenv("DOCUMENT_RECOVERY_ENABLED", "false")
+    monkeypatch.setattr(main, "warm_up_rag_runtime", lambda: None)
     monkeypatch.setattr(main, "process_document", lambda **kwargs: scheduled.append(kwargs))
     overrides = dict(main.app.dependency_overrides)
     main.app.dependency_overrides[get_db] = independent_db
@@ -143,48 +146,38 @@ def upload_api(postgres_engine, tenant, monkeypatch):
     )
     main.app.dependency_overrides[main.enforce_upload_rate_limit] = lambda: None
     try:
-        yield main, scheduled
+        # One application lifecycle, as in production. Closing a lifecycle drains
+        # uploads, so concurrent requests must not each start/stop the application.
+        with TestClient(main.app) as client:
+            yield main, scheduled, client
     finally:
         main.app.dependency_overrides.clear()
         main.app.dependency_overrides.update(overrides)
 
 
-def _post_upload(app):
-    # Um portal/event loop por requisicao: o endpoint usa SQLAlchemy sincrono.
-    with TestClient(app) as client:
-        return client.post("/documents/upload", files={"file": ("dedup.txt", b"dedup", "text/plain")})
+def _post_upload(client):
+    return client.post("/documents/upload", files={"file": ("dedup.txt", b"dedup", "text/plain")})
 
 
-def test_concurrent_upload_returns_202_and_409_and_schedules_only_winner(upload_api, tenant, monkeypatch):
-    from app import document_repository as repository
-
-    main, scheduled = upload_api
-    barrier = Barrier(2, timeout=15)
-    original_find = repository.find_active_duplicate_document
-    def both_read_before_insert(*args, **kwargs):
-        result = original_find(*args, **kwargs)
-        assert result is None
-        barrier.wait()
-        return result
-
-    monkeypatch.setattr(repository, "find_active_duplicate_document", both_read_before_insert)
-    # Ambas as validacoes preliminares e os dois checks no repository passam.
+def test_concurrent_upload_returns_202_and_409_and_schedules_only_winner(upload_api, tenant):
+    main, scheduled, client = upload_api
+    # Exercise the HTTP flow with the filesystem admission lock enabled. The
+    # independent-session test above forces the lower-level database race.
     with ThreadPoolExecutor(max_workers=2) as executor:
-        responses = list(executor.map(lambda _: _post_upload(main.app), range(2)))
+        responses = list(executor.map(lambda _: _post_upload(client), range(2)))
     assert sorted(response.status_code for response in responses) == [202, 409]
     winner = next(response.json() for response in responses if response.status_code == 202)
     assert len(scheduled) == 1
     assert scheduled[0] == {"document_id": winner["id"], "tenant_id": tenant, "content": b"dedup"}
 
     # A repeticao sequencial tambem nao agenda trabalho.
-    monkeypatch.setattr(repository, "find_active_duplicate_document", original_find)
-    assert _post_upload(main.app).status_code == 409
+    assert _post_upload(client).status_code == 409
     assert len(scheduled) == 1
 
 
 @pytest.mark.parametrize("failure", ["check", "primary-key"])
 def test_other_integrity_errors_remain_500_without_scheduling(upload_api, postgres_engine, tenant, monkeypatch, failure):
-    main, scheduled = upload_api
+    main, scheduled, client = upload_api
     from app.database import Document
     from app.document_repository import create_document
 
@@ -207,7 +200,7 @@ def test_other_integrity_errors_remain_500_without_scheduling(upload_api, postgr
         session.flush()
 
     monkeypatch.setattr(main, "create_document", broken_create)
-    assert _post_upload(main.app).status_code == 500
+    assert _post_upload(client).status_code == 500
     assert scheduled == []
     with Session(postgres_engine) as session:
         assert session.query(Document).filter_by(tenant_id=tenant).count() == (1 if existing_id else 0)

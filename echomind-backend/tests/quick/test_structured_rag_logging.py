@@ -169,7 +169,7 @@ async def test_retrieval_success_logs_counts_sources_duration_and_no_query(
     ]
 
     class Store:
-        def similarity_search_with_score(self, received_query: str, *, k: int):
+        def similarity_search_ready_with_score(self, received_query: str, *, k: int, tenant_id: str, today):
             assert received_query == query
             assert k >= 1
             return vector_documents
@@ -206,7 +206,7 @@ async def test_retrieval_failure_logs_safe_technical_context_and_reraises(
     secret = "senha-do-banco-na-mensagem"
 
     class BrokenStore:
-        def similarity_search_with_score(self, _query: str, *, k: int):
+        def similarity_search_ready_with_score(self, _query: str, *, k: int, tenant_id: str, today):
             raise RuntimeError(secret)
 
     monkeypatch.setattr(rag_engine, "_get_vector_store", lambda _tenant_id: BrokenStore())
@@ -238,7 +238,7 @@ async def test_chat_and_retrieval_share_correlation_without_logging_content(
     retrieved_content = "trecho integral e confidencial"
 
     class Store:
-        def similarity_search_with_score(self, _query: str, *, k: int):
+        def similarity_search_ready_with_score(self, _query: str, *, k: int, tenant_id: str, today):
             return [
                 (
                     Document(

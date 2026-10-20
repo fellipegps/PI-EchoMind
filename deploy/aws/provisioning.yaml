@@ -1,0 +1,310 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EchoMind project administration - fixed service roles and scoped CloudFormation access for the existing human operator.
+Metadata:
+  AWSToolsMetrics: {AWSAgentToolkit: aws-cloudformation@3}
+  com.aws.cloudformation.Context:
+    ref: [{at: docs/deploy-aws.md, has: 'Project permission bootstrap, service role separation and activation review'}]
+    must:
+      - Bootstrap with an already authorized IAM administrator; operator cannot update this access stack.
+      - No account administration or IAM mutation in the application execution role.
+      - Application provisioning is limited to this Region and the configured application stack.
+Parameters:
+  ApplicationStackName:
+    Type: String
+    Default: echomind-prod
+    AllowedPattern: '^echomind-[a-z0-9-]{1,20}$'
+    Description: Name and Project tag for the application stack; distinct from access stacks.
+  OperatorUserName:
+    Type: String
+    Default: echomind-access-operator
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]{1,64}$'
+    Description: Existing MFA-enabled human user; no user or credential is created here.
+Resources:
+  NodeRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Host SSM permissions are defined outside the application stack so application updates cannot expand them.
+        must: [No application secrets or account administration; IMDS stays unavailable inside bridge containers.]
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: ec2.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      ManagedPolicyArns: [!Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore']
+      Tags: [{Key: Project, Value: !Ref ApplicationStackName}]
+  NodeProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: {Roles: [!Ref NodeRole]}
+  SnapshotRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Fixed DLM role can snapshot only volumes carrying the application backup tag.
+        must: [No IAM permissions; snapshot deletion requires the matching backup tag.]
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: dlm.amazonaws.com}
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: {'aws:SourceAccount': !Ref 'AWS::AccountId'}
+              ArnLike: {'aws:SourceArn': !Sub 'arn:${AWS::Partition}:dlm:${AWS::Region}:${AWS::AccountId}:policy/*'}
+      Tags: [{Key: Project, Value: !Ref ApplicationStackName}]
+      Policies:
+        - PolicyName: project-snapshots
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - {Effect: Allow, Action: ['ec2:DescribeInstances', 'ec2:DescribeVolumes', 'ec2:DescribeSnapshots', 'ec2:DescribeAvailabilityZones'], Resource: '*'}
+              - Effect: Allow
+                Action: ec2:CreateSnapshot
+                Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*'
+                Condition: {StringEquals: {'ec2:ResourceTag/EchoMindBackup': !Ref ApplicationStackName}}
+              - {Effect: Allow, Action: ['ec2:CreateSnapshot', 'ec2:CreateTags'], Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*'}
+              - Effect: Allow
+                Action: ec2:DeleteSnapshot
+                Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/*'
+                Condition: {StringEquals: {'ec2:ResourceTag/EchoMindBackup': !Ref ApplicationStackName}}
+              - Effect: Allow
+                Action: ['events:PutRule', 'events:DeleteRule', 'events:DescribeRule', 'events:EnableRule', 'events:DisableRule', 'events:ListTargetsByRule', 'events:PutTargets', 'events:RemoveTargets']
+                Resource: !Sub 'arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:rule/AwsDataLifecycleRule.managed-cwe.*'
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: CloudFormation automatically uses this service role; the operator does not switch console identities.
+        must:
+          - Only CloudFormation can assume this role; the human can pass it only to CloudFormation.
+          - Never allow IAM writes or pass an arbitrary role; runtime roles remain outside the application stack.
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement: [{Effect: Allow, Principal: {Service: cloudformation.amazonaws.com}, Action: 'sts:AssumeRole'}]
+      Tags: [{Key: Project, Value: !Ref ApplicationStackName}]
+  NetworkPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: EC2 evaluates each RunInstances resource separately; instance type is not a volume context key.
+        must: [Keep instance sizing on instance ARNs; root volume requires the project tag, encryption, gp3 and exactly 16 GiB.]
+    Properties:
+      Description: Create tagged project network and compute resources; modify only matching resources.
+      Roles: [!Ref ExecutionRole]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: RegionalInspection
+            Effect: Allow
+            Action: ['ec2:DescribeAddresses', 'ec2:DescribeAvailabilityZones', 'ec2:DescribeIamInstanceProfileAssociations', 'ec2:DescribeImages', 'ec2:DescribeInstanceAttribute', 'ec2:DescribeInstanceCreditSpecifications', 'ec2:DescribeInstances', 'ec2:DescribeInternetGateways', 'ec2:DescribeNetworkAcls', 'ec2:DescribeNetworkInterfaces', 'ec2:DescribeRouteTables', 'ec2:DescribeSecurityGroups', 'ec2:DescribeSubnets', 'ec2:DescribeTags', 'ec2:DescribeVolumeAttribute', 'ec2:DescribeVolumes', 'ec2:DescribeVolumesModifications', 'ec2:DescribeVpcAttribute', 'ec2:DescribeVpcs']
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - {Sid: CreateVpc, Effect: Allow, Action: 'ec2:CreateVpc', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - {Sid: CreateSubnet, Effect: Allow, Action: 'ec2:CreateSubnet', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - {Sid: CreateRouteTable, Effect: Allow, Action: 'ec2:CreateRouteTable', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:route-table/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - {Sid: CreateSecurityGroup, Effect: Allow, Action: 'ec2:CreateSecurityGroup', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - {Sid: CreateInternetGateway, Effect: Allow, Action: 'ec2:CreateInternetGateway', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:internet-gateway/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - {Sid: AllocateAddress, Effect: Allow, Action: 'ec2:AllocateAddress', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - {Sid: CreateVolume, Effect: Allow, Action: 'ec2:CreateVolume', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}, Bool: {'ec2:Encrypted': true}}}
+          - {Sid: CreateNetworkInterface, Effect: Allow, Action: 'ec2:CreateNetworkInterface', Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*', Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}}}
+          - Sid: CreateSubnetAndRouteTableInProjectVpc
+            Effect: Allow
+            Action: ['ec2:CreateSubnet', 'ec2:CreateRouteTable', 'ec2:CreateSecurityGroup']
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:vpc/*'
+            Condition: {StringEquals: {'ec2:ResourceTag/Project': !Ref ApplicationStackName}}
+          - Sid: TagOnCreation
+            Effect: Allow
+            Action: ec2:CreateTags
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:*'
+            Condition:
+              StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName}
+              StringEqualsIfExists:
+                ec2:CreateAction: [AllocateAddress, CreateInternetGateway, CreateNetworkInterface, CreateRouteTable, CreateSecurityGroup, CreateSubnet, CreateVolume, CreateVpc, RunInstances]
+              'Null': {'ec2:CreateAction': 'false'}
+          - Sid: RunSmallTaggedInstance
+            Effect: Allow
+            Action: ec2:RunInstances
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+            Condition: {StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName, 'ec2:InstanceType': t3.small}}
+          - Sid: RunEncryptedTaggedRootVolume
+            Effect: Allow
+            Action: ec2:RunInstances
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:volume/*'
+            Condition:
+              StringEquals: {'aws:RequestTag/Project': !Ref ApplicationStackName, 'ec2:VolumeType': gp3}
+              NumericEquals: {'ec2:VolumeSize': 16}
+              Bool: {'ec2:Encrypted': true}
+          - Sid: RunInstanceDependencies
+            Effect: Allow
+            Action: ec2:RunInstances
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}::image/*'
+          - Sid: RunOnlyInProjectNetwork
+            Effect: Allow
+            Action: ['ec2:RunInstances', 'ec2:CreateNetworkInterface']
+            Resource: [!Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*', !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*', !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*']
+            Condition: {StringEquals: {'ec2:ResourceTag/Project': !Ref ApplicationStackName}}
+          - Sid: ManageProjectResources
+            Effect: Allow
+            Action: ['ec2:AssociateAddress', 'ec2:AssociateIamInstanceProfile', 'ec2:AssociateRouteTable', 'ec2:AttachInternetGateway', 'ec2:AttachVolume', 'ec2:AuthorizeSecurityGroupEgress', 'ec2:AuthorizeSecurityGroupIngress', 'ec2:CreateRoute', 'ec2:CreateTags', 'ec2:DeleteInternetGateway', 'ec2:DeleteNetworkInterface', 'ec2:DeleteRoute', 'ec2:DeleteRouteTable', 'ec2:DeleteSecurityGroup', 'ec2:DeleteSubnet', 'ec2:DeleteTags', 'ec2:DeleteVolume', 'ec2:DeleteVpc', 'ec2:DetachInternetGateway', 'ec2:DetachVolume', 'ec2:DisassociateAddress', 'ec2:DisassociateIamInstanceProfile', 'ec2:DisassociateRouteTable', 'ec2:ModifyInstanceAttribute', 'ec2:ModifyInstanceCreditSpecification', 'ec2:ModifyInstanceMetadataOptions', 'ec2:ModifyNetworkInterfaceAttribute', 'ec2:ModifySubnetAttribute', 'ec2:ModifyVolume', 'ec2:ModifyVolumeAttribute', 'ec2:ModifyVpcAttribute', 'ec2:ReleaseAddress', 'ec2:ReplaceIamInstanceProfileAssociation', 'ec2:ReplaceRoute', 'ec2:ReplaceRouteTableAssociation', 'ec2:RevokeSecurityGroupEgress', 'ec2:RevokeSecurityGroupIngress', 'ec2:StartInstances', 'ec2:StopInstances', 'ec2:TerminateInstances', 'ec2:UpdateSecurityGroupRuleDescriptionsEgress', 'ec2:UpdateSecurityGroupRuleDescriptionsIngress']
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:*'
+            Condition: {StringEquals: {'ec2:ResourceTag/Project': !Ref ApplicationStackName}}
+  StorageAndServicesPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Configure only project audit storage, alerts, budget, lifecycle policy and encryption.
+      Roles: [!Ref ExecutionRole]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ProjectAuditBucket
+            Effect: Allow
+            Action: ['s3:CreateBucket', 's3:GetAccelerateConfiguration', 's3:GetAnalyticsConfiguration', 's3:GetBucketCORS', 's3:GetBucketLogging', 's3:GetBucketNotification', 's3:GetBucketObjectLockConfiguration', 's3:GetBucketOwnershipControls', 's3:GetBucketPolicy', 's3:GetBucketPublicAccessBlock', 's3:GetBucketTagging', 's3:GetBucketVersioning', 's3:GetBucketWebsite', 's3:GetEncryptionConfiguration', 's3:GetIntelligentTieringConfiguration', 's3:GetInventoryConfiguration', 's3:GetLifecycleConfiguration', 's3:GetMetricsConfiguration', 's3:GetReplicationConfiguration', 's3:ListBucket', 's3:PutBucketOwnershipControls', 's3:PutBucketPolicy', 's3:PutBucketPublicAccessBlock', 's3:PutBucketTagging', 's3:PutBucketVersioning', 's3:PutEncryptionConfiguration', 's3:PutLifecycleConfiguration', 's3:DeleteBucketPolicy']
+            Resource: !Sub 'arn:${AWS::Partition}:s3:::${ApplicationStackName}-*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - Sid: ProjectAlarms
+            Effect: Allow
+            Action: ['cloudwatch:PutMetricAlarm', 'cloudwatch:DeleteAlarms', 'cloudwatch:TagResource', 'cloudwatch:UntagResource', 'cloudwatch:ListTagsForResource']
+            Resource: !Sub 'arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${ApplicationStackName}-*'
+          - Sid: AlarmRead
+            Effect: Allow
+            Action: cloudwatch:DescribeAlarms
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - Sid: ProjectNotifications
+            Effect: Allow
+            Action: ['sns:CreateTopic', 'sns:DeleteTopic', 'sns:GetDataProtectionPolicy', 'sns:GetTopicAttributes', 'sns:ListSubscriptionsByTopic', 'sns:ListTagsForResource', 'sns:SetTopicAttributes', 'sns:Subscribe', 'sns:TagResource', 'sns:UntagResource']
+            Resource: !Sub 'arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:${ApplicationStackName}-*'
+          - Sid: CreateTaggedLifecycleAndKey
+            Effect: Allow
+            Action: ['dlm:CreateLifecyclePolicy', 'kms:CreateKey']
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region', 'aws:RequestTag/Project': !Ref ApplicationStackName}}
+          - Sid: ProjectLifecycle
+            Effect: Allow
+            Action: ['dlm:GetLifecyclePolicy', 'dlm:UpdateLifecyclePolicy', 'dlm:DeleteLifecyclePolicy', 'dlm:TagResource', 'dlm:UntagResource']
+            Resource: !Sub 'arn:${AWS::Partition}:dlm:${AWS::Region}:${AWS::AccountId}:policy/*'
+            Condition: {StringEquals: {'aws:ResourceTag/Project': !Ref ApplicationStackName}}
+          - Sid: ProjectNotificationKey
+            Effect: Allow
+            Action: ['kms:DescribeKey', 'kms:EnableKey', 'kms:DisableKey', 'kms:EnableKeyRotation', 'kms:DisableKeyRotation', 'kms:GetKeyPolicy', 'kms:PutKeyPolicy', 'kms:GetKeyRotationStatus', 'kms:ListResourceTags', 'kms:TagResource', 'kms:UntagResource', 'kms:UpdateKeyDescription']
+            Resource: !Sub 'arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            Condition: {StringEquals: {'aws:ResourceTag/Project': !Ref ApplicationStackName}}
+          - Sid: AwsManagedEbsEncryption
+            Effect: Allow
+            Action: ['kms:CreateGrant', 'kms:Decrypt', 'kms:DescribeKey', 'kms:GenerateDataKeyWithoutPlaintext', 'kms:ReEncryptFrom', 'kms:ReEncryptTo']
+            Resource: !Sub 'arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/*'
+            Condition:
+              StringEquals: {'kms:ViaService': !Sub 'ec2.${AWS::Region}.${AWS::URLSuffix}', 'kms:CallerAccount': !Ref 'AWS::AccountId'}
+              ForAnyValue:StringEquals: {'kms:ResourceAliases': 'alias/aws/ebs'}
+          - Sid: ProjectAuditTrail
+            Effect: Allow
+            Action: ['cloudtrail:CreateTrail', 'cloudtrail:UpdateTrail', 'cloudtrail:DeleteTrail', 'cloudtrail:StartLogging', 'cloudtrail:StopLogging', 'cloudtrail:AddTags', 'cloudtrail:RemoveTags', 'cloudtrail:PutEventSelectors', 'cloudtrail:GetTrail', 'cloudtrail:GetTrailStatus', 'cloudtrail:GetEventSelectors', 'cloudtrail:GetInsightSelectors', 'cloudtrail:ListTags']
+            Resource: !Sub 'arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/${ApplicationStackName}-audit'
+          - Sid: TrailInspection
+            Effect: Allow
+            Action: cloudtrail:DescribeTrails
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - Sid: ProjectBudget
+            Effect: Allow
+            Action: ['budgets:ModifyBudget', 'budgets:ViewBudget', 'budgets:TagResource', 'budgets:UntagResource', 'budgets:ListTagsForResource']
+            Resource: !Sub 'arn:${AWS::Partition}:budgets::${AWS::AccountId}:budget/${ApplicationStackName}-gross-monthly'
+          - Sid: BillingViewRead
+            Effect: Allow
+            Action: billing:GetBillingViewData
+            Resource: !Sub 'arn:${AWS::Partition}:billing::${AWS::AccountId}:billingview/*'
+          - Sid: FixedInstanceProfileInspection
+            Effect: Allow
+            Action: iam:GetInstanceProfile
+            Resource: !GetAtt NodeProfile.Arn
+          - Sid: FixedServiceRoleInspection
+            Effect: Allow
+            Action: iam:GetRole
+            Resource: [!GetAtt NodeRole.Arn, !GetAtt SnapshotRole.Arn]
+          - Sid: PassNodeOnlyToEc2
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt NodeRole.Arn
+            Condition: {StringEquals: {'iam:PassedToService': ec2.amazonaws.com}}
+          - Sid: PassSnapshotOnlyToDlm
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt SnapshotRole.Arn
+            Condition: {StringEquals: {'iam:PassedToService': dlm.amazonaws.com}}
+          - Sid: ReadCanonicalImageParameter
+            Effect: Allow
+            Action: ssm:GetParameters
+            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}::parameter/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id'
+  OperatorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: One human login handles project CloudFormation updates and SSM administration; service roles are selected automatically.
+        must:
+          - No IAM writes, Organizations or account settings; direct EC2 writes are limited to starting, stopping and rebooting project hosts.
+          - Stack creation and updates must name the fixed execution role; SSM targets require the project tag.
+    Properties:
+      Users: [!Ref OperatorUserName]
+      Description: EchoMind human project administration without account-wide administrator access.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PlanAndUpdateApplication
+            Effect: Allow
+            Action: ['cloudformation:CreateStack', 'cloudformation:UpdateStack', 'cloudformation:CreateChangeSet']
+            Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStackName}/*'
+            Condition: {ArnEquals: {'cloudformation:RoleArn': !GetAtt ExecutionRole.Arn}, Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: ApplyAndInspectApplication
+            Effect: Allow
+            Action: ['cloudformation:ExecuteChangeSet', 'cloudformation:DeleteChangeSet', 'cloudformation:DescribeChangeSet', 'cloudformation:DescribeStacks', 'cloudformation:DescribeEvents', 'cloudformation:DescribeStackEvents', 'cloudformation:DescribeStackResource', 'cloudformation:DescribeStackResources', 'cloudformation:ListStackResources', 'cloudformation:ListChangeSets', 'cloudformation:GetTemplate', 'cloudformation:SetStackPolicy']
+            Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStackName}/*'
+            Condition: {Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: InspectAccessStackOutputs
+            Effect: Allow
+            Action: cloudformation:DescribeStacks
+            Resource: !Ref 'AWS::StackId'
+          - Sid: PassOnlyApplicationExecutionRole
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt ExecutionRole.Arn
+            Condition: {StringEquals: {'iam:PassedToService': cloudformation.amazonaws.com}, Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: ValidateAndInspectRegion
+            Effect: Allow
+            Action: ['cloudformation:ValidateTemplate', 'cloudformation:GetTemplateSummary', 'cloudformation:DescribeType', 'cloudformation:ListStacks', 'cloudtrail:DescribeTrails', 'ec2:DescribeInstances', 'ec2:DescribeInstanceStatus', 'ec2:DescribeInstanceAttribute', 'ec2:DescribeInstanceCreditSpecifications', 'ec2:DescribeVolumes', 'ec2:DescribeVolumesModifications', 'ec2:DescribeAvailabilityZones', 'ec2:DescribeImages', 'ec2:DescribeInstanceTypes', 'ec2:DescribeVpcs', 'ec2:DescribeSubnets', 'ec2:DescribeSecurityGroups', 'ec2:DescribeAddresses', 'ec2:DescribeNetworkInterfaces', 'ec2:DescribeRouteTables', 'ec2:DescribeTags', 'cloudwatch:GetMetricData', 'cloudwatch:GetMetricStatistics', 'cloudwatch:ListMetrics', 'ssm:DescribeInstanceInformation', 'ssm:DescribeSessions', 'ssm:GetCommandInvocation', 'freetier:GetAccountPlanState', 'freetier:GetFreeTierUsage', 'pricing:GetProducts', 'servicequotas:GetServiceQuota']
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - Sid: AdministerProjectHost
+            Effect: Allow
+            Action: ['ssm:StartSession', 'ssm:SendCommand']
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+            Condition: {StringEquals: {'ssm:resourceTag/Project': !Ref ApplicationStackName}, Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: StartStopAndRebootProjectHost
+            Effect: Allow
+            Action: ['ec2:StartInstances', 'ec2:StopInstances', 'ec2:RebootInstances']
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+            Condition: {StringEquals: {'ec2:ResourceTag/Project': !Ref ApplicationStackName}, Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: UseOnlyFixedAdminDocuments
+            Effect: Allow
+            Action: ['ssm:StartSession', 'ssm:SendCommand']
+            Resource: [!Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}::document/AWS-RunShellScript', !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}::document/SSM-SessionManagerRunShell', !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/SSM-SessionManagerRunShell']
+            Condition: {Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: OwnSessionsOnly
+            Effect: Allow
+            Action: ['ssm:ResumeSession', 'ssm:TerminateSession', 'ssmmessages:OpenDataChannel']
+            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:session/${!aws:username}-*'
+            Condition: {Bool: {'aws:MultiFactorAuthPresent': true}}
+          - Sid: OwnIdentityInspection
+            Effect: Allow
+            Action: ['iam:GetUser', 'iam:GetLoginProfile', 'iam:ListMFADevices']
+            Resource: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${OperatorUserName}'
+          - Sid: InspectCanonicalImageParameter
+            Effect: Allow
+            Action: ['ssm:GetParameter', 'ssm:GetParameters']
+            Resource: !Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}::parameter/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id'
+Outputs:
+  ExecutionRoleArn: {Description: Pass as RoleARN on every application CloudFormation create/update/change set., Value: !GetAtt ExecutionRole.Arn}
+  NodeInstanceProfileName: {Description: NodeInstanceProfileName parameter for the application stack., Value: !Ref NodeProfile}
+  NodeRoleName: {Description: Fixed instance role; future artifact permissions require a separate bootstrap review., Value: !Ref NodeRole}
+  SnapshotExecutionRoleArn: {Description: SnapshotExecutionRoleArn parameter for the application stack., Value: !GetAtt SnapshotRole.Arn}
+  ApplicationStackName: {Description: Only application stack the human operator may modify., Value: !Ref ApplicationStackName}

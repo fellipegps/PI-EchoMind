@@ -196,6 +196,7 @@ def process_document(
     document_id: str,
     tenant_id: str,
     content: bytes,
+    resume_interrupted: bool = False,
 ) -> DocumentProcessingResult:
     """Processa bytes duraveis com sessao propria e compensacao tenant-scoped."""
     processing_started = time.perf_counter()
@@ -242,20 +243,21 @@ def process_document(
             )
             event_emitted = True
             return _processing_result(refreshed)
-        if document.status == DocumentStatus.PROCESSING.value:
+        if document.status == DocumentStatus.PROCESSING.value and not resume_interrupted:
             raise DocumentProcessingInProgressError(
                 "Documento ja esta sendo processado."
             )
 
         stage = "state"
         try:
-            document = transition_document_status(
-                db,
-                tenant_id=tenant_id,
-                document_id=document_id,
-                target_status=DocumentStatus.PROCESSING,
-            )
-            db.commit()
+            if document.status == DocumentStatus.PENDING.value:
+                document = transition_document_status(
+                    db,
+                    tenant_id=tenant_id,
+                    document_id=document_id,
+                    target_status=DocumentStatus.PROCESSING,
+                )
+                db.commit()
 
             stage = "extraction"
             extracted = _extract_document(document.mime_type, content)
@@ -269,6 +271,10 @@ def process_document(
                 tenant_id=tenant_id,
                 document_id=document_id,
             )
+            # On recovery, remove known old vectors before replacing their source
+            # rows. A crash must not erase the IDs needed for the next cleanup.
+            if resume_interrupted and previous_chunks:
+                get_rag_indexer(db, tenant_id).delete_document_chunks(document, previous_chunks)
             persisted_chunks = replace_document_chunks(
                 db,
                 tenant_id=tenant_id,

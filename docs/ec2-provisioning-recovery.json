@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-19",
+  "stack": "echomind-prod",
+  "state": "recovered-infrastructure-and-host-verified",
+  "creation_authorized_by_owner": true,
+  "creation_attempt": "predeploy-application-20261019-v1",
+  "actionable_failures": [
+    {
+      "resource": "Node",
+      "type": "AWS::EC2::Instance",
+      "api_action": "ec2:RunInstances",
+      "denied_resource_type": "volume",
+      "classification": "environment/IAM",
+      "cause": "ec2:InstanceType was required on both instance and volume ARNs, but the volume authorization context does not provide this condition key.",
+      "cloudtrail_volume_project_tag_confirmed": true
+    }
+  ],
+  "cascade_cancellations": [
+    "AlertTopic"
+  ],
+  "instance_created": true,
+  "correction": {
+    "file": "deploy/aws/provisioning.yaml",
+    "policy": "NetworkPolicy",
+    "adds_api_actions": false,
+    "instance_restriction": "Project tag and t3.small remain required on instance ARNs.",
+    "volume_restriction": "Project tag, encrypted=true, gp3 and exactly 16 GiB on volume ARNs, without ec2:InstanceType.",
+    "state": "applied-and-full-policy-verified",
+    "access_analyzer_findings": [],
+    "simulations": [
+      {
+        "case": "encrypted-tagged-gp3-root-without-instance-context",
+        "decision": "allowed",
+        "expected": "allowed",
+        "passed": true,
+        "missing": []
+      },
+      {
+        "case": "unencrypted-root",
+        "decision": "implicitDeny",
+        "expected": "implicitDeny",
+        "passed": true,
+        "missing": [
+          "aws:RequestedRegion",
+          "ec2:ResourceTag/Project",
+          "ec2:InstanceType",
+          "ec2:CreateAction"
+        ]
+      },
+      {
+        "case": "oversized-root",
+        "decision": "implicitDeny",
+        "expected": "implicitDeny",
+        "passed": true,
+        "missing": [
+          "aws:RequestedRegion",
+          "ec2:ResourceTag/Project",
+          "ec2:InstanceType",
+          "ec2:CreateAction"
+        ]
+      },
+      {
+        "case": "other-project-root",
+        "decision": "implicitDeny",
+        "expected": "implicitDeny",
+        "passed": true,
+        "missing": [
+          "aws:RequestedRegion",
+          "ec2:ResourceTag/Project",
+          "ec2:InstanceType",
+          "ec2:CreateAction"
+        ]
+      },
+      {
+        "case": "non-gp3-root",
+        "decision": "implicitDeny",
+        "expected": "implicitDeny",
+        "passed": true,
+        "missing": [
+          "aws:RequestedRegion",
+          "ec2:ResourceTag/Project",
+          "ec2:InstanceType",
+          "ec2:CreateAction"
+        ]
+      },
+      {
+        "case": "untagged-root",
+        "decision": "implicitDeny",
+        "expected": "implicitDeny",
+        "passed": true,
+        "missing": [
+          "aws:RequestedRegion",
+          "ec2:ResourceTag/Project",
+          "aws:RequestTag/Project",
+          "ec2:InstanceType",
+          "ec2:CreateAction"
+        ]
+      },
+      {
+        "case": "t3.small-instance",
+        "decision": "allowed",
+        "expected": "allowed",
+        "passed": true,
+        "missing": []
+      },
+      {
+        "case": "t3.large-instance",
+        "decision": "implicitDeny",
+        "expected": "implicitDeny",
+        "passed": true,
+        "missing": [
+          "aws:RequestedRegion",
+          "ec2:VolumeSize",
+          "ec2:ResourceTag/Project",
+          "ec2:Encrypted",
+          "ec2:VolumeType",
+          "ec2:CreateAction"
+        ]
+      }
+    ],
+    "local_infrastructure_tests": 13,
+    "local_release_tests": 20,
+    "local_cfn_lint": "passed",
+    "local_cfn_guard": "passed"
+  },
+  "retained_resources": [
+    {
+      "logical_id": "DataVolume",
+      "type": "AWS::EC2::Volume",
+      "size_gib": 20,
+      "state": "available",
+      "attachments": 0,
+      "encrypted": true,
+      "source_snapshot": false,
+      "created_by_this_attempt": true
+    },
+    {
+      "logical_id": "PublicIp",
+      "type": "AWS::EC2::EIP",
+      "associated": false,
+      "created_by_this_attempt": true
+    },
+    {
+      "logical_id": "AlertKey",
+      "type": "AWS::KMS::Key",
+      "purpose": "Notification encryption only; retained disk uses the separate AWS EBS managed key.",
+      "created_by_this_attempt": true
+    },
+    {
+      "logical_id": "AuditBucket",
+      "type": "AWS::S3::Bucket",
+      "preserve_for_audit": true,
+      "created_by_this_attempt": true
+    }
+  ],
+  "recovery_plan": [
+    "Obtain explicit approval for the bounded IAM correction and cleanup of this failed attempt.",
+    "Register/review/execute the provisioning stack update; only NetworkPolicy may change.",
+    "Recheck ROLLBACK_COMPLETE and resource ownership before deleting only the failed application stack record; preserve both access stacks.",
+    "Delete only the unattached empty 20 GiB volume from this attempt, release its unassociated EIP and schedule deletion of its notification KMS key with a 7-day waiting period. Keep the audit bucket and its contents.",
+    "Create/review a replacement application change set with the same configuration and cost scope; stop on unrelated or broader changes.",
+    "Execute the authorized replacement plan, apply stack-policy.json after CREATE_COMPLETE and verify the host with verify_host.sh."
+  ],
+  "approval_review": {
+    "blocked_action": "CreateChangeSet for the IAM correction",
+    "reason": "Existing authorization covers application infrastructure but does not explicitly approve the IAM permission change.",
+    "workaround_attempted": false,
+    "resolved_by_explicit_owner_approval": true
+  },
+  "cost_note": {
+    "retained_resources_base_usd_month": "6.25",
+    "assumptions": "20 GiB gp3, one reserved IPv4 for 730 hours, one KMS key, before credits; excludes audit S3/requests.",
+    "cleanup_pending": false,
+    "observation_phase": "Historical estimate before authorized cleanup."
+  },
+  "limitations": [
+    "Earlier 25 simulations supplied instance-only context to volume evaluations; they did not reproduce the failing service request.",
+    "New positive root-volume simulation succeeds without instance context. Denial simulations retain any missing-context diagnostics in this report.",
+    "Infrastructure recovered and verified; application/HTTPS/pipeline and real scheduled backup restoration remain pending."
+  ],
+  "recovery_result": {
+    "iam_change_set": "fix-root-volume-context-20261019",
+    "iam_stack_status": "UPDATE_COMPLETE",
+    "modified_resources": [
+      "NetworkPolicy"
+    ],
+    "failed_stack_deleted": true,
+    "old_volume_deleted": true,
+    "old_ipv4_released": true,
+    "old_notification_key_deletion_date": "2026-10-26T15:50:15.481Z",
+    "old_audit_bucket_preserved": true,
+    "replacement_change_set": "predeploy-application-20261019-v2",
+    "replacement_stack_status": "CREATE_COMPLETE",
+    "verification": "docs/ec2-infrastructure-verification.json"
+  },
+  "first_attempt_instance_created": false,
+  "retained_resources_observation_phase": "Historical inventory immediately after first rollback; recovery_result records completed cleanup."
+}

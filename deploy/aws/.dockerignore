@@ -1,0 +1,4 @@
+# Validation tools only; project templates are mounted read-only at runtime.
+**
+!validation.Dockerfile
+!.dockerignore

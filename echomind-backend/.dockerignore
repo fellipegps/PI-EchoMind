@@ -1,0 +1,30 @@
+# Only application code and explicit operational files may enter the build.
+**
+!Dockerfile
+!.dockerignore
+!requirements-deploy.lock
+!app/
+!app/**
+!alembic.ini
+!alembic/
+!alembic/**
+!scripts/
+!scripts/reindex_all.py
+!scripts/check_database.py
+
+# These exclusions also apply inside the permitted directories.
+**/.env
+**/.env.*
+**/.aws
+**/.aws/**
+**/.git
+**/.git/**
+**/__pycache__
+**/__pycache__/**
+**/*.pyc
+**/*.pyo
+**/*.pem
+**/*.key
+**/*.log
+**/.pytest_cache
+**/.pytest_cache/**

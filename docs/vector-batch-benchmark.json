@@ -1,0 +1,196 @@
+{
+  "format": 1,
+  "database_scenarios": [
+    {
+      "chunks": 335,
+      "repeats": 3,
+      "batch_size": 32,
+      "embedding_batch_size": 1,
+      "real_e5": false,
+      "simulated_delay_per_sql_statement_ms": 0.0,
+      "median_seconds": {
+        "legacy": 1.8334,
+        "batch32": 0.2098
+      },
+      "speedup": 8.74,
+      "samples": [
+        {
+          "mode": "legacy",
+          "repeat": 1,
+          "seconds": 1.7887,
+          "vectors_verified": 335,
+          "statements": 672,
+          "insert_statements": 335,
+          "commits": 336
+        },
+        {
+          "mode": "batch32",
+          "repeat": 1,
+          "seconds": 0.2098,
+          "vectors_verified": 335,
+          "statements": 24,
+          "insert_statements": 11,
+          "commits": 12
+        },
+        {
+          "mode": "batch32",
+          "repeat": 2,
+          "seconds": 0.2259,
+          "vectors_verified": 335,
+          "statements": 24,
+          "insert_statements": 11,
+          "commits": 12
+        },
+        {
+          "mode": "legacy",
+          "repeat": 2,
+          "seconds": 1.8334,
+          "vectors_verified": 335,
+          "statements": 672,
+          "insert_statements": 335,
+          "commits": 336
+        },
+        {
+          "mode": "legacy",
+          "repeat": 3,
+          "seconds": 1.9918,
+          "vectors_verified": 335,
+          "statements": 672,
+          "insert_statements": 335,
+          "commits": 336
+        },
+        {
+          "mode": "batch32",
+          "repeat": 3,
+          "seconds": 0.2069,
+          "vectors_verified": 335,
+          "statements": 24,
+          "insert_statements": 11,
+          "commits": 12
+        }
+      ],
+      "cgroup": {},
+      "scope": "Disposable local pgvector, synthetic text; not production latency, upload or sustained load."
+    },
+    {
+      "chunks": 335,
+      "repeats": 3,
+      "batch_size": 32,
+      "embedding_batch_size": 1,
+      "real_e5": false,
+      "simulated_delay_per_sql_statement_ms": 25.0,
+      "median_seconds": {
+        "legacy": 20.6361,
+        "batch32": 0.864
+      },
+      "speedup": 23.88,
+      "samples": [
+        {
+          "mode": "legacy",
+          "repeat": 1,
+          "seconds": 20.6888,
+          "vectors_verified": 335,
+          "statements": 672,
+          "insert_statements": 335,
+          "commits": 336
+        },
+        {
+          "mode": "batch32",
+          "repeat": 1,
+          "seconds": 0.864,
+          "vectors_verified": 335,
+          "statements": 24,
+          "insert_statements": 11,
+          "commits": 12
+        },
+        {
+          "mode": "batch32",
+          "repeat": 2,
+          "seconds": 0.8585,
+          "vectors_verified": 335,
+          "statements": 24,
+          "insert_statements": 11,
+          "commits": 12
+        },
+        {
+          "mode": "legacy",
+          "repeat": 2,
+          "seconds": 20.6361,
+          "vectors_verified": 335,
+          "statements": 672,
+          "insert_statements": 335,
+          "commits": 336
+        },
+        {
+          "mode": "legacy",
+          "repeat": 3,
+          "seconds": 20.6025,
+          "vectors_verified": 335,
+          "statements": 672,
+          "insert_statements": 335,
+          "commits": 336
+        },
+        {
+          "mode": "batch32",
+          "repeat": 3,
+          "seconds": 0.8706,
+          "vectors_verified": 335,
+          "statements": 24,
+          "insert_statements": 11,
+          "commits": 12
+        }
+      ],
+      "cgroup": {},
+      "scope": "Disposable local pgvector, synthetic text; not production latency, upload or sustained load."
+    }
+  ],
+  "real_e5_linux": {
+    "chunks": 335,
+    "repeats": 1,
+    "batch_size": 32,
+    "embedding_batch_size": 1,
+    "real_e5": true,
+    "explicit_cached_model": true,
+    "simulated_delay_per_sql_statement_ms": 0,
+    "median_seconds": {
+      "legacy": 25.6226,
+      "batch32": 22.0773
+    },
+    "speedup": 1.16,
+    "samples": [
+      {
+        "mode": "legacy",
+        "repeat": 1,
+        "seconds": 25.6226,
+        "vectors_verified": 335,
+        "statements": 672,
+        "insert_statements": 335,
+        "commits": 336
+      },
+      {
+        "mode": "batch32",
+        "repeat": 1,
+        "seconds": 22.0773,
+        "vectors_verified": 335,
+        "statements": 24,
+        "insert_statements": 11,
+        "commits": 12
+      }
+    ],
+    "cgroup": {
+      "memory.peak": "1442021376",
+      "memory.max": "1610612736",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0"
+    },
+    "scope": "Disposable local pgvector, synthetic text; not production latency, upload or sustained load.",
+    "exit_code": 0,
+    "oom_killed": false
+  },
+  "limits": {
+    "cpus": 2,
+    "memory_mib": 1536,
+    "swap_enabled": false,
+    "external_network": false
+  },
+  "production_changed": false
+}

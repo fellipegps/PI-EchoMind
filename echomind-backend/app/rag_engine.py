@@ -29,7 +29,6 @@ from types import SimpleNamespace
 from typing import Any, AsyncGenerator, Callable, Mapping, Sequence
 
 from langchain_community.embeddings import FastEmbedEmbeddings
-from langchain_community.vectorstores.pgvector import PGVector
 from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
@@ -37,6 +36,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .embedding_adapter import E5FastEmbedEmbeddings
+from .retrieval_store import RetrievalPGVector
 from .schemas import sao_paulo_today
 from .database import (
     DATABASE_URL,
@@ -95,6 +95,8 @@ UNCERTAIN_DISTANCE_THRESHOLD = float(os.getenv("UNCERTAIN_DISTANCE_THRESHOLD", "
 TOP_K_DOCS           = int(os.getenv("TOP_K_DOCS", "3"))
 _RETRIEVAL_OVERFETCH_MULTIPLIER = 3
 _MIN_RETRIEVAL_CANDIDATES = 10
+# Database writes are grouped; ONNX still encodes exactly one passage at a time.
+_DOCUMENT_VECTOR_WRITE_BATCH_SIZE = 32
 DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-base"
 RERANKER_ENABLED = os.getenv("RERANKER_ENABLED", "false").lower() in {
     "1",
@@ -237,7 +239,7 @@ def _vector_store_engine_args() -> dict[str, Any]:
 
 
 @lru_cache(maxsize=128)
-def _get_vector_store(tenant_id: str) -> PGVector:
+def _get_vector_store(tenant_id: str) -> RetrievalPGVector:
     """
     FIX Bug 3: singleton com @lru_cache garante que TODAS as operações
     (add_documents, similarity_search, delete) usam a mesma instância
@@ -255,7 +257,7 @@ def _get_vector_store(tenant_id: str) -> PGVector:
         stage="initialization",
         tenant_id=tenant_id,
     )
-    vector_store = PGVector(
+    vector_store = RetrievalPGVector(
         connection_string=DATABASE_URL,
         embedding_function=_get_embeddings(),
         collection_name=_tenant_collection_name(tenant_id),
@@ -568,7 +570,7 @@ def _format_retrieved_document(document: Document) -> str:
 
 
 def _retrieval_candidate_k() -> int:
-    """Compensa o pos-filtro sem permitir overfetch sem limite."""
+    """Reserva candidatos elegiveis para a fusao hibrida e a revalidacao final."""
     return max(
         TOP_K_DOCS * _RETRIEVAL_OVERFETCH_MULTIPLIER,
         _MIN_RETRIEVAL_CANDIDATES,
@@ -993,7 +995,9 @@ async def _retrieve_docs(
 
     vector_task = loop.run_in_executor(
         None,
-        lambda: _get_vector_store(tenant_id).similarity_search_with_score(question, k=candidate_k),
+        lambda: _get_vector_store(tenant_id).similarity_search_ready_with_score(
+            question, tenant_id=tenant_id, today=reference_date, k=candidate_k,
+        ),
     )
     lexical_task = loop.run_in_executor(
         None,
@@ -1315,8 +1319,10 @@ class RAGEngine:
             )
         )
         self._delete_vector_ids(cleanup_ids)
-        for chunk in current_chunks:
-            self._index_document_chunk(document, chunk)
+        for offset in range(0, len(current_chunks), _DOCUMENT_VECTOR_WRITE_BATCH_SIZE):
+            self._index_document_chunk_batch(
+                document, current_chunks[offset:offset + _DOCUMENT_VECTOR_WRITE_BATCH_SIZE],
+            )
 
     def delete_document_chunks(
         self,
@@ -1359,6 +1365,39 @@ class RAGEngine:
             source_type=_DOCUMENT_CHUNK_SOURCE_TYPE,
             content=_document_chunk_content(document, chunk),
             extra_metadata=_document_chunk_metadata(document, chunk),
+        )
+
+    def _index_document_chunk_batch(
+        self, document: StoredDocument, chunks: Sequence[DocumentChunk],
+    ) -> None:
+        """Buffers at most 32 vectors; a failed batch propagates to ingestion cleanup.
+
+        PGVector.add_documents would encode the whole batch together in ONNX.
+        Keep the proven single-passage inference footprint and use add_embeddings
+        only after all vectors in this bounded database batch have been generated.
+        """
+        try:
+            store = _get_vector_store(self.tenant_id)
+            texts, metadatas, vectors, ids = [], [], [], []
+            for chunk in chunks:
+                content = _document_chunk_content(document, chunk)
+                metadata = _normalize_extra_metadata(_document_chunk_metadata(document, chunk))
+                metadata.update(source_id=chunk.id, source_type=_DOCUMENT_CHUNK_SOURCE_TYPE,
+                                tenant_id=self.tenant_id)
+                encoded = store.embedding_function.embed_documents([content])
+                if len(encoded) != 1 or len(encoded[0]) != DEFAULT_EMBEDDING_DIM:
+                    raise ValueError("Encoder retornou quantidade ou dimensao invalida.")
+                texts.append(content)
+                metadatas.append(metadata)
+                vectors.append(encoded[0])
+                ids.append(_make_vector_id(chunk.id, _DOCUMENT_CHUNK_SOURCE_TYPE, self.tenant_id))
+            store.add_embeddings(texts=texts, embeddings=vectors, metadatas=metadatas, ids=ids)
+        except Exception as exc:
+            raise RuntimeError("Falha ao indexar lote documental no pgvector.") from exc
+        emit_event(
+            event="rag.index", status="success", stage="upsert-batch", tenant_id=self.tenant_id,
+            counts={"persisted_chunks": len(chunks)},
+            source_types={_DOCUMENT_CHUNK_SOURCE_TYPE: len(chunks)},
         )
 
     def _delete_vector_ids(self, vector_ids: Sequence[str]) -> None:

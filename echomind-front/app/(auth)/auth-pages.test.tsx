@@ -26,6 +26,7 @@ function deferred<T = void>() {
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.updateUser.mockResolvedValue({ error: null });
+  mocks.register.mockResolvedValue({ requiresEmailConfirmation: true });
 });
 
 const pages = [
@@ -141,7 +142,7 @@ describe("DS-02 cadastro", () => {
   });
 
   it("mantém quatro valores, bloqueia durante envio e orienta confirmação antes do login", async () => {
-    const request = deferred();
+    const request = deferred<{ requiresEmailConfirmation: boolean }>();
     mocks.register.mockReturnValue(request.promise);
     const user = await fillRegister("123456");
     const submit = screen.getByRole("button", { name: "Criar Conta" });
@@ -150,10 +151,18 @@ describe("DS-02 cadastro", () => {
     expect(submit).toHaveAttribute("aria-busy", "true");
     expect(mocks.register).toHaveBeenCalledWith("auth@example.test", "123456", { fullName: "Pessoa de teste", companyName: "Instituição de teste" });
     expect(mocks.push).not.toHaveBeenCalled();
-    await act(async () => request.resolve());
+    await act(async () => request.resolve({ requiresEmailConfirmation: true }));
     expect(mocks.success).toHaveBeenCalledWith("Cadastro realizado! Verifique seu email para confirmar a conta.");
     expect(mocks.push).toHaveBeenCalledWith("/login");
     expect(submit).toBeEnabled();
+  });
+
+  it("orienta entrar quando o provedor libera a conta sem confirmação por email", async () => {
+    mocks.register.mockResolvedValueOnce({ requiresEmailConfirmation: false });
+    const user = await fillRegister("teste-local");
+    await user.click(screen.getByRole("button", { name: "Criar Conta" }));
+    await waitFor(() => expect(mocks.success).toHaveBeenCalledWith("Cadastro realizado! Você já pode entrar na sua conta."));
+    expect(mocks.push).toHaveBeenCalledWith("/login");
   });
 
   it("libera nova tentativa após erro, sem navegação indevida", async () => {

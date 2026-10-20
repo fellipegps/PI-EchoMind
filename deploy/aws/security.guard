@@ -1,0 +1,70 @@
+# Project controls, including the deliberate public HTTP/HTTPS exception.
+let nodes = Resources.*[ Type == 'AWS::EC2::Instance' ]
+let disks = Resources.*[ Type == 'AWS::EC2::Volume' ]
+let groups = Resources.*[ Type == 'AWS::EC2::SecurityGroup' ]
+let topics = Resources.*[ Type == 'AWS::SNS::Topic' ]
+let buckets = Resources.*[ Type == 'AWS::S3::Bucket' ]
+let human_operators = Resources.*[ Type == 'AWS::IAM::User' ]
+
+rule operator_has_no_embedded_credentials_or_admin when %human_operators !empty {
+    %human_operators {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties {
+            LoginProfile !exists
+            Policies !exists
+            Groups !exists
+            ManagedPolicyArns[0].'Fn::Sub' == 'arn:${AWS::Partition}:iam::aws:policy/SignInLocalDevelopmentAccess'
+            ManagedPolicyArns[1] !exists
+        }
+    }
+}
+
+rule node_hardening when %nodes !empty {
+    %nodes.Properties {
+        InstanceType == 't3.small'
+        MetadataOptions.HttpTokens == 'required'
+        MetadataOptions.HttpPutResponseHopLimit == 1
+        DisableApiTermination == true
+        CreditSpecification.CPUCredits == 'standard'
+        KeyName !exists
+        BlockDeviceMappings.*.Ebs.Encrypted == true
+        PropagateTagsToVolumeOnCreation == true
+    }
+    Resources.*.Type != /^AWS::IAM::/
+}
+rule durable_encryption when %disks !empty {
+    %disks {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties.Encrypted == true
+        Properties.VolumeType == 'gp3'
+    }
+}
+rule public_web_only when %groups !empty {
+    %groups.Properties.SecurityGroupIngress.* {
+        IpProtocol == 'tcp'
+        FromPort IN [80, 443]
+        ToPort IN [80, 443]
+        FromPort == ToPort
+    }
+}
+rule encrypted_notifications when %topics !empty {
+    %topics.Properties.KmsMasterKeyId exists
+}
+rule audit_bucket_security when %buckets !empty {
+    %buckets {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties {
+            PublicAccessBlockConfiguration {
+                BlockPublicAcls == true
+                IgnorePublicAcls == true
+                BlockPublicPolicy == true
+                RestrictPublicBuckets == true
+            }
+            BucketEncryption.ServerSideEncryptionConfiguration !empty
+            VersioningConfiguration.Status == 'Enabled'
+        }
+    }
+}

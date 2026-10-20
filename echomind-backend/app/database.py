@@ -13,11 +13,11 @@ from sqlalchemy import (
     UniqueConstraint, text,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
-from dotenv import load_dotenv
+from .runtime_config import load_runtime_environment
 
 # ─── Conexão ─────────────────────────────────────────────────────────────────
 
-load_dotenv()
+load_runtime_environment()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:

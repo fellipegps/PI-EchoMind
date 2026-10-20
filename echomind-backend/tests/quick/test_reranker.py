@@ -230,7 +230,7 @@ async def test_retrieval_reranks_only_the_fused_candidate_pool(
     persist_retrieval_sources([doc for doc, _distance in vector_documents] + lexical_documents)
 
     class VectorStore:
-        def similarity_search_with_score(self, question: str, *, k: int):
+        def similarity_search_ready_with_score(self, question: str, *, k: int, tenant_id: str, today):
             return vector_documents
 
     class CapturingReranker:
@@ -292,7 +292,7 @@ async def test_retrieval_falls_back_to_pr24_on_error_or_timeout(
     persist_retrieval_sources([doc for doc, _distance in vector_documents] + lexical_documents)
 
     class VectorStore:
-        def similarity_search_with_score(self, question: str, *, k: int):
+        def similarity_search_ready_with_score(self, question: str, *, k: int, tenant_id: str, today):
             assert k >= 10
             return vector_documents
 

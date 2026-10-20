@@ -1,0 +1,249 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EchoMind GitHub OIDC publication - immutable ECR images, encrypted private release and backup storage, and one scoped SSM deployment target.
+Metadata:
+  AWSToolsMetrics: {AWSAgentToolkit: aws-cloudformation@3}
+  com.aws.cloudformation.Context:
+    ref: [{at: docs/deploy-aws.md, has: 'Stage 8 activation, trust boundaries, recovery and storage costs'}]
+    must:
+      - Preparation only; activate after non-root provisioning, database readiness and memory validation.
+      - Protect both GitHub environments to main before allowing OIDC; verify actual subject prefix.
+      - Deploying trusted repository code grants root execution on this single node; restrict repository writers.
+Parameters:
+  InstanceId:
+    Type: String
+    AllowedPattern: '^i-[a-f0-9]{8,17}$'
+    Description: InstanceId output from the infrastructure stack.
+  NodeRoleName:
+    Type: String
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]{1,64}$'
+    Description: Existing EC2 instance role name, obtained from its instance profile. No role is replaced.
+  GitHubSubjectPrefix:
+    Type: String
+    Default: repo:fellipegps/PI-EchoMind
+    AllowedPattern: '^repo:[A-Za-z0-9_.@-]+/[A-Za-z0-9_.@-]+$'
+    Description: Exact GitHub OIDC repo prefix; include immutable owner/repository IDs if enabled. Never use a wildcard.
+  ExistingGitHubProviderArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:iam::[0-9]{12}:oidc-provider/token.actions.githubusercontent.com$'
+    Description: Reuse the account GitHub provider if present; otherwise this stack creates one.
+Conditions:
+  CreateProvider: !Equals [!Ref ExistingGitHubProviderArn, '']
+Resources:
+  GitHubProvider:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Federated short-lived credentials; retained because the account provider can be shared.
+        must: [Reuse an existing provider; do not create a duplicate or delete a shared provider.]
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+  BackendRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Preserve commit-tagged versions for rollback; only dangling layers expire automatically.
+        must: [Immutable tags; never automatically expire a tagged active or previous release.]
+    Properties:
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: {EncryptionType: AES256}
+      ImageScanningConfiguration: {ScanOnPush: true}
+      LifecyclePolicy:
+        LifecyclePolicyText: '{"rules":[{"rulePriority":1,"description":"Remove untagged images after seven days","selection":{"tagStatus":"untagged","countType":"sinceImagePushed","countUnit":"days","countNumber":7},"action":{"type":"expire"}}]}'
+  ProxyRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Pair each proxy revision with its backend; preserve tagged versions for rollback.
+        must: [Immutable tags; tagged releases require reviewed cleanup.]
+    Properties:
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: {EncryptionType: AES256}
+      ImageScanningConfiguration: {ScanOnPush: true}
+      LifecyclePolicy:
+        LifecyclePolicyText: '{"rules":[{"rulePriority":1,"description":"Remove untagged images after seven days","selection":{"tagStatus":"untagged","countType":"sinceImagePushed","countUnit":"days","countNumber":7},"action":{"type":"expire"}}]}'
+  ReleaseBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Small public code bundles and private document backups use separate access prefixes; SSE-S3 avoids another monthly key fee.
+        must: [Block all public access; TLS only; no runtime credentials in release bundles.]
+    Properties:
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, IgnorePublicAcls: true, BlockPublicPolicy: true, RestrictPublicBuckets: true}
+      OwnershipControls: {Rules: [{ObjectOwnership: BucketOwnerEnforced}]}
+      BucketEncryption: {ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]}
+      VersioningConfiguration: {Status: Enabled}
+      LifecycleConfiguration:
+        Rules:
+          - {Id: releases, Status: Enabled, Prefix: releases/, ExpirationInDays: 90, NoncurrentVersionExpiration: {NoncurrentDays: 7}, AbortIncompleteMultipartUpload: {DaysAfterInitiation: 1}}
+          - {Id: backups, Status: Enabled, Prefix: backups/, ExpirationInDays: 7, NoncurrentVersionExpiration: {NoncurrentDays: 7}, AbortIncompleteMultipartUpload: {DaysAfterInitiation: 1}}
+  ReleaseBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ReleaseBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - {Effect: Deny, Principal: '*', Action: 's3:*', Resource: [!GetAtt ReleaseBucket.Arn, !Sub '${ReleaseBucket.Arn}/*'], Condition: {Bool: {'aws:SecureTransport': false}}}
+          # The workflow uses If-None-Match=* so a commit's bundle cannot be overwritten.
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:PutObject
+            Resource: !Sub '${ReleaseBucket.Arn}/releases/*'
+            Condition: {'Null': {'s3:if-none-match': 'true'}}
+  BuildRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: GitHub aws-build environment can publish code/images but cannot send commands or read document backups.
+        must: [Exact aud and sub; main-only protected environment; no IAM or infrastructure mutation permissions.]
+    Properties:
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Federated: !If [CreateProvider, !Ref GitHubProvider, !Ref ExistingGitHubProviderArn]}
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:aws-build'
+      Policies:
+        - PolicyName: publish-versions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # ECR authorization does not support resource-level permissions.
+              - {Effect: Allow, Action: 'ecr:GetAuthorizationToken', Resource: '*'}
+              - Effect: Allow
+                Action: ['ecr:BatchCheckLayerAvailability', 'ecr:InitiateLayerUpload', 'ecr:UploadLayerPart', 'ecr:CompleteLayerUpload', 'ecr:PutImage', 'ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer', 'ecr:DescribeImages']
+                Resource: [!GetAtt BackendRepository.Arn, !GetAtt ProxyRepository.Arn]
+              - {Effect: Allow, Action: ['s3:PutObject', 's3:GetObject'], Resource: !Sub '${ReleaseBucket.Arn}/releases/*'}
+  DeployRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: AWS production can invoke only the fixed release document on one node; separate from the publication role.
+        must: [Never allow AWS-RunShellScript or arbitrary targets; protect the aws-production environment to main.]
+    Properties:
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Federated: !If [CreateProvider, !Ref GitHubProvider, !Ref ExistingGitHubProviderArn]}
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:environment:aws-production'
+      Policies:
+        - PolicyName: release-one-node
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ssm:SendCommand
+                Resource: [!Sub 'arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/${DeployDocument}', !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/${InstanceId}']
+              # GetCommandInvocation does not support resource-level permissions.
+              - {Effect: Allow, Action: 'ssm:GetCommandInvocation', Resource: '*'}
+  NodeReleasePolicy:
+    Type: AWS::IAM::Policy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Host-only ECR pulls and artifact reads; uploads backups but cannot read or delete them. IMDS hop limit remains one.
+        must: [Attach only to the existing EC2 role; application containers retain no AWS credentials.]
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-node-release'
+      Roles: [!Ref NodeRoleName]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - {Effect: Allow, Action: 'ecr:GetAuthorizationToken', Resource: '*'}
+          - {Effect: Allow, Action: ['ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer', 'ecr:BatchCheckLayerAvailability'], Resource: [!GetAtt BackendRepository.Arn, !GetAtt ProxyRepository.Arn]}
+          - {Effect: Allow, Action: 's3:GetObject', Resource: !Sub '${ReleaseBucket.Arn}/releases/*'}
+          - {Effect: Allow, Action: ['s3:PutObject', 's3:AbortMultipartUpload'], Resource: !Sub '${ReleaseBucket.Arn}/backups/*'}
+  DeployDocument:
+    Type: AWS::SSM::Document
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Only a commit and checksum are accepted; extract a bounded allowlist, then run the trusted release transaction.
+        must: [SSM Agent >= 3.3.2746.0 and AWS CLI v2 on host; fail closed if ENV_VAR is unavailable.]
+    Properties:
+      DocumentType: Command
+      DocumentFormat: YAML
+      UpdateMethod: NewVersion
+      Content:
+        schemaVersion: '2.2'
+        description: Publish a verified EchoMind application release on the prepared node.
+        parameters:
+          Revision: {type: String, allowedPattern: '^[0-9a-f]{40}$', interpolationType: ENV_VAR}
+          BundleSha256: {type: String, allowedPattern: '^[0-9a-f]{64}$', interpolationType: ENV_VAR}
+        mainSteps:
+          - action: aws:runShellScript
+            name: release
+            precondition: {StringEquals: [platformType, Linux]}
+            inputs:
+              timeoutSeconds: '3000'
+              runCommand:
+                - !Sub |
+                    #!/bin/bash
+                    set -euo pipefail
+                    umask 077
+                    test -n "$SSM_Revision" && test -n "$SSM_BundleSha256"
+                    test -f /srv/echomind/bootstrap-ready
+                    mountpoint -q /srv/echomind
+                    mountpoint -q /etc/echomind
+                    command -v aws >/dev/null
+                    export AWS_DEFAULT_REGION='${AWS::Region}' AWS_REGION='${AWS::Region}' AWS_PAGER=''
+                    export RELEASE_BUCKET='${ReleaseBucket}'
+                    export BACKEND_REPOSITORY='${BackendRepository.RepositoryUri}' PROXY_REPOSITORY='${ProxyRepository.RepositoryUri}'
+                    install -d -m 700 /srv/echomind/releases
+                    # Lock covers downloads too. The Python transaction also locks direct invocations.
+                    flock -n /run/lock/echomind-release.lock /bin/bash -s <<'RELEASE_SCRIPT'
+                    set -euo pipefail
+                    WORK=$(mktemp -d /srv/echomind/releases/staging-XXXXXXXX)
+                    export WORK
+                    # Failed bundles are small and retained for private diagnosis; never delete current releases.
+                    aws s3api get-object --bucket "$RELEASE_BUCKET" --key "releases/$SSM_Revision.tar.gz" "$WORK/bundle.tar.gz" >/dev/null
+                    python3 - <<'PY'
+                    import hashlib, os, pathlib, re, tarfile
+                    root = pathlib.Path(os.environ['WORK'])
+                    revision, digest = os.environ['SSM_Revision'], os.environ['SSM_BundleSha256']
+                    assert re.fullmatch(r'[0-9a-f]{40}', revision)
+                    assert re.fullmatch(r'[0-9a-f]{64}', digest)
+                    bundle = root / 'bundle.tar.gz'
+                    assert bundle.stat().st_size <= 1024 * 1024
+                    assert hashlib.sha256(bundle.read_bytes()).hexdigest() == digest
+                    allowed = {'compose.yaml', 'compose.https.yaml', 'rollout.py', 'manifest.json'}
+                    with tarfile.open(bundle, 'r:gz') as archive:
+                        members = archive.getmembers()
+                        assert len(members) == len(allowed) and {m.name for m in members} == allowed
+                        assert all(m.isfile() and 0 <= m.size <= 262144 for m in members)
+                        for member in members:
+                            data = archive.extractfile(member).read(member.size + 1)
+                            assert len(data) == member.size
+                            (root / member.name).write_bytes(data)
+                    import json
+                    assert json.loads((root / 'manifest.json').read_text())['revision'] == revision
+                    PY
+                    python3 "$WORK/rollout.py" --release "$WORK"
+                    RELEASE_SCRIPT
+Outputs:
+  BuildRoleArn: {Value: !GetAtt BuildRole.Arn}
+  DeployRoleArn: {Value: !GetAtt DeployRole.Arn}
+  BackendRepositoryUri: {Value: !GetAtt BackendRepository.RepositoryUri}
+  ProxyRepositoryUri: {Value: !GetAtt ProxyRepository.RepositoryUri}
+  ReleaseBucketName: {Value: !Ref ReleaseBucket}
+  DeployDocumentName: {Value: !Ref DeployDocument}

@@ -10,7 +10,6 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 from alembic import context
-from dotenv import load_dotenv
 
 # ─── Garante que o pacote `app` seja importável ───────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -19,7 +18,6 @@ from app.database import Base  # noqa: E402 — importa após ajuste do path
 
 # ─── Lê configuração do alembic.ini ──────────────────────────────────────────
 config = context.config
-load_dotenv()
 
 # Sobrescreve a URL com a variável de ambiente (prioridade sobre alembic.ini)
 database_url = os.getenv("DATABASE_URL")
@@ -31,7 +29,8 @@ if not database_url:
 if database_url.startswith("postgresql") and "sslmode" not in database_url:
     database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
 
-config.set_main_option("sqlalchemy.url", database_url)
+# ConfigParser interpolates percent signs; URL-encoded passwords must survive it.
+config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 # Configura logging conforme definido no alembic.ini
 if config.config_file_name is not None:
@@ -57,20 +56,29 @@ def run_migrations_offline() -> None:
 
 
 # ─── Modo Online (conecta e aplica as migrações) ──────────────────────────────
+def migrate_on_connection(connection) -> None:
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        compare_type=True,
+    )
+    with context.begin_transaction():
+        context.run_migrations()
+
+
 def run_migrations_online() -> None:
+    provided_connection = config.attributes.get("connection")
+    if provided_connection is not None:
+        # Keep caller checks, table locks and DDL in the same transaction.
+        migrate_on_connection(provided_connection)
+        return
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            compare_type=True,
-        )
-        with context.begin_transaction():
-            context.run_migrations()
+        migrate_on_connection(connection)
 
 
 if context.is_offline_mode():
