@@ -136,7 +136,7 @@ def test_alembic_preserves_percent_encoded_password(monkeypatch, production_conf
 
 @pytest.fixture
 def installer():
-    spec = importlib.util.spec_from_file_location("configure_runtime", DEPLOY / "configure_runtime.py")
+    spec = importlib.util.spec_from_file_location("configure_runtime", DEPLOY / "operations/configure_runtime.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
