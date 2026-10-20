@@ -15,8 +15,9 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   mais workers ou réplicas; escalar exige primeiro um store compartilhado.
 - `t3.small` com 2 GiB é a configuração inicial do MVP de baixo tráfego,
   mantida após os ensaios controlados na EC2 descritos abaixo. Os ensaios
-  cobriram documentos sintéticos de até 256 KiB e rajadas curtas de quatro
-  consultas; carga sustentada e uploads máximos ainda precisam de validação.
+  cobriram TXT sintético de até 1 MiB, PDF textual e DOCX pequenos, além de
+  rajadas curtas de quatro consultas; carga sustentada e uploads máximos ainda
+  precisam de validação.
   Não é necessário usar GPU.
 - A disponibilidade e a validade dos créditos da conta precisam ser verificadas
   antes de provisionar. Esta configuração não promete hospedagem gratuita permanente.
@@ -2457,6 +2458,84 @@ ficam em `.publication/`, ignorada pelo Git. A API foi conferida no navegador.
 - [x] Remover o novo arquivo sintético após autorização específica e conferir o documento real.
 - [ ] Validar carga sustentada, ingestão completa de 10 MiB, PDFs/DOCXs e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir observabilidade, vulnerabilidades e automação da etapa 9.
+
+### Ampliação da ingestão e validação de formatos - 19/10/2026
+
+Foi mantida a revisão de backend `55a1b1b`, na mesma t3.small com dois vCPUs,
+2 GiB, backend limitado a 1536 MiB, um worker e uma ingestão por vez. O ensaio
+admitiu três arquivos sintéticos apenas na conta de teste. Cada original teve
+tamanho e SHA-256 conferidos; o processamento ocorreu no worker durável já ativo,
+sem carregar outra cópia do E5. Não houve nova publicação ou alteração de
+infraestrutura, variáveis privadas, HTTPS ou automação.
+
+| Arquivo sintético | Original | Trechos / pais / vetores | Processamento | Criação até conclusão |
+| --- | --- | --- | --- | --- |
+| `capacity-1m.txt` | 1048576 bytes | 1338 / 446 / 1338 | 367,901 s | 371,155 s |
+| `format-check.pdf` | 932 bytes, duas páginas textuais | 1 / 1 / 1 | 4,133 s | 8,644 s |
+| `format-check.docx` | 36971 bytes, títulos, parágrafos e tabela | 4 / 2 / 4 | 4,776 s | 5,835 s |
+
+Os tempos de processamento vêm dos eventos de conclusão da aplicação. O outro
+intervalo usa os timestamps relacionais e inclui admissão e espera pelo worker.
+A admissão usou o validador, repositório e armazenamento da aplicação, sem medir
+transferência HTTP multipart ou autenticação do upload. O TXT de 1 MiB levou cerca
+de seis minutos e onze segundos desde a criação, portanto a aceitação de um
+original não deve ser confundida com indexação imediata. O limite completo de
+10 MiB continua sem ensaio de ingestão integral.
+
+Foram conferidos **1343 trechos e 1343 vetores**, sem vetores sem correspondência
+nos trechos atuais, além de 449 pais. O TXT usou **42 lotes** (41 de 32 e um de 26);
+PDF e DOCX usaram um lote cada. A inferência continuou individual e a gravação
+limitada a 32 vetores por lote. O PDF preservou o intervalo de páginas 1 a 2. O
+DOCX preservou as seções, e o código de conferência existente na tabela foi
+encontrado no conteúdo persistido.
+
+As três consultas públicas sequenciais retornaram HTTP 200 com o código esperado,
+em **4,385 s, 4,118 s e 4,148 s**, respectivamente. A pergunta sobre DOCX pediu
+explicitamente a informação da tabela; o código da tabela apareceu na resposta.
+Esses testes conferem o caminho leitura/indexação/busca/resposta para estes
+arquivos pequenos. Não cobrem PDFs digitalizados, OCR, documentos extensos ou
+todas as variações dos formatos.
+
+A janela curta enviou **12 consultas sequenciais** do mesmo cliente, com início
+alvo a cada dez segundos. As 12 retornaram HTTP 200 e o identificador esperado,
+em **4,137 a 4,477 s**, média de **4,300 s**, numa janela de **114,356 s**. Junto
+das três perguntas de formatos, foram 15 respostas conferidas. Isso observa
+estabilidade breve; não mede capacidade sustentada, percentis de SLA ou teto de
+concorrência.
+
+O monitoramento cobriu **815,562 s e 395 amostras**, incluindo preparação,
+ingestões e consultas. O pico amostrado do backend foi **1032,95 MiB**; o pico
+cgroup desde a criação do container chegou a **1072,77 MiB**. O host manteve pelo
+menos **344,82 MiB disponíveis**, sem swap, OOM, eventos de limite, reinícios,
+troca de containers ou amostras sem saúde. O pico de CPU por intervalo foi
+**99,76% dos dois vCPUs**. A média do backend de 13,72% cobre toda essa janela,
+incluindo períodos de espera; não descreve isoladamente a ingestão ou o chat.
+O modo de créditos permaneceu `standard`; o último ponto disponível consultado,
+02:37 UTC, mostrou **232,637 créditos**. A métrica tem atraso e não representa
+ensaio de funcionamento com saldo esgotado. A configuração de 2 GiB continua
+adequada apenas ao escopo de MVP e carga limitada observado nesses ensaios.
+
+Após autorização específica do usuário, os três documentos sintéticos, seus
+1343 trechos/vetores e originais foram removidos. A conferência encontrou zero
+documentos, trechos, pais e vetores documentais remanescentes na conta de teste.
+O documento real mantém **12837 bytes, 20 trechos, 20 vetores e original íntegro**.
+A fila está vazia e as escritas liberadas. API e proxy estão saudáveis, e HTTPS,
+CORS e bloqueio de rota privada sem credenciais passaram novamente. Interações
+e métricas sintéticas permanecem na conta de teste.
+
+Cinco testes dos medidores passaram, além das conferências locais dos leitores,
+hashes, páginas/seções e sintaxe dos auxiliares temporários. O relatório com
+contagens, durações e recursos é `docs/capacity-formats-aws-production.json`.
+Os originais sintéticos e auxiliares ficam na pasta `.publication/`, ignorada
+pelo Git. Carga sustentada, ingestão integral do limite máximo e comportamento
+com créditos esgotados continuam pendentes.
+
+- [x] Medir o processamento completo do TXT de 1 MiB na EC2 existente.
+- [x] Validar PDF textual pequeno e DOCX pequeno com seções e tabela em produção.
+- [x] Conferir trechos, pais, vetores, páginas/seções e três respostas públicas.
+- [x] Concluir a janela curta de consultas, registrar recursos e limpar os três arquivos autorizados.
+- [ ] Validar carga sustentada, 10 MiB completos, formatos maiores e créditos esgotados.
+- [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
 
 ## Referências
 

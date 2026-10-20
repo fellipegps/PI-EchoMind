@@ -1,0 +1,601 @@
+{
+  "date": "2026-10-19",
+  "timezone": "America/Sao_Paulo",
+  "scope": "Progressive production ingestion with one 1MiB TXT and small textual PDF/DOCX; short spaced public-query observation, not full sustained-load or maximum-upload acceptance",
+  "application_source_revision": "55a1b1bea118f05a708439fd6f68c1bccd9cfcd7",
+  "application_image_sha256": "sha256:e1250dcf3d2baa61171bb2674ceff2a0d0ea8f89a58aefc5c5440cd0dc7421ee",
+  "aws_region": "us-east-1",
+  "instance": {
+    "type": "t3.small",
+    "vcpus": 2,
+    "nominal_memory_gib": 2,
+    "cpu_credit_mode": "standard",
+    "backend_limit_mib": 1536,
+    "proxy_limit_mib": 128,
+    "workers": 1,
+    "concurrent_ingestions": 1,
+    "reranker_enabled": false
+  },
+  "unchanged_application_and_infrastructure": true,
+  "measurements": {
+    "admission": "Application validator, tenant-scoped repository, durable original and existing worker, admitted by operator; HTTP multipart upload and authentication not timed",
+    "additional_embedding_model_loaded": false,
+    "fixtures": [
+      {
+        "filename": "capacity-1m.txt",
+        "mime_type": "text/plain",
+        "bytes": 1048576,
+        "sha256": "41e5e1435084ef5576e9bd917445ffdc2fe963813f01dd0748a1df9a23b61193",
+        "expected_marker": "CAPACITY-20261019",
+        "expected_chunks": 1338,
+        "expected_parents": 446
+      },
+      {
+        "filename": "format-check.pdf",
+        "mime_type": "application/pdf",
+        "bytes": 932,
+        "sha256": "a2aaf178aae5d9e165d1276deaf8770b0d82cb6c32d071cd2e36ad4f458075e1",
+        "expected_marker": "PDFCHECK-20261019",
+        "expected_chunks": 1,
+        "expected_parents": 1,
+        "block_pages": [
+          1,
+          2
+        ],
+        "sections": []
+      },
+      {
+        "filename": "format-check.docx",
+        "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "bytes": 36971,
+        "sha256": "12c9d06d95430a1e310895e32322511c80d41fac10c973ddd16800ca2c1a8796",
+        "expected_marker": "DOCXCHECK-20261019",
+        "expected_chunks": 4,
+        "expected_parents": 2,
+        "block_pages": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "sections": [
+          "Atendimento DOCXCHECK",
+          "Programa DOCXCHECK - teste de tabelas"
+        ]
+      }
+    ],
+    "results": {
+      "fixtures": [
+        {
+          "fixture": "capacity-1m.txt",
+          "status": "ready",
+          "bytes": 1048576,
+          "recorded_chunks": 1338,
+          "chunks": 1338,
+          "parents": 446,
+          "vectors": 1338,
+          "unmatched_vectors": 0,
+          "chunks_with_expected_marker": 1338,
+          "page_range": [
+            null,
+            null
+          ],
+          "sections": [],
+          "created_to_processed_seconds": 371.155172
+        },
+        {
+          "fixture": "format-check.pdf",
+          "status": "ready",
+          "bytes": 932,
+          "recorded_chunks": 1,
+          "chunks": 1,
+          "parents": 1,
+          "vectors": 1,
+          "unmatched_vectors": 0,
+          "chunks_with_expected_marker": 1,
+          "page_range": [
+            1,
+            2
+          ],
+          "sections": [],
+          "created_to_processed_seconds": 8.644319
+        },
+        {
+          "fixture": "format-check.docx",
+          "status": "ready",
+          "bytes": 36971,
+          "recorded_chunks": 4,
+          "chunks": 4,
+          "parents": 2,
+          "vectors": 4,
+          "unmatched_vectors": 0,
+          "chunks_with_expected_marker": 1,
+          "page_range": [
+            null,
+            null
+          ],
+          "sections": [
+            "Atendimento DOCXCHECK",
+            "Programa DOCXCHECK - teste de tabelas"
+          ],
+          "created_to_processed_seconds": 5.834532
+        }
+      ],
+      "storage": {
+        "draining": false,
+        "active": false,
+        "queued_jobs": 0
+      }
+    },
+    "vector_batches": {
+      "batch_sizes": [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        26,
+        1,
+        4
+      ],
+      "total_batched_vectors": 1343,
+      "ingestions": [
+        {
+          "status": "success",
+          "stage": "completed",
+          "duration_ms": 367900.66,
+          "counts": {
+            "persisted_chunks": 1338,
+            "persisted_parents": 446
+          }
+        },
+        {
+          "status": "success",
+          "stage": "completed",
+          "duration_ms": 4133.443,
+          "counts": {
+            "persisted_chunks": 1,
+            "persisted_parents": 1
+          }
+        },
+        {
+          "status": "success",
+          "stage": "completed",
+          "duration_ms": 4775.631,
+          "counts": {
+            "persisted_chunks": 4,
+            "persisted_parents": 2
+          }
+        }
+      ]
+    },
+    "total_verified_chunks": 1343,
+    "total_verified_vectors": 1343,
+    "total_verified_parents": 449,
+    "performance_scope": "Processing durations are application events; created-to-processed durations include admission and worker polling. No historical controlled A/B comparison in this phase."
+  },
+  "baseline_original_integrity": {
+    "ready_documents": 1,
+    "valid_originals": 1,
+    "missing_originals": 0,
+    "invalid_originals": 0,
+    "original_files": 1,
+    "queued_jobs": 0,
+    "draining": false,
+    "fixture_absent": null
+  },
+  "format_chat_checks": {
+    "started_at": "2026-10-20T02:38:10.698630+00:00",
+    "ended_at": "2026-10-20T02:38:23.350277+00:00",
+    "checks": [
+      {
+        "fixture": "capacity-1m.txt",
+        "request": 1,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.857,
+        "duration_seconds": 4.385
+      },
+      {
+        "fixture": "format-check.pdf",
+        "request": 1,
+        "status": 200,
+        "bytes": 126,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.514,
+        "duration_seconds": 4.118
+      },
+      {
+        "fixture": "format-check.docx",
+        "request": 1,
+        "status": 200,
+        "bytes": 159,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.666,
+        "duration_seconds": 4.148
+      }
+    ],
+    "all_expected_answers": true,
+    "scope": "Three sequential synthetic public queries after documents ready; not sustained load"
+  },
+  "short_query_window": {
+    "started_at": "2026-10-20T02:39:06.493680+00:00",
+    "ended_at": "2026-10-20T02:41:00.850123+00:00",
+    "elapsed_seconds": 114.356,
+    "requested_start_interval_seconds": 10,
+    "concurrency": 1,
+    "requests": [
+      {
+        "request": 1,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.649,
+        "duration_seconds": 4.171
+      },
+      {
+        "request": 2,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.897,
+        "duration_seconds": 4.422
+      },
+      {
+        "request": 3,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.852,
+        "duration_seconds": 4.378
+      },
+      {
+        "request": 4,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.69,
+        "duration_seconds": 4.209
+      },
+      {
+        "request": 5,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.659,
+        "duration_seconds": 4.244
+      },
+      {
+        "request": 6,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.775,
+        "duration_seconds": 4.297
+      },
+      {
+        "request": 7,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.952,
+        "duration_seconds": 4.477
+      },
+      {
+        "request": 8,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.912,
+        "duration_seconds": 4.437
+      },
+      {
+        "request": 9,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.614,
+        "duration_seconds": 4.137
+      },
+      {
+        "request": 10,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.653,
+        "duration_seconds": 4.18
+      },
+      {
+        "request": 11,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.773,
+        "duration_seconds": 4.296
+      },
+      {
+        "request": 12,
+        "status": 200,
+        "bytes": 131,
+        "expected_marker_found": true,
+        "first_byte_seconds": 3.878,
+        "duration_seconds": 4.356
+      }
+    ],
+    "all_expected_answers": true,
+    "scope": "Short observation of 12 synthetic requests, one client, ten-second target spacing; not sustained throughput, percentile SLO, or exhausted CPU credit test",
+    "mean_duration_seconds": 4.3,
+    "min_duration_seconds": 4.137,
+    "max_duration_seconds": 4.477
+  },
+  "total_public_chat_requests": 15,
+  "host_observation": {
+    "started_at": "2026-10-20T02:28:05.247670+00:00",
+    "ended_at": "2026-10-20T02:41:40.809668+00:00",
+    "samples": 395,
+    "elapsed_seconds": 815.562,
+    "sample_interval_cpu_peak_percent": 99.76,
+    "host_memory_total_bytes": 1998573568,
+    "host_memory_available_min_bytes": 361570304,
+    "host_swap_used_max_bytes": 0,
+    "root_free_min_bytes": 12291080192,
+    "data_free_min_bytes": 17230217216,
+    "containers": {
+      "backend": {
+        "container_replaced": false,
+        "healthy_at_end": true,
+        "unhealthy_samples": 0,
+        "oom_killed": false,
+        "restarts_before": 0,
+        "restarts_after": 0,
+        "memory_at_start_bytes": 989224960,
+        "memory_at_end_bytes": 1043632128,
+        "sampled_memory_peak_bytes": 1083125760,
+        "lifetime_memory_peak_before_bytes": 1077342208,
+        "lifetime_memory_peak_after_bytes": 1124876288,
+        "memory_limit_bytes": 1610612736,
+        "cpu_seconds": 223.842,
+        "average_cpu_percent_of_two_vcpus": 13.72,
+        "memory_limit_events_delta": 0,
+        "oom_events_delta": 0,
+        "oom_kill_events_delta": 0
+      },
+      "proxy": {
+        "container_replaced": false,
+        "healthy_at_end": true,
+        "unhealthy_samples": 0,
+        "oom_killed": false,
+        "restarts_before": 0,
+        "restarts_after": 0,
+        "memory_at_start_bytes": 36745216,
+        "memory_at_end_bytes": 28295168,
+        "sampled_memory_peak_bytes": 36745216,
+        "lifetime_memory_peak_before_bytes": 45342720,
+        "lifetime_memory_peak_after_bytes": 45342720,
+        "memory_limit_bytes": 134217728,
+        "cpu_seconds": 1.363,
+        "average_cpu_percent_of_two_vcpus": 0.08,
+        "memory_limit_events_delta": 0,
+        "oom_events_delta": 0,
+        "oom_kill_events_delta": 0
+      }
+    },
+    "load_guard_ok": true,
+    "scope": "Window includes preparation, sequential ingestions, probes and public queries; CPU averages do not isolate ingestion or active request service time."
+  },
+  "cpu_credit_observation": {
+    "checked_at": "2026-10-20T02:42:28.606183+00:00",
+    "metrics": {
+      "MetricDataResults": [
+        {
+          "Id": "credit_balance",
+          "Label": "CPUCreditBalance",
+          "Timestamps": [
+            "2026-10-20T02:37:00+00:00",
+            "2026-10-20T02:32:00+00:00",
+            "2026-10-20T02:27:00+00:00",
+            "2026-10-20T02:22:00+00:00",
+            "2026-10-20T02:17:00+00:00"
+          ],
+          "Values": [
+            232.63721973333332,
+            232.25802141666668,
+            232.56461228333333,
+            230.9236535,
+            229.05988336666667
+          ],
+          "StatusCode": "Complete"
+        },
+        {
+          "Id": "cpu_utilization",
+          "Label": "CPUUtilization",
+          "Timestamps": [
+            "2026-10-20T02:37:00+00:00",
+            "2026-10-20T02:32:00+00:00",
+            "2026-10-20T02:27:00+00:00",
+            "2026-10-20T02:22:00+00:00",
+            "2026-10-20T02:17:00+00:00"
+          ],
+          "Values": [
+            3.9960088274576195,
+            18.769980031559083,
+            21.029164572759292,
+            2.930758231472198,
+            1.3631326732063065
+          ],
+          "StatusCode": "Complete"
+        }
+      ],
+      "Messages": []
+    }
+  },
+  "cpu_credit_caveat": "Delayed CloudWatch points; positive balance observed, no exhausted-credit workload and no conclusion about sustained throughput.",
+  "public_verification_before_cleanup": {
+    "checked_at": "2026-10-20T02:37:51.085231+00:00",
+    "domain": "echomind-api.duckdns.org",
+    "health_status": 200,
+    "http_redirect_status": 308,
+    "certificate_hostname_and_chain_valid": true,
+    "tls_protocol": "TLSv1.3",
+    "certificate_not_after": "Jan 17 17:17:59 2027 GMT",
+    "certificate_serial": "05C95EF8B85CD5E4646DE5AAA7397D3E303A",
+    "certificate_issuer": {
+      "countryName": "US",
+      "organizationName": "Let's Encrypt",
+      "commonName": "YE2"
+    },
+    "cors_production_origin": true,
+    "cors_untrusted_origin_rejected": true,
+    "hsts": true,
+    "protected_endpoint_without_credentials": 403
+  },
+  "cleanup": {
+    "state": "completed",
+    "user_explicitly_authorized": true,
+    "targets": [
+      {
+        "filename": "capacity-1m.txt",
+        "bytes": 1048576,
+        "sha256": "41e5e1435084ef5576e9bd917445ffdc2fe963813f01dd0748a1df9a23b61193"
+      },
+      {
+        "filename": "format-check.pdf",
+        "bytes": 932,
+        "sha256": "a2aaf178aae5d9e165d1276deaf8770b0d82cb6c32d071cd2e36ad4f458075e1"
+      },
+      {
+        "filename": "format-check.docx",
+        "bytes": 36971,
+        "sha256": "12c9d06d95430a1e310895e32322511c80d41fac10c973ddd16800ca2c1a8796"
+      }
+    ],
+    "matched_documents": 3,
+    "matched_chunks": 1343,
+    "matched_vectors": 1343,
+    "all_originals_valid": true,
+    "applied": true,
+    "originals_removed": true,
+    "queued_jobs_after": 0,
+    "verification": {
+      "test_tenant_documents": 0,
+      "test_tenant_chunks": 0,
+      "test_tenant_parents": 0,
+      "test_tenant_document_vectors": 0,
+      "real_document": {
+        "ready": true,
+        "bytes": 12837,
+        "chunks": 20,
+        "vectors": 20
+      }
+    },
+    "originals": {
+      "ready_documents": 1,
+      "valid_originals": 1,
+      "missing_originals": 0,
+      "invalid_originals": 0,
+      "original_files": 1,
+      "queued_jobs": 0,
+      "draining": false,
+      "fixture_absent": null
+    }
+  },
+  "final_state": {
+    "application_source_revision": "55a1b1bea118f05a708439fd6f68c1bccd9cfcd7",
+    "pending_deployment": false,
+    "documents": {
+      "draining": false,
+      "active": false,
+      "queued_jobs": 0
+    },
+    "containers": [
+      {
+        "name": "echomind-backend-1",
+        "image": "sha256:e1250dcf3d2baa61171bb2674ceff2a0d0ea8f89a58aefc5c5440cd0dc7421ee",
+        "running": true,
+        "health": "healthy",
+        "oom": false,
+        "restarts": 0
+      },
+      {
+        "name": "echomind-proxy-1",
+        "image": "sha256:fc9243ab5a709befc3d0806a92f831fb3bb85d15ce9199b386e512496daf7984",
+        "running": true,
+        "health": "healthy",
+        "oom": false,
+        "restarts": 0
+      }
+    ],
+    "public_verification": {
+      "checked_at": "2026-10-20T02:41:57.021144+00:00",
+      "domain": "echomind-api.duckdns.org",
+      "health_status": 200,
+      "http_redirect_status": 308,
+      "certificate_hostname_and_chain_valid": true,
+      "tls_protocol": "TLSv1.3",
+      "certificate_not_after": "Jan 17 17:17:59 2027 GMT",
+      "certificate_serial": "05C95EF8B85CD5E4646DE5AAA7397D3E303A",
+      "certificate_issuer": {
+        "countryName": "US",
+        "organizationName": "Let's Encrypt",
+        "commonName": "YE2"
+      },
+      "cors_production_origin": true,
+      "cors_untrusted_origin_rejected": true,
+      "hsts": true,
+      "protected_endpoint_without_credentials": 403
+    }
+  },
+  "validation": {
+    "measurement_tool_tests_passed": 5,
+    "local_parser_hash_chunk_metadata_checks_passed": true,
+    "temporary_operator_script_syntax_checked": true
+  },
+  "limits": [
+    "Full 10MiB ingestion remains untested",
+    "PDF has a text layer and two short pages; scanned PDFs, OCR, long or complex PDFs were not tested",
+    "DOCX is small, with synthetic headings, paragraphs and table; broad format compatibility remains untested",
+    "Twelve spaced requests from one client over 114.356s are a short observation, not sustained capacity, a percentile SLO or a concurrency limit",
+    "CPU credit exhaustion, snapshot restoration, vulnerability review and remaining observability/CI/CD checks remain pending",
+    "Synthetic interactions and operational metrics remain in the test account; local fixture evidence remains in ignored .publication directory",
+    "No new application release, infrastructure, secrets or automatic deployment activation"
+  ]
+}
+
