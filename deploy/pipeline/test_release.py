@@ -3,6 +3,7 @@ import copy
 import importlib.util
 import io
 import json
+import runpy
 from pathlib import Path
 import subprocess
 import sys
@@ -14,7 +15,8 @@ from unittest.mock import patch
 import yaml
 
 from package_release import ROOT, package
-from rollout import Host, ReleaseError, command, manifest, recover_previous, transact
+from rollout import Host, ReleaseError, command, manifest, recover_previous, rehearse_rollback, transact
+from adopt_manual import baseline
 
 SPEC = importlib.util.spec_from_file_location("infra_checks", ROOT / "deploy/aws/check_infra.py")
 sys.path.insert(0, str(ROOT / "deploy/aws"))
@@ -123,6 +125,45 @@ class ReleaseTests(unittest.TestCase):
             recover_previous(host, self.current)
         self.assertTrue(pending.exists())
         self.assertNotIn(("resume", "old"), host.events)
+
+    def test_rehearsal_proves_candidate_then_recovers_verified_previous(self):
+        host = FakeHost()
+        rehearse_rollback(host, self.new, self.current)
+        self.assertEqual(json.loads(self.current.read_text()), self.old)
+        self.assertIn(('healthy', 'new'), host.events)
+        self.assertEqual(host.events[-2:], [('healthy', 'old'), ('resume', 'old')])
+        self.assertFalse(self.current.with_name('pending.json').exists())
+
+    def test_rehearsal_does_not_claim_success_when_candidate_or_recovery_fails(self):
+        for action, revision in (('up', 'new'), ('healthy', 'new'), ('healthy', 'old'), ('resume', 'old')):
+            self.current.write_text(json.dumps(self.old))
+            self.current.with_name('pending.json').unlink(missing_ok=True)
+            with self.assertRaises(ReleaseError):
+                rehearse_rollback(FakeHost({(action, revision)}), self.new, self.current)
+
+    def test_local_adoption_is_recovery_only_and_pins_exact_images(self):
+        path = Path(self.directory.name)
+        value = {'version': 1, 'revision': 'a' * 40, 'origin': 'manual-adoption',
+                 'backend': 'sha256:' + 'b' * 64, 'proxy': 'sha256:' + 'c' * 64}
+        (path / 'manifest.json').write_text(json.dumps(value))
+        self.assertEqual(manifest(path, allow_local_recovery=True), value)
+        with patch.dict('os.environ', {'BACKEND_REPOSITORY':'approved','PROXY_REPOSITORY':'approved'}):
+            with self.assertRaises(ReleaseError):manifest(path)
+        value['backend'] = 'untrusted:latest'
+        (path / 'manifest.json').write_text(json.dumps(value))
+        with self.assertRaises(ReleaseError):manifest(path, allow_local_recovery=True)
+
+    def test_adoption_rejects_manifest_image_mismatch_or_unhealthy_container(self):
+        metadata = {'source_revision': 'a' * 40, 'source_directory':'/verified',
+                    'images': {name:{'id':'sha256:' + char * 64} for name,char in (('backend','b'),('proxy','c'))}}
+        containers = [{'Name':'/echomind-' + name + '-1','Image':metadata['images'][name]['id'],
+                       'Config':{'Labels':{'com.docker.compose.project':'echomind',
+                                          'com.docker.compose.project.working_dir':'/verified/deploy'}},
+                       'State':{'Running':True,'Health':{'Status':'healthy'}}} for name in ('backend','proxy')]
+        state = baseline(metadata, containers, Path('/baseline'), {})
+        self.assertEqual(state['backend'], metadata['images']['backend']['id'])
+        containers[0]['Image'] = 'sha256:' + 'd' * 64
+        with self.assertRaises(ReleaseError):baseline(metadata, containers, Path('/baseline'), {})
 
     def test_durable_state_write_failure_restores_previous_pointer(self):
         import rollout
@@ -257,8 +298,29 @@ class PipelineSecurityTests(unittest.TestCase):
         self.assertEqual(workflow["jobs"]["deploy"]["needs"], "publish")
         for job in workflow["jobs"].values():
             checkout = job["steps"][0]
-            self.assertEqual(checkout["with"]["ref"], "${{ github.event.workflow_run.head_sha }}")
+            self.assertEqual(checkout["with"]["ref"], "${{ github.event.workflow_run.head_sha || github.sha }}")
             self.assertFalse(checkout["with"]["persist-credentials"])
+        self.assertIn("github.event_name == 'workflow_run'", workflow['jobs']['deploy']['if'])
+        self.assertIn("github.ref == 'refs/heads/main'", publish['if'])
+        self.assertEqual(workflow['jobs']['publish']['permissions']['actions'], 'read')
+
+    def test_manual_publication_requires_successful_push_ci_for_current_main(self):
+        revision = 'a' * 40
+        repo = 'owner/repository'
+        run = {'head_sha': revision, 'head_branch':'main', 'event':'push', 'conclusion':'success',
+               'head_repository':{'full_name':repo}}
+        for runs, allowed in (([run], True), ([], False), ([run | {'event':'pull_request'}], False),
+                              ([run | {'head_repository':{'full_name':'untrusted/fork'}}], False)):
+            responses = [io.BytesIO(json.dumps({'object':{'sha':revision}}).encode()),
+                         io.BytesIO(json.dumps({'workflow_runs':runs}).encode())]
+            with patch.dict('os.environ', {'RELEASE_REVISION':revision,'GITHUB_REPOSITORY':repo,
+                                          'GITHUB_TOKEN':'synthetic-test-token'}), \
+                    patch('urllib.request.urlopen', side_effect=responses):
+                if allowed:
+                    runpy.run_path(str(ROOT / 'deploy/pipeline/ensure_main.py'))
+                else:
+                    with self.assertRaises(SystemExit):
+                        runpy.run_path(str(ROOT / 'deploy/pipeline/ensure_main.py'))
 
 
 if __name__ == "__main__":

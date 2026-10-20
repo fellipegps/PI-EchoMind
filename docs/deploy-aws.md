@@ -1699,7 +1699,7 @@ um release malicioso aprovado em código seguro.
 - [ ] Proteger a branch `main` e as alterações do pipeline.
 - [ ] Verificar o `sub` OIDC real do repositório. Repositórios novos/opt-in podem incluir IDs imutáveis: informar o prefixo exato em `GitHubSubjectPrefix`, sem wildcard. Não imprimir o token.
 - [ ] Inspecionar o provedor OIDC GitHub já existente na conta. Reutilizar seu ARN; criar um apenas se não existir.
-- [ ] Separar a concessão `NodeReleasePolicy` do pipeline para o bootstrap de acesso, mantendo a execução da aplicação sem escrita IAM.
+- [x] Isolar o bootstrap IAM no stack administrativo `echomind-pipeline`, sem usar a role de execução da aplicação nem conceder escrita IAM a ela. `NodeReleasePolicy` permanece nesse stack de acesso separado do stack da aplicação.
 - [ ] Criar/revisar change set de `deploy/aws/pipeline.yaml`, sem executar até conferir identidade, custos e permissões.
 - [ ] Configurar as variáveis públicas do repositório abaixo, usando outputs reais.
 - [ ] Habilitar `AWS_DEPLOY_ENABLED=true` somente quando os pré-requisitos estiverem atendidos; acompanhar a primeira publicação.
@@ -1751,10 +1751,28 @@ diretório do release e configurações públicas. `previous.json` guarda a ante
 `pending.json` registra uma troca em andamento. Esses arquivos não contêm
 credenciais, ficam restritos no volume criptografado e nunca vão ao GitHub.
 
-A primeira implantação precisa iniciar sem containers Compose `echomind`
-externos a este fluxo; se já existirem, ele bloqueia para o operador registrar
-ou migrar a instalação conscientemente. No primeiro deploy não há versão
-anterior: uma falha para o candidato e conserva os volumes para diagnóstico.
+A instalação manual existente deve ser registrada com `adopt_manual.py` antes
+da primeira publicação. O utilitário confere o manifesto manual, as imagens
+locais por ID imutável, Compose, mounts, banco e HTTPS, sem reiniciar a aplicação.
+Ele registra essa instalação como retorno inicial. Containers externos sem
+registro continuam bloqueando o deploy. Em um servidor realmente vazio, uma
+falha inicial para o candidato e conserva os volumes para diagnóstico.
+
+Para ativar, mantenha `AWS_DEPLOY_ENABLED=false` durante o primeiro merge e
+aguarde o CI de push da `main`. A execução manual de `Deploy AWS` apenas publica
+as imagens e o bundle desse commit: exige CI aprovado da revisão atual e não
+executa o job de implantação. Depois da adoção, execute o ensaio controlado
+`rollout.py --release DIRETORIO_VERIFICADO --rehearse-rollback`: ele sobe e
+verifica o candidato, provoca uma falha controlada e confirma a recuperação
+real da instalação anterior e a retomada das escritas. Somente então habilite
+a variável e execute novamente o CI de push da `main` para a primeira publicação
+automática. As próximas conclusões bem-sucedidas desse CI acionam o deploy.
+
+Validação local em 2026-10-20: 25 testes do pipeline, validações dos quatro
+templates, políticas, workflows e shell aprovados. O ensaio Compose descartável
+também recuperou uma versão anterior após falha real de um container, preservando
+originais, backup e retomada de escritas. Isso ainda não comprova ativação AWS;
+o resultado da primeira publicação deve ser registrado após sua execução.
 
 O backup por deploy contém **originais e marcadores de documentos**, não banco,
 credenciais, certificados ou cache de modelos. O backup do PostgreSQL é uma

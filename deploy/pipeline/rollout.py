@@ -76,10 +76,14 @@ def settings() -> dict[str, str]:
     return values
 
 
-def manifest(release: Path) -> dict:
+def manifest(release: Path, *, allow_local_recovery=False) -> dict:
     value = json.loads((release / "manifest.json").read_text())
     if value.get("version") != 1 or not re.fullmatch(r"[0-9a-f]{40}", value.get("revision", "")):
         raise ReleaseError("Invalid release manifest.")
+    if allow_local_recovery and value.get("origin") == "manual-adoption":
+        if not all(re.fullmatch(r"sha256:[0-9a-f]{64}", value.get(name, "")) for name in ("backend", "proxy")):
+            raise ReleaseError("Manual recovery requires pinned local image IDs.")
+        return value
     for name, repository in (("backend", "BACKEND_REPOSITORY"), ("proxy", "PROXY_REPOSITORY")):
         expected = os.environ[repository]
         if not re.fullmatch(re.escape(expected) + r"@sha256:[0-9a-f]{64}", value.get(name, "")):
@@ -254,12 +258,49 @@ def recover_previous(host, current: Path):
     print("Interrupted release recovered to its verified previous version.")
 
 
+def rehearse_rollback(host, new: dict, current: Path):
+    """Verify a candidate, inject one health failure, and require a verified rollback."""
+    if not current.exists():
+        raise ReleaseError("Register the existing release before a rollback rehearsal.")
+    previous = json.loads(current.read_text())
+    if previous["revision"] == new["revision"]:
+        raise ReleaseError("Rehearsal requires a distinct candidate revision.")
+
+    class FailCandidateOnce:
+        candidate_verified = False
+        previous_verified = False
+
+        def __getattr__(self, name):
+            return getattr(host, name)
+
+        def healthy(self, state):
+            host.healthy(state)
+            if state == new:
+                self.candidate_verified = True
+                raise ReleaseError("Controlled rollback rehearsal failure.")
+            if state == previous:
+                self.previous_verified = True
+
+    probe = FailCandidateOnce()
+    try:
+        transact(probe, new, current)
+    except ReleaseError:
+        if (not probe.candidate_verified or not probe.previous_verified
+                or current.with_name("pending.json").exists()
+                or json.loads(current.read_text()) != previous):
+            raise ReleaseError("Rollback rehearsal did not complete; inspect recovery state.") from None
+    else:
+        raise ReleaseError("Expected rehearsal failure was not exercised.")
+    print("Rollback rehearsal passed; verified previous release restored and writes resumed.")
+
+
 def main():
     import fcntl
     parser = argparse.ArgumentParser(description=__doc__)
     operation = parser.add_mutually_exclusive_group(required=True)
     operation.add_argument("--release", type=Path)
     operation.add_argument("--recover-previous", action="store_true", help="Explicit operator recovery from pending.json")
+    parser.add_argument("--rehearse-rollback", action="store_true", help="Verify candidate then deliberately exercise rollback")
     arguments = parser.parse_args()
     os.umask(0o077)
     if os.geteuid() != 0 or not (ROOT / "bootstrap-ready").is_file():
@@ -281,7 +322,7 @@ def main():
             raise ReleaseError("Release directory outside the durable release store.")
         if shutil.disk_usage(ROOT).free < 4 * 1024**3:
             raise ReleaseError("Require at least 4 GiB free before pulling images/backing up documents.")
-        values = manifest(release)
+        values = manifest(release, allow_local_recovery=bool(recovery))
         state = values | {"release": str(release), "settings": settings()}
         if recovery and any(recovery.get(key) != values[key] for key in ("revision", "backend", "proxy")):
             raise ReleaseError("Recovery state disagrees with its saved manifest.")
@@ -290,23 +331,26 @@ def main():
                "AWS_DEFAULT_REGION": "us-east-1", "AWS_REGION": "us-east-1", "AWS_PAGER": ""}
         with tempfile.TemporaryDirectory(prefix="ecr-", dir=ROOT) as directory:
             env["DOCKER_CONFIG"] = directory
-            token = command(["aws", "ecr", "get-login-password"], env=env, timeout=30)
-            try:
-                subprocess.run(["docker", "login", "--username", "AWS", "--password-stdin",
-                                os.environ["BACKEND_REPOSITORY"].split("/")[0]],
-                               input=token, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                               timeout=30, check=True)
-            except subprocess.SubprocessError:
-                raise ReleaseError("ECR authentication failed.") from None
-            finally:
-                del token
-            for name in ("backend", "proxy"):
-                command(["docker", "pull", "--platform", "linux/amd64", values[name]], env=env, timeout=900)
+            if values.get("origin") != "manual-adoption":
+                token = command(["aws", "ecr", "get-login-password"], env=env, timeout=30)
+                try:
+                    subprocess.run(["docker", "login", "--username", "AWS", "--password-stdin",
+                                    os.environ["BACKEND_REPOSITORY"].split("/")[0]],
+                                   input=token, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                   timeout=30, check=True)
+                except subprocess.SubprocessError:
+                    raise ReleaseError("ECR authentication failed.") from None
+                finally:
+                    del token
+                for name in ("backend", "proxy"):
+                    command(["docker", "pull", "--platform", "linux/amd64", values[name]], env=env, timeout=900)
             current = ROOT / "current.json"
             if not current.exists() and command(["docker", "ps", "-aq", "--filter", "label=com.docker.compose.project=echomind"], env=env).strip():
                 raise ReleaseError("Unmanaged existing containers detected; register the initial release first.")
             if recovery:
                 recover_previous(Host(env), current)
+            elif arguments.rehearse_rollback:
+                rehearse_rollback(Host(env), state, current)
             else:
                 transact(Host(env), state, current)
 

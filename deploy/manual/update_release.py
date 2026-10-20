@@ -62,6 +62,8 @@ class ManualHost(Host):
 
 
 def update(revision: str, archive_sha256: str):
+    if (ROOT / "current.json").exists():
+        raise ReleaseError("Installation adopted by the pipeline; use its release/recovery procedure.")
     if os.geteuid() != 0 or not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ReleaseError("Root and a full committed revision are required.")
     if not (ROOT / "bootstrap-ready").is_file() or not all(os.path.ismount(p) for p in (ROOT, PRIVATE)):

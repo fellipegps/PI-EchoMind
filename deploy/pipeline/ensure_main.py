@@ -17,4 +17,15 @@ with urllib.request.urlopen(request, timeout=15) as response:
     latest = json.load(response)["object"]["sha"]
 if revision != latest:
     raise SystemExit("Main has a newer commit; this release is obsolete. Wait for its CI.")
-print("Successful CI revision is still the main branch head.")
+checks = urllib.request.Request(
+    f"https://api.github.com/repos/{repository}/actions/workflows/ci.yml/runs"
+    f"?head_sha={revision}&event=push&status=success&per_page=10",
+    headers=request.headers,
+)
+with urllib.request.urlopen(checks, timeout=15) as response:
+    runs = json.load(response)["workflow_runs"]
+if not any(run.get("head_sha") == revision and run.get("head_branch") == "main"
+           and run.get("event") == "push" and run.get("conclusion") == "success"
+           and run.get("head_repository", {}).get("full_name") == repository for run in runs):
+    raise SystemExit("Require successful push CI for the current main revision before publication.")
+print("Current main revision has successful push CI.")

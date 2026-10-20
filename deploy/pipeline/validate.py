@@ -11,7 +11,7 @@ FILES = [
     "deploy/compose.yaml", "deploy/compose.https.yaml", ".github/workflows/deploy-aws.yml", ".github/workflows/ci.yml",
     *["deploy/pipeline/" + name for name in (
         "package_release.py", "publish_release.py", "ensure_main.py", "send_release.py",
-        "rollout.py", "test_release.py",
+        "rollout.py", "test_release.py", "adopt_manual.py",
     )],
 ]
 container = ["docker", "run", "--rm", "--pull", "never", "--platform", "linux/amd64",
