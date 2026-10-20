@@ -3,7 +3,7 @@ Description: EchoMind project administration - fixed service roles and scoped Cl
 Metadata:
   AWSToolsMetrics: {AWSAgentToolkit: aws-cloudformation@3}
   com.aws.cloudformation.Context:
-    ref: [{at: docs/deploy-aws.md, has: 'Project permission bootstrap, service role separation and activation review'}]
+    ref: [{at: deploy/README.md, has: 'Infraestrutura e separacao de permissoes'}]
     must:
       - Bootstrap with an already authorized IAM administrator; operator cannot update this access stack.
       - No account administration or IAM mutation in the application execution role.

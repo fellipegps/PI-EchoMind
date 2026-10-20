@@ -3,7 +3,7 @@ Description: EchoMind GitHub OIDC publication - immutable ECR images, encrypted 
 Metadata:
   AWSToolsMetrics: {AWSAgentToolkit: aws-cloudformation@3}
   com.aws.cloudformation.Context:
-    ref: [{at: docs/deploy-aws.md, has: 'Stage 8 activation, trust boundaries, recovery and storage costs'}]
+    ref: [{at: deploy/README.md, has: 'Publicacao automatica, recuperacao e armazenamento'}]
     must:
       - Preparation only; activate after non-root provisioning, database readiness and memory validation.
       - Protect both GitHub environments to main before allowing OIDC; verify actual subject prefix.

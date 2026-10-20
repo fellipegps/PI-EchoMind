@@ -12,7 +12,7 @@ from pathlib import Path
 import subprocess
 import uuid
 
-DEPLOY = Path(__file__).resolve().parent
+DEPLOY = Path(__file__).resolve().parents[1]
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
                '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges:true',
                '--tmpfs', '/tmp:rw,noexec,nosuid,size=64m,mode=1777',
                '--mount', f'type=volume,source={cache_volume},target=/var/cache/echomind/models',
-               '--mount', f'type=bind,source={DEPLOY / "fixtures/measure_e5.py"},target=/measure.py,readonly']
+               '--mount', f'type=bind,source={DEPLOY / "tests/fixtures/measure_e5.py"},target=/measure.py,readonly']
     synthetic = {
         'ECHOMIND_ENV': 'testing', 'DATABASE_URL': 'postgresql://synthetic:synthetic@127.0.0.1:1/synthetic',
         'SUPABASE_URL': 'https://synthetic.supabase.co', 'SUPABASE_SECRET_KEY': 'sb_secret_synthetic',

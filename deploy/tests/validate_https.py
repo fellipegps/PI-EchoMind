@@ -23,7 +23,7 @@ import uuid
 from validate_runtime import inspect, run, wait_healthy
 
 
-DEPLOY = Path(__file__).resolve().parent
+DEPLOY = Path(__file__).resolve().parents[1]
 ORIGIN = "https://frontend.example.test"
 CLIENT_CHECK = r'''
 import http.client, json, socket, ssl
@@ -95,7 +95,7 @@ def main() -> None:
         override_settings = {"services": {"backend": {
             "environment": {"PYTHONPATH": "/deploy-check:/app"},
             "healthcheck": {"interval": "1s", "start_period": "5s"},
-            "volumes": [{"type": "bind", "source": str(DEPLOY / "fixtures"), "target": "/deploy-check", "read_only": True}],
+            "volumes": [{"type": "bind", "source": str(DEPLOY / "tests/fixtures"), "target": "/deploy-check", "read_only": True}],
         }, "proxy": {"healthcheck": {"interval": "1s", "start_period": "2s"}}}}
         override.write_text(json.dumps(override_settings), encoding="utf-8")
         compose = ["docker", "compose", "--project-name", project, "--file", str(DEPLOY / "compose.yaml"),

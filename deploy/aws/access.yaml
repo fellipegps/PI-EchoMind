@@ -5,7 +5,7 @@ Metadata:
     AWSAgentToolkit: aws-cloudformation@3
   com.aws.cloudformation.Context:
     ref:
-      - at: docs/deploy-aws.md
+      - at: deploy/README.md
         has: First operator setup, human password and MFA handoff, and separate provisioning permissions
     must:
       - This identity stack may bootstrap the first non-root user; it does not provision the application.

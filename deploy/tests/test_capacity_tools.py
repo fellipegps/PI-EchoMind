@@ -6,15 +6,15 @@ import unittest
 
 
 def module(name, path):
-    spec = importlib.util.spec_from_file_location(name, Path(__file__).parent / path)
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).resolve().parents[1] / path)
     value = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(value)
     return value
 
 
-observer = module('capacity_observer', 'manual/observe_capacity.py')
-chat = module('capacity_chat', 'measure_public_chat.py')
-host = module('capacity_host', 'manual/check_application_host.py')
+observer = module('capacity_observer', 'operations/observe_capacity.py')
+chat = module('capacity_chat', 'operations/measure_public_chat.py')
+host = module('capacity_host', 'operations/check_application_host.py')
 
 
 class CapacityToolsTest(unittest.TestCase):
