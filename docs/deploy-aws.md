@@ -2436,13 +2436,14 @@ O modo de créditos segue `standard`; o último ponto disponível do CloudWatch,
 01:25 UTC, registrou 209,779 créditos. Esse ponto tem atraso e não quantifica o
 consumo completo deste teste, nem valida operação com saldo esgotado.
 
-Os originais estavam íntegros antes e depois da publicação. Após os ensaios,
-o documento real e o sintético estão íntegros; o real mantém 12837 bytes, 20
-trechos e 20 vetores. A fila está vazia e os uploads estão
-liberados. A remoção permanente apenas de `batch-256k.txt`, seus 335 trechos,
-vetores e original foi preparada e conferida sem alterações; está aguardando
-autorização específica, após bloqueio da revisão automática. As interações e
-métricas sintéticas permanecem na conta de teste.
+Os originais estavam íntegros antes e depois da publicação. Após autorização
+específica do usuário, foram removidos somente `batch-256k.txt`, seus 335 trechos,
+335 vetores e original. A conferência posterior encontrou zero documentos,
+trechos, pais ou vetores documentais remanescentes na conta de teste. O documento
+real mantém 12837 bytes, 20 trechos, 20 vetores e seu original íntegro. A fila está
+vazia, os uploads liberados e API/proxy saudáveis, sem reinícios ou OOM. HTTPS,
+CORS e rejeição de acesso privado sem credenciais foram novamente aprovados.
+As interações e métricas sintéticas permanecem na conta de teste.
 
 O leitor de eventos do host agora reconhece `rag.index` e exporta apenas os
 campos operacionais permitidos. Seus cinco testes passaram, incluindo a recusa
@@ -2453,7 +2454,7 @@ ficam em `.publication/`, ignorada pelo Git. A API foi conferida no navegador.
 - [x] Publicar a versão em lotes com recuperação e verificar a imagem em execução.
 - [x] Medir ingestão completa de 256 KiB e conferir os 335 vetores em 11 lotes.
 - [x] Conferir memória, saúde, HTTPS e cinco respostas públicas.
-- [ ] Remover o novo arquivo sintético após autorização específica e conferir o documento real.
+- [x] Remover o novo arquivo sintético após autorização específica e conferir o documento real.
 - [ ] Validar carga sustentada, ingestão completa de 10 MiB, PDFs/DOCXs e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir observabilidade, vulnerabilidades e automação da etapa 9.
 

@@ -312,12 +312,76 @@
     "vectors": 20
   },
   "cleanup": {
-    "state": "awaiting_specific_user_authorization",
+    "state": "completed",
     "fixture": "batch-256k.txt",
     "matched_documents": 1,
     "matched_chunks": 335,
     "matched_vectors": 335,
-    "other_documents_preserved": true
+    "other_documents_preserved": true,
+    "user_authorized": true,
+    "applied": true,
+    "originals_removed": true,
+    "queued_jobs_after": 0,
+    "verification": {
+      "test_tenant_documents": 0,
+      "test_tenant_chunks": 0,
+      "test_tenant_parents": 0,
+      "test_tenant_document_vectors": 0,
+      "real_document": {
+        "ready": true,
+        "bytes": 12837,
+        "chunks": 20,
+        "vectors": 20
+      },
+      "originals": {
+        "ready_documents": 1,
+        "valid_originals": 1,
+        "missing_originals": 0,
+        "invalid_originals": 0,
+        "original_files": 1,
+        "queued_jobs": 0,
+        "draining": false,
+        "fixture_absent": null
+      },
+      "host": {
+        "containers": [
+          {
+            "name": "echomind-backend-1",
+            "running": true,
+            "health": "healthy",
+            "oom_killed": false,
+            "restarts": 0
+          },
+          {
+            "name": "echomind-proxy-1",
+            "running": true,
+            "health": "healthy",
+            "oom_killed": false,
+            "restarts": 0
+          }
+        ],
+        "pending_deployment": false
+      },
+      "public": {
+        "checked_at": "2026-10-20T01:37:01.641743+00:00",
+        "domain": "echomind-api.duckdns.org",
+        "health_status": 200,
+        "http_redirect_status": 308,
+        "certificate_hostname_and_chain_valid": true,
+        "tls_protocol": "TLSv1.3",
+        "certificate_not_after": "Jan 17 17:17:59 2027 GMT",
+        "certificate_serial": "05C95EF8B85CD5E4646DE5AAA7397D3E303A",
+        "certificate_issuer": {
+          "countryName": "US",
+          "organizationName": "Let's Encrypt",
+          "commonName": "YE2"
+        },
+        "cors_production_origin": true,
+        "cors_untrusted_origin_rejected": true,
+        "hsts": true,
+        "protected_endpoint_without_credentials": 403
+      }
+    }
   },
   "limits": [
     "One 256KiB TXT only; full 10MiB, PDF and DOCX ingestion not tested",
