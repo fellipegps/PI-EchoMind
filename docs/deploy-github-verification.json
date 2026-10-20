@@ -1,0 +1,167 @@
+{
+  "verified_at": "2026-10-20T14:13:36Z",
+  "repository": "fellipegps/PI-EchoMind",
+  "pull_request": "https://github.com/fellipegps/PI-EchoMind/pull/31",
+  "deployed_revision": "d799f54fb0fbfe97e570693d54a34f4237cd323e",
+  "automatic_deployment_enabled": true,
+  "github": {
+    "ci": "https://github.com/fellipegps/PI-EchoMind/actions/runs/39435388905",
+    "publication_only": "https://github.com/fellipegps/PI-EchoMind/actions/runs/39435813325",
+    "automatic_deployment": "https://github.com/fellipegps/PI-EchoMind/actions/runs/39436978677",
+    "automatic_event": "workflow_run",
+    "publish": "success",
+    "deploy": "success",
+    "main_protection": {
+      "pull_request": true,
+      "required_approvals": 0,
+      "enforce_admins": true,
+      "force_push": false,
+      "deletion": false,
+      "required_checks": [
+        "Deployment / safety-and-recovery",
+        "Backend / unit-api",
+        "Database / migration-integration",
+        "Frontend / quality-build"
+      ]
+    },
+    "environments_restricted_to_main": [
+      "aws-build",
+      "aws-production"
+    ],
+    "authentication": "OIDC temporary credentials; no static AWS keys"
+  },
+  "aws": {
+    "region": "us-east-1",
+    "stack": "echomind-pipeline",
+    "status": "CREATE_COMPLETE",
+    "created_resources": 9,
+    "instance": "i-0a9c55feb65da0808",
+    "new_instances": 0,
+    "release_bucket": "echomind-pipeline-releasebucket-hg7glkgwjvii",
+    "deploy_document": "echomind-pipeline-DeployDocument-KzniK0Fb6XLR",
+    "ssm_deployment_command": "1075dff4-4a64-4c2c-8e2e-2f4337c63674"
+  },
+  "artifact": {
+    "manifest": {
+      "backend": "255530396291.dkr.ecr.us-east-1.amazonaws.com/echomind-pipeline-backendrepository-xglkbsok6n6r@sha256:ac044790c015c67ae14b0800705c770f75f1f64b65209d1679ebaf031e139a4b",
+      "proxy": "255530396291.dkr.ecr.us-east-1.amazonaws.com/echomind-pipeline-proxyrepository-kboog1lutrfd@sha256:290b9cf88d63a04d67fd85e0b96fe99bd1d3805f415b68a0f8f333659860d618",
+      "revision": "d799f54fb0fbfe97e570693d54a34f4237cd323e",
+      "version": 1
+    },
+    "bundle_sha256": "3ee32be89d37f867fa5fd5512eeaf6590ace6f88b29560913e961cefe4559f33",
+    "bundle_bytes": 7241,
+    "compressed_image_bytes": {
+      "backend": 166814724,
+      "proxy": 43105764
+    }
+  },
+  "source_members_match_git_commit": true,
+  "rollback_rehearsal": {
+    "command": "719b4863-35c5-4edb-aa40-224e7215cbe1",
+    "status": "Success",
+    "verified_candidate_then_injected_failure": true,
+    "previous_release_and_writes_restored": true,
+    "verification": [
+      {
+        "revision": "55a1b1bea118f05a708439fd6f68c1bccd9cfcd7",
+        "origin": "manual-adoption",
+        "pending": false,
+        "data_free_bytes": 16604913664,
+        "containers": [
+          {
+            "service": "backend",
+            "image": "sha256:e1250dcf3d2baa61171bb2674ceff2a0d0ea8f89a58aefc5c5440cd0dc7421ee",
+            "image_id": "sha256:e1250dcf3d2baa61171bb2674ceff2a0d0ea8f89a58aefc5c5440cd0dc7421ee",
+            "running": true,
+            "health": "healthy",
+            "oom_killed": false,
+            "restarts": 0
+          },
+          {
+            "service": "proxy",
+            "image": "sha256:fc9243ab5a709befc3d0806a92f831fb3bb85d15ce9199b386e512496daf7984",
+            "image_id": "sha256:fc9243ab5a709befc3d0806a92f831fb3bb85d15ce9199b386e512496daf7984",
+            "running": true,
+            "health": "healthy",
+            "oom_killed": false,
+            "restarts": 0
+          }
+        ],
+        "public_health": {
+          "status": 200,
+          "payload": {
+            "status": "ok",
+            "service": "EchoMind API"
+          }
+        }
+      },
+      {
+        "ready_documents": 1,
+        "valid_originals": 1,
+        "missing_originals": 0,
+        "invalid_originals": 0,
+        "original_files": 1,
+        "queued_jobs": 0,
+        "draining": false,
+        "fixture_absent": null
+      }
+    ]
+  },
+  "final_verification": [
+    {
+      "revision": "d799f54fb0fbfe97e570693d54a34f4237cd323e",
+      "origin": null,
+      "pending": false,
+      "data_free_bytes": 16604864512,
+      "containers": [
+        {
+          "service": "backend",
+          "image": "255530396291.dkr.ecr.us-east-1.amazonaws.com/echomind-pipeline-backendrepository-xglkbsok6n6r@sha256:ac044790c015c67ae14b0800705c770f75f1f64b65209d1679ebaf031e139a4b",
+          "image_id": "sha256:ac044790c015c67ae14b0800705c770f75f1f64b65209d1679ebaf031e139a4b",
+          "running": true,
+          "health": "healthy",
+          "oom_killed": false,
+          "restarts": 0
+        },
+        {
+          "service": "proxy",
+          "image": "255530396291.dkr.ecr.us-east-1.amazonaws.com/echomind-pipeline-proxyrepository-kboog1lutrfd@sha256:290b9cf88d63a04d67fd85e0b96fe99bd1d3805f415b68a0f8f333659860d618",
+          "image_id": "sha256:290b9cf88d63a04d67fd85e0b96fe99bd1d3805f415b68a0f8f333659860d618",
+          "running": true,
+          "health": "healthy",
+          "oom_killed": false,
+          "restarts": 0
+        }
+      ],
+      "public_health": {
+        "status": 200,
+        "payload": {
+          "status": "ok",
+          "service": "EchoMind API"
+        }
+      }
+    },
+    {
+      "ready_documents": 1,
+      "valid_originals": 1,
+      "missing_originals": 0,
+      "invalid_originals": 0,
+      "original_files": 1,
+      "queued_jobs": 0,
+      "draining": false,
+      "fixture_absent": null
+    }
+  ],
+  "storage": {
+    "initial_image_MiB": 200.2,
+    "estimated_initial_ECR_USD_per_month_before_credits": 0.0196,
+    "pricing_source": "https://aws.amazon.com/ecr/pricing/",
+    "estimate_scope": "Initial ECR image storage only; excludes existing EC2/EBS, S3 objects, requests, transfers and taxes. Future tagged images can increase storage.",
+    "backups_current_expiration_days": 7,
+    "noncurrent_version_expiration_days": 7,
+    "release_bundle_expiration_days": 90,
+    "untagged_image_expiration_days": 7,
+    "tagged_images": "Retained for recovery; reviewed cleanup required as versions accumulate."
+  },
+  "no_secret_values_in_report": true
+}

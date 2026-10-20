@@ -5,6 +5,31 @@ cada etapa precisa de evidência de validação antes de ser marcada como conclu
 As etapas iniciais preparam o backend localmente. A publicação depende das
 etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
 
+**Estado atual em 2026-10-20:** deploy automático AWS ativado e primeira execução
+real aprovada. O [PR #31](https://github.com/fellipegps/PI-EchoMind/pull/31) foi
+integrado à `main`; o [workflow automático](https://github.com/fellipegps/PI-EchoMind/actions/runs/39436978677)
+publicou e implantou a revisão `d799f54fb0fbfe97e570693d54a34f4237cd323e`.
+Backend/proxy saudáveis, HTTPS 200, original íntegro, fila vazia e escritas
+liberadas. A recuperação real para a versão manual anterior foi ensaiada antes
+da ativação. Registros anteriores abaixo descrevem os estados de cada etapa;
+as evidências atuais estão em `docs/deploy-github-verification.json`.
+
+Para atualizar: envie sua branch ao GitHub, abra um PR e integre à `main` após
+os quatro testes obrigatórios. O CI de push da `main` aprovado aciona o deploy
+da API e do proxy. A branch principal bloqueia push direto, force push e exclusão;
+não exige um segundo revisor. Uma execução manual de `Deploy AWS` apenas publica
+artefatos, sem atualizar a máquina. Não há migrations ou reindexação automáticas.
+Uma atualização pode interromper brevemente a API nesta arquitetura de um nó.
+
+Armazenamento inicial das duas imagens: 200,20 MiB comprimidos, estimativa de
+US$0,0196/mês no ECR antes de créditos, conforme o
+[preço oficial de US$0,10/GB-mês](https://aws.amazon.com/ecr/pricing/).
+Essa estimativa não inclui EC2/EBS existentes, S3, requisições ou impostos.
+Bundles têm expiração de 90 dias; backups correntes, sete dias, com versões
+não correntes expirando após mais sete dias. Imagens sem tag expiram após sete
+dias. Releases com tag são retidos para recuperação e precisam de limpeza
+revisada conforme o histórico crescer, preservando as versões ativa e anterior.
+
 ## Arquitetura definida
 
 - Frontend Next.js na Vercel, usando a configuração já documentada no README.
@@ -57,13 +82,14 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
   temporária OIDC, imagem identificada pelo commit, atualizações serializadas,
   drenagem de tarefas, verificação após deploy e recuperação da versão anterior.
   Workflow, infraestrutura complementar e recuperação validados localmente.
-  A ativação na AWS/GitHub e a primeira execução real permanecem pendentes;
-  `AWS_DEPLOY_ENABLED` fica ausente/desativado até concluir os pré-requisitos.
+  Ativação AWS/GitHub e primeira execução real aprovadas em 2026-10-20;
+  `AWS_DEPLOY_ENABLED=true`, com adoção e recuperação real verificadas.
 - [ ] **9. Validação em produção:** login, recuperação de senha, chat, upload e
   consulta de documentos, memória/CPU/disco com embeddings reais, revisão de
   vulnerabilidades das dependências, logs e recuperação após reinício.
   Fluxos funcionais e carga controlada medidos; busca durante ingestão corrigida
-  e publicada. Faltam carga sustentada/documentos máximos e restauração do EBS.
+  e publicada. Restauração do EBS aprovada; faltam carga sustentada/documentos máximos
+  e o encerramento das demais verificações desta etapa.
 
 ## Diagnóstico inicial, antes das etapas de preparação
 
@@ -1684,7 +1710,7 @@ um release malicioso aprovado em código seguro.
 - [x] Aplicar `stack-policy.json` após `CREATE_COMPLETE`, antes de qualquer update; conferir o documento aplicado.
 - [x] Verificar uma reinicialização real, retorno dos serviços, mounts e preservação de arquivo no disco de dados.
 - [x] Proprietário confirma inscrição SNS; conferir assinatura, quatro alarmes, orçamento saudável e entrega CloudTrail.
-- [ ] Conferir o primeiro snapshot DLM agendado e ensaiar a restauração real do disco.
+- [x] Conferir o primeiro snapshot DLM agendado e ensaiar a restauração real do disco.
 - [ ] Revisar a autorização de leitura de `DescribeEvents` no perfil local; enquanto isso, usar AWS Core somente para consultar a validação.
 - [x] Preparar a instalação automática do AWS CLI **2.38.0**, verificando a assinatura oficial antes da execução, e a checagem/atualização do SSM Agent.
 - [x] Confirmar na EC2 real AWS CLI **2.38.0**, SSM Agent **3.3.4793.0**, serviços ativos e marcador de bootstrap.
@@ -1694,15 +1720,15 @@ um release malicioso aprovado em código seguro.
 - [x] Configurar `API_DOMAIN=echomind-api.duckdns.org` e e-mail ACME real no `deploy.env`; CORS exato no backend.
 - [x] Apontar DuckDNS para o Elastic IP; conferir propagação, portas 80/443 e certificado público válido.
 - [x] Publicar a primeira versão manual, conferir limites/volumes e preservar o certificado após recriação real do proxy.
-- [ ] Incorporar a versão manual atual ao procedimento de rollback antes de ativar a primeira publicação automática. Não tratar o servidor como vazio.
+- [x] Incorporar a versão manual atual ao procedimento de rollback antes de ativar a primeira publicação automática. Não tratar o servidor como vazio.
 - [x] Criar os ambientes GitHub `aws-build` e `aws-production`, ambos restritos exclusivamente à branch `main`, sem tags permitidas.
-- [ ] Proteger a branch `main` e as alterações do pipeline.
-- [ ] Verificar o `sub` OIDC real do repositório. Repositórios novos/opt-in podem incluir IDs imutáveis: informar o prefixo exato em `GitHubSubjectPrefix`, sem wildcard. Não imprimir o token.
-- [ ] Inspecionar o provedor OIDC GitHub já existente na conta. Reutilizar seu ARN; criar um apenas se não existir.
+- [x] Proteger a branch `main` e as alterações do pipeline.
+- [x] Verificar o `sub` OIDC real do repositório. Prefixo atual confirmado pela API: `repo:fellipegps/PI-EchoMind`, sem wildcard e sem imprimir o token.
+- [x] Inspecionar o provedor OIDC GitHub já existente na conta. Nenhum existia; o stack criou o único provedor GitHub.
 - [x] Isolar o bootstrap IAM no stack administrativo `echomind-pipeline`, sem usar a role de execução da aplicação nem conceder escrita IAM a ela. `NodeReleasePolicy` permanece nesse stack de acesso separado do stack da aplicação.
-- [ ] Criar/revisar change set de `deploy/aws/pipeline.yaml`, sem executar até conferir identidade, custos e permissões.
-- [ ] Configurar as variáveis públicas do repositório abaixo, usando outputs reais.
-- [ ] Habilitar `AWS_DEPLOY_ENABLED=true` somente quando os pré-requisitos estiverem atendidos; acompanhar a primeira publicação.
+- [x] Criar/revisar change set de `deploy/aws/pipeline.yaml`; validações AWS aprovadas e nove recursos criados após autorização específica.
+- [x] Configurar as variáveis públicas do repositório abaixo, usando outputs reais.
+- [x] Habilitar `AWS_DEPLOY_ENABLED=true` após os pré-requisitos e acompanhar a primeira publicação: jobs `publish` e `deploy` aprovados.
 
 O stack complementar recebe `InstanceId` do stack principal e `NodeRoleName`
 da role real do instance profile da EC2. Não substitui a role nem o nó. As
@@ -2051,7 +2077,7 @@ envelopes locais ficam em `.publication/`, ignorada pelo Git.
 - [ ] Validar carga sustentada, ingestão completa de 10 MiB e créditos esgotados.
 - [ ] Conferir primeiro snapshot agendado e ensaiar restauração do EBS.
 - [ ] Concluir revisão de vulnerabilidades e observabilidade da etapa 9.
-- [ ] Concluir permissões/OIDC, proteção da branch, adoção da release manual e
+- [x] Concluir permissões/OIDC, proteção da branch, adoção da release manual e
   ensaio real de deploy/rollback antes de habilitar `AWS_DEPLOY_ENABLED`.
 
 ## Cadastro e recuperação de senha em produção - 2026-10-19
