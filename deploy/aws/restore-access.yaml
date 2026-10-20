@@ -16,6 +16,10 @@ Parameters:
     AllowedPattern: '^echomind-[A-Za-z0-9+=,.@_-]{1,55}$'
     MaxLength: 64
     Description: Existing ExecutionRoleName from the provisioning stack output ARN. Do not create a role.
+  SourceSnapshotId:
+    Type: String
+    AllowedPattern: '^snap-[a-f0-9]{17}$'
+    Description: Verified completed encrypted owned data snapshot. Authorize only this recovery source.
 Resources:
   RecoveryOperatorPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -61,8 +65,8 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Metadata:
       com.aws.cloudformation.Context:
-        why: CloudFormation must inspect the source snapshot before restoring through the existing project execution role.
-        must: [Read only; no new EC2 writes, IAM actions, credentials or KMS permissions.]
+        why: CreateVolume evaluates both the new volume and the source snapshot; existing volume permissions do not authorize the source.
+        must: [Only the selected encrypted snapshot may be used as a source; no IAM actions, credentials or KMS permissions.]
     Properties:
       Roles: [!Ref ExecutionRoleName]
       Description: Allow the existing project execution role to inspect source snapshot metadata.
@@ -73,3 +77,10 @@ Resources:
             Action: ec2:DescribeSnapshots
             Resource: '*'
             Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - Sid: RestoreOnlySelectedSnapshot
+            Effect: Allow
+            Action: ec2:CreateVolume
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/${SourceSnapshotId}'
+            Condition:
+              StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}
+              Bool: {'ec2:Encrypted': true}

@@ -1,8 +1,10 @@
 # EchoMind recovery rehearsal
 
-Status: application archive restoration passed; EBS snapshot inspection and the
-volume rehearsal require administrator-approved supplemental access. No recovery
-access policy or restore volume has been created by this preparation.
+Status on 2026-10-20: the two initial access policies were installed and the first
+scheduled encrypted snapshot was verified. The first copy attempt failed before
+allocating a volume because CreateVolume also authorizes the source snapshot.
+The empty failed drill stack was deleted. A correction pinned to that one
+snapshot is prepared; its application and the volume rehearsal remain pending.
 
 ## Existing boundaries and access change
 
@@ -13,8 +15,9 @@ outside the resources in `restore-drill.yaml`.
 
 An existing IAM administrator may install `restore-access.yaml` as the separate
 stack `echomind-restore-access`, using `CAPABILITY_IAM`. Use the same application
-name and existing operator, and obtain `ExecutionRoleName` from the role ARN in
-the `echomind-provisioning` output. Actual reviewed parameters are generated in
+name and existing operator, obtain `ExecutionRoleName` from the role ARN in
+the `echomind-provisioning` output, and select a verified `SourceSnapshotId`.
+Actual reviewed parameters are generated in
 ignored `.publication/restore-access.parameters.json`; inspect them before use.
 
 The two new managed policies:
@@ -24,13 +27,19 @@ The two new managed policies:
   only `${ApplicationStackName}-restore-drill` with MFA. Creation requires the
   existing fixed project execution role. No updates, imports, IAM writes or
   direct EC2 writes are granted to the operator.
-- Let the existing execution role describe source snapshots in this Region.
-  Its existing project-scoped volume permissions are reused. No new service
+- Let the existing execution role describe source snapshots in this Region and
+  use only `SourceSnapshotId` as an encrypted CreateVolume source. The source ARN
+  has an empty account component, as required by EC2 snapshot authorization.
+  Its existing project-scoped destination-volume permissions are reused. No new service
   role, credential, account administrator policy or IAM permission for KMS is added.
 
 The existing operator cannot install these policies itself. Administrative
 approval and an authorized administrative session are required. Template
 descriptions, source files and this runbook do not constitute that approval.
+Changing the selected source requires an administrator-reviewed parameter update;
+the operator cannot broaden this policy. The source permission does not authorize
+modifying or deleting the snapshot. See AWS's
+[CreateVolume source-snapshot authorization change](https://aws.amazon.com/blogs/storage/enhancing-resource-level-permission-for-creating-an-amazon-ebs-volume-from-a-snapshot/).
 
 ## Snapshot selection and isolated volume
 
@@ -52,7 +61,10 @@ After access is granted:
 4. Confirm that the resulting VolumeId is different from both protected IDs,
    has `RestoreDrill` and `Project` tags, uses the expected snapshot and attaches
    only to the intended instance. Verify all this through EC2 and stack outputs.
-5. On the host, resolve the new NVMe device by its **VolumeId serial**, not by
+5. Run `deploy/manual/inspect_restored_volume.py` on the host only after the API
+   checks above. Pass the authenticated copy/root/data VolumeIds, the existing
+   bounded private archive path and its previously pinned SHA-256. The helper
+   resolves the new NVMe device by its **VolumeId serial**, not by
    filesystem UUID, `/dev/sdg` alone or guessed NVMe numbering. Verify it is
    unused ext4 and does not resolve to the live/root device. Set the copy's block
    device read-only, then mount it at an empty private directory with
@@ -90,7 +102,8 @@ image, with only public files mounted, no credentials and `--network none`:
 - cfn-lint validates `restore-access.yaml` and `restore-drill.yaml`.
 - `test_restore_drill.py` runs cfn-guard and rejects an unencrypted copy, the live
   device slot, an unintended backup tag, extra compute, IAM writes, loss of MFA
-  and deletion of the production stack.
+  and deletion of the production stack. It also rejects wildcard snapshot-source
+  permission, an unencrypted source and CreateVolume permission for the operator.
 - AWS `ValidateTemplate` checks both templates without installing policies or
   creating a volume. Actual account-aware creation checks remain pending until
   access, snapshot and parameters have been confirmed.

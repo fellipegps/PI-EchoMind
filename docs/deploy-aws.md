@@ -2604,9 +2604,58 @@ ignorada pelo Git.
 - [x] Restaurar um arquivo privado de originais em diretório isolado e conferir integridade.
 - [x] Conferir preservação do original ativo e saúde da API após o ensaio.
 - [x] Preparar e validar o acesso mínimo e a infraestrutura da cópia EBS.
-- [ ] Aprovar/aplicar o acesso suplementar com sessão administradora.
-- [ ] Confirmar o primeiro snapshot agendado, restaurar/montar a cópia e concluir sua limpeza.
+- [x] Aprovar/aplicar as duas políticas iniciais com sessão administradora.
+- [x] Confirmar o primeiro snapshot agendado do disco de dados.
+- [ ] Aplicar a correção de autorização do snapshot de origem, já preparada e revisada.
+- [ ] Restaurar/montar a cópia e concluir sua limpeza.
 - [ ] Ensaiar recuperação do serviço e coordenar a recuperação com o banco externo.
+
+### Backup agendado e correção da origem - 20/10/2026
+
+As duas políticas iniciais foram instaladas na mesma conta AWS por meio de
+`echomind-restore-access`, com status `CREATE_COMPLETE`. Não foram criadas novas
+contas, usuários ou roles. A integração continuou operando como
+`echomind-access-operator`; as consultas de snapshots e da política DLM passaram.
+
+O primeiro backup automático, `snap-0256fd1981e0df8a0`, foi criado pela política
+DLM esperada e corresponde ao disco retido de 20 GiB, criptografado e pertencente
+à conta do projeto. Iniciou em 20/10 às 00:36:38 e terminou às 00:39:58, horário
+de Brasília. A política está habilitada, com intervalo de 24 horas e retenção
+de sete snapshots. A execução não precisa começar exatamente no minuto nominal.
+
+A primeira tentativa de criar a cópia foi negada antes da alocação do volume:
+a role de execução tinha permissão sobre o volume de destino, mas não sobre o
+snapshot de origem. O EC2 exige ambas, conforme a
+[documentação da alteração de autorização do CreateVolume](https://aws.amazon.com/blogs/storage/enhancing-resource-level-permission-for-creating-an-amazon-ebs-volume-from-a-snapshot/).
+A pilha vazia da tentativa foi excluída e nenhum disco de ensaio permaneceu.
+
+O template `restore-access.yaml` agora recebe `SourceSnapshotId` e autoriza
+`ec2:CreateVolume` somente no ARN daquele snapshot, exigindo criptografia e a
+região do projeto. A política do operador não muda. Nenhuma permissão IAM/KMS,
+usuário ou role adicional é concedida. A descrição física da política é
+preservada para evitar substituição desnecessária.
+
+O conjunto de alterações **`echomind-restore-source-20261020`** está criado e
+disponível, sem execução: apenas `RecoveryExecutionInspectionPolicy` seria
+modificada, com `Replacement: False`. O documento de política resolvido foi
+conferido na prévia da AWS; a origem é exclusivamente o snapshot verificado.
+A aplicação dessa correção aguarda a confirmação exigida pelo controle do
+navegador para a nova permissão de acesso.
+
+Validação da correção: cfn-lint 1.57.2 sem erros/avisos nos dois templates,
+cfn-guard 3.2.1 e cinco regressões de escopo aprovados, e AWS ValidateTemplate
+aprovado. O novo leitor `deploy/manual/inspect_restored_volume.py` passou quatro
+testes no Windows e quatro no Linux. Ele exige identificação por serial do
+VolumeId e inspeção explícita da árvore de partições, rejeita cópias montadas ou
+inesperadas, monta com bloqueio de escrita e sem replay do journal, compara os
+originais por tamanho/hash e desmonta antes de permitir a limpeza.
+
+O original ativo continua válido, sem jobs pendentes. Backend/proxy continuam
+saudáveis, nas mesmas imagens, sem reinícios ou OOM. Os dois discos protegidos
+permanecem conectados. HTTPS, saúde 200, redirecionamento, HSTS, CORS e proteção
+dos endpoints passaram novamente. A montagem de um disco restaurado e a
+recuperação completa do serviço ainda não foram demonstradas.
+Evidências sanitizadas: `docs/recovery-ebs-verification.json`.
 
 ## Referências
 

@@ -127,6 +127,22 @@ job markers or reindex chunks. An existing valid original is left in place; an
 invalid existing original aborts the operation. Use only for the specific file
 authorized by its owner; this is not a volume or database backup restoration.
 
+## Read-only EBS recovery inspection
+
+`inspect_restored_volume.py` runs as root on the existing Linux host after
+CloudFormation/EC2 verification of the disposable copy. Supply `--volume-id`,
+`--root-volume-id`, `--data-volume-id`, `--archive` and `--archive-sha256` through
+the authenticated administration channel. It identifies the device by volume
+serial, rejects mounted/partitioned/wrong-size copies, verifies the live mount,
+blocks writes to the copy and mounts it with `ro,noload,nodev,nosuid,noexec`.
+Only document originals are compared with the pinned archive and live originals;
+no runtime secret, database, second Docker daemon or backend is accessed.
+
+The helper unmounts the copy in cleanup and reports counts/flags only. A failure
+requires verifying that the copy is unmounted before deleting its recovery stack.
+Never pass a production VolumeId as the copy, format it, or resolve the device by
+filesystem UUID. Run `test_inspect_restored_volume.py` for the isolated safety tests.
+
 ## Controlled capacity observation
 
 `observe_capacity.py` runs on the existing EC2 host without importing the model,

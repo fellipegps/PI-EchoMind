@@ -29,10 +29,16 @@ rule recovery_access_scope when %access !empty {
     %access.Properties.PolicyDocument.Version == '2012-10-17'
     Resources.RecoveryOperatorPolicy.Properties.Users[0].Ref == 'OperatorUserName'
     Resources.RecoveryExecutionInspectionPolicy.Properties.Roles[0].Ref == 'ExecutionRoleName'
-    Resources.RecoveryExecutionInspectionPolicy.Properties.PolicyDocument.Statement.* {
-        Action == 'ec2:DescribeSnapshots'
+    Resources.RecoveryExecutionInspectionPolicy.Properties.PolicyDocument.Statement[ Action == 'ec2:DescribeSnapshots' ] {
         Resource == '*'
         Condition.StringEquals.'aws:RequestedRegion'.Ref == 'AWS::Region'
+    }
+    Resources.RecoveryExecutionInspectionPolicy.Properties.PolicyDocument.Statement[ Sid == 'RestoreOnlySelectedSnapshot' ] !empty
+    Resources.RecoveryExecutionInspectionPolicy.Properties.PolicyDocument.Statement[ Sid == 'RestoreOnlySelectedSnapshot' ] {
+        Action == 'ec2:CreateVolume'
+        Resource.'Fn::Sub' == 'arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/${SourceSnapshotId}'
+        Condition.StringEquals.'aws:RequestedRegion'.Ref == 'AWS::Region'
+        Condition.Bool.'ec2:Encrypted' == true
     }
     Resources.RecoveryOperatorPolicy.Properties.PolicyDocument.Statement[ Sid IN ['CreateOnlyRecoveryStack', 'InspectAndDeleteOnlyRecoveryStack'] ] {
         Resource.'Fn::Sub' == 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStackName}-restore-drill/*'

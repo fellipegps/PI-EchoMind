@@ -26,14 +26,15 @@ def validate_access(template):
         'cloudformation:DescribeStacks','cloudformation:DescribeEvents','cloudformation:DescribeStackEvents',
         'cloudformation:DescribeStackResource','cloudformation:DescribeStackResources',
         'cloudformation:ListStackResources','cloudformation:GetTemplate','cloudformation:DeleteStack'}
-    for resource in template['Resources'].values():
+    for name, resource in template['Resources'].items():
         assert resource['Type'] == 'AWS::IAM::ManagedPolicy'
         policy=resource['Properties']['PolicyDocument']
         assert len(json.dumps(policy,separators=(',',':'))) < 6144
         for statement in policy['Statement']:
             actions=statement['Action']
             actions={actions} if isinstance(actions,str) else set(actions)
-            assert actions <= allowed and statement['Effect']=='Allow'
+            scoped_allowed = allowed | {'ec2:CreateVolume'} if name=='RecoveryExecutionInspectionPolicy' else allowed
+            assert actions <= scoped_allowed and statement['Effect']=='Allow'
             if any(action.startswith('cloudformation:') for action in actions):
                 assert statement['Resource']['Fn::Sub'].endswith('stack/${ApplicationStackName}-restore-drill/*')
                 assert statement['Condition']['Bool']['aws:MultiFactorAuthPresent'] is True
@@ -41,7 +42,11 @@ def validate_access(template):
                 if s['Sid']=='CreateOnlyRecoveryStack')
     assert create['Condition']['ArnEquals']['cloudformation:RoleArn']['Fn::Sub'].endswith('role/${ExecutionRoleName}')
     reader=template['Resources']['RecoveryExecutionInspectionPolicy']['Properties']['PolicyDocument']['Statement']
-    assert len(reader)==1 and reader[0]['Action']=='ec2:DescribeSnapshots'
+    assert len(reader)==2 and reader[0]['Action']=='ec2:DescribeSnapshots'
+    assert reader[1]['Action']=='ec2:CreateVolume'
+    assert reader[1]['Resource']=={'Fn::Sub':'arn:${AWS::Partition}:ec2:${AWS::Region}::snapshot/${SourceSnapshotId}'}
+    assert reader[1]['Condition']['Bool']['ec2:Encrypted'] is True
+    assert template['Parameters']['SourceSnapshotId']['AllowedPattern']=='^snap-[a-f0-9]{17}$'
 
 class RestoreTemplateTest(unittest.TestCase):
     def test_baselines_and_limits(self):
@@ -74,6 +79,16 @@ class RestoreTemplateTest(unittest.TestCase):
                            if s['Sid']=='CreateOnlyRecoveryStack')
             statement['Condition'].pop(key)
             with self.assertRaises((AssertionError,KeyError)):validate_access(template)
+
+    def test_source_permission_cannot_expand_or_reach_operator(self):
+        for mutate in (
+            lambda t:t['Resources']['RecoveryExecutionInspectionPolicy']['Properties']['PolicyDocument']['Statement'][1].update(Resource='*'),
+            lambda t:t['Resources']['RecoveryExecutionInspectionPolicy']['Properties']['PolicyDocument']['Statement'][1]['Condition'].update(Bool={'ec2:Encrypted':False}),
+            lambda t:t['Resources']['RecoveryOperatorPolicy']['Properties']['PolicyDocument']['Statement'][0].update(Action='ec2:CreateVolume'),
+        ):
+            template=read('restore-access.yaml')
+            mutate(template)
+            with self.assertRaises(AssertionError):validate_access(template)
 
     def test_guard_rejects_live_slot_unencrypted_copy_and_automatic_backup_tag(self):
         mutations = [
