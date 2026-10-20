@@ -1,10 +1,11 @@
 # EchoMind recovery rehearsal
 
-Status on 2026-10-20: the two initial access policies were installed and the first
-scheduled encrypted snapshot was verified. The first copy attempt failed before
-allocating a volume because CreateVolume also authorizes the source snapshot.
-The empty failed drill stack was deleted. A correction pinned to that one
-snapshot is prepared; its application and the volume rehearsal remain pending.
+Status on 2026-10-20: the source-snapshot permission correction was approved and
+applied. An encrypted 20 GiB copy of the first scheduled snapshot was created,
+attached, mounted read-only, verified against the pinned archive/live original,
+unmounted and deleted. The source snapshot and both live disks remain intact.
+Evidence: `docs/recovery-ebs-verification.json`. This proves readability of the
+original files on the restored disk; full service and database recovery remain separate.
 
 ## Existing boundaries and access change
 
@@ -105,8 +106,9 @@ image, with only public files mounted, no credentials and `--network none`:
   and deletion of the production stack. It also rejects wildcard snapshot-source
   permission, an unencrypted source and CreateVolume permission for the operator.
 - AWS `ValidateTemplate` checks both templates without installing policies or
-  creating a volume. Actual account-aware creation checks remain pending until
-  access, snapshot and parameters have been confirmed.
+  creating a volume. Actual creation subsequently passed with the verified
+  snapshot and approved source permission. An earlier denied copy attempt
+  allocated no volume and its empty failed stack was removed.
 
 ## Application archive check, already independent of EBS access
 

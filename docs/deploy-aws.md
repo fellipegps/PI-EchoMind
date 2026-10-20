@@ -2606,8 +2606,8 @@ ignorada pelo Git.
 - [x] Preparar e validar o acesso mínimo e a infraestrutura da cópia EBS.
 - [x] Aprovar/aplicar as duas políticas iniciais com sessão administradora.
 - [x] Confirmar o primeiro snapshot agendado do disco de dados.
-- [ ] Aplicar a correção de autorização do snapshot de origem, já preparada e revisada.
-- [ ] Restaurar/montar a cópia e concluir sua limpeza.
+- [x] Aplicar a correção de autorização do snapshot de origem.
+- [x] Restaurar/montar a cópia, verificar os originais e concluir sua limpeza.
 - [ ] Ensaiar recuperação do serviço e coordenar a recuperação com o banco externo.
 
 ### Backup agendado e correção da origem - 20/10/2026
@@ -2635,12 +2635,13 @@ região do projeto. A política do operador não muda. Nenhuma permissão IAM/KM
 usuário ou role adicional é concedida. A descrição física da política é
 preservada para evitar substituição desnecessária.
 
-O conjunto de alterações **`echomind-restore-source-20261020`** está criado e
-disponível, sem execução: apenas `RecoveryExecutionInspectionPolicy` seria
-modificada, com `Replacement: False`. O documento de política resolvido foi
+O conjunto de alterações **`echomind-restore-source-20261020`** foi autorizado e
+executado em 20/10 às 10:08, horário de Brasília. Somente
+`RecoveryExecutionInspectionPolicy` foi modificada, com `Replacement: False`.
+O documento de política resolvido foi
 conferido na prévia da AWS; a origem é exclusivamente o snapshot verificado.
-A aplicação dessa correção aguarda a confirmação exigida pelo controle do
-navegador para a nova permissão de acesso.
+A pilha `echomind-restore-access` concluiu com `UPDATE_COMPLETE`. A política
+do operador não foi modificada nessa correção.
 
 Validação da correção: cfn-lint 1.57.2 sem erros/avisos nos dois templates,
 cfn-guard 3.2.1 e cinco regressões de escopo aprovados, e AWS ValidateTemplate
@@ -2653,9 +2654,42 @@ originais por tamanho/hash e desmonta antes de permitir a limpeza.
 O original ativo continua válido, sem jobs pendentes. Backend/proxy continuam
 saudáveis, nas mesmas imagens, sem reinícios ou OOM. Os dois discos protegidos
 permanecem conectados. HTTPS, saúde 200, redirecionamento, HSTS, CORS e proteção
-dos endpoints passaram novamente. A montagem de um disco restaurado e a
-recuperação completa do serviço ainda não foram demonstradas.
+dos endpoints passaram novamente.
 Evidências sanitizadas: `docs/recovery-ebs-verification.json`.
+
+### Ensaio de restauração EBS concluído - 20/10/2026
+
+Com o operador habitual e a role de execução existente, a pilha isolada
+`echomind-prod-restore-drill` criou a cópia **`vol-049ca7831c1074993`** do snapshot
+verificado: gp3, 20 GiB, criptografada, 3.000 IOPS e 125 MiB/s, na mesma AZ da
+máquina, conectada somente ao slot livre `/dev/sdg`. Tags, snapshot de origem,
+criptografia e os dois discos protegidos foram conferidos pela API antes da
+inspeção. A cópia não recebeu a tag de backup automático.
+
+O leitor identificou o dispositivo pelo serial do VolumeId e montou apenas a
+cópia com `ro,noload,nodev,nosuid,noexec`. **Um original foi recuperado e conferido
+por tamanho e SHA-256**, com inventário idêntico ao arquivo de backup previamente
+validado e ao volume ativo. Não havia jobs pendentes. Não houve acesso ao banco
+nesse leitor, replay de journal, restauração sobre produção ou inicialização de
+outro backend/modelo.
+
+O leitor desmontou a cópia e removeu o diretório de montagem. Após conferir os
+dois recursos descartáveis da pilha, a limpeza já autorizada removeu somente a
+cópia e sua conexão. O volume foi criado às **10:09:53** e sua exclusão foi
+confirmada às **10:11:48**, horário de Brasília. A pilha terminou em
+`DELETE_COMPLETE`; a consulta pelo ID da cópia retornou `InvalidVolume.NotFound`
+e não restaram volumes com a tag do ensaio. O custo faturado não foi consultado.
+
+O snapshot de origem permanece concluído e criptografado. Os discos raiz e de
+dados continuam conectados nos slots originais, com os mesmos horários de
+conexão, e o volume ativo permanece gravável. A conferência final manteve um
+original válido, zero ausências/corrupções/jobs, dois containers saudáveis,
+imagens inalteradas, zero reinícios/OOM, e API pública com HTTPS e saúde 200.
+
+O ensaio comprovou a leitura e a integridade dos originais em um disco restaurado.
+**Ainda falta ensaiar a recuperação completa do serviço e coordená-la com o
+banco/Auth do Supabase e demais configurações externas.** O tempo de criação ou
+leitura dessa cópia não é uma medição de RTO do serviço.
 
 ## Referências
 
