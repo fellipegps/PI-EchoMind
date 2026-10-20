@@ -2207,7 +2207,7 @@ artefatos privados permanecem em `.publication/`, ignorada pelo Git.
 - [x] Corrigir e testar localmente retrieval enquanto outro documento está em processamento.
 - [x] Publicar a correção de retrieval na AWS e repetir a verificação funcional em produção.
 - [x] Otimizar e medir localmente gravação vetorial por lotes antes de uploads grandes.
-- [ ] Publicar a indexação em lotes e medir a ingestão completa na EC2 existente.
+- [x] Publicar a indexação em lotes e medir o processamento completo na EC2 existente.
 - [ ] Validar carga sustentada, upload máximo completo, PDFs/DOCXs e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
 
@@ -2377,8 +2377,85 @@ Supabase ou Groq. Evidências sanitizadas: `docs/vector-batch-benchmark.json`.
 O smoke da imagem Linux também aprovou inicialização, limites, persistência,
 recuperação documental, reinício automático, manutenção e encerramento limpo.
 
-Esta preparação ainda precisa de publicação e medição na EC2. Os originais,
-vetores e configurações de produção não foram modificados nesta etapa.
+Essa preparação foi local. Sua publicação e a medição na EC2 estão registradas
+na seção seguinte.
+
+### Publicação e medição da indexação em lotes - 19/10/2026
+
+A revisão `55a1b1bea118f05a708439fd6f68c1bccd9cfcd7` foi publicada na EC2 existente,
+com a imagem `sha256:e1250dcf3d2baa61171bb2674ceff2a0d0ea8f89a58aefc5c5440cd0dc7421ee`.
+O pacote continha 69 arquivos versionados, 213522 bytes, com SHA-256
+`ea3909c872ea5d0ff592104c831d901f08d6503e0017a63e4089a8bfbfa4b3b1`,
+conferido antes da extração e novamente antes da troca. O atualizador existente
+fez manutenção, cópia dos originais no EBS criptografado, troca apenas do backend,
+verificação da imagem e liberação das escritas. Proxy e volumes foram preservados.
+A versão anterior `a76179b` e seu estado de recuperação continuam disponíveis.
+Não há transação de publicação pendente, migração de banco ou ativação do CI/CD.
+
+Foi admitido um único arquivo sintético `batch-256k.txt`, de **262144 bytes**,
+na conta de teste existente. Seu conteúdo e hash são os mesmos do ensaio anterior
+de 256 KiB. A admissão usou o validador, repositório e armazenamento da aplicação;
+o worker já ativo processou a tarefa durável, usando seu modelo em cache. Não foi
+iniciado um segundo modelo. O ensaio mede extração, persistência e indexação desse
+worker; não mede envio HTTP multipart, autenticação ou navegação do upload.
+
+| Verificação | Resultado |
+| --- | --- |
+| Conclusão | `ready`, 335 trechos, 112 pais e 335 vetores |
+| Gravação vetorial | 11 lotes: dez de 32 e um de 15 |
+| Integridade vetorial | Nenhum vetor sem correspondência em trecho atual |
+| Processamento observado | **99,912 s**, evento de conclusão da ingestão |
+| Criação do registro até conclusão | **102,582 s**, incluindo espera pelo worker |
+| Consultas públicas após conclusão | **5/5** respostas com o identificador esperado |
+| Uma consulta | HTTP 200, **4,832 s** |
+| Quatro perguntas diferentes simultâneas | HTTP 200 em todas, **10,520 a 12,012 s** |
+| Pico amostrado do backend | **1015,87 MiB**, limite de 1536 MiB |
+| Menor memória disponível no host | **376,32 MiB**, sem swap |
+| Saúde durante observação | Nenhum OOM, evento de limite, reinício ou amostra sem saúde |
+| HTTPS e acesso | TLS 1.3, certificado válido, HSTS e CORS aprovados; rota privada sem credenciais retorna 403 |
+
+A observação cobriu 279,324 segundos com 136 amostras. O pico de memória cgroup
+desde a criação do container foi 1027,43 MiB; ele inclui inicialização e não deve
+ser confundido com o pico amostrado da janela. O pico de CPU do host por intervalo
+foi 91,59%, normalizado para os dois vCPUs. Essa amostra breve não representa
+ocupação sustentada. A consulta de elegibilidade também encontrou um trecho pronto
+conhecido, limitou os resultados ao tenant e não retornou resultados para outro
+tenant inexistente, sem carregar outro encoder.
+
+No ensaio histórico, o mesmo conteúdo de 256 KiB levou **281,578 s**. O valor atual
+foi **64,52% menor**, uma razão de **2,82 vezes**. São amostras históricas únicas,
+sem controle das mesmas condições de cache, créditos, rede ou provedores; não é
+um teste A/B nem uma garantia de aceleração para outros documentos. A observação
+atual confirma a redução real para 11 gravações de lote na produção.
+
+O dimensionamento permanece **t3.small, 2 vCPUs, 2 GiB**, backend com **1536 MiB**,
+um worker, uma ingestão por vez e reranker desativado. A amostra sustenta essa
+configuração para o MVP de baixo tráfego. O consumo observado do backend,
+somado ao proxy e ao sistema, não sustenta reduzir a máquina para 1 GiB.
+O modo de créditos segue `standard`; o último ponto disponível do CloudWatch,
+01:25 UTC, registrou 209,779 créditos. Esse ponto tem atraso e não quantifica o
+consumo completo deste teste, nem valida operação com saldo esgotado.
+
+Os originais estavam íntegros antes e depois da publicação. Após os ensaios,
+o documento real e o sintético estão íntegros; o real mantém 12837 bytes, 20
+trechos e 20 vetores. A fila está vazia e os uploads estão
+liberados. A remoção permanente apenas de `batch-256k.txt`, seus 335 trechos,
+vetores e original foi preparada e conferida sem alterações; está aguardando
+autorização específica, após bloqueio da revisão automática. As interações e
+métricas sintéticas permanecem na conta de teste.
+
+O leitor de eventos do host agora reconhece `rag.index` e exporta apenas os
+campos operacionais permitidos. Seus cinco testes passaram, incluindo a recusa
+de conteúdo e identidade privada no evento de lote. Relatório sanitizado:
+`docs/vector-batch-aws-production.json`. Os auxiliares temporários e comprovantes
+ficam em `.publication/`, ignorada pelo Git. A API foi conferida no navegador.
+
+- [x] Publicar a versão em lotes com recuperação e verificar a imagem em execução.
+- [x] Medir ingestão completa de 256 KiB e conferir os 335 vetores em 11 lotes.
+- [x] Conferir memória, saúde, HTTPS e cinco respostas públicas.
+- [ ] Remover o novo arquivo sintético após autorização específica e conferir o documento real.
+- [ ] Validar carga sustentada, ingestão completa de 10 MiB, PDFs/DOCXs e créditos esgotados.
+- [ ] Ensaiar snapshot/restauração e concluir observabilidade, vulnerabilidades e automação da etapa 9.
 
 ## Referências
 

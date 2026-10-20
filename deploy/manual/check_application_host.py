@@ -9,7 +9,7 @@ def run(*args):
 
 
 def public_event(event):
-    if event.get('event') not in {'rag.warmup', 'rag.retrieval', 'rag.ingestion',
+    if event.get('event') not in {'rag.warmup', 'rag.retrieval', 'rag.ingestion', 'rag.index',
                                  'rag.chat', 'document.ingestion', 'rag.generation'}:
         return None
     output = {key: event[key] for key in

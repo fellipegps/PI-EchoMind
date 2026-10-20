@@ -69,6 +69,11 @@ class CapacityToolsTest(unittest.TestCase):
             'question': 'private synthetic text', 'tenant_id': 'private-id',
             'counts': {'returned_results': 2, 'question': 'private synthetic text', 'vector_candidates': -1}})
         self.assertEqual(output, {'event': 'rag.retrieval', 'status': 'success', 'counts': {'returned_results': 2}})
+        batch = host.public_event({'event': 'rag.index', 'status': 'success', 'stage': 'upsert-batch',
+            'tenant_id': 'private-id', 'content': 'private text',
+            'counts': {'persisted_chunks': 32, 'tenant_id': 'private-id'}})
+        self.assertEqual(batch, {'event': 'rag.index', 'status': 'success',
+                                'stage': 'upsert-batch', 'counts': {'persisted_chunks': 32}})
         self.assertIsNone(host.public_event({'event': 'unknown', 'message': 'private synthetic text'}))
 
 
