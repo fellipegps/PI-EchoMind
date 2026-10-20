@@ -2205,7 +2205,7 @@ artefatos privados permanecem em `.publication/`, ignorada pelo Git.
 - [x] Conferir créditos de CPU e saúde pública após os ensaios.
 - [x] Limpar somente os arquivos autorizados e verificar o original real.
 - [x] Corrigir e testar localmente retrieval enquanto outro documento está em processamento.
-- [ ] Publicar a correção de retrieval na AWS e repetir a verificação funcional em produção.
+- [x] Publicar a correção de retrieval na AWS e repetir a verificação funcional em produção.
 - [ ] Otimizar e medir gravação vetorial por lotes antes de uploads grandes.
 - [ ] Validar carga sustentada, upload máximo completo, PDFs/DOCXs e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
@@ -2240,8 +2240,8 @@ testes reais de integração do adaptador. A inclusão futura de índices vetori
 aproximados exige validar novamente o efeito de filtros e a recuperação de
 candidatos, incluindo a configuração de varredura iterativa do pgvector.
 
-Esta etapa prepara e valida a correção localmente. A imagem ainda precisa ser
-publicada na EC2; os resultados anteriores de capacidade continuam históricos.
+Esta etapa preparou e validou a correção localmente. A publicação posterior está
+registrada abaixo; os resultados anteriores de capacidade continuam históricos.
 
 Validação local: **582 testes rápidos aprovados** e **90 testes de integração
 aprovados**, incluindo as três regressões novas. Três testes de permissões do
@@ -2255,6 +2255,63 @@ passou em inicialização saudável, limites e isolamento, persistência do cach
 dos originais após recriação, recuperação de ingestão interrompida, reinício
 automático após falha, pausa/retomada de escritas e encerramento limpo.
 Os recursos descartáveis foram removidos ao final.
+
+### Correção publicada na EC2 - 19/10/2026
+
+A revisão `a76179b29568b2660fb72269442db3e9e651f4e5` está ativa no backend,
+incluindo a correção da aplicação do commit `35cfb2c`. A publicação usou o usuário
+IAM dedicado e SSM na EC2 existente. Foram transferidos 69 arquivos públicos
+commitados, em pacote de 211487 bytes, conferido por SHA-256 antes da extração.
+A imagem construída na própria EC2 é
+`sha256:6bbb84b3c5423b891de1edd3eb3a6513add66fb3179027cdc5a9e7279be357c9`.
+Somente `rag_engine.py` e o novo `retrieval_store.py` mudaram entre os arquivos
+de aplicação anteriormente publicados e esta versão.
+
+O atualizador `deploy/manual/update_release.py` reutiliza a transação já testada
+do pipeline, preservando a publicação manual. Ele exige os mesmos arquivos
+Compose/proxy, trava o deploy, confere o banco, pausa escritas documentais e
+produz uma cópia privada dos documentos no EBS de dados criptografado antes da
+troca. Somente o backend foi recriado; o mesmo container do proxy continuou em
+execução, com seus certificados e volumes. O estado anterior, sua imagem e sua
+pasta de código foram retidos para recuperação. A configuração pública de imagem
+e o manifesto manual foram atualizados após o sucesso. O arquivo de segredos
+existente foi entregue diretamente ao Docker, sem leitura de seus valores.
+Não houve migrations, reindexação, alteração IAM, novos recursos AWS ou ativação
+do CI/CD. Nenhum volume foi removido.
+
+Cinco testes do atualizador passaram em Windows e Linux; os 20 testes compartilhados
+de transação, recuperação e segurança passaram no Linux descartável. Uma tentativa
+no Windows encontrou ausência de Bash funcional, resolvida pela execução Linux.
+Não foi provocada uma falha deliberada na produção. Erros/timeout de deploy mantêm
+estado pendente para reconciliação; a cópia local no EBS auxilia recuperação,
+mas não substitui o ensaio de restauração e um backup externo.
+
+| Verificação após a publicação | Resultado |
+| --- | --- |
+| Backend e proxy | Saudáveis, zero reinícios e zero OOM |
+| Aquecimento do modelo existente em cache | Sucesso, cerca de 5,44 s |
+| Consulta real pelo novo adaptador | Dez candidatos elegíveis; fonte pronta conhecida encontrada |
+| Consulta de outro tenant na mesma coleção | Zero resultados |
+| Segurança da consulta de verificação | Transação somente leitura, sem carregar outro modelo |
+| Original persistente | Um documento pronto e um original válido; zero ausentes/inválidos |
+| Fila e manutenção | Fila vazia, escritas liberadas, nenhum deploy pendente |
+| HTTPS/health | HTTP 200, cadeia/hostname válidos, TLS 1.3, HSTS e redirecionamento 308 |
+| CORS e autenticação | Origem Vercel aceita, origem não autorizada recusada, anônimo recebe 403 |
+| Chat público da conta sintética | HTTP 200 e nome institucional esperado; aproximadamente 10,63 s incluindo leitura da ficha |
+
+O chat público usa a ficha institucional da conta sintética, que ficou sem
+documentos após a limpeza autorizada anterior. A busca do documento real foi
+conferida separadamente por consulta somente leitura, reutilizando um vetor
+persistido para testar o SQL exato do novo adaptador. O cenário com 50 vetores
+indisponíveis foi validado no PostgreSQL local descartável; nenhum novo documento
+foi carregado em produção nesta publicação. Essas verificações não representam
+novo ensaio de ingestão concorrente nem capacidade sustentada.
+
+Evidências sanitizadas: `docs/retrieval-release-verification.json`.
+Próximo item funcional pendente: otimizar e medir a gravação vetorial por lotes
+antes de ampliar os uploads; os ensaios de carga sustentada e restauração continuam
+na checklist. A branch permanece `codex/deploy-config`, sem push/merge nem
+ativação automática de deploy.
 
 ## Referências
 
