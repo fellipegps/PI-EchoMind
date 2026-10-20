@@ -2537,6 +2537,77 @@ com créditos esgotados continuam pendentes.
 - [ ] Validar carga sustentada, 10 MiB completos, formatos maiores e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
 
+### Preparação da recuperação e ensaio de arquivo - 20/10/2026
+
+O disco de dados existente é um **EBS gp3 criptografado de 20 GiB**, retido,
+conectado à instância na AZ `us-east-1a`. Há dois arquivos privados de recuperação
+de documentos, de 20480 bytes cada, com o mesmo SHA-256, proprietário root e modo
+`0600`, no próprio disco criptografado. O agendamento versionado do DLM não é
+evidência de que um primeiro snapshot foi concluído.
+
+O utilitário `deploy/manual/rehearse_document_backup.py` foi executado dentro do
+backend existente com um desses arquivos, com hash fixado no controle autenticado.
+Consultou o inventário documental em transação somente de leitura, restaurou o
+arquivo em um diretório temporário novo e conferiu tamanho e SHA-256 do original.
+O original recuperado coincidiu com o registro do banco; o diretório temporário
+foi removido. O original em produção também foi validado antes e depois. Não
+houve restauração sobre o volume ativo, pausa de uploads, carga de outro modelo
+ou escrita no banco. A verificação final encontrou um documento pronto, original
+íntegro, fila vazia, escritas liberadas e API/proxy saudáveis. HTTPS, HSTS, CORS e
+rejeição de acesso privado sem credenciais passaram novamente.
+
+Quatro testes de segurança do utilitário passaram no Windows e no Linux. Eles
+conferem isolamento e limpeza do temporário, além de rejeitar bytes adulterados,
+documentos inesperados e travessia de diretório. Este resultado comprova a
+recuperação do original arquivado, **não uma restauração de snapshot EBS**. O
+arquivo no mesmo disco não protege contra perda desse disco, e não contém o
+backup do banco, Auth, configurações ou serviços externos.
+
+Na inspeção dos backups, a AWS negou `ec2:DescribeSnapshots` com
+`UnauthorizedOperation` e `dlm:GetLifecyclePolicy` com `AccessDeniedException`
+para o usuário operacional. Não foi possível confirmar o primeiro snapshot ou
+selecionar sua cópia para o ensaio. O usuário atual não pode conceder permissões
+a si mesmo.
+
+O plano revisável está em `deploy/aws/restore-drill.md`:
+
+- `restore-access.yaml` cria duas políticas gerenciadas, instaladas por uma
+  sessão administradora. A primeira permite ao operador consultar snapshots,
+  inspecionar a política DLM do projeto e criar/consultar/excluir somente a stack
+  `echomind-prod-restore-drill`, com MFA e a role de execução existente. A segunda
+  permite à role existente descrever snapshots. Não concede escrita IAM ou
+  escrita EC2 direta ao operador, exclusão da stack de produção ou dos snapshots.
+- `restore-drill.yaml` prepara apenas um volume gp3 criptografado de 20 GiB a
+  partir de um snapshot verificado, e sua conexão no slot livre `/dev/sdg`. O
+  disco ativo permanece conectado. A inspeção exige identificar o NVMe pelo
+  VolumeId, bloquear escrita e montar com `ro,noload,nodev,nosuid,noexec`.
+  A cópia temporária será desmontada e excluída após o ensaio autorizado; disco
+  ativo e snapshot de origem serão preservados.
+
+Os dois templates passaram em **cfn-lint 1.57.2**, nas regras **cfn-guard 3.2.1**
+e em **AWS ValidateTemplate**. Quatro testes dos templates conferiram os limites
+e rejeitaram ampliação IAM, perda de MFA/role fixa, exclusão da stack de produção,
+volume sem criptografia, slot do disco ativo, tag indevida de backup e recurso
+de compute adicional. A imagem local existente de validação foi reutilizada sem
+rede; não houve instalação ou download de ferramentas. ValidateTemplate não
+substitui a validação da criação com snapshot e parâmetros reais.
+
+Nenhuma política de recuperação ou cópia EBS foi criada nesta preparação.
+A instalação do acesso e a criação/limpeza da cópia aguardam aprovação explícita
+e uma sessão administradora para o bootstrap. A cópia de 20 GiB tem cobrança de
+armazenamento enquanto existir e pode consumir créditos; deve ser removida ao
+fim do teste. Consulte [preços EBS](https://aws.amazon.com/ebs/pricing/) antes da
+ativação. Relatório sanitizado: `docs/recovery-preparation-verification.json`.
+Parâmetros reais de revisão ficam em `.publication/restore-access.parameters.json`,
+ignorada pelo Git.
+
+- [x] Restaurar um arquivo privado de originais em diretório isolado e conferir integridade.
+- [x] Conferir preservação do original ativo e saúde da API após o ensaio.
+- [x] Preparar e validar o acesso mínimo e a infraestrutura da cópia EBS.
+- [ ] Aprovar/aplicar o acesso suplementar com sessão administradora.
+- [ ] Confirmar o primeiro snapshot agendado, restaurar/montar a cópia e concluir sua limpeza.
+- [ ] Ensaiar recuperação do serviço e coordenar a recuperação com o banco externo.
+
 ## Referências
 
 - [FastAPI em containers](https://fastapi.tiangolo.com/deployment/docker/)

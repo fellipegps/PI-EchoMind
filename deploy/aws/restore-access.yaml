@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: EchoMind supplemental access for inspecting backups and one isolated restoration stack. An existing IAM administrator installs this template.
+Metadata:
+  AWSToolsMetrics: {AWSAgentToolkit: aws-cloudformation@3}
+Parameters:
+  ApplicationStackName:
+    Type: String
+    Default: echomind-prod
+    AllowedPattern: '^echomind-[a-z0-9-]{1,20}$'
+  OperatorUserName:
+    Type: String
+    Default: echomind-access-operator
+    AllowedPattern: '^[A-Za-z0-9+=,.@_-]{1,64}$'
+  ExecutionRoleName:
+    Type: String
+    AllowedPattern: '^echomind-[A-Za-z0-9+=,.@_-]{1,55}$'
+    MaxLength: 64
+    Description: Existing ExecutionRoleName from the provisioning stack output ARN. Do not create a role.
+Resources:
+  RecoveryOperatorPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Backup inspection and a disposable recovery stack were outside the original operator policy.
+        must:
+          - No IAM writes, direct EC2 writes, production stack deletion or snapshot deletion.
+          - Create only the restore-drill stack with MFA and the existing fixed execution role; no updates or imports.
+          - Snapshot descriptions require a regional wildcard; DLM inspection requires the project resource tag.
+    Properties:
+      Users: [!Ref OperatorUserName]
+      Description: Inspect project backups and create or remove only the isolated recovery stack.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DescribeRegionalSnapshots
+            Effect: Allow
+            Action: ec2:DescribeSnapshots
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}
+          - Sid: InspectProjectBackupPolicy
+            Effect: Allow
+            Action: dlm:GetLifecyclePolicy
+            Resource: !Sub 'arn:${AWS::Partition}:dlm:${AWS::Region}:${AWS::AccountId}:policy/*'
+            Condition: {StringEquals: {'aws:ResourceTag/Project': !Ref ApplicationStackName}}
+          - Sid: CreateOnlyRecoveryStack
+            Effect: Allow
+            Action: cloudformation:CreateStack
+            Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStackName}-restore-drill/*'
+            Condition:
+              ArnEquals: {'cloudformation:RoleArn': !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${ExecutionRoleName}'}
+              Bool: {'aws:MultiFactorAuthPresent': true}
+              StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}
+          - Sid: InspectAndDeleteOnlyRecoveryStack
+            Effect: Allow
+            Action: ['cloudformation:DescribeStacks', 'cloudformation:DescribeEvents', 'cloudformation:DescribeStackEvents', 'cloudformation:DescribeStackResource', 'cloudformation:DescribeStackResources', 'cloudformation:ListStackResources', 'cloudformation:GetTemplate', 'cloudformation:DeleteStack']
+            Resource: !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStackName}-restore-drill/*'
+            Condition:
+              Bool: {'aws:MultiFactorAuthPresent': true}
+              StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}
+  RecoveryExecutionInspectionPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: CloudFormation must inspect the source snapshot before restoring through the existing project execution role.
+        must: [Read only; no new EC2 writes, IAM actions, credentials or KMS permissions.]
+    Properties:
+      Roles: [!Ref ExecutionRoleName]
+      Description: Allow the existing project execution role to inspect source snapshot metadata.
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: ec2:DescribeSnapshots
+            Resource: '*'
+            Condition: {StringEquals: {'aws:RequestedRegion': !Ref 'AWS::Region'}}

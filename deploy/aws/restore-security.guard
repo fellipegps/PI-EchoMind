@@ -1,0 +1,41 @@
+let copies = Resources.*[ Type == 'AWS::EC2::Volume' ]
+let attachments = Resources.*[ Type == 'AWS::EC2::VolumeAttachment' ]
+let access = Resources.*[ Type == 'AWS::IAM::ManagedPolicy' ]
+rule isolated_restore_copy when %copies !empty {
+    %copies {
+        DeletionPolicy == 'Delete'
+        UpdateReplacePolicy == 'Delete'
+        Properties {
+            Encrypted == true
+            SnapshotId exists
+            Size == 20
+            VolumeType == 'gp3'
+            Iops == 3000
+            Throughput == 125
+            Tags[ Key == 'RestoreDrill' ] !empty
+            Tags[ Key == 'EchoMindBackup' ] empty
+        }
+    }
+    Resources.*.Type IN ['AWS::EC2::Volume', 'AWS::EC2::VolumeAttachment']
+}
+rule unused_attachment_slot when %attachments !empty {
+    %attachments.Properties {
+        Device == '/dev/sdg'
+        VolumeId.Ref == 'RestoreVolume'
+    }
+}
+rule recovery_access_scope when %access !empty {
+    Resources.*.Type == 'AWS::IAM::ManagedPolicy'
+    %access.Properties.PolicyDocument.Version == '2012-10-17'
+    Resources.RecoveryOperatorPolicy.Properties.Users[0].Ref == 'OperatorUserName'
+    Resources.RecoveryExecutionInspectionPolicy.Properties.Roles[0].Ref == 'ExecutionRoleName'
+    Resources.RecoveryExecutionInspectionPolicy.Properties.PolicyDocument.Statement.* {
+        Action == 'ec2:DescribeSnapshots'
+        Resource == '*'
+        Condition.StringEquals.'aws:RequestedRegion'.Ref == 'AWS::Region'
+    }
+    Resources.RecoveryOperatorPolicy.Properties.PolicyDocument.Statement[ Sid IN ['CreateOnlyRecoveryStack', 'InspectAndDeleteOnlyRecoveryStack'] ] {
+        Resource.'Fn::Sub' == 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ApplicationStackName}-restore-drill/*'
+        Condition.Bool.'aws:MultiFactorAuthPresent' == true
+    }
+}

@@ -62,6 +62,11 @@ CI/CD activation remains separate.
 
 ## Backend-only updates of an existing manual installation
 
+For the isolated original-archive check and planned EBS recovery drill, see
+[`../aws/restore-drill.md`](../aws/restore-drill.md). The archive check uses
+`rehearse_document_backup.py` with a pinned SHA-256 and never restores into the
+live volume. Archive recovery and EBS snapshot recovery have separate evidence.
+
 `update_release.py` reuses the transaction in `deploy/pipeline/rollout.py` without
 activating the pipeline or creating AWS resources. Package and transfer committed
 source as above, retain its authenticated archive at
