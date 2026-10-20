@@ -116,6 +116,7 @@ def test_reindex_removes_previous_orphans_before_indexing_current_chunks(
     rag_engine_module,
 ) -> None:
     store = MagicMock()
+    store.embedding_function.embed_documents.return_value = [[0.1] * 384]
     monkeypatch.setattr(rag_engine_module, "_get_vector_store", lambda tenant_id: store)
     indexer = _indexer(rag_engine_module)
     document = _document()
@@ -133,8 +134,53 @@ def test_reindex_removes_previous_orphans_before_indexing_current_chunks(
         for chunk in old_chunks
     ]
     store.delete.assert_called_once_with(ids=expected_ids, collection_only=True)
-    assert store.add_documents.call_count == 1
-    assert store.add_documents.call_args.args[0][0].page_content.endswith("Conteudo atualizado.")
+    store.add_embeddings.assert_called_once()
+    assert store.add_embeddings.call_args.kwargs["texts"][0].endswith("Conteudo atualizado.")
+    assert store.add_embeddings.call_args.kwargs["ids"] == [expected_ids[0]]
+
+
+def test_large_document_bounds_database_batches_but_keeps_single_passage_inference(
+    monkeypatch, rag_engine_module,
+):
+    store = MagicMock()
+    store.embedding_function.embed_documents.return_value = [[0.1] * 384]
+    monkeypatch.setattr(rag_engine_module, "_get_vector_store", lambda _tenant: store)
+    chunks = [_chunk(id=f"chunk-{i}", chunk_index=i, content=f"Secao {i}.") for i in range(65)]
+    _indexer(rag_engine_module).reindex_document_chunks(_document(), chunks)
+    writes = [call.kwargs for call in store.add_embeddings.call_args_list]
+    assert [len(write["ids"]) for write in writes] == [32, 32, 1]
+    assert all(len(call.args[0]) == 1 for call in store.embedding_function.embed_documents.call_args_list)
+    assert len(store.embedding_function.embed_documents.call_args_list) == len(chunks)
+    ids = [value for write in writes for value in write["ids"]]
+    assert ids == [rag_engine_module._make_vector_id(chunk.id, "document_chunk", "tenant-a") for chunk in chunks]
+    assert len(set(ids)) == 65
+    assert all(metadata["tenant_id"] == "tenant-a" and metadata["document_id"] == "doc-1"
+               for write in writes for metadata in write["metadatas"])
+    store.add_documents.assert_not_called()
+
+
+@pytest.mark.parametrize("invalid", [[], [[0.1] * 383], [[0.1] * 384, [0.1] * 384]])
+def test_invalid_encoder_output_never_persists_an_incomplete_batch(monkeypatch, rag_engine_module, invalid):
+    store = MagicMock()
+    store.embedding_function.embed_documents.side_effect = [[[0.1] * 384], invalid]
+    monkeypatch.setattr(rag_engine_module, "_get_vector_store", lambda _tenant: store)
+    with pytest.raises(RuntimeError, match="lote"):
+        _indexer(rag_engine_module).reindex_document_chunks(
+            _document(), [_chunk(), _chunk(id="second", chunk_index=1)],
+        )
+    store.add_embeddings.assert_not_called()
+
+
+def test_batch_stops_after_failed_write_and_propagates_for_cleanup(monkeypatch, rag_engine_module):
+    store = MagicMock()
+    store.embedding_function.embed_documents.return_value = [[0.1] * 384]
+    store.add_embeddings.side_effect = [None, RuntimeError("private database failure")]
+    monkeypatch.setattr(rag_engine_module, "_get_vector_store", lambda _tenant: store)
+    chunks = [_chunk(id=f"chunk-{i}", chunk_index=i) for i in range(65)]
+    with pytest.raises(RuntimeError, match="lote"):
+        _indexer(rag_engine_module).reindex_document_chunks(_document(), chunks)
+    assert store.add_embeddings.call_count == 2
+    assert store.embedding_function.embed_documents.call_count == 64
 
 
 def test_delete_rejects_chunks_from_another_tenant_before_touching_store(

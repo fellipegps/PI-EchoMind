@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime, timezone
 
 import pytest
 from sqlalchemy import delete
@@ -16,7 +16,7 @@ def test_postgresql_upsert_and_query_remain_tenant_scoped(postgres_engine) -> No
     from app.database import RagMetricDaily
     from app.rag_metrics import get_rag_metrics, record_metric_event
 
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     tenant_a = "pr31-metrics-a"
     tenant_b = "pr31-metrics-b"
 
@@ -74,7 +74,7 @@ def test_postgresql_batch_persistence_keeps_tenants_isolated(
     from app import rag_metrics
     from app.database import RagMetricDaily
 
-    today = date.today()
+    today = datetime.now(timezone.utc).date()
     tenant_a = "pr31-batch-a"
     tenant_b = "pr31-batch-b"
     tenants = [tenant_a, tenant_b]

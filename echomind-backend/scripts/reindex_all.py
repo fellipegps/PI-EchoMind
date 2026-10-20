@@ -307,10 +307,11 @@ def reindex_tenant(db: Session, tenant_id: str) -> ReindexResult:
         else []
     )
 
-    documents_by_id = {document.id: document for document in documents}
+    chunks_by_document = {document.id: [] for document in documents}
     actual_chunk_counts = {document.id: 0 for document in documents}
     for chunk in chunks:
         actual_chunk_counts[chunk.document_id] += 1
+        chunks_by_document[chunk.document_id].append(chunk)
     for document in documents:
         actual_count = actual_chunk_counts[document.id]
         if document.chunk_count != actual_count:
@@ -328,8 +329,9 @@ def reindex_tenant(db: Session, tenant_id: str) -> ReindexResult:
 
     for faq in faqs:
         rag.index_faq(faq)
-    for chunk in chunks:
-        rag.index_document_chunk(documents_by_id[chunk.document_id], chunk)
+    for document in documents:
+        if chunks_by_document[document.id]:
+            rag.reindex_document_chunks(document, chunks_by_document[document.id])
 
     return ReindexResult(
         tenant_id=tenant_id,

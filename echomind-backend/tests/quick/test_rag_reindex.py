@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 import pytest
 from fastembed import TextEmbedding
@@ -258,10 +258,8 @@ def test_reindex_tenant_indexes_only_ready_documents_and_persisted_chunks(
     assert cleared_tenants == ["tenant-a"]
     fake_rag.index_faq.assert_called_once_with(faq_a)
     fake_rag.index_event.assert_not_called()
-    assert fake_rag.index_document_chunk.call_args_list == [
-        call(ready_a, ready_chunks[1]),
-        call(ready_a, ready_chunks[0]),
-    ]
+    fake_rag.reindex_document_chunks.assert_called_once_with(ready_a, [ready_chunks[1], ready_chunks[0]])
+    fake_rag.index_document_chunk.assert_not_called()
 
 
 def test_reindex_tenant_validates_chunk_count_before_clearing(
@@ -348,10 +346,11 @@ def test_reindex_tenant_second_execution_produces_same_deterministic_set(
                 rag_engine._make_vector_id(source.id, "faq", self.tenant_id)
             )
 
-        def index_document_chunk(self, _document, source):
-            collections[self.tenant_id].add(
-                rag_engine._make_vector_id(source.id, "document_chunk", self.tenant_id)
-            )
+        def reindex_document_chunks(self, _document, sources):
+            for source in sources:
+                collections[self.tenant_id].add(
+                    rag_engine._make_vector_id(source.id, "document_chunk", self.tenant_id)
+                )
 
     cleared_tenants: list[str] = []
 

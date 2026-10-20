@@ -229,12 +229,12 @@ def test_failed_rebuild_stops_and_can_resume_without_touching_unproven_collectio
 
     case = reconciliation_case
     protected = _protected_rows(case)
-    original = case.runtime.rag.RAGEngine.index_document_chunk
-    def fail_after_one(self, document, chunk):
-        original(self, document, chunk)
+    original = case.runtime.rag.RAGEngine.reindex_document_chunks
+    def fail_after_one(self, document, chunks):
+        original(self, document, chunks[:1])
         if self.tenant_id == case.valid:
             raise RuntimeError("Falha apos gravacao parcial de vetor.")
-    monkeypatch.setattr(case.runtime.rag.RAGEngine, "index_document_chunk", fail_after_one)
+    monkeypatch.setattr(case.runtime.rag.RAGEngine, "reindex_document_chunks", fail_after_one)
     with Session(case.runtime.engine) as session:
         with pytest.raises(reindex_all.TenantReindexError) as caught:
             reindex_all.reindex_all(session)
@@ -243,7 +243,7 @@ def test_failed_rebuild_stops_and_can_resume_without_touching_unproven_collectio
         assert "vazia ou parcial" in str(caught.value)
         assert len(case.valid_store.similarity_search("trecho", k=20)) == 2
         assert _protected_rows(case) == protected
-        monkeypatch.setattr(case.runtime.rag.RAGEngine, "index_document_chunk", original)
+        monkeypatch.setattr(case.runtime.rag.RAGEngine, "reindex_document_chunks", original)
         reindex_all.reindex_all(session)
     _assert_rebuilt(case)
     assert _protected_rows(case) == protected

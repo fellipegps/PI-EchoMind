@@ -61,8 +61,8 @@ etapas de infraestrutura, segredos, HTTPS e validação dos serviços reais.
 - [ ] **9. Validação em produção:** login, recuperação de senha, chat, upload e
   consulta de documentos, memória/CPU/disco com embeddings reais, revisão de
   vulnerabilidades das dependências, logs e recuperação após reinício.
-  Fluxos funcionais e carga controlada medidos; corrigir busca durante ingestão,
-  validar carga sustentada/documentos máximos e ensaiar restauração do EBS.
+  Fluxos funcionais e carga controlada medidos; busca durante ingestão corrigida
+  e publicada. Faltam carga sustentada/documentos máximos e restauração do EBS.
 
 ## Diagnóstico inicial, antes das etapas de preparação
 
@@ -2206,7 +2206,8 @@ artefatos privados permanecem em `.publication/`, ignorada pelo Git.
 - [x] Limpar somente os arquivos autorizados e verificar o original real.
 - [x] Corrigir e testar localmente retrieval enquanto outro documento está em processamento.
 - [x] Publicar a correção de retrieval na AWS e repetir a verificação funcional em produção.
-- [ ] Otimizar e medir gravação vetorial por lotes antes de uploads grandes.
+- [x] Otimizar e medir localmente gravação vetorial por lotes antes de uploads grandes.
+- [ ] Publicar a indexação em lotes e medir a ingestão completa na EC2 existente.
 - [ ] Validar carga sustentada, upload máximo completo, PDFs/DOCXs e créditos esgotados.
 - [ ] Ensaiar snapshot/restauração e concluir os demais itens da etapa 9.
 
@@ -2308,10 +2309,76 @@ foi carregado em produção nesta publicação. Essas verificações não repres
 novo ensaio de ingestão concorrente nem capacidade sustentada.
 
 Evidências sanitizadas: `docs/retrieval-release-verification.json`.
-Próximo item funcional pendente: otimizar e medir a gravação vetorial por lotes
-antes de ampliar os uploads; os ensaios de carga sustentada e restauração continuam
-na checklist. A branch permanece `codex/deploy-config`, sem push/merge nem
-ativação automática de deploy.
+Na publicação acima, o próximo item funcional era otimizar a gravação por lotes.
+A preparação local dessa otimização está registrada abaixo. Os ensaios de carga
+sustentada e restauração continuam na checklist. A branch permanece
+`codex/deploy-config`, sem push/merge nem ativação automática de deploy.
+
+### Indexação documental em lotes - preparação local
+
+`RAGEngine.reindex_document_chunks` passa a gravar até **32 vetores por transação**
+do PGVector, em vez de uma gravação por trecho. Os embeddings continuam sendo
+gerados **um trecho por chamada**, com o mesmo singleton E5, cabeçalho, prefixo
+`passage:`, dimensão 384, metadados normalizados e UUIDs determinísticos.
+Só o lote atual de vetores fica em memória. Não foi ampliado o lote de inferência
+ONNX, o número de workers, a concorrência de ingestões ou o teto de memória.
+
+A reindexação administrativa agrupa os trechos por documento e usa o mesmo
+caminho em lotes. FAQs e indexação individual mantêm seu comportamento. A geração
+com quantidade/dimensão incorreta falha antes da gravação do lote. Erros de
+embedding ou banco são propagados ao processamento existente para compensação;
+não é marcado `ready` após uma indexação parcial. A limpeza continua restrita aos
+IDs do documento e à coleção do tenant, e os IDs necessários à recuperação ficam
+persistidos antes de iniciar a indexação. A busca continua recusando documentos
+`pending`, `processing` e `error`, inclusive quando já há um lote gravado.
+
+Os testes reais de PostgreSQL conferem 65 vetores em três lotes, metadados,
+conteúdo, embeddings, remoção de órfãos, idempotência e preservação de outro
+tenant. Outros ensaios provocam falha no segundo lote antes e depois do commit,
+além de interrupção abrupta após o primeiro lote confirmado; a compensação e a
+retomada mantêm exatamente os IDs dos trechos atuais, sem duplicações ou órfãos.
+
+O gate passou com **587 testes rápidos e 94 de integração**, cobertura global de
+**90,03%** e os quatro módulos documentais acima dos 80% exigidos. Três testes de
+permissão Linux foram ignorados no Windows. Os testes de métricas passaram a usar
+a mesma data UTC da persistência, corrigindo uma falha de relógio na virada do dia,
+sem alterar o comportamento de métricas da aplicação.
+
+O medidor `scripts/benchmark_vector_batches.py` recusa bancos remotos e exige o
+nome do banco descartável de integração. Ele compara o laço antigo de indexação
+com o novo método, usando o mesmo documento sintético e encoder, alternando a
+ordem entre repetições. Contabiliza SQL e commits e confere a quantidade gravada.
+O cenário com atraso adiciona explicitamente uma espera por comando SQL; ele não
+mede latência entre AWS e Supabase nem permite prever o tempo de upload real.
+
+Para **335 vetores**, as inserções caíram de **335 para 11**, os commits de
+**336 para 12** e os comandos SQL observados de **672 para 24**. No PostgreSQL
+local com embeddings sintéticos, três repetições deram mediana de **1,8334 s para
+0,2098 s (8,74 vezes)**. Com 25 ms adicionais simulados por comando SQL, as
+medianas foram **20,6361 s e 0,8640 s (23,88 vezes)**. Esses valores isolam o
+caminho de gravação; não representam aceleração equivalente do upload completo.
+
+No Linux com **E5 real já em cache**, dois CPUs, limite de 1536 MiB e sem swap,
+uma comparação completa de 335 embeddings/gravações por método levou **25,6226 s
+no caminho antigo e 22,0773 s em lotes**, ganho de **1,16 vez** neste ambiente de
+baixa latência. Os 335 vetores foram conferidos em ambos os caminhos. O pico
+cgroup do ensaio conjunto foi **1375,22 MiB**, sem eventos de limite, OOM ou
+encerramento anormal. Esse pico cobre os dois métodos e não identifica um pico
+isolado por método. O benchmark importa o RAG, usa PostgreSQL local e texto
+sintético; não é uma requisição HTTP ou upload com extração, nem medição da EC2.
+A inferência continua ocupando parte importante do tempo, e a economia de viagens
+ao banco não deve ser convertida em previsão de aceleração de ponta a ponta.
+
+O modo offline da biblioteca não reconheceu automaticamente o cache na primeira
+tentativa. O medidor passou a aceitar um caminho explícito do snapshot público,
+somente no ensaio, preservando o adapter e a configuração de inferência da
+aplicação. A execução final ocorreu em rede Docker interna, sem download, AWS,
+Supabase ou Groq. Evidências sanitizadas: `docs/vector-batch-benchmark.json`.
+O smoke da imagem Linux também aprovou inicialização, limites, persistência,
+recuperação documental, reinício automático, manutenção e encerramento limpo.
+
+Esta preparação ainda precisa de publicação e medição na EC2. Os originais,
+vetores e configurações de produção não foram modificados nesta etapa.
 
 ## Referências
 
