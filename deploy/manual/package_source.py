@@ -22,6 +22,7 @@ EXACT = {
     "deploy/compose.yaml", "deploy/compose.https.yaml", "deploy/.env.example",
     "deploy/configure_runtime.py", "deploy/manual/install_envelope.py",
     "deploy/manual/build_first_release.sh",
+    "deploy/manual/update_release.py", "deploy/pipeline/rollout.py",
     "deploy/proxy/Dockerfile", "deploy/proxy/Caddyfile",
 }
 PREFIXES = ("echomind-backend/app/", "echomind-backend/alembic/")

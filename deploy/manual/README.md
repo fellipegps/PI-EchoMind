@@ -60,6 +60,37 @@ installation was recorded in `docs/first-publication-verification.json`;
 the frontend follow-up is in `docs/frontend-publication-verification.json`.
 CI/CD activation remains separate.
 
+## Backend-only updates of an existing manual installation
+
+`update_release.py` reuses the transaction in `deploy/pipeline/rollout.py` without
+activating the pipeline or creating AWS resources. Package and transfer committed
+source as above, retain its authenticated archive at
+`/srv/echomind/incoming/<revision>.tar.gz`, verify/extract into a fresh release,
+and build the candidate backend before invoking:
+
+```sh
+python3 deploy/manual/update_release.py --revision <full-commit> --sha256 <archive-sha256>
+```
+
+Run from that verified source directory as root. Compose and proxy inputs must
+match the existing installation. The updater locks deployments, checks readiness,
+drains document writes and saves a private document recovery archive on encrypted
+data EBS, then recreates only the backend with its persistent volumes. It verifies
+database readiness, public HTTPS and exact container image/proxy identities before
+resuming writes and committing state. It updates only the public image setting;
+the existing backend runtime secrets are handed to Docker without reading values.
+There are no automatic migrations, reindexing or volume/image deletions.
+
+If startup or verification fails, the shared transaction restores the previous
+backend. Interrupted operations retain `manual-rollout/pending.json`; inspect and
+reconcile it before retrying. Successful operations retain `previous.json` and
+`previous-installation.json` in that private directory, plus the previous image and
+source. Post-transaction metadata failures also require reconciliation rather than
+blindly rerunning. The local archive is recovery assistance, not an off-host backup.
+
+Offline checks: `python deploy/manual/test_update_release.py` and the 20 pipeline
+transaction/security tests (run the latter on Linux).
+
 ## Read-only checks and a missing original
 
 `check_application_host.py` runs on the EC2 host with Docker inspection access.
