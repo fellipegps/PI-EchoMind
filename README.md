@@ -272,7 +272,7 @@ O build valida as origens HTTPS e o formato da chave publica e rejeita variaveis
 publicas de segredos do backend. `pnpm dev` continua aceitando a API local.
 Para um build de producao local, use configuracao publica adequada ou deixe a API
 ausente para validar somente o frontend. O procedimento de banco, backup e
-configuracao de Auth esta na [etapa 7](docs/deploy-aws.md#etapa-7-banco-e-frontend).
+configuracao de Auth esta no [guia de deploy](deploy/README.md#frontend-e-autenticacao).
 
 Sem `NEXT_PUBLIC_API_URL`, o frontend pode ser publicado e as chamadas a API
 mostram que o servidor ainda nao esta disponivel. Quando o backend for
@@ -301,10 +301,10 @@ preview precisam de uma origem liberada no CORS e de Redirect URLs proprias.
 
 ## Preparação do backend para a AWS
 
-A arquitetura e a checklist de publicação estão em [docs/deploy-aws.md](docs/deploy-aws.md).
+A arquitetura e a operação da publicação estão no [guia de deploy](deploy/README.md).
 O empacotamento do backend usa `echomind-backend/Dockerfile` e um lock de dependências
-para Python 3.12/Linux. A checklist registra o que já foi validado e o que ainda
-precisa ser preparado antes de publicar.
+para Python 3.12/Linux. O guia explica o fluxo automático pelo GitHub, as configurações
+necessárias e os procedimentos de diagnóstico, backup e recuperação.
 
 ## Banco De Dados
 
@@ -467,9 +467,9 @@ staging ou producao.
 Nenhuma reindexacao e iniciada automaticamente em startup, deploy, endpoint,
 scheduler ou importacao.
 
-O contrato operacional completo do MVP, incluindo formatos, estados, limites,
-OCR nao suportado, roteiro manual e branch protection recomendada, esta em
-[`docs/MVP-DOCUMENTAL.md`](docs/MVP-DOCUMENTAL.md).
+As orientacoes de publicacao, verificacao de documentos e recuperacao estao no
+[guia de deploy](deploy/README.md). O limite de upload e definido por
+`MAX_DOCUMENT_SIZE_MB`; PDFs digitalizados que dependem de OCR nao sao suportados.
 
 ## Autenticacao
 

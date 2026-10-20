@@ -14,7 +14,7 @@ import stat
 import tempfile
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
     "runtime_config", ROOT / "echomind-backend/app/runtime_config.py",
 )
@@ -40,7 +40,7 @@ def parse_raw(contents: str) -> dict[str, str]:
     return result
 
 
-DEFAULTS = parse_raw(Path(__file__).with_name(".env.example").read_text(encoding="utf-8"))
+DEFAULTS = parse_raw((ROOT / "deploy/.env.example").read_text(encoding="utf-8"))
 ALLOWED = DEFAULTS.keys() | {
     "RERANKER_MODEL", "RERANKER_CANDIDATE_LIMIT", "RERANKER_MAX_CHARS", "RERANKER_TIMEOUT_SECONDS",
 }

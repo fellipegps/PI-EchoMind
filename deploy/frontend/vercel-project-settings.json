@@ -1,8 +1,0 @@
-{
-  "framework": "nextjs",
-  "rootDirectory": "echomind-front",
-  "nodeVersion": "22.x",
-  "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": null
-}

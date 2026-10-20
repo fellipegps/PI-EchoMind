@@ -5,7 +5,7 @@ Metadata:
     AWSAgentToolkit: aws-cloudformation@3
   com.aws.cloudformation.Context:
     ref:
-      - at: docs/deploy-aws.md
+      - at: deploy/README.md
         has: Architecture, cost review, operator prerequisites and recovery procedures
     must:
       - Prepare only; deployment requires a non-root operator and a current credit review.

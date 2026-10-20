@@ -16,7 +16,6 @@ import yaml
 
 from package_release import ROOT, package
 from rollout import Host, ReleaseError, command, manifest, recover_previous, rehearse_rollback, transact
-from adopt_manual import baseline
 
 SPEC = importlib.util.spec_from_file_location("infra_checks", ROOT / "deploy/aws/check_infra.py")
 sys.path.insert(0, str(ROOT / "deploy/aws"))
@@ -152,18 +151,6 @@ class ReleaseTests(unittest.TestCase):
         value['backend'] = 'untrusted:latest'
         (path / 'manifest.json').write_text(json.dumps(value))
         with self.assertRaises(ReleaseError):manifest(path, allow_local_recovery=True)
-
-    def test_adoption_rejects_manifest_image_mismatch_or_unhealthy_container(self):
-        metadata = {'source_revision': 'a' * 40, 'source_directory':'/verified',
-                    'images': {name:{'id':'sha256:' + char * 64} for name,char in (('backend','b'),('proxy','c'))}}
-        containers = [{'Name':'/echomind-' + name + '-1','Image':metadata['images'][name]['id'],
-                       'Config':{'Labels':{'com.docker.compose.project':'echomind',
-                                          'com.docker.compose.project.working_dir':'/verified/deploy'}},
-                       'State':{'Running':True,'Health':{'Status':'healthy'}}} for name in ('backend','proxy')]
-        state = baseline(metadata, containers, Path('/baseline'), {})
-        self.assertEqual(state['backend'], metadata['images']['backend']['id'])
-        containers[0]['Image'] = 'sha256:' + 'd' * 64
-        with self.assertRaises(ReleaseError):baseline(metadata, containers, Path('/baseline'), {})
 
     def test_durable_state_write_failure_restores_previous_pointer(self):
         import rollout

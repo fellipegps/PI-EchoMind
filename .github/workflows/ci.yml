@@ -31,7 +31,7 @@ jobs:
       - name: Build the production backend image with its locked dependencies
         run: docker build --platform linux/amd64 --tag echomind-backend:ci ./echomind-backend
       - name: Check real container startup, persistence and restart without providers
-        run: python3 deploy/validate_runtime.py --image echomind-backend:ci
+        run: python3 deploy/tests/validate_runtime.py --image echomind-backend:ci
       - name: Rehearse a failed deployment and recovery with disposable containers
         run: python3 deploy/pipeline/smoke_release.py --image echomind-backend:ci
 

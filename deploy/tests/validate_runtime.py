@@ -17,7 +17,7 @@ import urllib.request
 import uuid
 
 
-COMPOSE_FILE = Path(__file__).resolve().with_name("compose.yaml")
+COMPOSE_FILE = Path(__file__).resolve().parents[1] / "compose.yaml"
 CACHE_CHECK = """
 import os
 from pathlib import Path

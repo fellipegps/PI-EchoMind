@@ -14,7 +14,7 @@ import time
 import uuid
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 BACKEND = ROOT / "echomind-backend"
 IMAGE = "pgvector/pgvector:0.8.6-pg17"
 

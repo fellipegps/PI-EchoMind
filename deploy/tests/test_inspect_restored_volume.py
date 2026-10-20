@@ -3,10 +3,12 @@ from copy import deepcopy
 import hashlib
 from io import BytesIO
 from pathlib import Path
+import sys
 import tarfile
 import tempfile
 import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'operations'))
 from inspect_restored_volume import GIB, compare_originals, select_copy
 
 COPY = 'vol-11111111111111111'
