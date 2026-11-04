@@ -6,9 +6,6 @@ from sqlalchemy import delete, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.database import Config, Interaction
-from app.privacy_retention import run_configured_retention
-
 pytestmark = pytest.mark.integration
 
 
@@ -27,6 +24,9 @@ def test_migration_defaults_and_retention_constraint(postgres_engine):
 
 
 def test_scheduled_cleanup_is_tenant_scoped_on_postgresql(postgres_engine):
+    from app.database import Config, Interaction
+    from app.privacy_retention import run_configured_retention
+
     tenants = ["privacy-active", "privacy-paused"]
     now = datetime.now(timezone.utc)
     factory = sessionmaker(bind=postgres_engine)

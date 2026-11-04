@@ -10,13 +10,13 @@ import pytest
 from sqlalchemy import delete, text
 from sqlalchemy.orm import Session
 
-from app.database import Interaction, UnansweredQuestion
-from app.unanswered_handoff import InvalidHandoff, new_handoff, submit_unanswered
-
 pytestmark = pytest.mark.integration
 
 
 def test_concurrent_confirmation_is_atomic_tenant_scoped_and_retryable(postgres_engine):
+    from app.database import Interaction, UnansweredQuestion
+    from app.unanswered_handoff import InvalidHandoff, new_handoff, submit_unanswered
+
     tenant = "handoff-concurrent"
     token, digest = new_handoff()
     try:
