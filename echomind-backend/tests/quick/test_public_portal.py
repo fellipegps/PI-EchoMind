@@ -43,6 +43,13 @@ def test_public_institution_resolves_slug_without_exposing_tenant(
         "phone": None,
         "address": None,
         "business_hours": None,
+        "privacy_controller": None,
+        "privacy_email": None,
+        "privacy_purpose": None,
+        "privacy_legal_basis": None,
+        "chat_retention_days": None,
+        "chat_retention_enabled": False,
+        "privacy_ready": False,
     }
     assert "tenant_id" not in response.json()
     assert "id" not in response.json()
@@ -300,8 +307,9 @@ def test_purge_expired_events_only_deletes_target_tenant(db: Session) -> None:
 
 def test_public_chat_uses_slug_and_rejects_client_supplied_tenant(
     client: TestClient,
+    privacy_config_data,
 ) -> None:
-    public_slug = client.get("/config").json()["public_slug"]
+    public_slug = client.put("/config", json=privacy_config_data).json()["public_slug"]
 
     response = client.post(
         f"/public/{public_slug}/chat",

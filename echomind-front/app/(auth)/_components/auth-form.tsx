@@ -22,6 +22,10 @@ export function AuthPanel({ title, description, children }: {
         </div>
       </header>
       <Card className="rounded-3xl p-6 sm:p-8">{children}</Card>
+      <p className="text-center text-sm leading-5 text-muted-foreground">
+        Usamos seus dados para administrar sua conta e a instituição.{" "}
+        <Link href="/privacidade" className="underline underline-offset-4">Aviso de privacidade</Link>
+      </p>
     </section>
   );
 }

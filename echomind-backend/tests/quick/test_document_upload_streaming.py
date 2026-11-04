@@ -239,7 +239,7 @@ async def test_barrier_is_exclusive_to_document_upload(monkeypatch, scope):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("failure,status", [("auth", 403), ("metadata", 422), ("persistence", 500)])
+@pytest.mark.parametrize("failure,status", [("auth", 401), ("metadata", 422), ("persistence", 500)])
 async def test_upload_failures_close_files_and_do_not_schedule_processing(
     client, quick_test_context, monkeypatch, parser_io, failure, status,
 ):

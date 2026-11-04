@@ -28,6 +28,7 @@ from .database import (
     utc_now,
 )
 from .unanswered_triage import question_fingerprint
+from .structured_logging import emit_event, safe_error_code
 from .middleware import latency_store
 from .schemas import (
     ConfigUpdate,
@@ -319,9 +320,12 @@ def _purge_expired_events_safely(
 ) -> None:
     try:
         purge_expired_events(db, tenant_id, today=today)
-    except SQLAlchemyError:
+    except SQLAlchemyError as exc:
         db.rollback()
-        logger.exception("Falha ao excluir eventos expirados do tenant %s", tenant_id)
+        emit_event(
+            event="events.expiration", status="error", stage="cleanup",
+            tenant_id=tenant_id, error_code=safe_error_code(exc),
+        )
 
 
 def get_events(
@@ -453,7 +457,12 @@ def upsert_config(db: Session, payload: ConfigUpdate, tenant_id: str) -> Config:
     elif not cfg.public_slug:
         cfg.public_slug = build_public_slug(cfg.company_name, tenant_id)
 
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    changes = payload.model_dump(exclude_unset=True)
+    if changes.get("chat_retention_enabled", cfg.chat_retention_enabled):
+        required = ("privacy_controller", "privacy_email", "privacy_purpose", "privacy_legal_basis", "chat_retention_days")
+        if any(not changes.get(field, getattr(cfg, field)) for field in required):
+            raise ValueError("Preencha os dados de privacidade e o prazo antes de ativar a limpeza automática.")
+    for field, value in changes.items():
         setattr(cfg, field, value)
     cfg.updated_at = utc_now()
     db.commit()
@@ -463,7 +472,10 @@ def upsert_config(db: Session, payload: ConfigUpdate, tenant_id: str) -> Config:
 
 # Interactions
 
-def save_interaction(db: Session, question: str, answer: str, tenant_id: str) -> Interaction:
+def save_interaction(
+    db: Session, question: str, answer: str, tenant_id: str, *,
+    unanswered_token_hash: str | None = None, answered: bool | None = None,
+) -> Interaction | None:
     not_answered_markers = (
         "nao tenho informacoes",
         "nao tenho informações",
@@ -475,13 +487,15 @@ def save_interaction(db: Session, question: str, answer: str, tenant_id: str) ->
         tenant_id=tenant_id,
         question=question,
         answer=answer,
-        was_answered=was_answered,
+        was_answered=was_answered if answered is None else answered,
+        unanswered_token_hash=unanswered_token_hash,
     )
     db.add(interaction)
     try:
         db.commit()
     except Exception:
         db.rollback()
+        return None
     return interaction
 
 
@@ -591,6 +605,10 @@ def delete_unanswered_question(db: Session, question_id: str, tenant_id: str) ->
     )
     if not uq:
         return False
+    db.query(UnansweredSuppression).filter(
+        UnansweredSuppression.tenant_id == tenant_id,
+        UnansweredSuppression.question_id == question_id,
+    ).delete(synchronize_session=False)
     db.delete(uq)
     db.commit()
     return True

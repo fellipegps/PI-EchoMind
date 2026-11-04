@@ -15,16 +15,18 @@ from fastapi import (
     File,
     Form,
     HTTPException,
+    Header,
     Query,
     Request,
     Response,
     UploadFile,
 )
-from fastapi.responses import StreamingResponse
+from .chat_streaming import ChatStreamingResponse as StreamingResponse
 from sqlalchemy.orm import Session
 from starlette.datastructures import UploadFile as StarletteUploadFile
 import asyncio
 import logging
+import json
 import os
 from pathlib import Path
 
@@ -33,7 +35,7 @@ from .campus_map_routes import router_campuses, router_public_geo
 from .cors_config import configure_cors
 from .middleware import TimingMiddleware, RequestLogMiddleware, latency_store
 from .schemas import (
-    ChatRequest, PublicChatRequest,
+    ChatRequest, PublicChatRequest, PublicUnansweredRequest,
     FaqCreate, FaqUpdate, FaqResponse, PublicFaqResponse,
     EventCreate, EventUpdate, EventResponse, PublicEventResponse,
     EventCourseCreate, EventCourseResponse,
@@ -45,6 +47,9 @@ from .schemas import (
 )
 from . import crud
 from .auth import CurrentUser, get_current_user
+from .privacy_retention import retention_worker
+from .chat_sanitization import sanitize_public_question
+from .unanswered_handoff import InvalidHandoff, new_handoff, submit_unanswered
 from .document_ingestion import (
     DocumentTooLargeError,
     DocumentValidationError,
@@ -117,6 +122,8 @@ async def lifespan(app: FastAPI):
     configure_metric_sink(enqueue_metric_event)
     start_metric_writer()
     document_runtime = DocumentRuntime(processor=process_document)
+    retention_stop = asyncio.Event()
+    retention_task = asyncio.create_task(retention_worker(retention_stop))
     try:
         warmup_timeout = float(os.getenv("RAG_WARMUP_TIMEOUT_SECONDS", "30"))
         try:
@@ -143,6 +150,8 @@ async def lifespan(app: FastAPI):
             )
         yield
     finally:
+        retention_stop.set()
+        await retention_task
         await asyncio.to_thread(document_runtime.stop)
         configure_metric_sink(None)
         await asyncio.to_thread(stop_metric_writer)
@@ -254,6 +263,8 @@ async def _stream_chat_for_tenant(
     message: str,
     tenant_id: str,
     db: Session,
+    public_handoff: bool = False,
+    event_stream: bool = False,
 ):
     question = message.strip()
     correlation_id = new_correlation_id()
@@ -268,7 +279,7 @@ async def _stream_chat_for_tenant(
         async def cached_stream_generator():
             with bind_log_context(tenant_id, correlation_id=correlation_id) as log_context:
                 for char in cached_answer:
-                    yield char
+                    yield _chat_event("token", {"text": char}) if event_stream else char
                 crud.save_interaction(db, question=question, answer=cached_answer, tenant_id=tenant_id)
                 emit_event(
                     event="rag.chat",
@@ -278,8 +289,10 @@ async def _stream_chat_for_tenant(
                     counts={"retrieved_results": 1},
                     source_types={"faq": 1},
                 )
+                if event_stream:
+                    yield _chat_event("done", {"unanswered_token": None})
 
-        return StreamingResponse(cached_stream_generator(), media_type="text/plain")
+        return StreamingResponse(cached_stream_generator(), media_type="text/event-stream" if event_stream else "text/plain")
 
     # Inicializa o RAGEngine ANTES de abrir o stream.
     # Erros de configuração (GROQ_API_KEY ausente, etc.) geram HTTP 503
@@ -297,52 +310,68 @@ async def _stream_chat_for_tenant(
             )
         raise HTTPException(
             status_code=503,
-            detail=str(exc),
+            detail="O assistente está indisponível no momento. Tente novamente mais tarde.",
         )
 
     async def stream_generator():
         full_response = ""
+        completed = False
+        handoff_token = None
         with bind_log_context(tenant_id, correlation_id=correlation_id) as log_context:
             try:
                 async for token in rag.astream_chat(question):
                     if not token:
                         continue
                     full_response += token
-                    yield token
+                    yield _chat_event("token", {"text": token}) if event_stream else token
+                completed = bool(full_response.strip())
             except Exception:
                 # O RAG registra somente o código técnico seguro com a mesma correlação.
                 pass
             finally:
-                # Persiste a interação (sempre)
-                crud.save_interaction(db, question=question, answer=full_response, tenant_id=tenant_id)
+                token_hash = None
+                if public_handoff and event_stream and completed and not rag.last_had_docs:
+                    handoff_token, token_hash = new_handoff()
+                saved = crud.save_interaction(
+                    db, question=question, answer=full_response, tenant_id=tenant_id,
+                    unanswered_token_hash=token_hash,
+                    answered=(rag.last_had_docs if completed else False) if public_handoff else None,
+                )
+                if saved is None:
+                    handoff_token = None
 
-                # Se o RAG não encontrou documentos relevantes, registra a pergunta
-                # como não respondida. Feito aqui com await run_in_executor — garante
-                # execução no event loop correto, ainda dentro do ciclo de vida do
-                # request, evitando o problema de create_task() que disparava após
-                # o context do request ser destruído.
-                if not rag.last_had_docs:
+                # Detection remains independent of the public visitor's choice.
+                # Only legacy authenticated chat registers automatically, using
+                # its own session before the streaming request finishes.
+                if completed and not rag.last_had_docs:
                     emit_event(
                         event="rag.unanswered",
                         status="success",
                         stage="detected",
                         context=log_context,
                     )
-                    try:
-                        loop = asyncio.get_event_loop()
-                        await loop.run_in_executor(
-                            None, _register_unanswered_standalone, question, tenant_id
-                        )
-                    except Exception as exc:
-                        emit_event(
-                            event="rag.unanswered",
-                            status="error",
-                            stage="scheduling",
-                            context=log_context,
-                            error_code=safe_error_code(exc),
-                        )
+                    if not public_handoff:
+                        try:
+                            loop = asyncio.get_event_loop()
+                            await loop.run_in_executor(
+                                None, _register_unanswered_standalone, question, tenant_id
+                            )
+                        except Exception as exc:
+                            emit_event(
+                                event="rag.unanswered", status="error", stage="scheduling",
+                                context=log_context, error_code=safe_error_code(exc),
+                            )
+            if event_stream:
+                if not completed:
+                    yield _chat_event("error", {"message": "Não foi possível concluir a resposta. Tente novamente."})
+                else:
+                    yield _chat_event("done", {"unanswered_token": handoff_token})
 
-    return StreamingResponse(stream_generator(), media_type="text/plain")
+    return StreamingResponse(stream_generator(), media_type="text/event-stream" if event_stream else "text/plain")
+
+
+def _chat_event(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
 @router_chat.post(
@@ -351,10 +380,15 @@ async def _stream_chat_for_tenant(
     dependencies=[Depends(enforce_chat_rate_limit)],
     deprecated=True,
 )
-async def chat(request: ChatRequest, db: Session = Depends(get_db)):
+async def chat(
+    request: ChatRequest,
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+):
     tenant_id = request.tenant_id.strip()
     if not tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id obrigatorio.")
+    _require_own_tenant(tenant_id, current_user)
     return await _stream_chat_for_tenant(
         message=request.message,
         tenant_id=tenant_id,
@@ -367,6 +401,12 @@ def _public_config_or_404(db: Session, public_slug: str):
     if config is None:
         raise HTTPException(status_code=404, detail="Instituição não encontrada.")
     return config
+
+
+def _require_own_tenant(tenant_id: str, current_user: CurrentUser) -> None:
+    """Rotas legadas com tenant explícito são exclusivas do administrador dono."""
+    if tenant_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Acesso não permitido.")
 
 
 @router_public.get("/{public_slug}", response_model=PublicInstitutionResponse)
@@ -411,13 +451,47 @@ async def public_chat(
     public_slug: str,
     request: PublicChatRequest,
     db: Session = Depends(get_db),
+    accept: str = Header(default=""),
 ):
     config = _public_config_or_404(db, public_slug)
+    if not config.privacy_ready:
+        raise HTTPException(status_code=503, detail="A instituição precisa concluir as informações de privacidade para liberar o atendimento.")
+    try:
+        question = sanitize_public_question(request.message)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from None
     return await _stream_chat_for_tenant(
-        message=request.message,
+        message=question,
         tenant_id=config.tenant_id,
         db=db,
+        public_handoff=True,
+        event_stream="text/event-stream" in accept.lower(),
     )
+
+
+@router_public.post(
+    "/{public_slug}/unanswered", status_code=204,
+    summary="Encaminha uma pergunta pública após confirmação do visitante",
+    dependencies=[Depends(enforce_chat_rate_limit)],
+)
+def confirm_public_unanswered(
+    public_slug: str, request: PublicUnansweredRequest, db: Session = Depends(get_db),
+):
+    config = _public_config_or_404(db, public_slug)
+    if not config.privacy_ready:
+        raise HTTPException(status_code=503, detail="O atendimento está indisponível no momento.")
+    tenant_id = config.tenant_id
+    try:
+        submit_unanswered(db, tenant_id=tenant_id, token=request.token)
+        db.commit()
+    except InvalidHandoff as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except Exception as exc:
+        db.rollback()
+        emit_event(event="rag.unanswered", status="error", stage="confirmation", tenant_id=tenant_id, error_code=safe_error_code(exc))
+        raise HTTPException(status_code=503, detail="Não foi possível encaminhar a pergunta. Tente novamente.") from None
+    return Response(status_code=204)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -437,9 +511,11 @@ def list_faqs(
 def list_chatbot_faqs(
     tenant_id: str = Query(..., min_length=1),
     db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
     """Retorna apenas as FAQs marcadas para exibição no chatbot (máx. 4)."""
-    return crud.get_chatbot_faqs(db, tenant_id=tenant_id)
+    _require_own_tenant(tenant_id, current_user)
+    return crud.get_chatbot_faqs(db, tenant_id=current_user.id)
 
 
 @router_faqs.post("", response_model=FaqResponse, status_code=201)
@@ -580,8 +656,10 @@ def get_config(
 def get_public_config(
     tenant_id: str = Query(..., min_length=1),
     db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
-    config = crud.get_config(db, tenant_id=tenant_id)
+    _require_own_tenant(tenant_id, current_user)
+    config = crud.get_config(db, tenant_id=current_user.id)
     if not config:
         raise HTTPException(status_code=404, detail="Configuração não encontrada. Crie uma primeiro.")
     return config
@@ -594,7 +672,10 @@ def update_config(
     current_user: CurrentUser = Depends(get_current_user),
 ):
     ensure_onboarding(db, current_user)
-    return crud.upsert_config(db, payload, tenant_id=current_user.id)
+    try:
+        return crud.upsert_config(db, payload, tenant_id=current_user.id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1086,18 +1167,23 @@ def _delete_stored_document(document_id, db, rag, current_user, storage):
 #  FEEDBACK  /feedback
 # ══════════════════════════════════════════════════════════════════════════════
 
-@router_feedback.post("", response_model=FeedbackResponse, status_code=201)
+@router_feedback.post(
+    "", response_model=FeedbackResponse, status_code=201,
+    dependencies=[Depends(enforce_chat_rate_limit)],
+)
 def save_response_feedback(
     payload: FeedbackRequest,
     db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
     """Registra avaliação simples do usuário sobre a resposta do chatbot."""
+    _require_own_tenant(payload.tenant_id, current_user)
     crud.save_feedback(
         db,
         question=payload.question.strip(),
         answer=payload.answer.strip(),
         helpful=payload.helpful,
-        tenant_id=payload.tenant_id,
+        tenant_id=current_user.id,
     )
     return FeedbackResponse(saved=True, helpful=payload.helpful)
 

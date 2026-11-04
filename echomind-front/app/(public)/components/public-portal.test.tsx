@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const apiMocks = vi.hoisted(() => ({
   streamPublicChat: vi.fn(),
+  submitPublicUnanswered: vi.fn(),
   listFaqs: vi.fn(),
   listEvents: vi.fn(),
   getInstitution: vi.fn(),
@@ -11,6 +12,7 @@ const apiMocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/api", () => ({
   streamPublicChat: apiMocks.streamPublicChat,
+  submitPublicUnanswered: apiMocks.submitPublicUnanswered,
   publicPortalApi: {
     listFaqs: apiMocks.listFaqs,
     listEvents: apiMocks.listEvents,
@@ -46,6 +48,23 @@ const publicEvent = {
 };
 
 describe("PublicPortal", () => {
+  it("bloqueia o envio sem aviso completo, mantendo as abas de eventos e locais", async () => {
+    apiMocks.getInstitution.mockResolvedValue({ company_name: "Instituição", privacy_ready: false });
+    render(<PublicPortal publicSlug="instituicao" />);
+    await screen.findByRole("heading", { name: "Instituição" });
+    expect(screen.getByRole("textbox", { name: "Digite sua pergunta" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Enviar pergunta" })).toBeDisabled();
+    expect(apiMocks.streamPublicChat).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Eventos" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Locais" })).toBeEnabled();
+  });
+  it("informa o uso dos dados antes do envio e oferece o aviso de privacidade", async () => {
+    render(<PublicPortal publicSlug="universidade" />);
+    const input = await screen.findByRole("textbox", { name: "Digite sua pergunta" });
+    expect(input).toHaveAccessibleDescription(/armazenadas.*Groq/);
+    expect(input).toHaveAttribute("maxLength", "2000");
+    expect(screen.getByRole("link", { name: "Saiba como seus dados são usados" })).toHaveAttribute("href", "/p/universidade/privacidade");
+  });
   it("oferece somente o navegador geográfico na aba Locais", async () => {
     render(<PublicPortal publicSlug="universidade" />);
     await userEvent.click(screen.getByRole("button", { name: "Locais" }));
@@ -55,12 +74,14 @@ describe("PublicPortal", () => {
   });
   beforeEach(() => {
     apiMocks.streamPublicChat.mockReset();
+    apiMocks.submitPublicUnanswered.mockReset();
+    apiMocks.submitPublicUnanswered.mockResolvedValue(undefined);
     apiMocks.listFaqs.mockReset();
     apiMocks.listEvents.mockReset();
     apiMocks.getInstitution.mockReset();
     apiMocks.listFaqs.mockResolvedValue([faq]);
     apiMocks.listEvents.mockResolvedValue([publicEvent]);
-    apiMocks.getInstitution.mockResolvedValue({ company_name: "UniEVANGÉLICA" });
+    apiMocks.getInstitution.mockResolvedValue({ company_name: "UniEVANGÉLICA", privacy_ready: true });
   });
 
   it("carrega instituição e FAQs somente pelo slug público do link", async () => {
@@ -93,6 +114,84 @@ describe("PublicPortal", () => {
     expect(screen.getByText("Qual é o prazo?")).toBeInTheDocument();
     expect(await screen.findByText("A rematrícula está disponível.")).toBeInTheDocument();
     expect(apiMocks.streamPublicChat).toHaveBeenCalledOnce();
+  });
+
+  it("somente encaminha após confirmar, desabilita duplo clique e mostra sucesso", async () => {
+    let finish!: () => void;
+    apiMocks.submitPublicUnanswered.mockReturnValue(new Promise<void>(resolve => { finish = resolve; }));
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => {
+      token("Não tenho essa informação."); done({ unanswered_token: "a".repeat(43) });
+    });
+    const user = userEvent.setup();
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Qual é o prazo?");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    const group = await screen.findByRole("group", { name: "Encaminhamento da pergunta" });
+    expect(apiMocks.submitPublicUnanswered).not.toHaveBeenCalled();
+    expect(screen.getByText(/A conversa continua no histórico/)).toBeInTheDocument();
+    const send = within(group).getByRole("button", { name: "Enviar pergunta" });
+    fireEvent.click(send); fireEvent.click(send);
+    expect(send).toBeDisabled();
+    expect(within(group).getByRole("button", { name: "Agora não" })).toBeDisabled();
+    expect(apiMocks.submitPublicUnanswered).toHaveBeenCalledExactlyOnceWith("unievangelica-anapolis", "a".repeat(43));
+    await act(async () => finish());
+    expect(await screen.findByText("Pergunta encaminhada para análise da equipe.")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Encaminhamento da pergunta" })).not.toBeInTheDocument();
+  });
+
+  it("Agora não fecha a opção sem encaminhar a pergunta", async () => {
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => {
+      token("Não tenho essa informação."); done({ unanswered_token: "a".repeat(43) });
+    });
+    const user = userEvent.setup();
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Qual o prazo?");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    await user.click(await screen.findByRole("button", { name: "Agora não" }));
+    expect(screen.queryByRole("group", { name: "Encaminhamento da pergunta" })).not.toBeInTheDocument();
+    expect(apiMocks.submitPublicUnanswered).not.toHaveBeenCalled();
+    expect(screen.getByText("Não tenho essa informação.")).toBeInTheDocument();
+  });
+
+  it("mantém a confirmação na resposta correta e permite tentar novamente após falha", async () => {
+    apiMocks.submitPublicUnanswered.mockRejectedValueOnce(new Error("Falha sintética"));
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => {
+      token("Resposta sem informação."); done({ unanswered_token: "a".repeat(43) });
+    });
+    const user = userEvent.setup();
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Qual o prazo?");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => { token("Resposta conhecida."); done(); });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Onde fica o campus?");
+    await user.click(screen.getByLabelText("Digite sua pergunta").closest("form")!.querySelector("button")!);
+    const original = screen.getByText("Resposta sem informação.").closest("article")!;
+    const latest = screen.getByText("Resposta conhecida.").closest("article")!;
+    expect(within(latest).queryByRole("group")).not.toBeInTheDocument();
+    await user.click(within(original).getByRole("button", { name: "Enviar pergunta" }));
+    expect(await within(original).findByRole("alert")).toHaveTextContent("Não foi possível encaminhar");
+    await user.click(within(original).getByRole("button", { name: "Enviar pergunta" }));
+    expect(await within(original).findByText("Pergunta encaminhada para análise da equipe.")).toBeInTheDocument();
+    expect(apiMocks.submitPublicUnanswered).toHaveBeenCalledTimes(2);
+  });
+
+  it("não oferece encaminhamento em resposta conhecida ou falha técnica", async () => {
+    const user = userEvent.setup();
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, done) => { token("Resposta conhecida."); done({ unanswered_token: null }); });
+    render(<PublicPortal publicSlug="unievangelica-anapolis" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Qual o prazo?");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    expect(screen.queryByRole("button", { name: "Agora não" })).not.toBeInTheDocument();
+    apiMocks.streamPublicChat.mockImplementation(async (_question, _slug, token, _done, error) => { token("Resposta parcial."); error(new Error("Interrupção")); });
+    await user.type(screen.getByLabelText("Digite sua pergunta"), "Outra dúvida");
+    await user.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível obter uma resposta");
+    expect(screen.queryByRole("button", { name: "Agora não" })).not.toBeInTheDocument();
+    expect(apiMocks.submitPublicUnanswered).not.toHaveBeenCalled();
   });
 
   it("formata o negrito da resposta mesmo quando os marcadores chegam em partes", async () => {

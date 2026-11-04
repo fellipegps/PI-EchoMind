@@ -5,9 +5,9 @@ external services/document persistence and the generated chat content.
 """
 
 import asyncio
+from types import SimpleNamespace
 
 from fastapi import Depends, File, HTTPException, Request, UploadFile
-from fastapi.responses import StreamingResponse
 
 from app import main
 from app.database import get_db
@@ -33,10 +33,13 @@ async def synthetic_chat(*, message, **_kwargs):
         finally:
             if not completed:
                 stream_state["cancelled"] += 1
-    return StreamingResponse(generate(), media_type="text/plain")
+    # Exercise the production chat response, including its disconnect listener.
+    return main.StreamingResponse(generate(), media_type="text/plain")
 
 
 main._stream_chat_for_tenant = synthetic_chat
+# O portal público resolve a instituição pelo slug; nenhum banco real é usado.
+main._public_config_or_404 = lambda _db, _slug: SimpleNamespace(tenant_id="synthetic", privacy_ready=True)
 
 
 @app.get("/_deploy/ip")

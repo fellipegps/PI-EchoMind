@@ -21,6 +21,12 @@ from starlette.types import ASGIApp
 logger = logging.getLogger("echomind.middleware")
 
 
+def _log_path(request: Request) -> str:
+    # Somente o template da rota; URLs reais podem conter dados pessoais.
+    route = request.scope.get("route")
+    return getattr(route, "path", "unmatched")
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 #  Armazenamento em memória das métricas de latência
 #  (em produção, substitua por Redis ou Prometheus)
@@ -125,7 +131,7 @@ class TimingMiddleware(BaseHTTPMiddleware):
             # Nota: não podemos modificar a response aqui pois já foi enviada
             # em streaming — apenas logamos.
             logger.info(
-                f"{request.method} {request.url.path} "
+                f"{request.method} {_log_path(request)} "
                 f"→ {elapsed_ms:.1f}ms"
                 + (" [ERRO]" if is_error else "")
             )
@@ -148,16 +154,17 @@ class RequestLogMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         start = time.perf_counter()
-        client = request.client.host if request.client else "unknown"
-
         response = await call_next(request)
 
         elapsed_ms = (time.perf_counter() - start) * 1000
         logger.info(
-            f"[{client}] {request.method} {request.url.path} "
+            f"{request.method} {_log_path(request)} "
             f"HTTP/{response.status_code} {elapsed_ms:.1f}ms"
         )
 
         # Adiciona header de latência na resposta (visível no DevTools)
         response.headers["X-Process-Time-Ms"] = f"{elapsed_ms:.1f}"
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "no-referrer"
         return response

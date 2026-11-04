@@ -67,6 +67,12 @@ def validate_production(environment: Mapping[str, str]) -> None:
             invalid.add(name)
     if environment.get("EMBEDDING_DIM", "384") != "384":
         invalid.add("EMBEDDING_DIM")
+    # Traces/debug may contain complete prompts, answers and retrieved content.
+    # External tracing is not an approved data destination in this deployment.
+    for name in ("LANGCHAIN_TRACING", "LANGCHAIN_TRACING_V2", "LANGSMITH_TRACING", "LANGSMITH_TRACING_V2",
+                 "LANGCHAIN_HANDLER", "LANGCHAIN_DEBUG", "LANGCHAIN_VERBOSE"):
+        if environment.get(name, "") not in {"", "false", "False", "0"}:
+            invalid.add(name)
     for name in ("RERANKER_ENABLED", "RAG_WARMUP_ENABLED", "DOCUMENT_RECOVERY_ENABLED"):
         if environment.get(name, "false" if name == "RERANKER_ENABLED" else "true").lower() not in {
             "true", "false", "1", "0", "yes", "no",

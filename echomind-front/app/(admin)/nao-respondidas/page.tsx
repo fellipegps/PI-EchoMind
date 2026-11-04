@@ -252,7 +252,7 @@ export default function UnansweredQuestions() {
                           <DialogContent className="max-h-[calc(100dvh-2rem)] min-w-0 overflow-y-auto sm:max-w-xl">
                             <DialogHeader className="pr-8 text-left">
                               <DialogTitle className="text-xl leading-7">Criar FAQ Oficial</DialogTitle>
-                              <DialogDescription>Revise a pergunta e escreva a resposta para criar uma <strong>FAQ oficial</strong> visível no painel de Base de Conhecimento.</DialogDescription>
+                              <DialogDescription>Revise a pergunta e escreva a resposta para criar uma <strong>FAQ oficial</strong> visível no painel de Base de Conhecimento. Remova nomes, CPF, contatos e outras informações pessoais da pergunta e da resposta: o conteúdo poderá aparecer no chat público.</DialogDescription>
                             </DialogHeader>
                             <div className="min-w-0 space-y-2">
                               <Label htmlFor={`question-${q.id}`}><Pencil aria-hidden="true" className="size-4" />Pergunta (editável)</Label>

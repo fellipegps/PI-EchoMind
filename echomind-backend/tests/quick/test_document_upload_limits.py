@@ -23,7 +23,9 @@ def test_upload_limits_requires_authentication(client, quick_test_context):
     auth = quick_test_context.get_current_user
     override = app.dependency_overrides.pop(auth)
     try:
-        assert client.get("/documents/upload-limits").status_code == 403
+        response = client.get("/documents/upload-limits")
+        assert response.status_code == 401
+        assert response.headers["www-authenticate"] == "Bearer"
     finally:
         app.dependency_overrides[auth] = override
 

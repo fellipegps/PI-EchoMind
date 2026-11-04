@@ -4,7 +4,18 @@ import { validatePublicConfig } from "./lib/public-config";
 if (process.env.NODE_ENV === "production") validatePublicConfig(process.env);
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  poweredByHeader: false,
+  async headers() {
+    return [{
+      source: "/:path*",
+      headers: [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Referrer-Policy", value: "no-referrer" },
+        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
+      ],
+    }];
+  },
 };
 
 export default nextConfig;

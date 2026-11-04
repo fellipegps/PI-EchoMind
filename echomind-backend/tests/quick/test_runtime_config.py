@@ -64,6 +64,14 @@ def test_valid_config_preserves_literal_credentials(production_config):
     ("MAX_DOCUMENT_SIZE_MB", "0"),
     ("RERANKER_TIMEOUT_SECONDS", "nan"),
     ("SIMILARITY_THRESHOLD", "secret-not-number"),
+    ("LANGCHAIN_TRACING", "true"),
+    ("LANGCHAIN_TRACING_V2", "1"),
+    ("LANGSMITH_TRACING", "local"),
+    ("LANGSMITH_TRACING_V2", "true"),
+    ("LANGCHAIN_TRACING", "off"),
+    ("LANGCHAIN_HANDLER", "langchain"),
+    ("LANGCHAIN_DEBUG", "true"),
+    ("LANGCHAIN_VERBOSE", "true"),
 ])
 def test_bad_config_names_only(production_config, name, value):
     production_config[name] = value
@@ -82,6 +90,10 @@ def test_missing_config_lists_all_required_variables():
         validate_production({})
     for name in ("DATABASE_URL", "SUPABASE_URL", "SUPABASE_SECRET_KEY", "GROQ_API_KEY", "ALLOWED_ORIGINS"):
         assert name in str(caught.value)
+
+
+def test_explicitly_disabled_tracing_is_accepted(production_config):
+    validate_production(production_config | {"LANGCHAIN_TRACING_V2": "false", "LANGSMITH_TRACING": "0"})
 
 
 def test_production_does_not_load_dotenv(monkeypatch, production_config):

@@ -11,6 +11,46 @@ O projeto usa Supabase para:
 - Validacao de sessoes administrativas no backend
 - Chaves opacas atuais do Supabase: `sb_secret_...` no backend e `sb_publishable_...` no frontend
 
+## LGPD e segurança
+
+A checklist oficial de LGPD e segurança interna reúne a
+análise do tratamento de dados, correções, pendências essenciais, rotina de
+descarte e resumo das alterações. O aviso do produto está em `/privacidade`;
+o da instituição, em `/p/{slug}/privacidade`. Em **Configurações → Privacidade e
+retenção**, cadastre o responsável, contato, finalidade, base legal e prazo aprovado.
+O chat público só é liberado após concluir esses dados e ativar a limpeza.
+Cada instituição informa sua própria política no painel, sem nome, e-mail,
+finalidade ou prazo preenchidos pelo produto. A UniEVANGÉLICA e os 30 dias são
+dados do primeiro cadastro usado nos testes, não padrões do sistema. É possível
+salvar um cadastro incompleto com a limpeza desativada; o chat segue bloqueado.
+O contato técnico da Horizon Code fica separado do canal de cada instituição.
+O modelo de ficha interna interna reúne as decisões,
+responsáveis e fornecedores por instituição. Manter a cópia preenchida em local
+privado, fora do Git e do site; o aviso público apresenta somente as informações
+necessárias aos visitantes.
+A conferência operacional de 02/11/2026 registrou o piloto independente da
+Horizon Code, os controles já existentes e as pendências de recuperação e
+fornecedores, sem alterar planos. A ficha preenchida fica em armazenamento
+privado fora do projeto; o modelo versionado permanece em branco.
+Esta etapa exige aplicar as migrations `0024`, `0025` e `0026` antes da nova API;
+veja o [guia de deploy](deploy/README.md). A `0025` remove permissões diretas
+dos clientes nas tabelas exclusivas do backend; o login pelo Supabase é preservado.
+Rotas legadas com `tenant_id` agora exigem login do proprietário; o portal
+público continua em `/public/{public_slug}`. A limpeza depende de ativação
+explícita no painel e não foi aplicada ao banco real nesta revisão.
+No chat público, perguntas não respondidas só são encaminhadas após o visitante
+escolher **Enviar pergunta**; **Agora não** não envia à fila e preserva o histórico
+pelo prazo configurado. A `0026` guarda a confirmação sem duplicar envios.
+Pedidos de acesso/eliminação de conversas específicas contam com a ferramenta
+operacional `manage_chat_data.py`, com seleção conferida por instituição,
+prévia por padrão e exportação privada para revisão. O procedimento e seus
+limites estão na checklist oficial.
+
+O backend usa FastAPI `0.133.1` e Starlette `1.3.1`, com instalação e deploy
+validados localmente conforme a avaliação interna.
+Rotas protegidas sem Bearer token retornam `401` com `WWW-Authenticate: Bearer`;
+acesso autenticado a outra instituição continua retornando `403`.
+
 ## Estrutura
 
 ```text

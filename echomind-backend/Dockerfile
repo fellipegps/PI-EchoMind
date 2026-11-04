@@ -27,6 +27,8 @@ COPY alembic.ini ./alembic.ini
 COPY alembic ./alembic
 COPY scripts/reindex_all.py ./scripts/reindex_all.py
 COPY scripts/check_database.py ./scripts/check_database.py
+COPY scripts/purge_chat_data.py ./scripts/purge_chat_data.py
+COPY scripts/manage_chat_data.py ./scripts/manage_chat_data.py
 
 USER 10001:10001
 
@@ -39,4 +41,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
 
 # Trust proxy headers only after configuring the HTTPS proxy's exact address.
 # Database migrations and RAG reindexing are separate, explicit operations.
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-proxy-headers", "--timeout-graceful-shutdown", "300"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-proxy-headers", "--no-access-log", "--timeout-graceful-shutdown", "300"]

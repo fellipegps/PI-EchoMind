@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Bot, CalendarDays, MapPin } from "lucide-react";
 import { EchoMindBrand } from "@/components/echomind-brand";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,13 @@ const NAV_ITEMS = [
 
 export type PortalTabId = (typeof NAV_ITEMS)[number]["id"];
 
-export function PortalShell({ activeTab, onTabChange, companyName, children, auxiliary }: {
+export function PortalShell({ activeTab, onTabChange, companyName, children, auxiliary, privacyHref = "/privacidade" }: {
   activeTab: PortalTabId;
   onTabChange: (tab: PortalTabId) => void;
   companyName: string;
   children: ReactNode;
   auxiliary?: ReactNode;
+  privacyHref?: string;
 }) {
   return (
     <div data-slot="portal-shell" className="min-h-svh bg-background pb-[calc(80px+env(safe-area-inset-bottom))] text-foreground lg:pb-0">
@@ -58,6 +60,7 @@ export function PortalShell({ activeTab, onTabChange, companyName, children, aux
           <div className="min-w-0">{children}</div>
           {activeTab === "chat" ? <aside data-slot="portal-auxiliary" aria-label="Informações da instituição" className="hidden min-w-0 xl:block">{auxiliary}</aside> : null}
         </main>
+        <footer className="px-4 pb-6 text-sm text-muted-foreground sm:px-6"><Link href={privacyHref} className="underline underline-offset-4">Privacidade e contato sobre dados pessoais</Link></footer>
       </div>
     </div>
   );
