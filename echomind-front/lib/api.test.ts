@@ -7,9 +7,14 @@ vi.mock("./supabase", () => ({
 }));
 
 import {
+  configApi,
   documentApi,
+  faqApi,
+  feedbackApi,
   publicPortalApi,
+  streamChat,
   streamPublicChat,
+  submitPublicUnanswered,
   type DocumentListResponse,
   type DocumentUploadMetadata,
   type KnowledgeDocument,
@@ -17,6 +22,27 @@ import {
 } from "./api";
 
 const API_URL = "http://localhost:8000";
+
+it("envia autenticação em todos os clientes legados que aceitam tenant", async () => {
+  localStorage.clear();
+  tokenStore.set("token-do-admin");
+  const fetchMock = vi.fn<typeof fetch>().mockImplementation(async () => jsonResponse({}));
+  vi.stubGlobal("fetch", fetchMock);
+  try {
+    await configApi.getPublic("tenant-a");
+    await faqApi.listChatbot("tenant-a");
+    await feedbackApi.save({ question: "Pergunta", answer: "Resposta", helpful: true, tenant_id: "tenant-a" });
+    fetchMock.mockResolvedValueOnce(new Response("Resposta"));
+    await streamChat("Pergunta", "tenant-a", vi.fn(), vi.fn(), vi.fn());
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+    for (const call of fetchMock.mock.calls) {
+      expect(requestHeaders(call).get("Authorization")).toBe("Bearer token-do-admin");
+    }
+  } finally {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  }
+});
 
 const document: KnowledgeDocument = {
   id: "document-1",
@@ -263,5 +289,14 @@ describe("publicPortalApi", () => {
     expect(tokens.join("")).toBe("Resposta pública");
     expect(onDone).toHaveBeenCalledOnce();
     expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("encaminha somente o token pelo slug público, sem autenticação ou texto livre", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    await submitPublicUnanswered("instituicao", "a".repeat(43));
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`${API_URL}/public/instituicao/unanswered`);
+    expect(JSON.parse(String(init?.body))).toEqual({ token: "a".repeat(43) });
+    expect(new Headers(init?.headers).has("Authorization")).toBe(false);
   });
 });

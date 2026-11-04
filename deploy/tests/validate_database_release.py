@@ -67,7 +67,7 @@ def main() -> None:
         sql("INSERT INTO campus_locations (id,tenant_id,name,x,y) "
             "VALUES ('release-sentinel','synthetic-tenant','Restore sentinel',50,50)")
         before = preflight()
-        assert before["current"] == ["0022"] and before["pending"] == ["0023"]
+        assert before["current"] == ["0022"] and before["pending"] == ["0023", "0024", "0025", "0026"]
         assert before["legacy_location_count"] == 1 and not before["ready"]
         print("PASS: read-only preflight detects pending destructive migration", flush=True)
 
@@ -76,9 +76,26 @@ def main() -> None:
         inside("pg_restore", "--list", "/tmp/before.dump")
         migrate("head")
         after = preflight()
-        assert after["ready"] and after["current"] == ["0023"]
+        assert after["ready"] and after["current"] == ["0026"]
         assert sql("SELECT to_regclass('public.campus_locations') IS NULL") == "t"
         print("PASS: migration reaches head and removes retired table", flush=True)
+
+        sql("INSERT INTO config (id,tenant_id,public_slug,company_name) "
+            "VALUES ('privacy-sentinel','synthetic-tenant','privacy-sentinel','Synthetic controller')")
+        assert sql("SELECT chat_retention_enabled=false AND chat_retention_days IS NULL FROM config WHERE id='privacy-sentinel'") == "t"
+        run([sys.executable, "-m", "alembic", "downgrade", "0023"], cwd=BACKEND, env=environment)
+        assert sql("SELECT company_name FROM config WHERE id='privacy-sentinel'") == "Synthetic controller"
+        migrate("head")
+        assert sql("SELECT chat_retention_enabled=false FROM config WHERE id='privacy-sentinel'") == "t"
+        print("PASS: privacy migration defaults to no deletion and round-trip preserves institution", flush=True)
+
+        sql("CREATE ROLE anon NOLOGIN; GRANT SELECT ON TABLE public.config TO anon")
+        exposed = preflight()
+        assert not exposed["ready"]
+        assert exposed["public_client_table_grants"] == [{"table": "config", "role": "anon"}]
+        sql("REVOKE SELECT ON TABLE public.config FROM anon")
+        assert preflight()["ready"]
+        print("PASS: release preflight rejects direct client grants, including after restore", flush=True)
 
         sql("CREATE TABLE release_vector_probe (embedding vector); "
             "ALTER TABLE release_vector_probe ENABLE ROW LEVEL SECURITY; "

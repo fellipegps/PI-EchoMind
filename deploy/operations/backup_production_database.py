@@ -120,11 +120,13 @@ def backup(project):
              'pgvector/pgvector:0.8.6-pg17'], env=environment)
         created = True
         for _ in range(40):
-            result = subprocess.run(['docker', 'exec', restore_name, 'pg_isready', '-q', '-U', 'postgres'],
+            result = subprocess.run(['docker', 'exec', restore_name, 'pg_isready', '-q', '-h', '127.0.0.1', '-U', 'postgres'],
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if result.returncode == 0:
                 break
             time.sleep(0.5)
+        else:
+            raise RuntimeError('Local restore database did not become ready.')
         result = subprocess.run(['docker', 'port', restore_name, '5432/tcp'], capture_output=True, check=True)
         port = int(result.stdout.decode().strip().rsplit(':', 1)[1])
         local_engine = create_engine(f'postgresql://postgres:{password}@127.0.0.1:{port}/echomind_restorecheck', poolclass=NullPool)

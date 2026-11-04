@@ -413,7 +413,8 @@ def test_rag_metrics_endpoint_is_authenticated_and_tenant_scoped(
         unauthenticated = client.get("/dashboard/rag-metrics")
     finally:
         app.dependency_overrides[dependency] = override
-    assert unauthenticated.status_code == 403
+    assert unauthenticated.status_code == 401
+    assert unauthenticated.headers["www-authenticate"] == "Bearer"
 
 
 def test_rag_metrics_endpoint_limits_period(client: TestClient) -> None:

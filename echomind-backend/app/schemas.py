@@ -10,7 +10,7 @@ from typing import Literal, Optional
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -24,6 +24,12 @@ class ChatRequest(BaseModel):
 
 class PublicChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000, examples=["Onde fica a secretaria?"])
+
+    model_config = {"extra": "forbid"}
+
+
+class PublicUnansweredRequest(BaseModel):
+    token: str = Field(..., min_length=43, max_length=43, pattern=r"^[A-Za-z0-9_-]{43}$")
 
     model_config = {"extra": "forbid"}
 
@@ -270,7 +276,23 @@ class EventResponse(BaseModel):
 #  CONFIGURAÇÃO
 # ══════════════════════════════════════════════════════════════════════════════
 
-class ConfigUpdate(BaseModel):
+class PrivacyFields(BaseModel):
+    privacy_controller: Optional[str] = Field(None, min_length=2, max_length=200)
+    privacy_email: Optional[EmailStr] = Field(None, max_length=320)
+    privacy_purpose: Optional[str] = Field(None, min_length=10, max_length=1000)
+    privacy_legal_basis: Optional[str] = Field(None, min_length=5, max_length=1000)
+    chat_retention_days: Optional[int] = Field(None, ge=1, le=3650, strict=True)
+    chat_retention_enabled: bool = False
+
+    @field_validator("privacy_controller", "privacy_email", "privacy_purpose", "privacy_legal_basis", mode="before")
+    @classmethod
+    def normalize_privacy_text(cls, value):
+        if isinstance(value, str):
+            return value.strip() or None
+        return value
+
+
+class ConfigUpdate(PrivacyFields):
     company_name: Optional[str]       = Field(None, min_length=2, max_length=200)
     description: Optional[str]        = Field(None, max_length=5000)
     tone_of_voice: Optional[str]      = None
@@ -281,7 +303,7 @@ class ConfigUpdate(BaseModel):
     business_hours: Optional[str]     = Field(None, max_length=200)
 
 
-class ConfigResponse(BaseModel):
+class ConfigResponse(PrivacyFields):
     id: str
     public_slug: str
     company_name: str
@@ -293,6 +315,7 @@ class ConfigResponse(BaseModel):
     address: Optional[str]
     business_hours: Optional[str]
     updated_at: Optional[datetime]
+    privacy_ready: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -312,7 +335,7 @@ class PublicEventResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class PublicInstitutionResponse(BaseModel):
+class PublicInstitutionResponse(PrivacyFields):
     public_slug: str
     company_name: str
     description: Optional[str]
@@ -320,6 +343,7 @@ class PublicInstitutionResponse(BaseModel):
     phone: Optional[str]
     address: Optional[str]
     business_hours: Optional[str]
+    privacy_ready: bool = False
 
     model_config = {"from_attributes": True}
 

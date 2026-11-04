@@ -11,6 +11,8 @@
 !scripts/
 !scripts/reindex_all.py
 !scripts/check_database.py
+!scripts/purge_chat_data.py
+!scripts/manage_chat_data.py
 
 # These exclusions also apply inside the permitted directories.
 **/.env

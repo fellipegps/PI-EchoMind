@@ -136,6 +136,43 @@ class Host:
             state["backend"], "python", "scripts/check_database.py",
         ], env=self.environment, timeout=120)
 
+    def schema_head(self, state):
+        # Inspect migration metadata without loading runtime env or connecting to DB.
+        code = (
+            "import json; from alembic.config import Config; "
+            "from alembic.script import ScriptDirectory; "
+            "print(json.dumps(ScriptDirectory.from_config(Config('alembic.ini')).get_heads()))"
+        )
+        output = command([
+            "docker", "run", "--rm", "--pull", "never", "--network", "none", "--read-only",
+            "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true", "--memory", "128m",
+            "--memory-swap", "128m", "--tmpfs", "/tmp:rw,noexec,nosuid,size=16m",
+            state["backend"], "python", "-c", code,
+        ], env=self.environment, timeout=120)
+        try:
+            heads = json.loads(output)
+            if (not isinstance(heads, list) or len(heads) != 1 or not isinstance(heads[0], str)
+                    or not re.fullmatch(r"[A-Za-z0-9_]{1,64}", heads[0])):
+                raise ValueError
+            return heads[0]
+        except (TypeError, ValueError):
+            raise ReleaseError("Image migration metadata is invalid or has multiple heads.") from None
+
+    def recovery_validator(self, previous, candidate):
+        if previous.get("backend") and previous["backend"] == candidate.get("backend"):
+            return None
+        previous_head, candidate_head = self.schema_head(previous), self.schema_head(candidate)
+        if previous_head == candidate_head:
+            return None
+        # Reviewed only for 0024-0026: nullable additions and backend-only grants.
+        # Never treat an arbitrary newer schema as compatible with an old runtime.
+        if (previous_head, candidate_head) != ("0023", "0026"):
+            raise ReleaseError("Database revision change has no approved rollback compatibility.")
+        repository = os.environ.get("BACKEND_REPOSITORY", "")
+        if not repository or not re.fullmatch(re.escape(repository) + r"@sha256:[0-9a-f]{64}", candidate.get("backend", "")):
+            raise ReleaseError("Rollback database validator is outside the approved immutable repository.")
+        return candidate
+
     def drain(self, state):
         self.documents(state, "drain", "--timeout", "300", timeout=620)
 
@@ -174,9 +211,14 @@ class Host:
         self.compose(state, "up", "--detach", "--no-build", "--pull", "never", "--wait",
                      "--wait-timeout", "180", timeout=900)
 
-    def healthy(self, state):
+    def healthy(self, state, *, database_validator=None):
         # Compose health is liveness; also require real DB readiness and public trusted TLS.
-        self.compose(state, "exec", "-T", "backend", "python", "scripts/check_database.py", timeout=120)
+        if database_validator is None:
+            self.compose(state, "exec", "-T", "backend", "python", "scripts/check_database.py", timeout=120)
+        else:
+            # The old checker cannot resolve 0026. Its reviewed successor must
+            # still enforce exact revision, RLS, grants, required tables and vectors.
+            self.preflight(database_validator)
         url = f"https://{state['settings']['API_DOMAIN']}/health"
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         for attempt in range(12):
@@ -201,6 +243,7 @@ def transact(host, new: dict, current: Path):
     if pending.exists():
         raise ReleaseError("Interrupted release detected; reconcile pending.json privately before retrying.")
     host.preflight(new)
+    validator = host.recovery_validator(previous, new) if previous else None
     atomic_json(pending, {"previous": previous, "candidate": new})
     attempted = False
     try:
@@ -228,7 +271,10 @@ def transact(host, new: dict, current: Path):
                     # Use the known previous utility even if candidate Python code is broken.
                     host.drain(previous)
                     host.up(previous)
-                    host.healthy(previous)
+                    if validator is None:
+                        host.healthy(previous)
+                    else:
+                        host.healthy(previous, database_validator=validator)
                 host.resume(previous)
             elif attempted:
                 host.stop(new)
@@ -246,12 +292,19 @@ def transact(host, new: dict, current: Path):
 def recover_previous(host, current: Path):
     """Explicit operator recovery after a kill/reboot; preserve the marker if any check fails."""
     pending = current.with_name("pending.json")
-    previous = json.loads(pending.read_text()).get("previous")
+    saved = json.loads(pending.read_text())
+    previous = saved.get("previous")
     if previous is None:
         raise ReleaseError("Interrupted initial release has no previous version; inspect/stop its candidate manually.")
+    # Old pending files without a candidate retain the original strict checker;
+    # they cannot opt into the compatibility exception.
+    validator = host.recovery_validator(previous, saved["candidate"]) if saved.get("candidate") else None
     host.drain(previous)
     host.up(previous)
-    host.healthy(previous)
+    if validator is None:
+        host.healthy(previous)
+    else:
+        host.healthy(previous, database_validator=validator)
     host.resume(previous)
     atomic_json(current, previous)
     pending.unlink()
@@ -273,8 +326,8 @@ def rehearse_rollback(host, new: dict, current: Path):
         def __getattr__(self, name):
             return getattr(host, name)
 
-        def healthy(self, state):
-            host.healthy(state)
+        def healthy(self, state, **kwargs):
+            host.healthy(state, **kwargs)
             if state == new:
                 self.candidate_verified = True
                 raise ReleaseError("Controlled rollback rehearsal failure.")

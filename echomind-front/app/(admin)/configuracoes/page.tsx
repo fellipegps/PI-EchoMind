@@ -14,10 +14,12 @@ import { PageContainer } from "@/components/page-container";
 import { configApi } from "@/lib/api";
 import type { Config } from "@/lib/api";
 import { PublicPortalCard } from "./public-portal-card";
+import { PrivacySettingsCard } from "./privacy-settings-card";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [privacySaving, setPrivacySaving] = useState(false);
 
   const [form, setForm] = useState<Partial<Config>>({
     company_name: "",
@@ -50,13 +52,47 @@ export default function SettingsPage() {
         address: form.address,
         business_hours: form.business_hours,
       });
-      setForm(updated);
+      // Saving institution details must not publish or erase the privacy draft.
+      setForm(current => {
+        return {
+          ...updated,
+          privacy_controller: current.privacy_controller === undefined ? updated.privacy_controller : current.privacy_controller,
+          privacy_email: current.privacy_email === undefined ? updated.privacy_email : current.privacy_email,
+          privacy_purpose: current.privacy_purpose === undefined ? updated.privacy_purpose : current.privacy_purpose,
+          privacy_legal_basis: current.privacy_legal_basis === undefined ? updated.privacy_legal_basis : current.privacy_legal_basis,
+          chat_retention_days: current.chat_retention_days === undefined ? updated.chat_retention_days : current.chat_retention_days,
+          chat_retention_enabled: current.chat_retention_enabled === undefined ? updated.chat_retention_enabled : current.chat_retention_enabled,
+        };
+      });
       toast.success("Configurações atualizadas com sucesso!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao salvar configurações.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSavePrivacy = async () => {
+    setPrivacySaving(true);
+    try {
+      const updated = await configApi.save({
+        privacy_controller: form.privacy_controller?.trim() || null,
+        privacy_email: form.privacy_email?.trim() || null,
+        privacy_purpose: form.privacy_purpose?.trim() || null,
+        privacy_legal_basis: form.privacy_legal_basis?.trim() || null,
+        chat_retention_days: form.chat_retention_days ?? null,
+        chat_retention_enabled: form.chat_retention_enabled ?? false,
+      });
+      setForm(current => ({ ...current,
+        privacy_controller: updated.privacy_controller, privacy_email: updated.privacy_email,
+        privacy_purpose: updated.privacy_purpose, privacy_legal_basis: updated.privacy_legal_basis,
+        chat_retention_days: updated.chat_retention_days, chat_retention_enabled: updated.chat_retention_enabled,
+        privacy_ready: updated.privacy_ready,
+      }));
+      toast.success("Informações de privacidade atualizadas.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível salvar a privacidade.");
+    } finally { setPrivacySaving(false); }
   };
 
   if (loading) {
@@ -92,7 +128,7 @@ export default function SettingsPage() {
                 id="settings-company_name"
                 value={form.company_name ?? ""}
                 onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-                placeholder="Ex: UniEVANGÉLICA"
+                placeholder="Nome da instituição"
                 className="bg-background"
               />
             </div>
@@ -159,13 +195,14 @@ export default function SettingsPage() {
             </fieldset>
           </CardContent>
           <CardFooter className="border-t bg-muted/20 px-4 py-4 [.border-t]:pt-4 md:px-6">
-            <Button onClick={handleSave} disabled={saving} aria-busy={saving} className="w-full sm:w-auto sm:min-w-40">
+            <Button onClick={handleSave} disabled={saving || privacySaving} aria-busy={saving} className="w-full sm:w-auto sm:min-w-40">
               {saving && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
               {saving ? "Salvando…" : "Salvar Alterações"}
             </Button>
           </CardFooter>
         </Card>
 
+        <PrivacySettingsCard value={form} onChange={update => setForm(current => ({ ...current, ...update }))} onSave={() => void handleSavePrivacy()} saving={privacySaving || saving} />
         <PublicPortalCard publicSlug={form.public_slug ?? ""} />
       </div>
     </PageContainer>

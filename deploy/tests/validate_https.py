@@ -169,7 +169,7 @@ def main() -> None:
             print("PASS: verified TLS, HTTP redirect, host restriction, isolation and response headers", flush=True)
 
             for origin, expected_status in ((ORIGIN, 200), ("https://blocked.example.test", 400)):
-                status, headers, _ = request("/chat", method="OPTIONS", headers={
+                status, headers, _ = request("/public/synthetic/chat", method="OPTIONS", headers={
                     "Origin": origin, "Access-Control-Request-Method": "POST", "Access-Control-Request-Headers": "Content-Type"})
                 assert status == expected_status
                 assert headers.get("Access-Control-Allow-Origin") == (ORIGIN if expected_status == 200 else None)
@@ -179,7 +179,7 @@ def main() -> None:
                 connection = LocalHTTPSConnection("localhost", https_port, context=context, timeout=10)
                 connection.connect()
                 started = time.monotonic()
-                connection.request("POST", "/chat", body=json.dumps({"message": message, "tenant_id": "synthetic"}),
+                connection.request("POST", "/public/synthetic/chat", body=json.dumps({"message": message}),
                                    headers={"Content-Type": "application/json", "Origin": ORIGIN})
                 response = connection.getresponse()
                 assert response.status == 200 and response.readline() == b"first\n"

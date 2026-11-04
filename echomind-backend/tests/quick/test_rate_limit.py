@@ -45,7 +45,7 @@ def _config(
     )
 
 
-def _chat(client: TestClient, tenant_id: str = "tenant-do-payload"):
+def _chat(client: TestClient, tenant_id: str = "test-admin"):
     return client.post(
         "/chat",
         json={"message": "Qual e o horario?", "tenant_id": tenant_id},
@@ -248,20 +248,26 @@ def test_multiple_instances_fail_before_startup(
         load_rate_limit_config()
 
 
-def test_chat_rejects_above_limit_without_using_payload_tenant_as_key(
+def test_public_chat_rejects_above_limit_even_when_institution_changes(
     client: TestClient,
     fake_rag_engine,
     monkeypatch: pytest.MonkeyPatch,
+    db,
+    privacy_config_data,
 ) -> None:
     from app import main, rate_limit
+    from app.database import Config
 
     monkeypatch.setattr(rate_limit, "RATE_LIMIT_CONFIG", _config(chat_requests=2))
     rag_factory = MagicMock(return_value=fake_rag_engine)
     monkeypatch.setattr(main, "get_rag_engine", rag_factory)
 
-    first = _chat(client, tenant_id="tenant-a-fornecido-pelo-cliente")
-    second = _chat(client, tenant_id="tenant-b-fornecido-pelo-cliente")
-    rejected = _chat(client, tenant_id="tenant-c-fornecido-pelo-cliente")
+    for name in ("a", "b", "c"):
+        db.add(Config(tenant_id=f"tenant-{name}", public_slug=f"institution-{name}", company_name=name, **privacy_config_data))
+    db.flush()
+    first = client.post("/public/institution-a/chat", json={"message": "Onde fica a secretaria?"})
+    second = client.post("/public/institution-b/chat", json={"message": "Onde fica a secretaria?"})
+    rejected = client.post("/public/institution-c/chat", json={"message": "Onde fica a secretaria?"})
 
     assert first.status_code == 200
     assert second.status_code == 200

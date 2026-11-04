@@ -274,6 +274,10 @@ class Config(Base):
             "length(public_slug) BETWEEN 3 AND 100",
             name="ck_config_public_slug_length",
         ),
+        CheckConstraint(
+            "chat_retention_days IS NULL OR chat_retention_days BETWEEN 1 AND 3650",
+            name="ck_config_chat_retention_days",
+        ),
     )
 
     id              = Column(String, primary_key=True, default=new_uuid)
@@ -287,7 +291,21 @@ class Config(Base):
     phone           = Column(String, nullable=True)
     address         = Column(Text, nullable=True)
     business_hours  = Column(String, nullable=True)
+    privacy_controller = Column(String(200), nullable=True)
+    privacy_email = Column(String(320), nullable=True)
+    privacy_purpose = Column(String(1000), nullable=True)
+    privacy_legal_basis = Column(String(1000), nullable=True)
+    chat_retention_days = Column(Integer, nullable=True)
+    chat_retention_enabled = Column(Boolean, nullable=False, default=False, server_default="false")
     updated_at      = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+    @property
+    def privacy_ready(self) -> bool:
+        return bool(
+            self.privacy_controller and self.privacy_email and self.privacy_purpose
+            and self.privacy_legal_basis and self.chat_retention_days
+            and self.chat_retention_enabled
+        )
 
 
 class Interaction(Base):
@@ -304,6 +322,12 @@ class Interaction(Base):
     was_answered = Column(Boolean, default=True, nullable=False)
     feedback_helpful = Column(Boolean, nullable=True)
     asked_at    = Column(DateTime, default=utc_now, nullable=False)
+    unanswered_token_hash = Column(String(64), nullable=True)
+    unanswered_submitted_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index("ix_interactions_unanswered_token_hash", "unanswered_token_hash", unique=True),
+    )
 
 
 class UnansweredQuestion(Base):

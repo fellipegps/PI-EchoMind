@@ -17,6 +17,9 @@ SCHEMA_VERSION = 1
 _IDENTIFIER_PATTERN = re.compile(r"^[a-z][a-z0-9_.-]{0,63}$")
 _KNOWN_SOURCE_TYPES = {"faq", "event", "document_chunk", "document_parent"}
 _KNOWN_COUNT_FIELDS = {
+    "deleted_interactions",
+    "deleted_unanswered",
+    "deleted_suppressions",
     "approved_candidates",
     "child_candidates",
     "current_candidates",

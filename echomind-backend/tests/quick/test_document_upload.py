@@ -58,7 +58,8 @@ def test_upload_requires_authentication(client: TestClient, quick_test_context) 
         lambda: _post_upload(client),
     )
 
-    assert response.status_code == 403
+    assert response.status_code == 401
+    assert response.headers["www-authenticate"] == "Bearer"
 
 
 @pytest.mark.parametrize(

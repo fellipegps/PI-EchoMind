@@ -1,13 +1,17 @@
 import type { ComponentProps, FormEvent, RefObject } from "react";
 import { ChevronRight, Loader2, Send, Sparkles } from "lucide-react";
 import Markdown from "react-markdown";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { PublicEvent, PublicFaq } from "@/lib/api";
 import { EventSummary } from "./public-events";
 
-export type ChatMessage = { id: number; role: "assistant" | "user"; content: string };
+export type ChatMessage = {
+  id: number; role: "assistant" | "user"; content: string;
+  handoff?: { token: string; status: "offered" | "sending" | "sent" | "declined"; error?: string };
+};
 
 const markdownComponents = {
   pre: ({ children }: ComponentProps<"pre">) => (
@@ -42,7 +46,7 @@ function FaqSuggestions({ faqs, disabled, onQuestion, auxiliary = false }: {
 }
 
 export function PublicChat({ messages, scrollRef, input, onInput, onSubmit, onQuestion, faqs,
-  sending, waitingForFirstToken, blocked, portalLoading, portalError, chatError }: {
+  sending, waitingForFirstToken, blocked, portalLoading, portalError, chatError, onHandoff, onDeclineHandoff, privacyHref = "/privacidade" }: {
   messages: ChatMessage[];
   scrollRef: RefObject<HTMLDivElement | null>;
   input: string;
@@ -56,6 +60,9 @@ export function PublicChat({ messages, scrollRef, input, onInput, onSubmit, onQu
   portalLoading: boolean;
   portalError: string;
   chatError: string;
+  onHandoff: (messageId: number) => void;
+  onDeclineHandoff: (messageId: number) => void;
+  privacyHref?: string;
 }) {
   return (
     <div className="min-w-0 rounded-xl border border-border bg-card text-card-foreground shadow-sm">
@@ -77,6 +84,19 @@ export function PublicChat({ messages, scrollRef, input, onInput, onSubmit, onQu
                   <Markdown components={markdownComponents} skipHtml allowedElements={["p", "strong", "em", "a", "br", "ul", "ol", "li", "code", "pre", "blockquote"]} unwrapDisallowed>{message.content}</Markdown>
                 </div>
               ) : <p className="whitespace-pre-wrap text-base leading-6">{message.content}</p>}
+              {message.handoff && message.handoff.status !== "declined" ? (
+                <div className="space-y-3 border-t border-border pt-3">
+                  {message.handoff.status === "sent" ? <p role="status" className="text-sm">Pergunta encaminhada para análise da equipe.</p> : <>
+                    <p className="text-sm">Não encontrei essa informação. Quer encaminhar sua pergunta para análise da equipe?</p>
+                    <p className="text-sm text-muted-foreground">O envio é opcional e não garante uma resposta posterior. A conversa continua no histórico pelo prazo informado no aviso de privacidade.</p>
+                    {message.handoff.error ? <p role="alert" className="text-sm text-destructive">{message.handoff.error}</p> : null}
+                    <div role="group" aria-label="Encaminhamento da pergunta" className="flex flex-wrap gap-2">
+                      <Button type="button" disabled={message.handoff.status === "sending"} onClick={() => onHandoff(message.id)}>{message.handoff.status === "sending" ? "Enviando pergunta…" : "Enviar pergunta"}</Button>
+                      <Button type="button" variant="outline" disabled={message.handoff.status === "sending"} onClick={() => onDeclineHandoff(message.id)}>Agora não</Button>
+                    </div>
+                  </>}
+                </div>
+              ) : null}
             </div>
           </article>
         ))}
@@ -85,9 +105,15 @@ export function PublicChat({ messages, scrollRef, input, onInput, onSubmit, onQu
 
       {faqs.length > 0 ? <div className="border-t border-border p-4 sm:p-6 xl:hidden"><FaqSuggestions faqs={faqs} disabled={blocked} onQuestion={onQuestion} /></div> : null}
       {chatError ? <p role="alert" className="mx-4 my-4 rounded-lg border border-destructive bg-card p-4 text-sm leading-5 text-destructive [overflow-wrap:anywhere]">{chatError}</p> : null}
+      <p id="chat-privacy" className="border-t border-border px-4 py-3 text-sm leading-5 text-muted-foreground sm:px-6">
+        Você conversa com uma IA. As mensagens são armazenadas e podem ser enviadas à Groq para gerar respostas.
+        {" "}Um filtro remove alguns identificadores comuns, mas pode deixar passar dados pessoais.
+        Não envie CPF, senhas, dados de saúde ou outros dados pessoais. Respostas podem conter erros.{" "}
+        <Link href={privacyHref} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">Saiba como seus dados são usados</Link>.
+      </p>
       <form onSubmit={onSubmit} aria-busy={sending} className="flex min-w-0 items-center gap-3 border-t border-border p-4 sm:p-6">
         <label className="sr-only" htmlFor="portal-question">Digite sua pergunta</label>
-        <Input id="portal-question" value={input} onChange={(event) => onInput(event.target.value)} placeholder="Digite sua dúvida..." disabled={blocked} autoComplete="off" className="md:text-base md:leading-6" />
+        <Input id="portal-question" aria-describedby="chat-privacy" maxLength={2000} value={input} onChange={(event) => onInput(event.target.value)} placeholder="Digite sua dúvida..." disabled={blocked} autoComplete="off" className="md:text-base md:leading-6" />
         <Button type="submit" size="icon" aria-label="Enviar pergunta" disabled={blocked || !input.trim()}>
           {sending ? <span className="animate-spin motion-reduce:animate-none"><Loader2 aria-hidden="true" className="size-5" /></span> : <Send aria-hidden="true" className="size-5" />}
         </Button>

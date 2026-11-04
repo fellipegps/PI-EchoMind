@@ -24,14 +24,24 @@ SPEC.loader.exec_module(infra)
 
 
 class FakeHost:
-    def __init__(self, failures=()):
+    def __init__(self, failures=(), heads=None):
         self.events = []
         self.failures = set(failures)
+        self.heads = heads or {"old": "0026", "new": "0026"}
+        self.validators = []
+
+    def schema_head(self, state):
+        return self.heads[state["revision"]]
+
+    def recovery_validator(self, previous, candidate):
+        return Host.recovery_validator(self, previous, candidate)
 
     def __getattr__(self, action):
-        def call(state=None):
+        def call(state=None, *, database_validator=None):
             event = (action, (state or {}).get("revision"))
             self.events.append(event)
+            if action == "healthy":
+                self.validators.append(((state or {}).get("revision"), database_validator))
             if event in self.failures:
                 self.failures.remove(event)
                 raise ReleaseError("Synthetic failure.")
@@ -124,6 +134,110 @@ class ReleaseTests(unittest.TestCase):
             recover_previous(host, self.current)
         self.assertTrue(pending.exists())
         self.assertNotIn(("resume", "old"), host.events)
+
+    def test_reviewed_0023_to_0026_rollback_uses_new_checker_for_old_runtime(self):
+        self.new["backend"] = "approved@sha256:" + "a" * 64
+        host = FakeHost({("healthy", "new")}, heads={"old": "0023", "new": "0026"})
+        with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):
+            with self.assertRaisesRegex(ReleaseError, "previous version resumed"):
+                transact(host, self.new, self.current)
+        self.assertIn(("old", self.new), host.validators)
+        self.assertEqual(json.loads(self.current.read_text()), self.old)
+        self.assertFalse(self.current.with_name("pending.json").exists())
+
+    def test_unreviewed_revision_change_stops_before_drain_or_replacement(self):
+        for heads in ({"old": "0023", "new": "0027"}, {"old": "0022", "new": "0026"},
+                      {"old": "0026", "new": "0023"}):
+            with self.subTest(heads=heads):
+                host = FakeHost(heads=heads)
+                with self.assertRaisesRegex(ReleaseError, "approved rollback compatibility"):
+                    transact(host, self.new, self.current)
+                self.assertEqual(host.events, [("preflight", "new")])
+                self.assertFalse(self.current.with_name("pending.json").exists())
+
+    def test_reviewed_rollback_never_passes_secrets_to_unapproved_checker_image(self):
+        for image in ("outside@sha256:" + "a" * 64, "approved:latest"):
+            with self.subTest(image=image):
+                self.new["backend"] = image
+                host = FakeHost(heads={"old": "0023", "new": "0026"})
+                with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):
+                    with self.assertRaisesRegex(ReleaseError, "immutable repository"):
+                        transact(host, self.new, self.current)
+                self.assertNotIn(("drain", "old"), host.events)
+
+    def test_pending_recovery_uses_same_reviewed_schema_policy(self):
+        self.new["backend"] = "approved@sha256:" + "a" * 64
+        pending = self.current.with_name("pending.json")
+        pending.write_text(json.dumps({"previous": self.old, "candidate": self.new}))
+        host = FakeHost(heads={"old": "0023", "new": "0026"})
+        with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):
+            recover_previous(host, self.current)
+        self.assertIn(("old", self.new), host.validators)
+        self.assertFalse(pending.exists())
+        pending.write_text(json.dumps({"previous": self.old, "candidate": self.new}))
+        unknown = FakeHost(heads={"old": "0023", "new": "0027"})
+        with self.assertRaises(ReleaseError):
+            recover_previous(unknown, self.current)
+        self.assertEqual(unknown.events, [])
+        self.assertTrue(pending.exists())
+
+    def test_failed_checker_or_https_in_reviewed_recovery_preserves_pending(self):
+        self.new["backend"] = "approved@sha256:" + "a" * 64
+        host = FakeHost({("healthy", "new"), ("healthy", "old")},
+                        heads={"old": "0023", "new": "0026"})
+        with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):
+            with self.assertRaisesRegex(ReleaseError, "Recovery failed"):
+                transact(host, self.new, self.current)
+        self.assertTrue(self.current.with_name("pending.json").exists())
+        self.assertNotIn(("resume", "old"), host.events)
+
+    def test_image_heads_are_inspected_offline_without_runtime_environment(self):
+        with patch("rollout.command", return_value=b'["0026"]') as call:
+            self.assertEqual(Host({}).schema_head({"backend": "synthetic"}), "0026")
+        args = call.call_args.args[0]
+        self.assertEqual(args[args.index("--network") + 1], "none")
+        self.assertEqual(args[args.index("--pull") + 1], "never")
+        self.assertNotIn("--env-file", args)
+        self.assertNotIn("--mount", args)
+        for invalid in (b'[]', b'["0023", "0026"]', b'null', b'private diagnostic'):
+            with patch("rollout.command", return_value=invalid):
+                with self.assertRaises(ReleaseError):
+                    Host({}).schema_head({"backend": "synthetic"})
+
+    def test_reviewed_checker_cannot_replace_runtime_https_verification(self):
+        class ObservedHost(Host):
+            def __init__(self):
+                super().__init__({})
+                self.checked = []
+
+            def preflight(self, state):
+                self.checked.append(state)
+
+            def compose(self, *args, **kwargs):
+                raise AssertionError("The old exact-head checker must not run.")
+
+        host = ObservedHost()
+        old = self.old | {"settings": {"API_DOMAIN": "old-runtime.example.test"}}
+        response = io.BytesIO(b'{"status":"ok","service":"EchoMind API"}')
+        response.status, response.url = 200, "https://old-runtime.example.test/health"
+        with patch("rollout.urllib.request.build_opener") as opener:
+            opener.return_value.open.return_value = response
+            host.healthy(old, database_validator=self.new)
+            opener.return_value.open.assert_called_once_with(response.url, timeout=10)
+        self.assertEqual(host.checked, [self.new])
+        # A valid database report alone cannot declare the recovered runtime healthy.
+        with patch("rollout.urllib.request.build_opener") as opener, patch("rollout.time.sleep"):
+            opener.return_value.open.side_effect = OSError("synthetic TLS failure")
+            with self.assertRaisesRegex(ReleaseError, "HTTPS health check failed"):
+                host.healthy(old, database_validator=self.new)
+
+    def test_reviewed_checker_reuses_exact_preflight_and_preserves_grant_failure(self):
+        self.new["backend"] = "synthetic"
+        with patch("rollout.command", side_effect=ReleaseError("Synthetic rejected grants")), \
+                patch.object(Host, "compose"), patch("rollout.urllib.request.build_opener") as opener:
+            with self.assertRaisesRegex(ReleaseError, "rejected grants"):
+                Host({}).healthy(self.old, database_validator=self.new)
+        opener.assert_not_called()
 
     def test_rehearsal_proves_candidate_then_recovers_verified_previous(self):
         host = FakeHost()

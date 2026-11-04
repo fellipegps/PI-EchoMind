@@ -63,6 +63,17 @@ def check(database_url: str) -> dict:
             )).all()
             unprotected = sorted(row[0] for row in tables if not row[1])
             missing = sorted(REQUIRED_TABLES - {row[0] for row in tables})
+            client_grants = [
+                {"table": row[0], "role": row[1]}
+                for row in connection.execute(text(
+                    "SELECT c.relname, r.rolname FROM pg_class c "
+                    "JOIN pg_namespace n ON n.oid=c.relnamespace CROSS JOIN pg_roles r "
+                    "WHERE n.nspname='public' AND c.relkind IN ('r','p') "
+                    "AND r.rolname IN ('anon','authenticated') "
+                    "AND has_table_privilege(r.oid,c.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') "
+                    "ORDER BY c.relname,r.rolname"
+                )).all()
+            ]
             dimensions = connection.execute(text(
                 "SELECT c.relname, a.attname, a.atttypmod FROM pg_attribute a "
                 "JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace "
@@ -89,10 +100,11 @@ def check(database_url: str) -> dict:
                 "head": head, "current": current, "pending": pending,
                 "postgres_major": major, "vector_version": vector,
                 "public_tables_without_rls": unprotected,
+                "public_client_table_grants": client_grants,
                 "missing_tables": missing, "vector_columns_not_384": wrong_dimensions,
                 "legacy_location_count": legacy_count,
                 "ready": current == [head] and vector is not None and not unprotected and
-                         not missing and not wrong_dimensions and major == 17,
+                         not missing and not wrong_dimensions and not client_grants and major == 17,
             }
     finally:
         engine.dispose()

@@ -9,6 +9,7 @@
 pgpass
 pg_service.conf
 .database-backups/
+.privacy-requests/
 .publication/
 deploy/aws/parameters.json
 deploy/aws/parameters.local.json
@@ -24,6 +25,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+.security-checks/
 .coverage
 coverage.xml
 htmlcov/
@@ -47,3 +49,6 @@ pnpm-debug.log*
 # Arquivos do sistema operacional
 .DS_Store
 Thumbs.db
+
+
+docs/

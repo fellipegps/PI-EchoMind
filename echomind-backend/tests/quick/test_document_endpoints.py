@@ -94,7 +94,8 @@ def test_documents_requires_authentication(client: TestClient, quick_test_contex
         lambda: client.get("/documents"),
     )
 
-    assert response.status_code == 403
+    assert response.status_code == 401
+    assert response.headers["www-authenticate"] == "Bearer"
 
 
 def test_documents_rejects_invalid_authentication(

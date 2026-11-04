@@ -348,6 +348,7 @@ export function DocumentTab() {
         <CardHeader className="gap-2">
           <CardTitle><h2 className="text-lg font-semibold">Adicionar documento</h2></CardTitle>
           <p className="text-sm text-muted-foreground">Selecione um documento para alimentar a base de conhecimento do agente.</p>
+          <p className="text-sm text-muted-foreground">O conteúdo pode aparecer nas respostas do chat público e ser enviado à Groq. Envie somente documentos autorizados para divulgação, sem dados pessoais ou informações sigilosas.</p>
         </CardHeader>
         <CardContent className="min-w-0 space-y-6">
           <div

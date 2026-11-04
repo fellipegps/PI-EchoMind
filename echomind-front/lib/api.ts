@@ -5,6 +5,8 @@
  */
 
 import { supabase } from "./supabase";
+import { readChatStream, type PublicChatCompletion } from "./chat-stream";
+export type { PublicChatCompletion } from "./chat-stream";
 
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 const BASE_URL = configuredApiUrl
@@ -73,7 +75,17 @@ export interface EventCourse {
   name: string;
 }
 
-export interface Config {
+export interface PrivacySettings {
+  privacy_controller?: string | null;
+  privacy_email?: string | null;
+  privacy_purpose?: string | null;
+  privacy_legal_basis?: string | null;
+  chat_retention_days?: number | null;
+  chat_retention_enabled?: boolean;
+  privacy_ready?: boolean;
+}
+
+export interface Config extends PrivacySettings {
   id: string;
   public_slug: string;
   company_name: string;
@@ -87,7 +99,7 @@ export interface Config {
   updated_at: string | null;
 }
 
-export interface PublicInstitution {
+export interface PublicInstitution extends PrivacySettings {
   public_slug: string;
   company_name: string;
   description: string | null;
@@ -394,8 +406,10 @@ async function streamResponse(
   path: string,
   payload: Record<string, string>,
   onToken: (token: string) => void,
-  onDone: () => void,
-  onError: (err: Error) => void
+  onDone: (completion?: PublicChatCompletion) => void,
+  onError: (err: Error) => void,
+  authenticated = false,
+  events = false,
 ): Promise<void> {
   let url: string;
   try {
@@ -409,7 +423,11 @@ async function streamResponse(
   try {
     res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(events ? { Accept: "text/event-stream" } : {}),
+        ...(authenticated && tokenStore.get() ? { Authorization: `Bearer ${tokenStore.get()}` } : {}),
+      },
       body: JSON.stringify(payload),
     });
   } catch {
@@ -427,28 +445,8 @@ async function streamResponse(
 
   // 3. Lê o stream token a token
   try {
-    const reader = res.body!.getReader();
-    const decoder = new TextDecoder();
-    let receivedAny = false;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const token = decoder.decode(value, { stream: true });
-      if (token) {
-        receivedAny = true;
-        onToken(token);
-      }
-    }
-
-    // Stream encerrou sem nenhum token = erro silencioso no backend
-    // Neste caso chama onError para o frontend mostrar algo adequado
-    if (!receivedAny) {
-      onError(new Error("A IA não retornou resposta. Verifique a conexão com o servidor."));
-      return;
-    }
-
-    onDone();
+    const completion = await readChatStream(res, onToken, events);
+    onDone(completion);
   } catch {
     onError(new Error("Conexão interrompida durante a resposta. Tente novamente."));
   }
@@ -466,7 +464,8 @@ export function streamChat(
     { message, tenant_id: tenantId },
     onToken,
     onDone,
-    onError
+    onError,
+    true
   );
 }
 
@@ -474,7 +473,7 @@ export function streamPublicChat(
   message: string,
   publicSlug: string,
   onToken: (token: string) => void,
-  onDone: () => void,
+  onDone: (completion?: PublicChatCompletion) => void,
   onError: (err: Error) => void
 ): Promise<void> {
   return streamResponse(
@@ -482,8 +481,16 @@ export function streamPublicChat(
     { message },
     onToken,
     onDone,
-    onError
+    onError,
+    false,
+    true,
   );
+}
+
+export function submitPublicUnanswered(publicSlug: string, token: string): Promise<void> {
+  return publicRequest<void>(`/public/${encodeURIComponent(publicSlug)}/unanswered`, {
+    method: "POST", body: JSON.stringify({ token }),
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -494,7 +501,7 @@ export const faqApi = {
   list: () => request<Faq[]>("/faqs"),
 
   listChatbot: (tenantId: string) =>
-    publicRequest<Faq[]>(`/faqs/chatbot?tenant_id=${encodeURIComponent(tenantId)}`),
+    request<Faq[]>(`/faqs/chatbot?tenant_id=${encodeURIComponent(tenantId)}`),
 
   create: (data: { question: string; answer: string; show_in_chatbot?: boolean }) =>
     request<Faq>("/faqs", { method: "POST", body: JSON.stringify(data) }),
@@ -581,7 +588,7 @@ export const configApi = {
   get: () => request<Config>("/config"),
 
   getPublic: (tenantId: string) =>
-    publicRequest<Config>(`/config/public?tenant_id=${encodeURIComponent(tenantId)}`),
+    request<Config>(`/config/public?tenant_id=${encodeURIComponent(tenantId)}`),
 
   save: (data: Partial<Config>) =>
     request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
@@ -651,7 +658,7 @@ export const dashboardApi = {
 
 export const feedbackApi = {
   save: (data: { question: string; answer: string; helpful: boolean; tenant_id: string }) =>
-    publicRequest<{ saved: boolean; helpful: boolean }>("/feedback", {
+    request<{ saved: boolean; helpful: boolean }>("/feedback", {
       method: "POST",
       body: JSON.stringify(data),
     }),

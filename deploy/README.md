@@ -1,5 +1,70 @@
 # Deploy e operação do EchoMind
 
+Antes de publicar com dados pessoais, concluir a
+checklist de LGPD e segurança interna, incluindo retenção,
+fornecedores e resposta a incidentes. A limpeza automática do chat é ativada
+explicitamente por instituição no painel; a primeira execução ocorre uma hora
+após a inicialização. Não há exclusão habilitada por padrão nem no ato do deploy.
+Cada instituição preenche sua própria política e contato no painel. Não há
+perfil/e-mail/prazo automático por nome; UniEVANGÉLICA e 30 dias são dados do
+primeiro cadastro usado nos testes. O contato da equipe do projeto permanece
+separado do contato institucional. Confirmar controlador, operação e instruções
+antes de liberar o uso real, conforme a checklist.
+Registrar essas decisões na cópia privada do
+modelo de ficha por instituição interna, fora do
+Git e do site. O modelo é mantido com a documentação interna.
+
+FastAPI `0.133.1` e Starlette `1.3.1` foram validados localmente com o lock da
+imagem, sem alterar Pydantic, modelo ou schema. Sem Bearer token, rotas protegidas
+retornam `401` com `WWW-Authenticate: Bearer`; outra instituição continua `403`.
+O frontend já trata `401`. O chat escuta a desconexão durante a espera de tokens;
+manter o ensaio de cancelamento do HTTPS ao atualizar o framework novamente.
+Resultados e limites na avaliação do backend interna.
+
+Esta etapa exige aplicar as migrations **0024, 0025 e 0026 antes de publicar a nova API** pelo
+procedimento de banco existente; não há migração automática. A `0024` adiciona os
+campos de privacidade, sem remover registros. A `0025` revoga os privilégios de
+`PUBLIC`, `anon` e `authenticated` nas tabelas do aplicativo e os defaults de
+novas tabelas do executor no schema público. Não altera Supabase Auth, Storage,
+funções de extensões ou a conexão do backend. Usar o mesmo papel de banco do
+backend no procedimento existente; outros criadores exigem revisão dos defaults.
+A `0026` adiciona hash e recibo de encaminhamento às interações, sem apagar
+histórico. Publicar a nova API antes do frontend: versões antigas da API ainda
+encaminham automaticamente. Com a API nova, clientes públicos antigos em texto
+continuam funcionando, mas não alimentam a fila nem exibem a confirmação.
+Validar com pergunta sintética: **Agora não** mantém a fila intacta; **Enviar
+pergunta** encaminha uma vez, inclusive após duplo clique ou tentativa repetida.
+Respostas conhecidas e falhas técnicas não devem oferecer encaminhamento.
+O downgrade de `0026` invalida confirmações pendentes e remove os recibos, sem
+excluir histórico ou perguntas já encaminhadas; preferir manter os campos em rollback.
+O preflight bloqueia permissões diretas de clientes, inclusive após restauração
+de backups sem ACLs. Cadastros existentes ficam com o
+chat público bloqueado até preencherem controlador, contato, finalidade, base
+legal, prazo e ativarem a limpeza em **Configurações → Privacidade e retenção**.
+Mapas e eventos continuam acessíveis. Se houver revisões anteriores pendentes,
+revisar os riscos próprios delas; `0023` é destrutiva para o recurso descontinuado.
+Conferir aviso em `/p/{slug}/privacidade`, chat sintético e eventos
+`privacy.retention` após a liberação. A checklist interna
+detalha ativação, descarte, direitos e reversão. A imagem inclui o comando
+`python scripts/purge_chat_data.py` para prévia e manutenção, sem dados reais
+nos argumentos além da identificação institucional necessária.
+
+Para atender um pedido sobre interações específicas, a imagem também inclui
+`python scripts/manage_chat_data.py`: recebe seleção privada de IDs e instituição,
+mostra contagem por padrão, exporta para arquivo privado com `--export-to` ou
+exclui a seleção conferida com `--apply`. A ferramenta não identifica titulares,
+não encerra contas e não exclui documentos/FAQs/dados de provedores. Seguir o
+procedimento de direitos na checklist. Nunca registrar texto de conversa em
+argumentos ou logs; exportações/seleções devem permanecer fora do Git. No
+container, usar destino temporário gravável e transferir o arquivo por canal
+privado antes de remover as cópias temporárias.
+
+Em produção, manter tracing/debug do LangChain/LangSmith desativado. A API
+recusa flags que ativem esses recursos, pois podem registrar prompts e respostas
+inteiros em um serviço adicional. Não adicionar chaves/flags de tracing ao
+ambiente sem revisão de privacidade. A reversão da migration `0025` preserva
+as restrições de acesso; não restaura permissões amplas automaticamente.
+
 Estrutura: a raiz contém este guia, `.env.example` e os dois arquivos Compose.
 `aws/` define a infraestrutura; `pipeline/` publica e recupera versões;
 `proxy/` configura HTTPS; `operations/` reúne manutenção, backup e medições;
@@ -33,6 +98,13 @@ bundle verificado por SHA-256. Na EC2, drena escritas, faz backup dos originais,
 atualiza os containers, verifica banco e HTTPS e libera escritas. Falhas tentam
 recuperar a versão anterior. Deploys são serializados; a API pode ficar brevemente
 indisponível. Migrations e reindexação **não** são automáticas.
+
+Para a transição revisada `0023 → 0026`, o rollout confere as heads das imagens
+sem rede/segredos. Se precisar recuperar o runtime `0023`, valida o banco com
+o checker da imagem `0026` aprovada por digest e mantém a verificação HTTPS do
+runtime recuperado. Isso também vale para recuperação de `pending.json`.
+Outros pares de revisões são recusados antes de manutenção; não restaurar
+grants amplos nem desfazer as migrações de segurança para contornar a checagem.
 
 `main` exige PR e os quatro testes, aplica a regra a administradores e bloqueia
 force push/exclusão, sem exigir outro revisor. Os ambientes `aws-build` e
@@ -115,6 +187,19 @@ do EBS de dados e retém sete. `operations/backup_production_database.py` permit
 schema público e ensaio local de restauração, com projeto esperado explícito;
 os arquivos privados ficam ignorados em `.database-backups`. Não equivale a um
 backup completo de Supabase Auth ou a recuperação coordenada de todos os serviços.
+
+Conferência somente em leitura de **02/11/2026**: política DLM ativa com sete
+snapshots concluídos e criptografados; MFA da conta principal e do operador AWS
+confirmados. Bucket do pipeline com bloqueio público e criptografia, mas sem
+objetos correntes em `backups/` na consulta. Esses metadados não comprovam
+restauração nem backup recente do banco. Supabase permanece no plano Free;
+o procedimento de backup do schema público e restore local foi executado em
+02/11: revisão `0023`, contagens de 19 tabelas e RLS conferidas, sem alterar
+produção. Não inclui ACLs/Auth/Storage/originais; reaplicar grants e exclusões
+antes de reabrir uma restauração. Falta definir frequência, prazo e cópia externa
+restrita, sem pressupor backup gerenciado disponível ou
+contratar upgrade. Custos, limites e pendências estão na
+conferência operacional interna.
 
 `/srv/echomind/current.json` registra o release saudável; `previous.json`, o
 anterior; `pending.json`, uma operação interrompida. Preserve esses arquivos,
