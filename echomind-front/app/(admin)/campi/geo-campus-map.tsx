@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
+import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
 import type { Building, PathEdge, PathNode } from "@/lib/geocampus-api";
 import styles from "./geo-campus-map.module.css";
 
@@ -27,9 +28,6 @@ function label(text: string): HTMLElement {
   return element;
 }
 
-const MAP_TILE_URL = process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const MAP_TILE_ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION ||
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const SATELLITE_TILE_URL = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_URL?.trim();
 const SATELLITE_TILE_ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_ATTRIBUTION?.trim();
 
@@ -68,10 +66,7 @@ export function GeoCampusMap({
         zoomControl: false,
       });
       L.control.zoom({ zoomInTitle: "Aproximar mapa", zoomOutTitle: "Afastar mapa" }).addTo(map);
-      const mapTiles = L.tileLayer(MAP_TILE_URL, {
-        attribution: MAP_TILE_ATTRIBUTION,
-        maxZoom: 19,
-      });
+      const mapTiles = L.tileLayer(CAMPUS_MAP_TILE_URL, CAMPUS_MAP_TILE_OPTIONS);
       if (SATELLITE_TILE_URL && SATELLITE_TILE_ATTRIBUTION) {
         const satelliteTiles = L.tileLayer(SATELLITE_TILE_URL, {
           attribution: SATELLITE_TILE_ATTRIBUTION,

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./campus-map-view.module.css";
 
+import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
 import type { Building, Campus, PathEdge, PathNode } from "@/lib/geocampus-api";
 import { distanceMeters } from "./campus-routing";
 import type { CampusRoute, GeoPoint, LocationFix } from "./campus-routing";
@@ -15,10 +16,6 @@ type MapLayers = {
   current: import("leaflet").LayerGroup;
   markers: Map<string, import("leaflet").CircleMarker>;
 };
-
-const TILE_URL = process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const TILE_ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION ||
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export function CampusMapView({
   campus,
@@ -66,10 +63,7 @@ export function CampusMapView({
       map = L.map(container.current, { zoomControl: true }).setView(
         [campus.center_lat, campus.center_lng], Math.min(19, campus.zoom)
       );
-      L.tileLayer(TILE_URL, {
-        attribution: TILE_ATTRIBUTION,
-        maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(CAMPUS_MAP_TILE_URL, CAMPUS_MAP_TILE_OPTIONS).addTo(map);
       const byId = new Map(nodes.map((node) => [node.id, node]));
       const markers = new Map<string, import("leaflet").CircleMarker>();
       for (const edge of edges) {
