@@ -1,5 +1,6 @@
 // DS-05: isolated public-portal fixtures. No upstream calls or real institutional data.
 import { createServer } from "node:http";
+import { testPrivacySettings } from "./privacy-settings.mjs";
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,7 +54,7 @@ createServer(async (req, res) => {
   if (suffix === "/events" && slug === "ds05-loading") await new Promise((resolve) => setTimeout(resolve, 6000));
   if (suffix === "/events" && slug === "ds05-error") { res.writeHead(500); res.end(JSON.stringify({ detail: "detalhe interno da fixture" })); return; }
   const responses = {
-    "": { public_slug: slug, company_name: slug === "ds05-alternate" ? "Outra instituição · DS-05" : "Campus de teste · DS-05", website: null, phone: null, address: null, business_hours: null },
+    "": { ...testPrivacySettings, public_slug: slug, company_name: slug === "ds05-alternate" ? "Outra instituição · DS-05" : "Campus de teste · DS-05", website: null, phone: null, address: null, business_hours: null },
     "/faqs": faqs,
     "/events": slug === "ds05-empty" ? [] : slug === "ds05-alternate" ? [{ ...events[0], id: "ds05-other", title: "Evento exclusivo da segunda instituição" }] : events,
     "/geo-campus": { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] },

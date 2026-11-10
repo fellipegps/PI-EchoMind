@@ -17,14 +17,13 @@ A checklist oficial de LGPD e segurança interna reúne a
 análise do tratamento de dados, correções, pendências essenciais, rotina de
 descarte e resumo das alterações. O aviso do produto está em `/privacidade`;
 o da instituição, em `/p/{slug}/privacidade`. Em **Configurações → Privacidade e
-retenção**, cadastre o responsável, contato, finalidade, base legal e prazo aprovado.
-O chat público só é liberado após concluir esses dados e ativar a limpeza.
-Cada instituição informa sua própria política no painel, sem nome, e-mail,
-finalidade ou prazo preenchidos pelo produto. A UniEVANGÉLICA e os 30 dias são
-dados do primeiro cadastro usado nos testes, não padrões do sistema. É possível
-salvar um cadastro incompleto com a limpeza desativada; o chat segue bloqueado.
+retenção**, cadastre o responsável, contato, finalidade e base legal da instituição.
+O chat público funciona durante a revisão desse cadastro. O painel e o aviso
+mostram o prazo definido no servidor. A limpeza é automática e usa 30 dias por
+padrão. A operação pode ajustar `CHAT_HISTORY_RETENTION_DAYS` no ambiente do
+backend, entre 1 e 90 dias.
 O contato técnico da Horizon Code fica separado do canal de cada instituição.
-O modelo de ficha interna interna reúne as decisões,
+O modelo de ficha interna reúne as decisões,
 responsáveis e fornecedores por instituição. Manter a cópia preenchida em local
 privado, fora do Git e do site; o aviso público apresenta somente as informações
 necessárias aos visitantes.
@@ -36,11 +35,11 @@ Esta etapa exige aplicar as migrations `0024`, `0025` e `0026` antes da nova API
 veja o [guia de deploy](deploy/README.md). A `0025` remove permissões diretas
 dos clientes nas tabelas exclusivas do backend; o login pelo Supabase é preservado.
 Rotas legadas com `tenant_id` agora exigem login do proprietário; o portal
-público continua em `/public/{public_slug}`. A limpeza depende de ativação
-explícita no painel e não foi aplicada ao banco real nesta revisão.
+público continua em `/public/{public_slug}`. A limpeza aplica o prazo do servidor
+ao histórico de todas as instituições.
 No chat público, perguntas não respondidas só são encaminhadas após o visitante
 escolher **Enviar pergunta**; **Agora não** não envia à fila e preserva o histórico
-pelo prazo configurado. A `0026` guarda a confirmação sem duplicar envios.
+pelo prazo definido no servidor. A `0026` guarda a confirmação sem duplicar envios.
 Pedidos de acesso/eliminação de conversas específicas contam com a ferramenta
 operacional `manage_chat_data.py`, com seleção conferida por instituição,
 prévia por padrão e exportação privada para revisão. O procedimento e seus
@@ -842,7 +841,8 @@ Para reproduzir o gate do backend:
 ```bash
 cd echomind-backend
 python -m pip install -r requirements.txt -r requirements-dev.txt
-python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+PYTHON_DOTENV_DISABLED=1 RAG_WARMUP_ENABLED=false DOCUMENT_RECOVERY_ENABLED=false \
+  python -m pytest tests/quick -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
 python scripts/check_document_coverage.py coverage.xml
 ```
 
@@ -867,6 +867,20 @@ Para gerar o relatorio de cobertura sem impor um limite bloqueante, use
 O build de CI recebe somente placeholders publicos para
 `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` e
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Nenhum segredo de producao e usado.
+
+### Teste E2E do chat público
+
+Dentro de `echomind-front`, após instalar as dependências:
+
+```bash
+corepack pnpm exec playwright install chromium --only-shell
+corepack pnpm test:e2e
+```
+
+O Playwright abre o portal local, verifica o aviso de falha e confirma que o
+envio seguinte recebe uma resposta da API simulada. As duas capturas ficam em
+`.next/e2e-results/`. Execute separadamente do Vitest e deixe livres as portas
+3019 e 4105.
 
 ## CI PostgreSQL E pgvector
 

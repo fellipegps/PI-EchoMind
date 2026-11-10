@@ -14,6 +14,7 @@ import DashboardPage from "./page";
 
 const question = "Como consultar os procedimentos institucionais de matrícula, transferência e bolsas de estudo para o próximo semestre?";
 const dashboard = {
+  metrics_window_days: 30,
   total_questions: 1234567890,
   unanswered_questions: 12345,
   avg_response_time: "1,25 s",
@@ -33,6 +34,9 @@ describe("DashboardPage", () => {
     const user = userEvent.setup();
     render(<DashboardPage />);
     expect(await screen.findByText("1.234.567.890")).toBeInTheDocument();
+    expect(screen.getByText("Perguntas nos últimos 30 dias")).toBeInTheDocument();
+    expect(screen.getByText("Satisfação nos últimos 30 dias")).toBeInTheDocument();
+    expect(screen.getByText("Pendentes de triagem")).toBeInTheDocument();
     expect(screen.getByText("12.345")).toBeInTheDocument();
     expect(screen.getByText("1,25 s")).toBeInTheDocument();
     expect(screen.getByText("92,5%")).toBeInTheDocument();

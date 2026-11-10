@@ -1,5 +1,6 @@
 // DS-06: synthetic data only, no upstream API, credentials or real location.
 import { createServer } from "node:http";
+import { testPrivacySettings } from "./privacy-settings.mjs";
 import { appendFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 const logPath = fileURLToPath(new URL("../../.next/ds06-requests.jsonl", import.meta.url));
@@ -46,7 +47,7 @@ createServer(async (req, res) => {
     spaces: slug === "ds06-long" ? spaces.map(s => ({...s, name: s.name + " · " + long, floor: "Andar de teste com identificação extensa", description: long })) : spaces,
     nodes, edges: slug === "ds06-disconnected" ? [] : edges };
   const responses = {
-    "": { public_slug: slug, company_name: "Campus fictício · DS-06", website: null, phone: null, address: null, business_hours: null },
+    "": { ...testPrivacySettings, public_slug: slug, company_name: "Campus fictício · DS-06", website: null, phone: null, address: null, business_hours: null },
     "/faqs": [], "/events": [],
     "/geo-campus": slug === "ds06-empty" ? { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] } : geo,
   };

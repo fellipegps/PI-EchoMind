@@ -361,5 +361,4 @@ def privacy_config_data() -> dict:
         "privacy_controller": "Instituição Sintética", "privacy_email": "privacidade@example.com",
         "privacy_purpose": "Atendimento institucional e melhoria das informações disponíveis.",
         "privacy_legal_basis": "Base legal validada no ambiente sintético de teste.",
-        "chat_retention_days": 30, "chat_retention_enabled": True,
     }

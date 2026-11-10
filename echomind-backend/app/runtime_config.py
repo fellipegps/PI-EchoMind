@@ -12,6 +12,17 @@ class ProductionConfigurationError(RuntimeError):
     pass
 
 
+def chat_history_retention_days(environment: Mapping[str, str] | None = None) -> int:
+    config = os.environ if environment is None else environment
+    try:
+        days = int(config.get("CHAT_HISTORY_RETENTION_DAYS", "30"))
+        if 1 <= days <= 90:
+            return days
+    except ValueError:
+        pass
+    raise ProductionConfigurationError("CHAT_HISTORY_RETENTION_DAYS deve ser um inteiro entre 1 e 90.") from None
+
+
 def _https_origin(value: str) -> bool:
     try:
         parsed = urlsplit(value)
@@ -30,6 +41,10 @@ def _https_origin(value: str) -> bool:
 def validate_production(environment: Mapping[str, str]) -> None:
     """Check structure only; does not connect to services or authenticate keys."""
     invalid: set[str] = set()
+    try:
+        chat_history_retention_days(environment)
+    except ProductionConfigurationError:
+        invalid.add("CHAT_HISTORY_RETENTION_DAYS")
     required = ("DATABASE_URL", "SUPABASE_URL", "SUPABASE_SECRET_KEY", "GROQ_API_KEY", "ALLOWED_ORIGINS")
     for name in required:
         value = environment.get(name, "")
@@ -111,3 +126,5 @@ def load_runtime_environment() -> None:
         load_dotenv()
     if os.environ.get("ECHOMIND_ENV") == "production":
         validate_production(os.environ)
+    else:
+        chat_history_retention_days()

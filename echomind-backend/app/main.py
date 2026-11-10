@@ -454,8 +454,6 @@ async def public_chat(
     accept: str = Header(default=""),
 ):
     config = _public_config_or_404(db, public_slug)
-    if not config.privacy_ready:
-        raise HTTPException(status_code=503, detail="A instituição precisa concluir as informações de privacidade para liberar o atendimento.")
     try:
         question = sanitize_public_question(request.message)
     except ValueError as exc:
@@ -478,8 +476,6 @@ def confirm_public_unanswered(
     public_slug: str, request: PublicUnansweredRequest, db: Session = Depends(get_db),
 ):
     config = _public_config_or_404(db, public_slug)
-    if not config.privacy_ready:
-        raise HTTPException(status_code=503, detail="O atendimento está indisponível no momento.")
     tenant_id = config.tenant_id
     try:
         submit_unanswered(db, tenant_id=tenant_id, token=request.token)

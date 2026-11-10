@@ -23,7 +23,7 @@ BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 REQUIRED_TABLES = {
     "alembic_version", "config", "faqs", "events", "event_courses", "interactions",
-    "documents", "document_chunks", "document_chunk_parents", "rag_metric_daily",
+    "documents", "document_chunks", "document_chunk_parents", "rag_metric_daily", "chat_metric_daily",
     "unanswered_questions", "unanswered_suppressions", "campuses", "campus_buildings",
     "campus_spaces", "campus_path_nodes", "campus_path_edges",
 }

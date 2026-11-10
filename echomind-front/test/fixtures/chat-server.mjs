@@ -1,5 +1,6 @@
 // DS-04: isolated public-portal fixtures. No upstream calls or real institutional data.
 import { createServer } from "node:http";
+import { testPrivacySettings } from "./privacy-settings.mjs";
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -46,7 +47,7 @@ createServer(async (req, res) => {
   }
   if (slug === "ds04-loading" && suffix === "") await new Promise((resolve) => setTimeout(resolve, 6000));
   const responses = {
-    "": { public_slug: slug, company_name: slug === "ds04-longo" ? "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras" : "Campus de teste · DS-04", website: null, phone: null, address: null, business_hours: null },
+    "": { ...testPrivacySettings, public_slug: slug, company_name: slug === "ds04-longo" ? "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras" : "Campus de teste · DS-04", website: null, phone: null, address: null, business_hours: null },
     "/faqs": faqs,
     "/events": events,
     "/geo-campus": { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] },

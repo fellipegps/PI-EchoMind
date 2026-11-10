@@ -5,22 +5,24 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy.orm import sessionmaker
 
-from app.database import Config, Interaction
+from app.database import Config, Interaction, UnansweredQuestion, UnansweredSuppression
 from app.privacy_retention import retention_worker, run_configured_retention
 
 
-def test_privacy_starts_disabled_and_blocks_public_chat_before_processing(client):
+@pytest.mark.parametrize("mode", ["development", "testing", "production"])
+def test_public_chat_works_without_privacy_policy_in_every_mode(client, monkeypatch, mode):
+    monkeypatch.setenv("ECHOMIND_ENV", mode)
     config = client.get("/config").json()
     assert config["privacy_ready"] is False
-    assert config["chat_retention_enabled"] is False
-    with patch("app.main.get_rag_engine") as rag:
-        response = client.post(f"/public/{config['public_slug']}/chat", json={"message": "Pergunta pessoal"})
-    assert response.status_code == 503
-    rag.assert_not_called()
+    assert config["chat_retention_enabled"] is True
+    assert config["chat_retention_days"] == 30
+    response = client.post(f"/public/{config['public_slug']}/chat", json={"message": "Onde fica a secretaria?"})
+    assert response.status_code == 200
+    assert "Onde fica a secretaria?" in response.text
     assert client.get(f"/public/{config['public_slug']}/events").status_code == 200
 
 
-def test_configuration_is_public_safe_and_can_be_paused(client, privacy_config_data):
+def test_configuration_is_public_safe(client, privacy_config_data):
     response = client.put("/config", json=privacy_config_data)
     assert response.status_code == 200
     config = response.json()
@@ -29,39 +31,55 @@ def test_configuration_is_public_safe_and_can_be_paused(client, privacy_config_d
     assert public["privacy_email"] == privacy_config_data["privacy_email"]
     assert "tenant_id" not in public and "id" not in public
     assert client.put("/config", json={"company_name": "Nome atualizado"}).json()["privacy_ready"] is True
-    assert client.put("/config", json={"chat_retention_enabled": False}).json()["privacy_ready"] is False
+    assert public["chat_retention_days"] == 30 and public["chat_retention_enabled"] is True
 
 
-def test_partial_thirty_day_policy_can_be_saved_without_enabling_chat_or_cleanup(client, db, privacy_config_data):
-    draft = {**privacy_config_data, "privacy_controller": "UniEVANGÉLICA", "chat_retention_days": 30, "chat_retention_enabled": False}
+def test_partial_notice_keeps_public_chat_and_cleanup_available(client, db, privacy_config_data):
+    draft = {**privacy_config_data, "privacy_controller": "UniEVANGÉLICA"}
     draft.pop("privacy_legal_basis")
     response = client.put("/config", json=draft)
     assert response.status_code == 200
     saved = response.json()
     assert saved["chat_retention_days"] == 30 and saved["privacy_legal_basis"] is None
-    assert saved["privacy_ready"] is False and saved["chat_retention_enabled"] is False
+    assert saved["privacy_ready"] is False and saved["chat_retention_enabled"] is True
     db.add(Interaction(tenant_id="test-admin", question="Synthetic old question", asked_at=datetime.now(timezone.utc) - timedelta(days=45)))
     db.commit()
-    assert run_configured_retention(session_factory=sessionmaker(bind=db.connection())) == 0
-    assert db.query(Interaction).filter_by(tenant_id="test-admin").count() == 1
-    with patch("app.main.get_rag_engine") as rag:
-        assert client.post(f"/public/{saved['public_slug']}/chat", json={"message": "Onde fica a secretaria?"}).status_code == 503
-    rag.assert_not_called()
+    assert run_configured_retention(session_factory=sessionmaker(bind=db.connection()))["interactions"] == 1
+    assert db.query(Interaction).filter_by(tenant_id="test-admin").count() == 0
+    response = client.post(f"/public/{saved['public_slug']}/chat", json={"message": "Onde fica a secretaria?"})
+    assert response.status_code == 200
+    assert "Onde fica a secretaria?" in response.text
 
 
 @pytest.mark.parametrize("changes", [
     {"privacy_email": "invalid"}, {"privacy_email": "safe@example.test\r\nBcc:private@example.test"},
-    {"chat_retention_days": 0}, {"chat_retention_days": 3651}, {"chat_retention_days": 2.5},
-    {"chat_retention_days": True}, {"chat_retention_enabled": True},
 ])
-def test_invalid_or_incomplete_policy_is_rejected(client, changes):
+def test_invalid_privacy_email_is_rejected(client, changes):
     assert client.put("/config", json=changes).status_code == 422
 
 
-def test_active_policy_cannot_have_required_field_removed(client, privacy_config_data):
+def test_editing_notice_does_not_pause_cleanup(client, privacy_config_data):
     assert client.put("/config", json=privacy_config_data).status_code == 200
-    assert client.put("/config", json={"privacy_email": "  "}).status_code == 422
-    assert client.put("/config", json={"chat_retention_enabled": False, "privacy_email": None}).status_code == 200
+    response = client.put("/config", json={"privacy_email": "  "})
+    assert response.status_code == 200
+    assert response.json()["privacy_ready"] is False
+    assert response.json()["chat_retention_enabled"] is True
+
+
+@pytest.mark.parametrize("requested_days", [1, 3650, 99999, None])
+def test_admin_payload_cannot_change_server_retention(client, db, monkeypatch, requested_days):
+    monkeypatch.setenv("CHAT_HISTORY_RETENTION_DAYS", "14")
+    response = client.put("/config", json={
+        "chat_retention_days": requested_days, "chat_retention_enabled": False,
+    })
+    assert response.status_code == 200
+    config = response.json()
+    assert config["chat_retention_days"] == 14
+    assert config["chat_retention_enabled"] is True
+    public = client.get(f"/public/{config['public_slug']}").json()
+    assert public["chat_retention_days"] == 14 and public["chat_retention_enabled"] is True
+    stored = db.query(Config).filter_by(tenant_id="test-admin").one()
+    assert stored.chat_retention_days is None and stored.chat_retention_enabled is False
 
 
 def test_configuration_does_not_modify_other_tenants(client, db, privacy_config_data):
@@ -72,21 +90,31 @@ def test_configuration_does_not_modify_other_tenants(client, db, privacy_config_
     assert other.privacy_email is None and other.chat_retention_enabled is False
 
 
-def test_scheduled_retention_only_applies_complete_enabled_policies(db, privacy_config_data):
+def test_scheduled_retention_uses_operator_cutoff_for_all_institutions(db, privacy_config_data, monkeypatch):
+    monkeypatch.setenv("CHAT_HISTORY_RETENTION_DAYS", "14")
     now = datetime.now(timezone.utc)
-    for tenant, enabled, complete in [("active", True, True), ("paused", False, True), ("incomplete", True, False)]:
-        policy = {**privacy_config_data, "chat_retention_enabled": enabled}
-        if not complete:
-            policy["privacy_email"] = None
-        db.add(Config(tenant_id=tenant, public_slug=tenant, company_name=tenant, **policy))
-        db.add(Interaction(tenant_id=tenant, question="old", asked_at=now - timedelta(days=40)))
-        db.add(Interaction(tenant_id=tenant, question="recent", asked_at=now))
+    db.add(Config(
+        tenant_id="active", public_slug="active", company_name="Active", **privacy_config_data,
+        chat_retention_enabled=True, chat_retention_days=3650,
+    ))
+    db.add(Config(tenant_id="incomplete", public_slug="incomplete", company_name="Incomplete"))
+    for tenant in ("active", "incomplete", "legacy"):
+        db.add(Interaction(tenant_id=tenant, question="old", asked_at=now - timedelta(days=15)))
+        db.add(Interaction(tenant_id=tenant, question="at cutoff", asked_at=now - timedelta(days=14)))
+    question = UnansweredQuestion(
+        tenant_id="incomplete", canonical_question="old triage", first_asked=now - timedelta(days=15),
+    )
+    db.add(question)
+    db.flush()
+    db.add(UnansweredSuppression(
+        tenant_id="incomplete", question_id=question.id, fingerprint="fixture", created_at=now,
+    ))
     db.flush()
     factory = sessionmaker(bind=db.connection())
-    assert run_configured_retention(session_factory=factory, now=now) == 1
-    assert db.query(Interaction).filter_by(tenant_id="active").count() == 1
-    assert db.query(Interaction).filter_by(tenant_id="paused").count() == 2
-    assert db.query(Interaction).filter_by(tenant_id="incomplete").count() == 2
+    assert run_configured_retention(session_factory=factory, now=now) == {
+        "interactions": 3, "unanswered": 1, "suppressions": 1,
+    }
+    assert [row.question for row in db.query(Interaction).all()] == ["at cutoff"] * 3
 
 
 async def test_retention_shutdown_before_first_interval_does_not_delete():

@@ -23,11 +23,12 @@ def test_migration_defaults_and_retention_constraint(postgres_engine):
         connection.execute(text("DELETE FROM config WHERE id='privacy-default'"))
 
 
-def test_scheduled_cleanup_is_tenant_scoped_on_postgresql(postgres_engine):
-    from app.database import Config, Interaction
+def test_scheduled_cleanup_uses_server_policy_and_preserves_metrics_on_postgresql(postgres_engine, monkeypatch):
+    from app.database import ChatMetricDaily, Config, Interaction
     from app.privacy_retention import run_configured_retention
 
     tenants = ["privacy-active", "privacy-paused"]
+    monkeypatch.setenv("CHAT_HISTORY_RETENTION_DAYS", "30")
     now = datetime.now(timezone.utc)
     factory = sessionmaker(bind=postgres_engine)
     try:
@@ -37,19 +38,24 @@ def test_scheduled_cleanup_is_tenant_scoped_on_postgresql(postgres_engine):
                     tenant_id=tenant, public_slug=tenant, company_name="Synthetic",
                     privacy_controller="Synthetic", privacy_email="privacy@example.com",
                     privacy_purpose="Atendimento sintético", privacy_legal_basis="Teste sintético",
-                    chat_retention_days=30, chat_retention_enabled=enabled,
+                    chat_retention_days=3650, chat_retention_enabled=enabled,
                 ))
                 db.add_all([
                     Interaction(tenant_id=tenant, question="old synthetic", asked_at=now-timedelta(days=40)),
                     Interaction(tenant_id=tenant, question="recent synthetic", asked_at=now),
+                    ChatMetricDaily(tenant_id=tenant, metric_date=now.date()-timedelta(days=90), question_count=1),
                 ])
             db.commit()
-        assert run_configured_retention(session_factory=factory, now=now) == 1
+        assert run_configured_retention(session_factory=factory, now=now)["interactions"] == 2
         with Session(postgres_engine) as db:
             assert db.query(Interaction).filter_by(tenant_id=tenants[0]).count() == 1
-            assert db.query(Interaction).filter_by(tenant_id=tenants[1]).count() == 2
+            assert db.query(Interaction).filter_by(tenant_id=tenants[1]).count() == 1
+            for tenant in tenants:
+                assert db.get(ChatMetricDaily, (tenant, now.date() - timedelta(days=40))).question_count == 1
+                assert db.get(ChatMetricDaily, (tenant, now.date() - timedelta(days=90))) is None
     finally:
         with Session(postgres_engine) as db:
             db.execute(delete(Interaction).where(Interaction.tenant_id.in_(tenants)))
+            db.execute(delete(ChatMetricDaily).where(ChatMetricDaily.tenant_id.in_(tenants)))
             db.execute(delete(Config).where(Config.tenant_id.in_(tenants)))
             db.commit()

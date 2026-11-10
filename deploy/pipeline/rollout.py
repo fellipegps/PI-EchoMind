@@ -164,9 +164,9 @@ class Host:
         previous_head, candidate_head = self.schema_head(previous), self.schema_head(candidate)
         if previous_head == candidate_head:
             return None
-        # Reviewed only for 0024-0026: nullable additions and backend-only grants.
-        # Never treat an arbitrary newer schema as compatible with an old runtime.
-        if (previous_head, candidate_head) != ("0023", "0026"):
+        # Only reviewed pairs may reuse the newer checker after runtime rollback.
+        # 0027 adds a table and aggregates existing INSERTs without changing their contract.
+        if (previous_head, candidate_head) not in {("0023", "0026"), ("0026", "0027")}:
             raise ReleaseError("Database revision change has no approved rollback compatibility.")
         repository = os.environ.get("BACKEND_REPOSITORY", "")
         if not repository or not re.fullmatch(re.escape(repository) + r"@sha256:[0-9a-f]{64}", candidate.get("backend", "")):
@@ -216,7 +216,7 @@ class Host:
         if database_validator is None:
             self.compose(state, "exec", "-T", "backend", "python", "scripts/check_database.py", timeout=120)
         else:
-            # The old checker cannot resolve 0026. Its reviewed successor must
+            # The old checker cannot resolve the newer revision. Its reviewed successor must
             # still enforce exact revision, RLS, grants, required tables and vectors.
             self.preflight(database_validator)
         url = f"https://{state['settings']['API_DOMAIN']}/health"

@@ -1,5 +1,6 @@
 // Local-only fixtures for DS-01 visual verification. Never proxies to real services.
 import { createServer } from "node:http";
+import { testPrivacySettings } from "./privacy-settings.mjs";
 
 const user = { id: "00000000-0000-4000-8000-000000000001", email: "ds01@example.test", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: {}, created_at: "2026-10-11T00:00:00Z" };
 const faq = { id: "ds01-faq", question: "Como acessar a biblioteca?", answer: "Consulte os horários na secretaria do campus de teste." };
@@ -32,7 +33,7 @@ createServer(async (req, res) => {
     "/auth/me": { id: user.id, email: user.email, is_active: true, created_at: user.created_at },
     "/dashboard": metrics,
     "/dashboard/rag-metrics": rag,
-    "/public/ds01-fixture": { public_slug: "ds01-fixture", company_name: "Campus de teste · DS-01", website: null, phone: null, address: null, business_hours: null },
+    "/public/ds01-fixture": { ...testPrivacySettings, public_slug: "ds01-fixture", company_name: "Campus de teste · DS-01", website: null, phone: null, address: null, business_hours: null },
     "/public/ds01-fixture/faqs": [faq],
     "/public/ds01-fixture/events": [],
   };

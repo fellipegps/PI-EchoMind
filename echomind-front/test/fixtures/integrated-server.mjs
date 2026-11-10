@@ -1,5 +1,6 @@
 // DS-16: synthetic session and in-memory data; loopback only, no upstream services.
 import { createServer } from "node:http";
+import { testPrivacySettings } from "./privacy-settings.mjs";
 import { appendFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -8,7 +9,7 @@ mkdirSync(fileURLToPath(new URL("../../.next/", import.meta.url)), { recursive: 
 const stamp = "2026-10-12T12:00:00Z";
 const user = { id: "00000000-0000-4000-8000-000000000016", email: "ds16@example.test", aud: "authenticated", role: "authenticated", app_metadata: {}, user_metadata: {}, created_at: stamp };
 const long = "Referência institucional extensa para conferência de leitura e quebra de linhas: " + "TextoSemEspacos".repeat(12);
-let config = { id: "config16", public_slug: "ds16-fixture", company_name: "Instituição sintética de ensino, pesquisa e extensão — DS-16", description: long, tone_of_voice: "profissional e cordial", chat_voice_gender: "feminina", website: "https://example.test", phone: "(00) 00000-0000", address: "Avenida de teste, 1000", business_hours: "Segunda a sexta, das 8h às 22h", updated_at: stamp };
+let config = { ...testPrivacySettings, id: "config16", public_slug: "ds16-fixture", company_name: "Instituição sintética de ensino, pesquisa e extensão — DS-16", description: long, tone_of_voice: "profissional e cordial", chat_voice_gender: "feminina", website: "https://example.test", phone: "(00) 00000-0000", address: "Avenida de teste, 1000", business_hours: "Segunda a sexta, das 8h às 22h", updated_at: stamp };
 let faqs = [{ id: "faq16", question: "Como consultar os serviços acadêmicos? " + long, answer: "Resposta **de teste** com orientação institucional. " + long, show_in_chatbot: true, created_at: stamp }];
 const events = [{ id: "event16", title: "Encontro de integração acadêmica e apresentação dos espaços institucionais", description: long, event_date: "2026-10-20", event_end_date: "2026-10-21", event_type: "palestra", course: "Curso sintético de sistemas de informação", location: "Auditório fictício — Bloco A", image_url: null, link_url: "https://example.test/evento", created_at: stamp }];
 const campuses = [{ id: "c1", name: "Campus sintético Central", description: long, center_lat: -23.55045, center_lng: -46.63325, zoom: 18, active: true }];

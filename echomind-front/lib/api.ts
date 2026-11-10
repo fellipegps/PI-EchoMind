@@ -80,9 +80,9 @@ export interface PrivacySettings {
   privacy_email?: string | null;
   privacy_purpose?: string | null;
   privacy_legal_basis?: string | null;
-  chat_retention_days?: number | null;
-  chat_retention_enabled?: boolean;
-  privacy_ready?: boolean;
+  readonly chat_retention_days?: number | null;
+  readonly chat_retention_enabled?: boolean;
+  readonly privacy_ready?: boolean;
 }
 
 export interface Config extends PrivacySettings {
@@ -127,6 +127,7 @@ export interface UnansweredQuestion {
 }
 
 export interface DashboardData {
+  metrics_window_days?: number;
   total_questions: number;
   unanswered_questions: number;
   avg_response_time: string;
@@ -590,7 +591,7 @@ export const configApi = {
   getPublic: (tenantId: string) =>
     request<Config>(`/config/public?tenant_id=${encodeURIComponent(tenantId)}`),
 
-  save: (data: Partial<Config>) =>
+  save: (data: Omit<Partial<Config>, "chat_retention_days" | "chat_retention_enabled" | "privacy_ready">) =>
     request<Config>("/config", { method: "PUT", body: JSON.stringify(data) }),
 };
 

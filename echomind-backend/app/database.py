@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    create_engine, Column, String, Boolean, Text,
+    create_engine, BigInteger, Column, String, Boolean, Text,
     CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer,
     UniqueConstraint, text,
 )
@@ -295,6 +295,7 @@ class Config(Base):
     privacy_email = Column(String(320), nullable=True)
     privacy_purpose = Column(String(1000), nullable=True)
     privacy_legal_basis = Column(String(1000), nullable=True)
+    # Retained for compatibility with earlier releases. The server owns the live policy.
     chat_retention_days = Column(Integer, nullable=True)
     chat_retention_enabled = Column(Boolean, nullable=False, default=False, server_default="false")
     updated_at      = Column(DateTime, default=utc_now, onupdate=utc_now)
@@ -303,8 +304,7 @@ class Config(Base):
     def privacy_ready(self) -> bool:
         return bool(
             self.privacy_controller and self.privacy_email and self.privacy_purpose
-            and self.privacy_legal_basis and self.chat_retention_days
-            and self.chat_retention_enabled
+            and self.privacy_legal_basis
         )
 
 
@@ -553,6 +553,25 @@ class DocumentChunk(Base):
 
     document = relationship("Document", back_populates="chunks")
     parent = relationship("DocumentChunkParent", back_populates="children")
+
+
+class ChatMetricDaily(Base):
+    """Contagens de atendimento por instituição e dia em UTC, sem texto do chat."""
+
+    __tablename__ = "chat_metric_daily"
+    __table_args__ = (
+        CheckConstraint(
+            "question_count >= 0 AND positive_feedback_count >= 0 AND negative_feedback_count >= 0",
+            name="ck_chat_metric_daily_counts_nonnegative",
+        ),
+        Index("ix_chat_metric_daily_metric_date", "metric_date"),
+    )
+
+    tenant_id = Column(String, primary_key=True)
+    metric_date = Column(Date, primary_key=True)
+    question_count = Column(BigInteger, nullable=False, server_default="0")
+    positive_feedback_count = Column(BigInteger, nullable=False, server_default="0")
+    negative_feedback_count = Column(BigInteger, nullable=False, server_default="0")
 
 
 class RagMetricDaily(Base):

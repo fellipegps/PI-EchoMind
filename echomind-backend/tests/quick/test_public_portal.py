@@ -47,8 +47,8 @@ def test_public_institution_resolves_slug_without_exposing_tenant(
         "privacy_email": None,
         "privacy_purpose": None,
         "privacy_legal_basis": None,
-        "chat_retention_days": None,
-        "chat_retention_enabled": False,
+        "chat_retention_days": 30,
+        "chat_retention_enabled": True,
         "privacy_ready": False,
     }
     assert "tenant_id" not in response.json()
