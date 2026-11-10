@@ -2,229 +2,70 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./campus-map-view.module.css";
-
 import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
-import type { Building, Campus, PathEdge, PathNode } from "@/lib/geocampus-api";
-import { distanceMeters } from "./campus-routing";
-import type { CampusRoute, GeoPoint, LocationFix } from "./campus-routing";
+import type { Building, Campus, Landmark, PlaceType } from "@/lib/geocampus-api";
 
-type LeafletModule = typeof import("leaflet");
-type MapLayers = {
-  L: LeafletModule;
-  map: import("leaflet").Map;
-  route: import("leaflet").LayerGroup;
-  current: import("leaflet").LayerGroup;
-  markers: Map<string, import("leaflet").CircleMarker>;
-};
-
-export function CampusMapView({
-  campus,
-  buildings,
-  nodes,
-  edges,
-  destinationId,
-  route,
-  fix,
-  manualOrigin,
-  onSelectBuilding,
-  onSelectManualOrigin,
-}: {
+export function CampusMapView({ campus, buildings, landmarks, onOpenPlace }: {
   campus: Campus;
   buildings: Building[];
-  nodes: PathNode[];
-  edges: PathEdge[];
-  destinationId: string | null;
-  route: CampusRoute | null;
-  fix: LocationFix | null;
-  manualOrigin: GeoPoint | null;
-  onSelectBuilding: (id: string) => void;
-  onSelectManualOrigin: (point: GeoPoint) => void;
+  landmarks: Landmark[];
+  onOpenPlace: (type: PlaceType, publicCode: string) => void;
 }) {
   const container = useRef<HTMLDivElement>(null);
-  const layers = useRef<MapLayers | null>(null);
-  const onSelectBuildingRef = useRef(onSelectBuilding);
-  const onSelectManualOriginRef = useRef(onSelectManualOrigin);
-  const lastFittedDestination = useRef<string | null>(null);
-  const [ready, setReady] = useState(0);
+  const onOpenPlaceRef = useRef(onOpenPlace);
   const [mapError, setMapError] = useState(false);
 
-  useEffect(() => {
-    onSelectBuildingRef.current = onSelectBuilding;
-    onSelectManualOriginRef.current = onSelectManualOrigin;
-  }, [onSelectBuilding, onSelectManualOrigin]);
+  useEffect(() => { onOpenPlaceRef.current = onOpenPlace; }, [onOpenPlace]);
 
   useEffect(() => {
     if (!container.current) return;
     let cancelled = false;
     let map: import("leaflet").Map | null = null;
-    lastFittedDestination.current = null;
     void import("leaflet").then((L) => {
       if (cancelled || !container.current) return;
       map = L.map(container.current, { zoomControl: true }).setView(
         [campus.center_lat, campus.center_lng], Math.min(19, campus.zoom)
       );
       L.tileLayer(CAMPUS_MAP_TILE_URL, CAMPUS_MAP_TILE_OPTIONS).addTo(map);
-      const byId = new Map(nodes.map((node) => [node.id, node]));
-      const markers = new Map<string, import("leaflet").CircleMarker>();
-      for (const edge of edges) {
-        if (!edge.active) continue;
-        const from = byId.get(edge.from_node_id);
-        const to = byId.get(edge.to_node_id);
-        if (!from || !to) continue;
-        L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
-          color: edge.accessible ? "var(--success)" : "var(--muted-foreground)",
-          weight: 3,
-          opacity: 0.55,
-          interactive: false,
-          dashArray: edge.accessible ? undefined : "4 6",
-        }).addTo(map);
-      }
-      for (const building of buildings) {
-        const marker = L.circleMarker([building.entrance_lat, building.entrance_lng], {
-          radius: building.id === destinationId ? 11 : 8,
+      const places = [
+        ...buildings.map((item) => ({ ...item, type: "building" as const, lat: item.entrance_lat, lng: item.entrance_lng })),
+        ...landmarks.map((item) => ({ ...item, type: "landmark" as const })),
+      ];
+      for (const place of places) {
+        const open = () => onOpenPlaceRef.current(place.type, place.public_code);
+        const marker = L.circleMarker([place.lat, place.lng], {
+          radius: 9,
           color: "var(--card)",
           weight: 2,
-          fillColor: building.id === destinationId ? "var(--primary)" : "var(--foreground)",
+          fillColor: place.type === "building" ? "var(--primary)" : "var(--foreground)",
           fillOpacity: 1,
           bubblingMouseEvents: false,
         }).addTo(map);
         const label = document.createElement("span");
-        label.textContent = building.name;
+        label.textContent = place.name;
         marker.bindTooltip(label, { direction: "top" });
-        marker.on("click", () => onSelectBuildingRef.current(building.id));
+        marker.on("click", open);
         const element = marker.getElement();
         if (element) {
           element.setAttribute("tabindex", "0");
-          element.setAttribute("role", "button");
-          element.setAttribute("aria-label", `Selecionar ${building.name} como destino`);
-          element.setAttribute("aria-pressed", String(building.id === destinationId));
+          element.setAttribute("role", "link");
+          element.setAttribute("aria-label", `Abrir ficha de ${place.name}`);
           element.addEventListener("keydown", (event) => {
-            if (!(event instanceof KeyboardEvent)) return;
-            if (event.key === "Enter" || event.key === " ") {
+            if (event instanceof KeyboardEvent && event.key === "Enter") {
               event.preventDefault();
-              onSelectBuildingRef.current(building.id);
+              open();
             }
           });
         }
-        markers.set(building.id, marker);
       }
-      map.on("click", (event) => onSelectManualOriginRef.current({
-        lat: event.latlng.lat,
-        lng: event.latlng.lng,
-      }));
-      layers.current = {
-        L,
-        map,
-        route: L.layerGroup().addTo(map),
-        current: L.layerGroup().addTo(map),
-        markers,
-      };
       setMapError(false);
-      setReady((value) => value + 1);
-      window.setTimeout(() => {
-        if (!cancelled) map?.invalidateSize();
-      }, 0);
-    }).catch(() => {
-      if (!cancelled) setMapError(true);
-    });
-    return () => {
-      cancelled = true;
-      layers.current = null;
-      map?.remove();
-    };
-    // The map is rebuilt when institution data changes, not on each GPS update.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [campus, buildings, nodes, edges]);
+      window.setTimeout(() => { if (!cancelled) map?.invalidateSize(); }, 0);
+    }).catch(() => { if (!cancelled) setMapError(true); });
+    return () => { cancelled = true; map?.remove(); };
+  }, [campus, buildings, landmarks]);
 
-  useEffect(() => {
-    const state = layers.current;
-    if (!state) return;
-    for (const [id, marker] of state.markers) {
-      marker.getElement()?.setAttribute("aria-pressed", String(id === destinationId));
-      marker.setRadius(id === destinationId ? 11 : 8);
-      marker.setStyle({ fillColor: id === destinationId ? "var(--primary)" : "var(--foreground)" });
-    }
-  }, [ready, destinationId]);
-
-  useEffect(() => {
-    const state = layers.current;
-    if (!state) return;
-    state.route.clearLayers();
-    if (route) {
-      const coordinates: [number, number][] = route.points.map((point) => [point.lat, point.lng]);
-      if (coordinates.length >= 2) {
-        // A surface halo preserves route contrast over map tiles in both themes.
-        state.L.polyline(coordinates, {
-          color: "var(--card)", weight: 10, opacity: 0.95, interactive: false,
-        }).addTo(state.route);
-        state.L.polyline(coordinates, {
-          color: "var(--primary)",
-          weight: 6,
-          opacity: 0.9,
-        }).addTo(state.route);
-      }
-      const first = route.points[0];
-      const start = fix ?? manualOrigin;
-      if (first && start && distanceMeters(first, start) > 3) {
-        state.L.polyline(
-          [[start.lat, start.lng], [first.lat, first.lng]],
-          { color: "var(--warning)", weight: 3, dashArray: "5 8", opacity: 0.8 }
-        ).addTo(state.route);
-      }
-      const last = route.points.at(-1);
-      const destination = buildings.find((item) => item.id === destinationId);
-      if (last && destination && route.entranceGapM > 3) {
-        state.L.polyline(
-          [[last.lat, last.lng], [destination.entrance_lat, destination.entrance_lng]],
-          { color: "var(--warning)", weight: 3, dashArray: "5 8", opacity: 0.8 }
-        ).addTo(state.route);
-      }
-      if (destinationId && lastFittedDestination.current !== destinationId) {
-        const bounds = state.L.latLngBounds(coordinates);
-        if (destination) bounds.extend([destination.entrance_lat, destination.entrance_lng]);
-        state.map.fitBounds(bounds.pad(0.25), { maxZoom: 18 });
-        lastFittedDestination.current = destinationId;
-      }
-    }
-  }, [ready, route, destinationId, buildings, fix, manualOrigin]);
-
-  useEffect(() => {
-    const state = layers.current;
-    if (!state) return;
-    state.current.clearLayers();
-    if (fix) {
-      state.L.circle([fix.lat, fix.lng], {
-        radius: fix.accuracy,
-        color: "var(--primary)",
-        weight: 1,
-        fillColor: "var(--primary)",
-        fillOpacity: 0.14,
-        interactive: false,
-      }).addTo(state.current);
-      state.L.circleMarker([fix.lat, fix.lng], {
-        radius: 8,
-        color: "var(--card)",
-        weight: 3,
-        fillColor: "var(--primary)",
-        fillOpacity: 1,
-        interactive: false,
-      }).addTo(state.current);
-    } else if (manualOrigin) {
-      state.L.circleMarker([manualOrigin.lat, manualOrigin.lng], {
-        radius: 8,
-        color: "var(--card)",
-        weight: 3,
-        fillColor: "var(--warning)",
-        fillOpacity: 1,
-        interactive: false,
-      }).addTo(state.current);
-    }
-  }, [ready, fix, manualOrigin]);
-
-  return (
-    <>
-      <div ref={container} className={`geo-campus-map ${styles.map}`} role="region" aria-label={`Mapa geográfico do ${campus.name}`} />
-      {mapError && <p role="status" className="rounded-xl border border-border bg-card p-4 text-sm leading-5 text-muted-foreground">O mapa visual não carregou. Você ainda pode consultar os destinos abaixo.</p>}
-    </>
-  );
+  return <>
+    <div ref={container} className={`geo-campus-map ${styles.map}`} role="region" aria-label={`Mapa visual de ${campus.name}`} />
+    {mapError && <p role="status" className="rounded-xl border border-border bg-card p-4 text-sm leading-5 text-muted-foreground">O mapa visual não carregou. Você pode abrir as fichas dos locais pela lista abaixo.</p>}
+  </>;
 }

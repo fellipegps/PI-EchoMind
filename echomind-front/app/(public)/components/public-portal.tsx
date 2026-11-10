@@ -23,10 +23,11 @@ const INITIAL_MESSAGE: ChatMessage = {
 
 type PublicPortalProps = {
   publicSlug?: string;
+  initialTab?: TabId;
 };
 
-export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("chat");
+export function PublicPortal({ publicSlug = "", initialTab = "chat" }: PublicPortalProps) {
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const normalizedSlug = publicSlug.trim();
   const privacyHref = `/p/${encodeURIComponent(normalizedSlug)}/privacidade`;
   const [companyName, setCompanyName] = useState("Portal Acadêmico");
@@ -191,7 +192,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
 
           {activeTab === "locais" && (
             <section className={styles.panel} aria-labelledby="places-title">
-              <PortalSectionHeading id="places-title" eyebrow="Encontre seu caminho" title="Locais do campus" description="Pesquise os espaços cadastrados pela instituição." />
+              <PortalSectionHeading id="places-title" eyebrow="Guia visual" title="Locais do campus" description="Consulte os blocos, espaços e fotos de referência publicados pela instituição." />
 
               <PublicCampusNavigator publicSlug={normalizedSlug} />
             </section>

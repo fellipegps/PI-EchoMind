@@ -1,6 +1,7 @@
-"""Barreira de bytes anterior ao parser, exclusiva do upload documental."""
+"""Barreira de bytes anterior ao parser de documentos e fotos do campus."""
 
 import asyncio
+import re
 from collections.abc import Callable, Coroutine
 from typing import Any
 
@@ -11,6 +12,7 @@ from starlette.formparsers import MultiPartException, MultiPartParser
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from .document_ingestion import InvalidDocumentConfigurationError, get_max_document_size_bytes
+from .campus_photo import MAX_PHOTO_BYTES
 
 
 # Orcamento fixo para boundaries, cabecalhos das partes e metadados opcionais.
@@ -18,6 +20,21 @@ from .document_ingestion import InvalidDocumentConfigurationError, get_max_docum
 MULTIPART_ENVELOPE_BYTES = 64 * 1024
 _BODY_EXCEEDED = "echomind.document_upload.body_exceeded"
 _CONFIG_INVALID = "echomind.document_upload.config_invalid"
+# FastAPI validates the place type after parsing the form. Bound invalid types too.
+_PHOTO_UPLOAD_PATH = re.compile(
+    r"/campuses/[^/]+/places/[^/]+/[^/]+/photos"
+)
+
+
+def _upload_kind(scope: Scope) -> str | None:
+    if scope["type"] != "http" or scope.get("method") != "POST":
+        return None
+    path = scope.get("path", "").removeprefix(scope.get("root_path", ""))
+    if path == "/documents/upload":
+        return "document"
+    if _PHOTO_UPLOAD_PATH.fullmatch(path):
+        return "photo"
+    return None
 
 
 class DocumentUploadLimitMiddleware:
@@ -27,12 +44,13 @@ class DocumentUploadLimitMiddleware:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        path = scope.get("path", "").removeprefix(scope.get("root_path", ""))
-        if scope["type"] != "http" or scope["method"] != "POST" or path != "/documents/upload":
+        kind = _upload_kind(scope)
+        if kind is None:
             await self.app(scope, receive, send)
             return
         try:
-            body_limit = get_max_document_size_bytes() + MULTIPART_ENVELOPE_BYTES
+            file_limit = MAX_PHOTO_BYTES if kind == "photo" else get_max_document_size_bytes()
+            body_limit = file_limit + MULTIPART_ENVELOPE_BYTES
         except InvalidDocumentConfigurationError:
             scope[_CONFIG_INVALID] = True
             body_limit = 0
@@ -73,10 +91,14 @@ class DocumentUploadLimitMiddleware:
 
 
 class DocumentUploadRoute(APIRoute):
+    """Limita um arquivo e fecha temporários somente nas rotas de upload."""
+
     def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
         handler = super().get_route_handler()
 
         async def bounded_upload(original_request: Request) -> Response:
+            if _upload_kind(original_request.scope) is None:
+                return await handler(original_request)
             if original_request.scope.get(_CONFIG_INVALID):
                 raise HTTPException(status_code=500, detail="Configuração inválida do limite de upload.")
 

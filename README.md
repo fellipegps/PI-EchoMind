@@ -540,10 +540,13 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `PATCH` | `/faqs/{id}/toggle-chatbot` | Exibe ou oculta uma FAQ no chat publico |
 | `GET` | `/public/{slug}/faqs` | FAQs publicas do portal web |
 | `GET` | `/public/{slug}/events` | Eventos programados no portal web |
-| `GET` | `/public/{slug}/geo-campus` | Campi, prédios, espaços e caminhos ativos da instituição |
+| `GET` | `/public/{slug}/geo-campus` | Campi, blocos, espaços e pontos de referência publicados |
+| `GET` | `/public/{slug}/places/{type}/{code}` | Ficha pública do local, com fotos e bloco associado |
 | `POST` | `/public/{slug}/chat` | Chat publico vinculado ao slug da instituicao |
 | `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
-| `GET/POST/PUT/DELETE` | `/campuses` e sub-recursos | Cadastro geográfico autenticado de campi, prédios, espaços e caminhos |
+| `GET/POST/PUT/DELETE` | `/campuses` e sub-recursos | Cadastro autenticado de campi, blocos, espaços e pontos de referência |
+| `POST` | `/campuses/{campus}/places/{type}/{id}/photos` | Envio autenticado de uma foto do local via multipart |
+| `GET/DELETE` | `/campuses/{campus}/places/{type}/{id}/photos/{photo}` | Consulta ou exclusão autenticada de uma foto |
 | `GET/POST` | `/events/courses` | Lista ou cria cursos relacionados a eventos |
 | `GET/PUT` | `/config` | Configuracoes autenticadas do tenant |
 | `GET` | `/config/public` | Configuracao publica por `tenant_id` |
@@ -556,9 +559,19 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `POST` | `/feedback` | Feedback publico do chatbot |
 | `GET` | `/health` | Health check |
 
-O cadastro geográfico de campi, prédios, espaços e caminhos é feito em `/campi`.
-A aba pública Locais usa somente esse cadastro, incluindo origem manual, GPS e
-rotas acessíveis. Sem cadastro publicado, o portal informa indisponibilidade.
+O guia visual dos campi é administrado em `/campi`. O administrador marca blocos
+e pontos de referência no mapa, cadastra salas, laboratórios e auditórios dentro
+dos blocos e envia várias fotos para cada local. As fotos JPEG, PNG e WebP são
+validadas e convertidas para JPEG, com limite de 5 MiB e 16 megapixels por envio. As imagens ficam
+no banco, junto aos vínculos com a instituição e o local, e acompanham seu backup.
+A aba pública Locais apresenta os locais publicados. A seleção de um local e a
+leitura de seu QR Code abrem a mesma ficha em
+`/p/{slug}/locais/{type}/{public_code}`, com descrição, fotos e identificação do
+bloco quando se trata de um espaço interno. O administrador pode baixar e
+imprimir o QR Code. O código do local é estável após alterações no cadastro.
+O guia substitui o cálculo de rotas e o uso da localização do visitante.
+A migração `0028` adiciona os códigos dos locais existentes e as novas estruturas
+de referências e fotos, preservando o cadastro e os registros legados de caminhos.
 A revisão Alembic `0023` retira a tabela do recurso descontinuado; ela remove
 seus registros quando aplicada. Faça backup antes de aplicá-la em um banco
 existente. A reversão recria somente a estrutura, sem recuperar registros.

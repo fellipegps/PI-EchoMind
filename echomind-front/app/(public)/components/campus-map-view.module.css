@@ -29,9 +29,9 @@
 .map :global(.leaflet-control-attribution a:focus-visible) { outline: 2px solid var(--ring); outline-offset: 1px; }
 .map :global(.leaflet-tooltip) { max-width: 240px; white-space: normal; overflow-wrap: anywhere; border-color: var(--border); background: var(--card); color: var(--foreground); font-size: 12px; line-height: 16px; }
 .map :global(.leaflet-tooltip-top:before) { border-top-color: var(--border); }
-.map :global(path[role="button"]:focus-visible) { outline: none; stroke: var(--ring); stroke-width: 5px; }
+.map :global(path[role="link"]:focus-visible) { outline: none; stroke: var(--ring); stroke-width: 5px; }
 @media (max-width: 1023px) { .map { height: 320px; } }
 @media (prefers-reduced-motion: reduce) { .map :global(.leaflet-zoom-animated) { transition: none; } }
 
-.map :global(a), .map :global(path[role="button"]) { scroll-margin-top: 16px; scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
-@media (min-width: 1024px) { .map :global(a), .map :global(path[role="button"]) { scroll-margin-bottom: 16px; } }
+.map :global(a), .map :global(path[role="link"]) { scroll-margin-top: 16px; scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
+@media (min-width: 1024px) { .map :global(a), .map :global(path[role="link"]) { scroll-margin-bottom: 16px; } }

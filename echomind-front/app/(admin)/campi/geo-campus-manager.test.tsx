@@ -6,11 +6,13 @@ const api = vi.hoisted(() => ({
   campuses: { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   buildings: { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   spaces: { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
-  nodes: { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
-  edges: { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+  landmarks: { list: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
 }));
 
 vi.mock("@/lib/geocampus-api", () => ({ geoCampusApi: api }));
+vi.mock("@/lib/api", () => ({ configApi: { get: vi.fn().mockResolvedValue({ public_slug: "universidade" }) } }));
+vi.mock("./place-media-manager", () => ({ PlaceMediaManager: () => <div>Gerenciador de fotos</div> }));
+vi.mock("./place-qr-code", () => ({ PlaceQrCode: ({ publicSlug, publicCode }: { publicSlug: string; publicCode: string }) => <div>{publicSlug}/{publicCode}</div> }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("./geo-campus-map", () => ({
   GeoCampusMap: ({ onPickPoint }: { onPickPoint?: (point: { lat: number; lng: number }) => void }) =>
@@ -37,12 +39,10 @@ const building = {
   category: "prédio",
   entrance_lat: -16.328,
   entrance_lng: -48.953,
-  entrance_node_id: null,
+  public_code: "public-bloco-a",
+  photos: [],
   active: true,
 };
-const nodeA = { id: "node-1", campus_id: campus.id, lat: -16.328, lng: -48.953, label: "Portão" };
-const nodeB = { id: "node-2", campus_id: campus.id, lat: -16.329, lng: -48.954, label: "Biblioteca" };
-
 describe("GeoCampusManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -52,11 +52,10 @@ describe("GeoCampusManager", () => {
     api.campuses.list.mockResolvedValue([campus]);
     api.buildings.list.mockResolvedValue([building]);
     api.spaces.list.mockResolvedValue([]);
-    api.nodes.list.mockResolvedValue([nodeA, nodeB]);
-    api.edges.list.mockResolvedValue([]);
+    api.landmarks.list.mockResolvedValue([]);
   });
 
-  it("marca a entrada no mapa e liga o prédio a um ponto sem enviar tenant_id", async () => {
+  it("marca o bloco no mapa sem vínculos com rotas nem tenant_id", async () => {
     const user = userEvent.setup();
     api.buildings.create.mockResolvedValue({ ...building, id: "building-2", name: "Bloco B" });
     render(<GeoCampusManager />);
@@ -65,7 +64,6 @@ describe("GeoCampusManager", () => {
     await user.click(screen.getByRole("button", { name: "Novo prédio" }));
     await user.type(screen.getByLabelText("Nome"), "Bloco B");
     await user.click(screen.getByRole("button", { name: "Marcar ponto no mapa" }));
-    await user.selectOptions(screen.getByLabelText("Ponto do caminho na entrada"), "node-1");
     await user.click(screen.getByRole("button", { name: "Salvar" }));
 
     await waitFor(() => expect(api.buildings.create).toHaveBeenCalledWith("campus-1", {
@@ -74,7 +72,6 @@ describe("GeoCampusManager", () => {
       category: "prédio",
       entrance_lat: -16.3281234,
       entrance_lng: -48.9534567,
-      entrance_node_id: "node-1",
       active: true,
     }));
     expect(api.buildings.create.mock.calls[0][1]).not.toHaveProperty("tenant_id");
@@ -102,24 +99,18 @@ describe("GeoCampusManager", () => {
     }));
   });
 
-  it("cadastra trecho não acessível entre pontos distintos", async () => {
+  it("cadastra um ponto de referência marcado no mapa", async () => {
     const user = userEvent.setup();
-    api.edges.create.mockResolvedValue({ id: "edge-1", campus_id: campus.id, from_node_id: nodeA.id, to_node_id: nodeB.id, distance_m: 120, accessible: false, active: true });
+    api.landmarks.create.mockResolvedValue({ id: "ref-1", name: "Praça central", photos: [] });
     render(<GeoCampusManager />);
-
     await screen.findByText("Bloco A");
-    await user.click(screen.getByRole("tab", { name: "Trechos" }));
-    await user.click(screen.getByRole("button", { name: "Novo trecho" }));
-    await user.type(screen.getByLabelText("Comprimento real em metros (opcional)"), "120");
-    await user.click(screen.getByRole("checkbox", { name: "Trecho acessível (sem escadas ou barreiras)" }));
+    await user.click(screen.getByRole("tab", { name: "Pontos de referência" }));
+    await user.click(screen.getByRole("button", { name: "Novo ponto de referência" }));
+    await user.type(screen.getByLabelText("Nome"), "Praça central");
+    await user.click(screen.getByRole("button", { name: "Marcar ponto no mapa" }));
     await user.click(screen.getByRole("button", { name: "Salvar" }));
-
-    await waitFor(() => expect(api.edges.create).toHaveBeenCalledWith("campus-1", {
-      from_node_id: "node-1",
-      to_node_id: "node-2",
-      distance_m: 120,
-      accessible: false,
-      active: true,
+    await waitFor(() => expect(api.landmarks.create).toHaveBeenCalledWith("campus-1", {
+      name: "Praça central", description: null, lat: -16.3281234, lng: -48.9534567, active: true,
     }));
   });
 
@@ -153,7 +144,7 @@ describe("GeoCampusManager", () => {
     expect(screen.getByText("Bloco Norte")).toBeInTheDocument();
   });
 
-  it("preserva precisão manual, campos e vínculo ao editar prédio; falha mantém o formulário", async () => {
+  it("preserva precisão manual e campos ao editar prédio; falha mantém o formulário", async () => {
     const user = userEvent.setup();
     api.buildings.update.mockRejectedValueOnce(new Error("Falha sintética"));
     api.buildings.update.mockResolvedValueOnce(building);
@@ -163,7 +154,6 @@ describe("GeoCampusManager", () => {
     await user.type(screen.getByLabelText("Latitude"), "-16.123456789");
     await user.clear(screen.getByLabelText("Longitude"));
     await user.type(screen.getByLabelText("Longitude"), "-48.987654321");
-    await user.selectOptions(screen.getByLabelText("Ponto do caminho na entrada"), nodeB.id);
     await user.type(screen.getByLabelText("Descrição (opcional)"), "Descrição preservada");
     await user.click(screen.getByRole("checkbox", { name: "Ativo para visitantes" }));
     await user.click(screen.getByRole("button", { name: "Salvar" }));
@@ -172,12 +162,12 @@ describe("GeoCampusManager", () => {
     await user.click(screen.getByRole("button", { name: "Salvar" }));
     await waitFor(() => expect(api.buildings.update).toHaveBeenLastCalledWith(campus.id, building.id, {
       name: "Bloco A", description: "Descrição preservada", category: "prédio", entrance_lat: -16.123456789,
-      entrance_lng: -48.987654321, entrance_node_id: nodeB.id, active: false,
+      entrance_lng: -48.987654321, active: false,
     }));
     await waitFor(() => expect(screen.queryByLabelText("Latitude")).not.toBeInTheDocument());
   });
 
-  it("bloqueia coordenadas fora da faixa, zoom fracionário, pontos iguais e distância não positiva", async () => {
+  it("bloqueia coordenadas fora da faixa e zoom fracionário", async () => {
     const user = userEvent.setup(); render(<GeoCampusManager />);
     await screen.findByText("Bloco A");
     await user.click(screen.getByRole("button", { name: "Novo campus" }));
@@ -191,45 +181,24 @@ describe("GeoCampusManager", () => {
     await user.click(screen.getByRole("button", { name: "Salvar" }));
     expect(toast.error).toHaveBeenCalledWith("Informe um zoom de 1 a 19.");
     expect(api.campuses.create).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    await user.click(screen.getByRole("tab", { name: "Trechos" }));
-    await user.click(screen.getByRole("button", { name: "Novo trecho" }));
-    await user.selectOptions(screen.getByLabelText("Ponto final"), nodeA.id);
-    await user.click(screen.getByRole("button", { name: "Salvar" }));
-    expect(toast.error).toHaveBeenCalledWith("Selecione dois pontos diferentes para o trecho.");
-    await user.selectOptions(screen.getByLabelText("Ponto final"), nodeB.id);
-    await user.type(screen.getByLabelText("Comprimento real em metros (opcional)"), "0");
-    await user.click(screen.getByRole("button", { name: "Salvar" }));
-    expect(toast.error).toHaveBeenCalledWith("A distância deve ser maior que zero.");
-    expect(api.edges.create).not.toHaveBeenCalled();
   });
 
-  it.each(["accepted", "denied", "unavailable"])("GPS %s somente por ação e alternativa manual", async (mode) => {
-    const descriptor = Object.getOwnPropertyDescriptor(navigator, "geolocation");
-    const getCurrentPosition = vi.fn((success: PositionCallback, error: PositionErrorCallback) => {
-      if (mode === "accepted") success({ coords: { latitude: -16.123456789, longitude: -48.987654321 } } as GeolocationPosition);
-      else error({ code: 1 } as GeolocationPositionError);
-    });
+  it("oferece guia visual, fotos e QR sem solicitar a localização do administrador", async () => {
+    const getCurrentPosition = vi.fn();
     const watchPosition = vi.fn();
-    Object.defineProperty(navigator, "geolocation", { configurable: true, value: mode === "unavailable" ? undefined : { getCurrentPosition, watchPosition } });
+    const descriptor = Object.getOwnPropertyDescriptor(navigator, "geolocation");
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { getCurrentPosition, watchPosition } });
     try {
-      const user = userEvent.setup(); render(<GeoCampusManager />); await screen.findByText("Bloco A");
-      await user.click(screen.getByRole("tab", { name: "Pontos do caminho" }));
-      await user.click(screen.getByRole("button", { name: "Novo ponto" }));
+      const user = userEvent.setup();
+      render(<GeoCampusManager />);
+      await screen.findByText("Bloco A");
+      expect(screen.queryByRole("tab", { name: "Trechos" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("tab", { name: "Pontos do caminho" })).not.toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Fotos e QR Code de Bloco A" }));
+      expect(screen.getByText("Gerenciador de fotos")).toBeInTheDocument();
+      expect(await screen.findByText("universidade/public-bloco-a")).toBeInTheDocument();
       expect(getCurrentPosition).not.toHaveBeenCalled();
-      await user.click(screen.getByRole("button", { name: "Marcar minha localização" }));
-      if (mode === "unavailable") expect(toast.error).toHaveBeenCalledWith("Este navegador não oferece localização.");
-      else {
-        expect(getCurrentPosition).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), { enableHighAccuracy: true, timeout: 10000 });
-        if (mode === "accepted") expect(screen.getByLabelText("Latitude")).toHaveValue(-16.1234568);
-        else expect(toast.error).toHaveBeenCalledWith("Não foi possível acessar sua localização.");
-      }
       expect(watchPosition).not.toHaveBeenCalled();
-      await user.clear(screen.getByLabelText("Latitude")); await user.type(screen.getByLabelText("Latitude"), "0.123456789");
-      await user.clear(screen.getByLabelText("Longitude")); await user.type(screen.getByLabelText("Longitude"), "0.987654321");
-      api.nodes.create.mockResolvedValue(nodeA);
-      await user.click(screen.getByRole("button", { name: "Salvar" }));
-      await waitFor(() => expect(api.nodes.create).toHaveBeenCalledWith(campus.id, { label: null, lat: 0.123456789, lng: 0.987654321 }));
     } finally {
       if (descriptor) Object.defineProperty(navigator, "geolocation", descriptor);
       else Reflect.deleteProperty(navigator, "geolocation");
@@ -249,7 +218,7 @@ describe("GeoCampusManager", () => {
 
   it("abas operam com setas e editor devolve foco ao cancelar", async () => {
     const user = userEvent.setup(); render(<GeoCampusManager />); await screen.findByText("Bloco A");
-    screen.getByRole("tab", { name: "Prédios" }).focus(); await user.keyboard("{ArrowRight}");
+    screen.getByRole("tab", { name: "Prédios e blocos" }).focus(); await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("tab", { name: "Espaços internos" })).toHaveAttribute("aria-selected", "true");
     const trigger = screen.getByRole("button", { name: "Novo espaço" });
     await user.click(trigger); expect(screen.getByRole("heading", { name: "Cadastrar espaço interno" })).toHaveFocus();

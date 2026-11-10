@@ -12,7 +12,7 @@ const fake = vi.hoisted(() => {
 vi.mock("leaflet", () => ({ map: fake.create, tileLayer: () => fake.layer, layerGroup: () => fake.layer, circleMarker: fake.circleMarker, polyline: fake.polyline, marker: fake.createMarker, divIcon: vi.fn(), control: { zoom: () => fake.layer, layers: () => fake.layer } }));
 import { GeoCampusMap } from "./geo-campus-map";
 
-const props = { center: { lat: -16.328, lng: -48.953 }, zoom: 17, buildings: [], nodes: [], edges: [], draftPoint: null, focusPoint: null };
+const props = { center: { lat: -16.328, lng: -48.953 }, zoom: 17, buildings: [], landmarks: [], draftPoint: null, focusPoint: null };
 let observerCallback: ResizeObserverCallback;
 let disconnect: ReturnType<typeof vi.fn>;
 let frames: Map<number, FrameRequestCallback>;
@@ -51,13 +51,15 @@ describe("GeoCampusMap lifecycle and geography", () => {
     queued.forEach(callback => callback(0));
     expect(fake.map.invalidateSize).toHaveBeenCalledTimes(before);
   });
-  it("mantém geometria e texto de barreiras, sem desenhar trecho inativo", async () => {
-    const nodes = [{ id: "a", campus_id: "c", lat: 1, lng: 2, label: "A" }, { id: "b", campus_id: "c", lat: 3, lng: 4, label: "B" }];
-    const edge = { id: "ab", campus_id: "c", from_node_id: "a", to_node_id: "b", distance_m: null, accessible: false, active: true };
-    render(<GeoCampusMap {...props} nodes={nodes} edges={[edge, { ...edge, id: "inactive", active: false }]} />);
-    await waitFor(() => expect(fake.polyline).toHaveBeenCalled());
-    expect(fake.polyline).toHaveBeenCalledWith([[1, 2], [3, 4]], expect.objectContaining({ dashArray: "6 6", weight: 5 }));
-    expect(fake.polyline).toHaveBeenCalledTimes(1);
-    expect(fake.layer.bindTooltip.mock.calls.some(([element]) => element.textContent === "Trecho com barreira de acessibilidade")).toBe(true);
+  it("mostra blocos e referências com texto seguro sem desenhar caminhos", async () => {
+    const landmark = { id: "ref", campus_id: "c", public_code: "ref", lat: 1, lng: 2, name: "<script>praça</script>", description: null, active: true, photos: [] };
+    const building = { id: "block", campus_id: "c", public_code: "block", name: "Bloco A", description: null, category: "bloco", entrance_lat: 3, entrance_lng: 4, active: false, photos: [] };
+    render(<GeoCampusMap {...props} landmarks={[landmark]} buildings={[building]} />);
+    await waitFor(() => expect(fake.circleMarker).toHaveBeenCalled());
+    expect(fake.circleMarker).toHaveBeenCalledWith([1, 2], expect.objectContaining({ fillColor: "var(--primary)" }));
+    expect(fake.polyline).not.toHaveBeenCalled();
+    const labels = fake.layer.bindTooltip.mock.calls.map(([element]) => element as HTMLElement);
+    expect(labels.some(element => element.textContent === "<script>praça</script>" && element.children.length === 0)).toBe(true);
+    expect(labels.some(element => element.textContent === "Bloco A (Inativo)")).toBe(true);
   });
 });

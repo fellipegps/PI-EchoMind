@@ -226,7 +226,7 @@ async def test_invalid_limit_fails_before_receiving_body(
     {"type": "http", "method": "POST", "path": "/chat"},
     {"type": "http", "method": "GET", "path": "/documents/upload"},
 ])
-async def test_barrier_is_exclusive_to_document_upload(monkeypatch, scope):
+async def test_barrier_skips_unrelated_routes(monkeypatch, scope):
     from app.document_upload import DocumentUploadLimitMiddleware
     from unittest.mock import AsyncMock
 
@@ -236,6 +236,77 @@ async def test_barrier_is_exclusive_to_document_upload(monkeypatch, scope):
     await DocumentUploadLimitMiddleware(inner)(scope, receive, send)
     inner.assert_awaited_once_with(scope, receive, send)
     receive.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("place_type", ["building", "space", "landmark", "invalid-type"])
+@pytest.mark.parametrize("content_length", [None, b"1", b"invalid"])
+async def test_campus_photo_limit_precedes_parser_with_untrusted_content_length(
+    client, quick_test_context, monkeypatch, parser_io, place_type, content_length,
+):
+    from app.campus_photo import MAX_PHOTO_BYTES
+    from app.document_upload import MULTIPART_ENVELOPE_BYTES
+
+    # The photo bound is independent of the document limit configuration.
+    monkeypatch.setenv("MAX_DOCUMENT_SIZE_MB", "invalid")
+    body = multipart_body(b"x" * (7 * 1024 * 1024))
+    result = await send_stream(
+        quick_test_context.app, body, content_length=content_length,
+        path=f"/campuses/campus/places/{place_type}/place/photos",
+    )
+    assert result.status == 413
+    assert result.received < len(body)
+    assert result.received <= MAX_PHOTO_BYTES + MULTIPART_ENVELOPE_BYTES + 3 * 16384
+    assert sum(parser_io.parsed) <= MAX_PHOTO_BYTES + MULTIPART_ENVELOPE_BYTES
+    assert parser_io.files and all(file.closed for file in parser_io.files)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("extra_file", [True, b"x" * (7 * 1024 * 1024)], ids=["small", "large"])
+async def test_campus_photo_upload_rejects_multiple_files_before_second_body(
+    client, quick_test_context, parser_io, extra_file,
+):
+    body = multipart_body(b"first image", extra_file=extra_file)
+    result = await send_stream(
+        quick_test_context.app, body,
+        path="/campuses/campus/places/building/place/photos",
+    )
+    assert result.status == 400
+    assert json.loads(result.body) == {"detail": "Envie exatamente um arquivo por requisição."}
+    assert len(parser_io.files) == 1
+    assert parser_io.files[0].closed
+    if isinstance(extra_file, bytes):
+        assert result.received < len(body)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("content_length", [None, b"1", b"invalid"])
+async def test_valid_campus_photo_stream_uses_photo_bound_and_closes_files(
+    client, db, quick_test_context, monkeypatch, parser_io, content_length,
+):
+    from io import BytesIO
+    from PIL import Image
+    from app.database import CampusPlacePhoto
+
+    monkeypatch.setenv("MAX_DOCUMENT_SIZE_MB", "invalid")
+    campus = client.post("/campuses", json={
+        "name": "Campus de fotos", "center_lat": 0, "center_lng": 0,
+    }).json()
+    building = client.post(f"/campuses/{campus['id']}/buildings", json={
+        "name": "Bloco", "entrance_lat": 0, "entrance_lng": 0,
+    }).json()
+    output = BytesIO()
+    Image.new("RGB", (20, 20), "blue").save(output, format="PNG")
+    body = multipart_body(output.getvalue(), metadata={"caption": b"Fachada do bloco"})
+    result = await send_stream(
+        quick_test_context.app, body, content_length=content_length,
+        path=f"/campuses/{campus['id']}/places/building/{building['id']}/photos",
+    )
+    assert result.status == 201
+    assert json.loads(result.body)["caption"] == "Fachada do bloco"
+    assert result.received == sum(parser_io.parsed) == len(body)
+    assert len(parser_io.files) == 1 and parser_io.files[0].closed
+    assert db.query(CampusPlacePhoto).count() == 1
 
 
 @pytest.mark.asyncio
@@ -283,7 +354,10 @@ async def test_interrupted_receive_closes_the_partial_temporary_file(
             return {"type": "http.disconnect"}
         return {"type": "http.request", "body": body[(calls - 1) * 700000:calls * 700000], "more_body": True}
 
-    request = Request({"type": "http", "headers": [(b"content-type", b"multipart/form-data; boundary=upload")]}, receive)
+    request = Request({
+        "type": "http", "method": "POST", "path": "/documents/upload",
+        "headers": [(b"content-type", b"multipart/form-data; boundary=upload")],
+    }, receive)
     if failure == "cancel":
         with pytest.raises(asyncio.CancelledError):
             await handler(request)

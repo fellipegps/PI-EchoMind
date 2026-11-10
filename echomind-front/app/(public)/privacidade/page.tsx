@@ -5,7 +5,7 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-6 py-10 text-foreground">
       <h1 className="text-3xl font-semibold">Privacidade no EchoMind</h1>
-      <p className="text-sm text-muted-foreground">Atualizado em 2 de novembro de 2026.</p>
+      <p className="text-sm text-muted-foreground">Atualizado em 10 de novembro de 2026.</p>
       <p>O EchoMind oferece atendimento com inteligência artificial a partir das informações da instituição identificada no portal. Use o chat para dúvidas gerais; não envie documentos pessoais, CPF, senhas, dados de saúde ou informações de terceiros.</p>
       <section className="space-y-2" aria-labelledby="responsibilities-title">
         <h2 id="responsibilities-title" className="text-xl font-semibold">Responsabilidades no atendimento</h2>
@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">IA e serviços externos</h2>
         <p>Para gerar respostas, a pergunta e trechos relevantes da base institucional podem ser enviados à Groq. O Supabase armazena dados da aplicação e autentica administradores. A hospedagem e esses fornecedores podem tratar dados fora do Brasil, conforme a contratação da instituição.</p>
-        <p>Mapas e imagens externas podem revelar seu endereço IP aos respectivos provedores. Sua localização só é usada após sua ação e permissão no navegador, para calcular trajetos no próprio dispositivo; as coordenadas não são enviadas à API do EchoMind.</p>
+        <p>O mapa é um guia visual dos blocos, espaços internos e pontos de referência publicados pela instituição. As fichas apresentam descrições e fotos e podem ser abertas pelo mapa ou por QR Code. Os mapas de fundo e as imagens externas podem revelar seu endereço IP aos respectivos provedores.</p>
         <p>As respostas são geradas por IA, podem conter erros e devem ser confirmadas com a instituição quando necessário.</p>
       </section>
       <section className="space-y-2">

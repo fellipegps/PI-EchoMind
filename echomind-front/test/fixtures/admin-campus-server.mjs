@@ -14,31 +14,30 @@ const initial = () => ({
     { id: "north", name: "Campus Norte sintético", description: null, center_lat: -16.33, center_lng: -48.96, zoom: 18, active: false },
   ],
   buildings: [
-    { id: "library", campus_id: "central", name: "Biblioteca sintética", category: "estudo", description: "Acervo fictício", entrance_lat: -16.328, entrance_lng: -48.953, entrance_node_id: "gate", active: true },
-    { id: "unlinked", campus_id: "central", name: "Bloco sem rota", category: "ensino", description: null, entrance_lat: -16.3284, entrance_lng: -48.9537, entrance_node_id: null, active: false },
-    { id: "long", campus_id: "central", name: "Prédio extenso: " + "NomeSemEspacos".repeat(12), category: "Categoria".repeat(8), description: "Descrição fictícia extensa. ".repeat(90), entrance_lat: -16.3278, entrance_lng: -48.9535, entrance_node_id: "ramp", active: true },
-    { id: "north-building", campus_id: "north", name: "Bloco exclusivo Norte", category: "ensino", description: null, entrance_lat: -16.33, entrance_lng: -48.96, entrance_node_id: "north-gate", active: true },
+    { id: "library", campus_id: "central", name: "Biblioteca sintética", category: "estudo", description: "Acervo fictício", entrance_lat: -16.328, entrance_lng: -48.953, active: true },
+    { id: "unlinked", campus_id: "central", name: "Bloco inativo", category: "ensino", description: null, entrance_lat: -16.3284, entrance_lng: -48.9537, active: false },
+    { id: "long", campus_id: "central", name: "Prédio extenso: " + "NomeSemEspacos".repeat(12), category: "Categoria".repeat(8), description: "Descrição fictícia extensa. ".repeat(90), entrance_lat: -16.3278, entrance_lng: -48.9535, active: true },
+    { id: "north-building", campus_id: "north", name: "Bloco exclusivo Norte", category: "ensino", description: null, entrance_lat: -16.33, entrance_lng: -48.96, active: true },
   ],
   spaces: [{ id: "lab", campus_id: "central", building_id: "library", name: "Laboratório sintético", kind: "laboratório", floor: "2º andar", description: "Espaço fictício", active: true }],
-  "path-nodes": [
-    { id: "gate", campus_id: "central", label: "Portaria", lat: -16.328, lng: -48.953 },
-    { id: "square", campus_id: "central", label: "Praça", lat: -16.3283, lng: -48.953 },
-    { id: "ramp", campus_id: "central", label: "Rampa", lat: -16.3283, lng: -48.9534 },
-    { id: "north-gate", campus_id: "north", label: "Entrada Norte", lat: -16.33, lng: -48.96 },
-  ],
-  "path-edges": [
-    { id: "accessible", campus_id: "central", from_node_id: "gate", to_node_id: "square", distance_m: 35, accessible: true, active: true },
-    { id: "barrier", campus_id: "central", from_node_id: "square", to_node_id: "ramp", distance_m: 43, accessible: false, active: true },
-    { id: "inactive", campus_id: "central", from_node_id: "gate", to_node_id: "ramp", distance_m: null, accessible: true, active: false },
+  landmarks: [
+    { id: "square", campus_id: "central", public_code: "public-square", name: "Praça central", description: "Referência fictícia", lat: -16.3283, lng: -48.953, active: true, photos: [] },
   ],
 });
-let data = initial(), revision = 0, sequence = 0;
+function resetData() {
+  const current = initial();
+  for (const resource of ["buildings", "spaces"]) {
+    current[resource] = current[resource].map((place) => ({ ...place, public_code: "public-" + place.id, photos: [] }));
+  }
+  return current;
+}
+let data = resetData(), revision = 0, sequence = 0;
 createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); res.setHeader("Access-Control-Allow-Headers", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS"); res.setHeader("Content-Type", "application/json; charset=utf-8");
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
   const url = new URL(req.url, "http://127.0.0.1:4181"); let cfg = config();
-  if (cfg.revision !== revision) { data = initial(); revision = cfg.revision; }
+  if (cfg.revision !== revision) { data = resetData(); revision = cfg.revision; }
   if (/^\/(tiles|sat)\//.test(url.pathname)) {
     res.setHeader("Content-Type", "image/svg+xml");
     res.end(`<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="${url.pathname.startsWith("/sat/") ? "#c4d5b7" : "#e4e8e0"}"/><path d="M0 128H256M128 0V256" stroke="#fff" stroke-width="14"/><path d="M0 128H256M128 0V256" stroke="#a7b89e" stroke-width="2"/><text x="12" y="30" font-family="sans-serif" font-size="14" fill="#37452f">DS-14 · tile fictício</text></svg>`); return;
@@ -57,7 +56,26 @@ createServer(async (req, res) => {
   if (url.pathname === "/auth/v1/logout") { res.writeHead(204); res.end(); return; }
   if (url.pathname === "/dashboard") { res.end(JSON.stringify({ total_questions: 0, unanswered_questions: 0, avg_response_time: "0 s", satisfaction_rate: 0, daily_interactions: [], top_faqs: [] })); return; }
   if (url.pathname === "/dashboard/rag-metrics") { res.end(JSON.stringify({ has_data: false })); return; }
-  const match = url.pathname.match(/^\/campuses(?:\/([^/]+))?(?:\/(buildings|spaces|path-nodes|path-edges)(?:\/([^/]+))?)?$/);
+  if (url.pathname === "/config") { res.end(JSON.stringify({ company_name: "Instituição sintética", public_slug: "ds14" })); return; }
+  const photoMatch = url.pathname.match(/^\/campuses\/([^/]+)\/places\/(building|space|landmark)\/([^/]+)\/photos(?:\/([^/]+))?$/);
+  if (photoMatch) {
+    if (!req.headers.authorization) { res.writeHead(401); res.end("{}"); return; }
+    const [, campusId, type, placeId, photoId] = photoMatch;
+    const place = data[{ building: "buildings", space: "spaces", landmark: "landmarks" }[type]].find(item => item.id === placeId && item.campus_id === campusId);
+    if (!place) { res.writeHead(404); res.end("{}"); return; }
+    if (req.method === "POST" && !photoId) {
+      let raw = ""; for await (const chunk of req) raw += chunk;
+      const caption = raw.match(/name="caption"\r\n\r\n([^\r]*)/)?.[1] || null;
+      const photo = { id: "photo-" + sequence, caption, sort_order: place.photos.length, url: url.pathname + "/photo-" + sequence };
+      place.photos.push(photo); res.writeHead(201); res.end(JSON.stringify(photo)); return;
+    }
+    const index = place.photos.findIndex(photo => photo.id === photoId);
+    if (index < 0) { res.writeHead(404); res.end("{}"); return; }
+    if (req.method === "DELETE") { place.photos.splice(index, 1); res.writeHead(204); res.end(); return; }
+    res.setHeader("Content-Type", "image/png");
+    res.end(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/bHkAAAAASUVORK5CYII=", "base64")); return;
+  }
+  const match = url.pathname.match(/^\/campuses(?:\/([^/]+))?(?:\/(buildings|spaces|landmarks)(?:\/([^/]+))?)?$/);
   if (match) {
     if (!req.headers.authorization) { res.writeHead(401); res.end("{}"); return; }
     const [, campusId, resource, itemId] = match; const key = resource || "campuses";
@@ -71,7 +89,7 @@ createServer(async (req, res) => {
     if (cfg.mode === `${operation}-error` || (cfg.mode === "campuses-error" && key === "campuses") || (cfg.mode === "map-error" && resource)) { send(500, { detail: "SEGREDO_INTERNO_SINTETICO_NAO_EXIBIR" }); return; }
     if (cfg.mode === "delete-conflict" && operation === "delete") { send(409, { detail: "Cadastro possui vínculos. Remova as ligações antes de excluir." }); return; }
     if (operation === "list") { send(200, cfg.mode === "empty" ? [] : snapshot); return; }
-    if (operation === "create") { const created = { ...body, id: `${key}-created-${sequence}`, ...(resource ? { campus_id: campusId } : {}) }; data[key].push(created); send(201, created); return; }
+    if (operation === "create") { const created = { ...body, id: `${key}-created-${sequence}`, ...(resource ? { campus_id: campusId, public_code: "public-created-" + sequence, photos: [] } : {}) }; data[key].push(created); send(201, created); return; }
     const index = data[key].findIndex(item => item.id === (resource ? itemId : campusId));
     if (index < 0) { send(404, { detail: "Cadastro sintético ausente" }); return; }
     if (operation === "update") { data[key][index] = { ...data[key][index], ...body }; send(200, data[key][index]); return; }

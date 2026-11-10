@@ -48,6 +48,13 @@ const publicEvent = {
 };
 
 describe("PublicPortal", () => {
+  it("retorna diretamente à lista de locais depois de consultar uma ficha", async () => {
+    render(<PublicPortal publicSlug="universidade" initialTab="locais" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    expect(screen.getByRole("button", { name: "Locais" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("region", { name: "Navegação geográfica do campus" })).toHaveTextContent("universidade");
+    expect(screen.queryByRole("textbox", { name: "Digite sua pergunta" })).not.toBeInTheDocument();
+  });
   it("permite conversar sem aviso completo, mantendo as abas de eventos e locais", async () => {
     apiMocks.getInstitution.mockResolvedValue({ company_name: "Instituição", privacy_ready: false });
     render(<PublicPortal publicSlug="instituicao" />);

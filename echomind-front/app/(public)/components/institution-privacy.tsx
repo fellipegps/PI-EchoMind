@@ -42,7 +42,7 @@ export function InstitutionPrivacy({ publicSlug }: { publicSlug: string }) {
           <p>A limpeza abrange conversas e a fila de perguntas não respondidas. Documentos, FAQs publicadas, contas, cópias de segurança e dados dos fornecedores seguem procedimentos próprios, que a instituição deve informar. As exceções legais de conservação são avaliadas no atendimento ao pedido.</p>
         </section>
         <section className="space-y-2"><h2 className="text-xl font-semibold">Mapas e armazenamento no navegador</h2>
-          <p>A localização é opcional, depende de sua ação e da permissão do navegador e é usada para trajetos no dispositivo; as coordenadas não são enviadas à API EchoMind. Tiles de mapas e imagens são carregados de terceiros, que recebem seu IP e podem inferir a área visualizada.</p>
+          <p>O mapa é um guia visual com blocos, espaços internos, pontos de referência e fotos publicados pela instituição. Tocar em um local ou escanear seu QR Code abre a mesma ficha. O guia funciona sem solicitar a localização do visitante. As imagens de fundo do mapa são carregadas de terceiros, que recebem seu IP e podem inferir a área visualizada.</p>
           <p>O navegador guarda a preferência de tema e, para administradores, dados necessários à sessão de login. Não há conta de visitante para conversar.</p>
         </section>
         <p className="text-sm text-muted-foreground">Para esclarecer as condições de tratamento dos seus dados, entre em contato com a instituição pelo canal informado acima.</p>

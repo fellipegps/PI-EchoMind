@@ -19,61 +19,81 @@ export interface Campus {
 
 export type CampusInput = Omit<Campus, "id">;
 
+export type PlaceType = "building" | "space" | "landmark";
+
+export interface PlacePhoto {
+  id: string;
+  caption: string | null;
+  sort_order: number;
+  url: string;
+}
+
 export interface Building {
   id: string;
   campus_id: string;
+  public_code: string;
   name: string;
   description: string | null;
   category: string;
   entrance_lat: number;
   entrance_lng: number;
-  entrance_node_id: string | null;
   active: boolean;
+  photos: PlacePhoto[];
 }
 
-export type BuildingInput = Omit<Building, "id" | "campus_id">;
+export type BuildingInput = Omit<Building, "id" | "campus_id" | "public_code" | "photos">;
 
 export interface IndoorSpace {
   id: string;
   campus_id: string;
+  public_code: string;
   building_id: string;
   name: string;
   kind: string;
   floor: string | null;
   description: string | null;
   active: boolean;
+  photos: PlacePhoto[];
 }
 
-export type IndoorSpaceInput = Omit<IndoorSpace, "id" | "campus_id">;
+export type IndoorSpaceInput = Omit<IndoorSpace, "id" | "campus_id" | "public_code" | "photos">;
 
-export interface PathNode {
+export interface Landmark {
   id: string;
   campus_id: string;
+  public_code: string;
+  name: string;
+  description: string | null;
   lat: number;
   lng: number;
-  label: string | null;
-}
-
-export type PathNodeInput = Omit<PathNode, "id" | "campus_id">;
-
-export interface PathEdge {
-  id: string;
-  campus_id: string;
-  from_node_id: string;
-  to_node_id: string;
-  distance_m: number | null;
-  accessible: boolean;
   active: boolean;
+  photos: PlacePhoto[];
 }
 
-export type PathEdgeInput = Omit<PathEdge, "id" | "campus_id">;
+export type LandmarkInput = Omit<Landmark, "id" | "campus_id" | "public_code" | "photos">;
+
+export type CampusPlace = Building | IndoorSpace | Landmark;
+
+export interface PublicPlace {
+  type: PlaceType;
+  campus: Campus;
+  place: CampusPlace;
+  building: Building | null;
+}
 
 export interface PublicGeoCampus {
   campuses: Campus[];
   buildings: Building[];
   spaces: IndoorSpace[];
-  nodes: PathNode[];
-  edges: PathEdge[];
+  landmarks: Landmark[];
+}
+
+export function publicPlaceHref(slug: string, type: PlaceType, publicCode: string) {
+  return `/p/${encodeURIComponent(slug)}/locais/${type}/${encodeURIComponent(publicCode)}`;
+}
+
+export function campusPhotoUrl(url: string) {
+  return baseUrl ? `${baseUrl}${url}` : "";
 }
 
 function resourcePath(campusId: string, resource: string, itemId?: string) {
@@ -81,10 +101,15 @@ function resourcePath(campusId: string, resource: string, itemId?: string) {
   return itemId ? `${base}/${encodeURIComponent(itemId)}` : base;
 }
 
-async function geoRequest<T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T> {
+async function geoRequest<T>(
+  path: string,
+  init: RequestInit = {},
+  authenticated = true,
+  responseType: "json" | "blob" = "json",
+): Promise<T> {
   if (!baseUrl) throw new Error("O servidor do EchoMind ainda não está disponível.");
   const headers = new Headers(init.headers);
-  if (init.body !== undefined) headers.set("Content-Type", "application/json");
+  if (typeof init.body === "string") headers.set("Content-Type", "application/json");
   if (authenticated) {
     const token = tokenStore.get();
     if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -109,7 +134,13 @@ async function geoRequest<T>(path: string, init: RequestInit = {}, authenticated
     throw new Error(detail || "Não foi possível concluir a solicitação.");
   }
   if (response.status === 204) return undefined as T;
+  if (responseType === "blob") return response.blob() as Promise<T>;
   return response.json() as Promise<T>;
+}
+
+function photoPath(campusId: string, type: PlaceType, placeId: string, photoId?: string) {
+  const path = resourcePath(campusId, `places/${type}/${encodeURIComponent(placeId)}/photos`);
+  return photoId ? `${path}/${encodeURIComponent(photoId)}` : path;
 }
 
 function jsonBody(value: unknown): RequestInit {
@@ -137,8 +168,25 @@ export const geoCampusApi = {
   },
   buildings: resourceApi<Building, BuildingInput>("buildings"),
   spaces: resourceApi<IndoorSpace, IndoorSpaceInput>("spaces"),
-  nodes: resourceApi<PathNode, PathNodeInput>("path-nodes"),
-  edges: resourceApi<PathEdge, PathEdgeInput>("path-edges"),
+  landmarks: resourceApi<Landmark, LandmarkInput>("landmarks"),
+  photos: {
+    upload: (campusId: string, type: PlaceType, placeId: string, file: File, caption?: string) => {
+      const body = new FormData();
+      body.append("file", file);
+      if (caption?.trim()) body.append("caption", caption.trim());
+      return geoRequest<PlacePhoto>(photoPath(campusId, type, placeId), { method: "POST", body });
+    },
+    content: (campusId: string, type: PlaceType, placeId: string, photoId: string) =>
+      geoRequest<Blob>(photoPath(campusId, type, placeId, photoId), {}, true, "blob"),
+    delete: (campusId: string, type: PlaceType, placeId: string, photoId: string) =>
+      geoRequest<void>(photoPath(campusId, type, placeId, photoId), { method: "DELETE" }),
+  },
   publicMap: (slug: string) =>
     geoRequest<PublicGeoCampus>(`/public/${encodeURIComponent(slug)}/geo-campus`, {}, false),
+  publicPlace: (slug: string, type: PlaceType, publicCode: string) =>
+    geoRequest<PublicPlace>(
+      `/public/${encodeURIComponent(slug)}/places/${type}/${encodeURIComponent(publicCode)}`,
+      {},
+      false,
+    ),
 };

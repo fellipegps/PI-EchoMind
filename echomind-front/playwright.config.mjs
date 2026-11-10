@@ -7,6 +7,7 @@ export default defineConfig({
   testDir: "./test/e2e",
   testMatch: "**/*.e2e.mjs",
   outputDir: ".next/e2e-results",
+  workers: 1,
   use: { baseURL: portal },
   webServer: [
     {

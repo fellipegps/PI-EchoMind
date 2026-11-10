@@ -13,10 +13,9 @@ let config = { ...testPrivacySettings, id: "config16", public_slug: "ds16-fixtur
 let faqs = [{ id: "faq16", question: "Como consultar os serviços acadêmicos? " + long, answer: "Resposta **de teste** com orientação institucional. " + long, show_in_chatbot: true, created_at: stamp }];
 const events = [{ id: "event16", title: "Encontro de integração acadêmica e apresentação dos espaços institucionais", description: long, event_date: "2026-10-20", event_end_date: "2026-10-21", event_type: "palestra", course: "Curso sintético de sistemas de informação", location: "Auditório fictício — Bloco A", image_url: null, link_url: "https://example.test/evento", created_at: stamp }];
 const campuses = [{ id: "c1", name: "Campus sintético Central", description: long, center_lat: -23.55045, center_lng: -46.63325, zoom: 18, active: true }];
-const nodes = [{ id: "a", campus_id: "c1", lat: -23.5505, lng: -46.6333, label: "Portaria" }, { id: "b", campus_id: "c1", lat: -23.5504, lng: -46.6332, label: "Bloco A" }];
-const edges = [{ id: "ab", campus_id: "c1", from_node_id: "a", to_node_id: "b", distance_m: 15.5, accessible: true, active: true }];
-const buildings = nodes.map((n, i) => ({ id: `building${i}`, campus_id: "c1", name: n.label, description: "Prédio sintético", category: "ensino", entrance_lat: n.lat, entrance_lng: n.lng, entrance_node_id: n.id, active: true }));
-const spaces = [{ id: "space16", campus_id: "c1", building_id: "building1", name: "Laboratório de informática", kind: "laboratório", floor: "1º andar", description: long, active: true }];
+const buildings = [{ id: "building1", campus_id: "c1", public_code: "bloco-a-ds16", name: "Bloco A", description: "Prédio sintético", category: "ensino", entrance_lat: -23.5504, entrance_lng: -46.6332, active: true, photos: [] }];
+const landmarks = [{ id: "landmark16", campus_id: "c1", public_code: "portaria-ds16", name: "Portaria", description: "Referência sintética", lat: -23.5505, lng: -46.6333, active: true, photos: [] }];
+const spaces = [{ id: "space16", campus_id: "c1", public_code: "laboratorio-ds16", building_id: "building1", name: "Laboratório de informática", kind: "laboratório", floor: "1º andar", description: long, active: true, photos: [] }];
 const documents = ["ready", "error"].map((status, i) => ({ id: `doc${i}`, filename: i ? "Documento-com-falha.txt" : "Regulamento_institucional_de_matricula_" + "Referencia".repeat(14) + ".pdf", mime_type: i ? "text/plain" : "application/pdf", size_bytes: 1234567, sha256: "a".repeat(64), status, chunk_count: i ? 0 : 1234, document_type: null, document_number: null, department: null, published_at: null, valid_until: null, error_message: i ? "DETALHE_INTERNO_NAO_EXIBIR" : null, created_at: stamp, updated_at: stamp, processed_at: stamp }));
 const questions = ["pending", "review", "ignored"].map((status, i) => ({ id: `question${i}`, canonical_question: "Como consultar matrícula e atendimento? " + long, count: i + 12, first_asked: stamp, last_asked: stamp, similar_questions: ["Qual é o prazo acadêmico?"], triage_status: status, triage_reason: i === 1 ? "unclear" : i === 2 ? "ignored_by_admin" : null }));
 const dashboard = { total_questions: 1234567, unanswered_questions: 12345, avg_response_time: "1,25 s", satisfaction_rate: 92.5, daily_interactions: [210, 140, 320, 280, 460, 390, 510].map((count, i) => ({ date: `${i + 6}/10`, count })), top_faqs: faqs.map(f => ({ question: f.question, count: 1250 })) };
@@ -58,7 +57,15 @@ createServer(async (req, res) => {
   if (publicMatch) {
     const suffix = publicMatch[2] || "";
     if (publicMatch[1] === "ds16-error" && suffix === "/geo-campus") { send(500, { detail: "DETALHE_INTERNO_SINTETICO" }); return; }
-    const geo = publicMatch[1] === "ds16-empty" ? { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] } : { campuses, buildings, spaces, nodes, edges };
+    const geo = publicMatch[1] === "ds16-empty" ? { campuses: [], buildings: [], spaces: [], landmarks: [] } : { campuses, buildings, spaces, landmarks };
+    const placeMatch = suffix.match(/^\/places\/(building|space|landmark)\/([^/]+)$/);
+    if (placeMatch) {
+      const type = placeMatch[1];
+      const places = { building: buildings, space: spaces, landmark: landmarks }[type];
+      const place = places.find(item => item.public_code === placeMatch[2]);
+      if (!place || publicMatch[1] === "ds16-empty") { send(404, { detail: "Local não encontrado." }); return; }
+      send(200, { type, campus: campuses[0], place, building: type === "space" ? buildings.find(item => item.id === place.building_id) : null }); return;
+    }
     const data = { "": config, "/faqs": faqs.filter(f => f.show_in_chatbot), "/events": events, "/geo-campus": geo };
     if (suffix in data) { send(200, data[suffix]); return; }
   }
@@ -71,7 +78,7 @@ createServer(async (req, res) => {
   if (faqMatch && req.method === "PUT") { const faq = faqs.find(f => f.id === faqMatch[1]); Object.assign(faq, body); send(200, faq); return; }
   if (faqMatch && req.method === "DELETE") { faqs = faqs.filter(f => f.id !== faqMatch[1]); send(204); return; }
   if (req.method !== "GET") { send(404, { detail: "Operação não implementada na fixture; nada persistido" }); return; }
-  const responses = { "/config": config, "/dashboard": dashboard, "/dashboard/rag-metrics": rag, "/faqs": faqs, "/documents": { documents, total: documents.length }, "/documents/upload-limits": { max_document_size_bytes: 10485760 }, "/unanswered": questions.filter(q => q.triage_status === (url.searchParams.get("status") || "pending")), "/events": events, "/events/courses": [{ id: "course16", name: events[0].course }], "/campuses": campuses, "/campuses/c1/buildings": buildings, "/campuses/c1/spaces": spaces, "/campuses/c1/path-nodes": nodes, "/campuses/c1/path-edges": edges };
+  const responses = { "/config": config, "/dashboard": dashboard, "/dashboard/rag-metrics": rag, "/faqs": faqs, "/documents": { documents, total: documents.length }, "/documents/upload-limits": { max_document_size_bytes: 10485760 }, "/unanswered": questions.filter(q => q.triage_status === (url.searchParams.get("status") || "pending")), "/events": events, "/events/courses": [{ id: "course16", name: events[0].course }], "/campuses": campuses, "/campuses/c1/buildings": buildings, "/campuses/c1/spaces": spaces, "/campuses/c1/landmarks": landmarks };
   if (path in responses) { send(200, responses[path]); return; }
   send(404, { detail: "Fora da fixture DS-16" });
 }).listen(4201, "127.0.0.1", () => console.log("DS-16 fixture ready at http://127.0.0.1:4201"));
