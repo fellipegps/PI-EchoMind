@@ -211,6 +211,18 @@ def main() -> None:
             assert request("/_deploy/body", method="POST", body=b"x" * (1024 * 1024 + 1))[0] == 413
             print("PASS: exact 10 MiB file boundary, multipart allowance and proxy body cap", flush=True)
 
+            for size, expected in ((2 * 1024 * 1024, 200), (5 * 1024 * 1024, 200), (5 * 1024 * 1024 + 1, 413)):
+                status, headers, body = request(
+                    "/campuses/synthetic/places/building/synthetic/photos", method="POST",
+                    body=prefix + b"x" * size + suffix,
+                    headers={"Content-Type": "multipart/form-data; boundary=synthetic-boundary", "Origin": ORIGIN},
+                )
+                assert status == expected, (status, body[:200])
+                assert headers.get("Access-Control-Allow-Origin") == ORIGIN
+                if status == 200:
+                    assert json.loads(body)["bytes"] == size
+            print("PASS: campus photos above 1 MiB reach the API and preserve the exact 5 MiB limit", flush=True)
+
             for suffix_ip in (4, 5):
                 client_ip = subnet + f".{suffix_ip}"
                 code = f"EXPECTED_IP = {client_ip!r}\n" + CLIENT_CHECK

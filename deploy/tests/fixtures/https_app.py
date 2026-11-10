@@ -13,6 +13,7 @@ from app import main
 from app.database import get_db
 from app.document_ingestion import DocumentTooLargeError, get_max_document_size_bytes, read_limited_bytes
 from app.document_upload import DocumentUploadRoute
+from app.campus_photo import MAX_PHOTO_BYTES
 from app.rate_limit import enforce_chat_rate_limit
 
 
@@ -66,7 +67,9 @@ async def consume_body(request: Request):
 
 # Replace only the storage-dependent upload endpoint. Keep its actual parser,
 # middleware, byte budget and per-file read limit, without Supabase/auth calls.
-app.router.routes[:] = [route for route in app.router.routes if getattr(route, "path", None) != "/documents/upload"]
+photo_upload_path = "/campuses/{campus_id}/places/{place_type}/{place_id}/photos"
+app.router.routes[:] = [route for route in app.router.routes
+                       if getattr(route, "path", None) not in {"/documents/upload", photo_upload_path}]
 
 
 async def synthetic_upload(file: UploadFile = File(...)):
@@ -78,3 +81,14 @@ async def synthetic_upload(file: UploadFile = File(...)):
 
 
 app.router.routes.append(DocumentUploadRoute("/documents/upload", endpoint=synthetic_upload, methods=["POST"]))
+
+
+async def synthetic_photo_upload(file: UploadFile = File(...)):
+    try:
+        data = read_limited_bytes(file.file, max_size_bytes=MAX_PHOTO_BYTES)
+        return {"bytes": len(data)}
+    except DocumentTooLargeError:
+        raise HTTPException(status_code=413, detail="Foto sintética excedeu o limite.") from None
+
+
+app.router.routes.append(DocumentUploadRoute(photo_upload_path, endpoint=synthetic_photo_upload, methods=["POST"]))

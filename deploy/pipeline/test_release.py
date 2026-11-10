@@ -135,15 +135,17 @@ class ReleaseTests(unittest.TestCase):
         self.assertTrue(pending.exists())
         self.assertNotIn(("resume", "old"), host.events)
 
-    def test_reviewed_0023_to_0026_rollback_uses_new_checker_for_old_runtime(self):
+    def test_reviewed_rollback_uses_new_checker_for_old_runtime(self):
         self.new["backend"] = "approved@sha256:" + "a" * 64
-        host = FakeHost({("healthy", "new")}, heads={"old": "0023", "new": "0026"})
-        with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):
-            with self.assertRaisesRegex(ReleaseError, "previous version resumed"):
-                transact(host, self.new, self.current)
-        self.assertIn(("old", self.new), host.validators)
-        self.assertEqual(json.loads(self.current.read_text()), self.old)
-        self.assertFalse(self.current.with_name("pending.json").exists())
+        for previous, candidate in (("0023", "0026"), ("0026", "0027")):
+            with self.subTest(previous=previous, candidate=candidate):
+                host = FakeHost({("healthy", "new")}, heads={"old": previous, "new": candidate})
+                with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):
+                    with self.assertRaisesRegex(ReleaseError, "previous version resumed"):
+                        transact(host, self.new, self.current)
+                self.assertIn(("old", self.new), host.validators)
+                self.assertEqual(json.loads(self.current.read_text()), self.old)
+                self.assertFalse(self.current.with_name("pending.json").exists())
 
     def test_unreviewed_revision_change_stops_before_drain_or_replacement(self):
         for heads in ({"old": "0023", "new": "0027"}, {"old": "0022", "new": "0026"},

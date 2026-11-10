@@ -9,7 +9,7 @@ import json
 import logging
 import re
 import unicodedata
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from functools import lru_cache
 from typing import Optional
 
@@ -18,6 +18,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .database import (
+    ChatMetricDaily,
     CompanyEvent,
     Config,
     EventCourse,
@@ -458,10 +459,6 @@ def upsert_config(db: Session, payload: ConfigUpdate, tenant_id: str) -> Config:
         cfg.public_slug = build_public_slug(cfg.company_name, tenant_id)
 
     changes = payload.model_dump(exclude_unset=True)
-    if changes.get("chat_retention_enabled", cfg.chat_retention_enabled):
-        required = ("privacy_controller", "privacy_email", "privacy_purpose", "privacy_legal_basis", "chat_retention_days")
-        if any(not changes.get(field, getattr(cfg, field)) for field in required):
-            raise ValueError("Preencha os dados de privacidade e o prazo antes de ativar a limpeza automática.")
     for field, value in changes.items():
         setattr(cfg, field, value)
     cfg.updated_at = utc_now()
@@ -669,8 +666,19 @@ def save_feedback(
 
 # Dashboard
 
+DASHBOARD_METRIC_WINDOW_DAYS = 30
+
+
 def get_dashboard_stats(db: Session, tenant_id: str) -> dict:
-    total = db.query(Interaction).filter(Interaction.tenant_id == tenant_id).count()
+    today = utc_now().date()
+    first_day = today - timedelta(days=DASHBOARD_METRIC_WINDOW_DAYS - 1)
+    metrics = db.query(ChatMetricDaily).filter(
+        ChatMetricDaily.tenant_id == tenant_id,
+        ChatMetricDaily.metric_date.between(first_day, today),
+    ).all()
+    questions_by_day = {row.metric_date: row.question_count for row in metrics}
+    feedback_positive = sum(row.positive_feedback_count for row in metrics)
+    feedback_total = feedback_positive + sum(row.negative_feedback_count for row in metrics)
     unanswered_count = (
         db.query(UnansweredQuestion)
         .filter(
@@ -681,21 +689,10 @@ def get_dashboard_stats(db: Session, tenant_id: str) -> dict:
         .count()
     )
 
-    today = utc_now().date()
     daily = []
     for i in range(6, -1, -1):
         day = today - timedelta(days=i)
-        day_start = datetime.combine(day, datetime.min.time())
-        day_end = datetime.combine(day, datetime.max.time())
-        count = (
-            db.query(Interaction)
-            .filter(
-                Interaction.tenant_id == tenant_id,
-                Interaction.asked_at.between(day_start, day_end),
-            )
-            .count()
-        )
-        daily.append({"date": day.strftime("%d/%m"), "count": count})
+        daily.append({"date": day.strftime("%d/%m"), "count": questions_by_day.get(day, 0)})
 
     faqs = (
         db.query(Faq)
@@ -704,39 +701,14 @@ def get_dashboard_stats(db: Session, tenant_id: str) -> dict:
         .limit(5)
         .all()
     )
-    top_faqs = []
-    for faq in faqs:
-        hits = faq.total_consults or 0
-        if hits == 0:
-            hits = (
-                db.query(Interaction)
-                .filter(
-                    Interaction.tenant_id == tenant_id,
-                    func.lower(Interaction.question).contains(faq.question[:30].lower()),
-                )
-                .count()
-            )
-        top_faqs.append({"question": faq.question[:50], "count": hits or 0})
-
-    top_faqs.sort(key=lambda x: x["count"], reverse=True)
-
-    feedback_total = (
-        db.query(Interaction)
-        .filter(Interaction.tenant_id == tenant_id, Interaction.feedback_helpful.isnot(None))
-        .count()
-    )
-    feedback_positive = (
-        db.query(Interaction)
-        .filter(Interaction.tenant_id == tenant_id, Interaction.feedback_helpful == True)
-        .count()
-    )
     satisfaction_rate = round((feedback_positive / feedback_total) * 100, 1) if feedback_total else 0.0
 
     return {
-        "total_questions": total,
+        "metrics_window_days": DASHBOARD_METRIC_WINDOW_DAYS,
+        "total_questions": sum(questions_by_day.values()),
         "unanswered_questions": unanswered_count,
         "avg_response_time": latency_store.summary()["avg_response_time"],
         "satisfaction_rate": satisfaction_rate,
         "daily_interactions": daily,
-        "top_faqs": top_faqs[:5],
+        "top_faqs": [{"question": faq.question[:50], "count": faq.total_consults or 0} for faq in faqs],
     }

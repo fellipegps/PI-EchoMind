@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,7 @@ const config = {
   id: "internal-id", public_slug: "instituicao", company_name: "Instituição de teste", description: "Contexto de teste",
   tone_of_voice: "descontraído e jovem", chat_voice_gender: "masculina", website: "https://example.test", phone: "0000",
   address: "Rua fictícia", business_hours: "9h–18h", updated_at: null,
+  chat_retention_days: 30, chat_retention_enabled: true,
 };
 
 describe("Configurações — contrato DS-15 com simplificação autorizada", () => {
@@ -74,11 +75,10 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     expect(screen.getByRole("button", { name: "Salvar Alterações" })).toBeEnabled();
   });
 
-  it("salva o contato e o prazo aprovados sem enviar outros campos da instituição", async () => {
+  it("salva o aviso sem enviar alterações à retenção definida no servidor", async () => {
     const privacy = {
       privacy_controller: "Instituição Sintética", privacy_email: "privacidade@example.com",
       privacy_purpose: "Atendimento institucional ao público.", privacy_legal_basis: "Base aprovada pela instituição.",
-      chat_retention_days: 30, chat_retention_enabled: true,
     };
     mocks.save.mockResolvedValue({ ...config, ...privacy, privacy_ready: true });
     const user = userEvent.setup();
@@ -89,8 +89,10 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     await user.type(screen.getByLabelText("E-mail para pedidos de privacidade"), privacy.privacy_email);
     await user.type(screen.getByLabelText("Finalidade do uso dos dados no chat"), privacy.privacy_purpose);
     await user.type(screen.getByLabelText("Base legal definida pela instituição"), privacy.privacy_legal_basis);
-    await user.type(screen.getByLabelText("Prazo do histórico de chat, em dias"), "30");
-    await user.click(screen.getByRole("switch", { name: "Ativar limpeza automática do histórico" }));
+    const retention = screen.getByRole("region", { name: "Prazo de retenção do histórico" });
+    expect(within(retention).getByText("30 dias")).toBeInTheDocument();
+    expect(within(retention).queryByRole("spinbutton")).not.toBeInTheDocument();
+    expect(within(retention).queryByRole("switch")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Salvar privacidade" }));
     await waitFor(() => expect(mocks.save).toHaveBeenCalledWith(privacy));
     expect(await screen.findByText(/Informações de privacidade cadastradas/)).toBeInTheDocument();
@@ -100,7 +102,7 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     render(<SettingsPage />);
     expect(await screen.findByLabelText("E-mail para pedidos de privacidade")).toHaveValue("");
     expect(screen.getByLabelText("Base legal definida pela instituição")).toHaveValue("");
-    expect(screen.getByLabelText("Prazo do histórico de chat, em dias")).toHaveValue(null);
+    expect(screen.getByText("30 dias")).toBeInTheDocument();
     expect(mocks.save).not.toHaveBeenCalled();
   });
 
@@ -112,19 +114,18 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
   });
 
   it.each(["UniEVANGÉLICA", "Instituição sintética", " unievangelica "])("não cria uma política a partir do nome da instituição: %s", async company => {
-    mocks.get.mockResolvedValue({ ...config, company_name: company, privacy_ready: false, chat_retention_enabled: false });
+    mocks.get.mockResolvedValue({ ...config, company_name: company, privacy_ready: false });
     render(<SettingsPage />);
     expect(await screen.findByLabelText("Instituição responsável pelos dados")).toHaveValue("");
     expect(screen.getByLabelText("E-mail para pedidos de privacidade")).toHaveValue("");
     expect(screen.getByLabelText("Finalidade do uso dos dados no chat")).toHaveValue("");
-    expect(screen.getByLabelText("Prazo do histórico de chat, em dias")).toHaveValue(null);
+    expect(screen.getByText("30 dias")).toBeInTheDocument();
     expect(screen.getByLabelText("Base legal definida pela instituição")).toHaveValue("");
-    expect(screen.getByRole("switch", { name: "Ativar limpeza automática do histórico" })).not.toBeChecked();
-    expect(screen.getByText(/Conclua os campos e ative a limpeza/)).toBeInTheDocument();
+    expect(screen.getByText(/Você pode continuar testando o chat/)).toBeInTheDocument();
     expect(mocks.save).not.toHaveBeenCalled();
   });
 
-  it("preserva os valores já cadastrados, inclusive outro prazo aprovado", async () => {
+  it("preserva o aviso cadastrado e mostra o prazo informado pelo servidor", async () => {
     const existing = {
       privacy_controller: "Responsável cadastrado", privacy_email: "equipe@example.test",
       privacy_purpose: "Finalidade já cadastrada", privacy_legal_basis: "Base já cadastrada",
@@ -134,17 +135,16 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     render(<SettingsPage />);
     expect(await screen.findByLabelText("Instituição responsável pelos dados")).toHaveValue(existing.privacy_controller);
     expect(screen.getByLabelText("Finalidade do uso dos dados no chat")).toHaveValue(existing.privacy_purpose);
-    expect(screen.getByLabelText("Prazo do histórico de chat, em dias")).toHaveValue(60);
+    expect(screen.getByText("60 dias")).toBeInTheDocument();
     expect(screen.getByLabelText("Base legal definida pela instituição")).toHaveValue(existing.privacy_legal_basis);
     expect(screen.getByLabelText("E-mail para pedidos de privacidade")).toHaveValue(existing.privacy_email);
     expect(mocks.save).not.toHaveBeenCalled();
   });
 
-  it("salva o cadastro incompleto sem base legal, sem ativar limpeza nem liberar atendimento", async () => {
+  it("salva o aviso incompleto com a retenção do servidor ativa", async () => {
     const draft = {
       privacy_controller: "Instituição sintética", privacy_email: "privacy@example.test",
-      privacy_purpose: "Atendimento de dúvidas gerais.", chat_retention_days: 30,
-      privacy_legal_basis: null, chat_retention_enabled: false,
+      privacy_purpose: "Atendimento de dúvidas gerais.", privacy_legal_basis: null,
     };
     mocks.get.mockResolvedValue({ ...config, ...draft, privacy_ready: false });
     mocks.save.mockResolvedValue({ ...config, ...draft, privacy_ready: false });
@@ -154,25 +154,15 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     expect(basis).not.toBeRequired();
     await user.click(screen.getByRole("button", { name: "Salvar privacidade" }));
     await waitFor(() => expect(mocks.save).toHaveBeenCalledWith(draft));
-    expect(screen.getByText(/Conclua os campos e ative a limpeza/)).toBeInTheDocument();
+    expect(screen.getByText(/Você pode continuar testando o chat/)).toBeInTheDocument();
     expect(basis).toHaveValue("");
-    await user.click(screen.getByRole("switch", { name: "Ativar limpeza automática do histórico" }));
-    expect(basis).toBeRequired();
-    await user.click(screen.getByRole("button", { name: "Salvar privacidade" }));
+    expect(screen.getByText(/A limpeza automática remove interações/)).toBeInTheDocument();
     expect(mocks.save).toHaveBeenCalledTimes(1);
   });
 
-  it("não atribui a UniEVANGÉLICA ou o prazo de 30 dias a outra instituição", async () => {
-    render(<SettingsPage />);
-    expect(await screen.findByLabelText("Instituição responsável pelos dados")).toHaveValue("");
-    expect(screen.getByLabelText("Finalidade do uso dos dados no chat")).toHaveValue("");
-    expect(screen.getByLabelText("Prazo do histórico de chat, em dias")).toHaveValue(null);
-    expect(mocks.save).not.toHaveBeenCalled();
-  });
-
   it("salvar os dados gerais preserva a edição de privacidade sem publicá-la", async () => {
-    mocks.get.mockResolvedValue({ ...config, privacy_purpose: "Finalidade cadastrada.", chat_retention_days: 30, privacy_ready: false, chat_retention_enabled: false });
-    mocks.save.mockResolvedValue({ ...config, company_name: "UniEVANGÉLICA", privacy_purpose: null, chat_retention_days: null, privacy_ready: false, chat_retention_enabled: false });
+    mocks.get.mockResolvedValue({ ...config, privacy_purpose: "Finalidade cadastrada.", privacy_ready: false });
+    mocks.save.mockResolvedValue({ ...config, company_name: "UniEVANGÉLICA", privacy_purpose: null, chat_retention_days: 14, privacy_ready: false });
     const user = userEvent.setup();
     render(<SettingsPage />);
     const purpose = await screen.findByLabelText("Finalidade do uso dos dados no chat");
@@ -180,7 +170,7 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     await user.click(screen.getByRole("button", { name: "Salvar Alterações" }));
     await waitFor(() => expect(mocks.success).toHaveBeenCalledWith("Configurações atualizadas com sucesso!"));
     expect(purpose).toHaveValue("Finalidade em revisão pela equipe.");
-    expect(screen.getByLabelText("Prazo do histórico de chat, em dias")).toHaveValue(30);
+    expect(screen.getByText("14 dias")).toBeInTheDocument();
     expect(mocks.save).toHaveBeenCalledWith(expect.not.objectContaining({ privacy_purpose: expect.anything() }));
     expect(mocks.save).toHaveBeenCalledTimes(1);
   });
@@ -192,10 +182,8 @@ describe("Configurações — contrato DS-15 com simplificação autorizada", ()
     render(<SettingsPage />);
     const purpose = await screen.findByLabelText("Finalidade do uso dos dados no chat");
     await user.clear(purpose);
-    await user.clear(screen.getByLabelText("Prazo do histórico de chat, em dias"));
     await user.click(screen.getByRole("button", { name: "Salvar Alterações" }));
     await waitFor(() => expect(mocks.success).toHaveBeenCalled());
     expect(purpose).toHaveValue("");
-    expect(screen.getByLabelText("Prazo do histórico de chat, em dias")).toHaveValue(null);
   });
 });

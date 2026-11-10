@@ -38,14 +38,16 @@ Respostas conhecidas e falhas técnicas não devem oferecer encaminhamento.
 O downgrade de `0026` invalida confirmações pendentes e remove os recibos, sem
 excluir histórico ou perguntas já encaminhadas; preferir manter os campos em rollback.
 O preflight bloqueia permissões diretas de clientes, inclusive após restauração
-de backups sem ACLs. Cadastros existentes ficam com o
-chat público bloqueado até preencherem controlador, contato, finalidade, base
-legal, prazo e ativarem a limpeza em **Configurações → Privacidade e retenção**.
-Mapas e eventos continuam acessíveis. Se houver revisões anteriores pendentes,
+de backups sem ACLs. Em **Configurações → Privacidade e retenção**, o administrador
+cadastra controlador, contato, finalidade e base legal. A operação define
+`CHAT_HISTORY_RETENTION_DAYS` no ambiente do backend, com padrão de 30 dias e
+faixa de 1 a 90. Na primeira execução após a publicação, a limpeza inclui
+registros existentes que ultrapassaram o prazo, inclusive em cadastros legados.
+Se houver revisões anteriores pendentes,
 revisar os riscos próprios delas; `0023` é destrutiva para o recurso descontinuado.
 Conferir aviso em `/p/{slug}/privacidade`, chat sintético e eventos
 `privacy.retention` após a liberação. A checklist interna
-detalha ativação, descarte, direitos e reversão. A imagem inclui o comando
+detalha descarte e direitos. A imagem inclui o comando
 `python scripts/purge_chat_data.py` para prévia e manutenção, sem dados reais
 nos argumentos além da identificação institucional necessária.
 
@@ -99,10 +101,11 @@ atualiza os containers, verifica banco e HTTPS e libera escritas. Falhas tentam
 recuperar a versão anterior. Deploys são serializados; a API pode ficar brevemente
 indisponível. Migrations e reindexação **não** são automáticas.
 
-Para a transição revisada `0023 → 0026`, o rollout confere as heads das imagens
-sem rede/segredos. Se precisar recuperar o runtime `0023`, valida o banco com
-o checker da imagem `0026` aprovada por digest e mantém a verificação HTTPS do
-runtime recuperado. Isso também vale para recuperação de `pending.json`.
+Nas transições revisadas `0023 → 0026` e `0026 → 0027`, o rollout confere as
+revisões das imagens sem rede nem segredos. Ao recuperar o runtime anterior,
+valida o banco com o verificador da imagem mais nova, aprovada por digest,
+e mantém a verificação HTTPS do runtime recuperado. Isso também vale para
+recuperação de `pending.json`.
 Outros pares de revisões são recusados antes de manutenção; não restaurar
 grants amplos nem desfazer as migrações de segurança para contornar a checagem.
 

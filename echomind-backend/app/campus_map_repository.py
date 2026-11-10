@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from math import asin, cos, radians, sin, sqrt
+from hashlib import sha256
+from urllib.parse import quote
 
-from sqlalchemy import func, or_
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import (
     Campus,
     CampusBuilding,
+    CampusLandmark,
+    CampusPlacePhoto,
     CampusPathEdge,
     CampusPathNode,
     CampusSpace,
@@ -126,7 +129,7 @@ def update_campus(db: Session, tenant_id: str, campus_id: str, changes: dict) ->
 def delete_campus(db: Session, tenant_id: str, campus_id: str) -> None:
     campus = _get_campus(db, tenant_id, campus_id)
     scope = {"tenant_id": tenant_id, "campus_id": campus_id}
-    for model in (CampusPathEdge, CampusSpace, CampusBuilding, CampusPathNode):
+    for model in (CampusPathEdge, CampusSpace, CampusBuilding, CampusLandmark, CampusPathNode):
         db.query(model).filter_by(**scope).delete(synchronize_session=False)
     db.delete(campus)
     _delete_commit(db)
@@ -139,14 +142,8 @@ def list_buildings(db: Session, tenant_id: str, campus_id: str) -> list[CampusBu
     ).all()
 
 
-def _check_node(db: Session, tenant_id: str, campus_id: str, node_id: str | None) -> None:
-    if node_id is not None:
-        _get_child(db, CampusPathNode, tenant_id, campus_id, node_id)
-
-
 def create_building(db: Session, tenant_id: str, campus_id: str, data: dict) -> CampusBuilding:
     _get_campus(db, tenant_id, campus_id)
-    _check_node(db, tenant_id, campus_id, data.get("entrance_node_id"))
     _check_name(db, CampusBuilding, tenant_id, data["name"], campus_id=campus_id)
     return _save(db, CampusBuilding(tenant_id=tenant_id, campus_id=campus_id, **data))
 
@@ -155,8 +152,6 @@ def update_building(db: Session, tenant_id: str, campus_id: str, building_id: st
                     changes: dict) -> CampusBuilding:
     building = _get_child(db, CampusBuilding, tenant_id, campus_id, building_id)
     _required_update(changes, "name", "category", "entrance_lat", "entrance_lng", "active")
-    if "entrance_node_id" in changes:
-        _check_node(db, tenant_id, campus_id, changes["entrance_node_id"])
     if "name" in changes:
         _check_name(db, CampusBuilding, tenant_id, changes["name"], campus_id=campus_id,
                     exclude_id=building_id)
@@ -207,157 +202,182 @@ def delete_space(db: Session, tenant_id: str, campus_id: str, space_id: str) -> 
     _delete_commit(db)
 
 
-def list_nodes(db: Session, tenant_id: str, campus_id: str) -> list[CampusPathNode]:
+def list_landmarks(db: Session, tenant_id: str, campus_id: str) -> list[CampusLandmark]:
     _get_campus(db, tenant_id, campus_id)
-    return db.query(CampusPathNode).filter_by(tenant_id=tenant_id, campus_id=campus_id).order_by(
-        CampusPathNode.created_at, CampusPathNode.id,
+    return db.query(CampusLandmark).filter_by(tenant_id=tenant_id, campus_id=campus_id).order_by(
+        CampusLandmark.name, CampusLandmark.id,
     ).all()
 
 
-def create_node(db: Session, tenant_id: str, campus_id: str, data: dict) -> CampusPathNode:
+def create_landmark(db: Session, tenant_id: str, campus_id: str, data: dict) -> CampusLandmark:
     _get_campus(db, tenant_id, campus_id)
-    return _save(db, CampusPathNode(tenant_id=tenant_id, campus_id=campus_id, **data))
+    _check_name(db, CampusLandmark, tenant_id, data["name"], campus_id=campus_id)
+    return _save(db, CampusLandmark(tenant_id=tenant_id, campus_id=campus_id, **data))
 
 
-def _haversine_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    d_lat = radians(lat2 - lat1)
-    d_lng = radians(lng2 - lng1)
-    a = sin(d_lat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(d_lng / 2) ** 2
-    return 2 * 6_371_000 * asin(min(1.0, sqrt(a)))
+def update_landmark(db: Session, tenant_id: str, campus_id: str, landmark_id: str,
+                    changes: dict) -> CampusLandmark:
+    row = _get_child(db, CampusLandmark, tenant_id, campus_id, landmark_id)
+    _required_update(changes, "name", "lat", "lng", "active")
+    if "name" in changes:
+        _check_name(db, CampusLandmark, tenant_id, changes["name"], campus_id=campus_id,
+                    exclude_id=landmark_id)
+    _apply(row, changes)
+    return _save(db, row)
 
 
-def _edge_distance(db: Session, tenant_id: str, campus_id: str,
-                   from_node_id: str, to_node_id: str) -> float:
-    start = _get_child(db, CampusPathNode, tenant_id, campus_id, from_node_id)
-    end = _get_child(db, CampusPathNode, tenant_id, campus_id, to_node_id)
-    return max(_haversine_m(start.lat, start.lng, end.lat, end.lng), 0.01)
-
-
-def update_node(db: Session, tenant_id: str, campus_id: str, node_id: str,
-                changes: dict) -> CampusPathNode:
-    node = _get_child(db, CampusPathNode, tenant_id, campus_id, node_id)
-    _required_update(changes, "lat", "lng")
-    _apply(node, changes)
-    if "lat" in changes or "lng" in changes:
-        db.flush()
-        edges = db.query(CampusPathEdge).filter(
-            CampusPathEdge.tenant_id == tenant_id,
-            CampusPathEdge.campus_id == campus_id,
-            or_(CampusPathEdge.from_node_id == node_id, CampusPathEdge.to_node_id == node_id),
-        ).all()
-        for edge in edges:
-            edge.distance_m = _edge_distance(db, tenant_id, campus_id,
-                                             edge.from_node_id, edge.to_node_id)
-            edge.updated_at = utc_now()
-    return _save(db, node)
-
-
-def delete_node(db: Session, tenant_id: str, campus_id: str, node_id: str) -> None:
-    node = _get_child(db, CampusPathNode, tenant_id, campus_id, node_id)
-    db.query(CampusBuilding).filter_by(
-        tenant_id=tenant_id, campus_id=campus_id, entrance_node_id=node_id,
-    ).update({
-        CampusBuilding.entrance_node_id: None,
-        CampusBuilding.updated_at: utc_now(),
-    }, synchronize_session=False)
-    db.query(CampusPathEdge).filter(
-        CampusPathEdge.tenant_id == tenant_id,
-        CampusPathEdge.campus_id == campus_id,
-        or_(CampusPathEdge.from_node_id == node_id, CampusPathEdge.to_node_id == node_id),
-    ).delete(synchronize_session=False)
-    db.delete(node)
+def delete_landmark(db: Session, tenant_id: str, campus_id: str, landmark_id: str) -> None:
+    row = _get_child(db, CampusLandmark, tenant_id, campus_id, landmark_id)
+    db.delete(row)
     _delete_commit(db)
 
 
-def list_edges(db: Session, tenant_id: str, campus_id: str) -> list[CampusPathEdge]:
-    _get_campus(db, tenant_id, campus_id)
-    return db.query(CampusPathEdge).filter_by(tenant_id=tenant_id, campus_id=campus_id).order_by(
-        CampusPathEdge.created_at, CampusPathEdge.id,
-    ).all()
+PLACE_MODELS = {"building": CampusBuilding, "space": CampusSpace, "landmark": CampusLandmark}
 
 
-def _prepare_edge(db: Session, tenant_id: str, campus_id: str,
-                  values: dict, *, existing: CampusPathEdge | None = None) -> dict:
-    start_id = values.get("from_node_id", existing.from_node_id if existing else None)
-    end_id = values.get("to_node_id", existing.to_node_id if existing else None)
-    if start_id == end_id:
-        raise GeoValidationError("Um trecho deve conectar dois nós diferentes.")
-    first_id, second_id = sorted((start_id, end_id))
-    _check_node(db, tenant_id, campus_id, first_id)
-    _check_node(db, tenant_id, campus_id, second_id)
-    duplicate = db.query(CampusPathEdge.id).filter(
-        CampusPathEdge.tenant_id == tenant_id,
-        CampusPathEdge.campus_id == campus_id,
-        CampusPathEdge.from_node_id == first_id,
-        CampusPathEdge.to_node_id == second_id,
+def get_place(db: Session, tenant_id: str, campus_id: str, place_type: str, place_id: str):
+    return _get_child(db, PLACE_MODELS[place_type], tenant_id, campus_id, place_id)
+
+
+def _photo_query(db: Session, row, place_type: str):
+    return db.query(CampusPlacePhoto).filter(
+        CampusPlacePhoto.tenant_id == row.tenant_id,
+        CampusPlacePhoto.campus_id == row.campus_id,
+        getattr(CampusPlacePhoto, f"{place_type}_id") == row.id,
     )
+
+
+def photo_data(photo: CampusPlacePhoto, row, place_type: str, public_slug: str | None = None) -> dict:
+    if public_slug is not None:
+        base = f"/public/{quote(public_slug, safe='')}/places/{place_type}/{row.public_code}"
+    else:
+        base = f"/campuses/{row.campus_id}/places/{place_type}/{row.id}"
+    return {
+        "id": photo.id, "caption": photo.caption, "sort_order": photo.sort_order,
+        "url": f"{base}/photos/{photo.id}",
+    }
+
+
+def places_data(db: Session, rows: list, place_type: str,
+                public_slug: str | None = None) -> list[dict]:
+    if not rows:
+        return []
+    field = getattr(CampusPlacePhoto, f"{place_type}_id")
+    photos = db.query(CampusPlacePhoto).filter(
+        CampusPlacePhoto.tenant_id == rows[0].tenant_id,
+        field.in_([row.id for row in rows]),
+    ).order_by(CampusPlacePhoto.sort_order, CampusPlacePhoto.created_at, CampusPlacePhoto.id).all()
+    by_place = {row.id: [] for row in rows}
+    row_lookup = {row.id: row for row in rows}
+    for photo in photos:
+        place_id = getattr(photo, f"{place_type}_id")
+        by_place[place_id].append(photo_data(photo, row_lookup[place_id], place_type, public_slug))
+    result = []
+    for row in rows:
+        values = {column.name: getattr(row, column.name)
+                  for column in row.__table__.columns if column.name != "tenant_id"}
+        values["photos"] = by_place[row.id]
+        result.append(values)
+    return result
+
+
+def place_data(db: Session, row, place_type: str, public_slug: str | None = None) -> dict:
+    return places_data(db, [row], place_type, public_slug)[0]
+
+
+def add_photo(db: Session, tenant_id: str, campus_id: str, place_type: str, place_id: str,
+              content: bytes, caption: str | None) -> tuple[CampusPlacePhoto, object]:
+    model = PLACE_MODELS[place_type]
+    # The parent lock serializes uploads and deletion of the same place in PostgreSQL.
+    row = db.query(model).filter_by(
+        tenant_id=tenant_id, campus_id=campus_id, id=place_id,
+    ).with_for_update().first()
+    if row is None:
+        raise GeoNotFoundError("Local não encontrado neste campus.")
+    digest = sha256(content).hexdigest()
+    existing = _photo_query(db, row, place_type).filter(CampusPlacePhoto.sha256 == digest).first()
     if existing is not None:
-        duplicate = duplicate.filter(CampusPathEdge.id != existing.id)
-    if duplicate.first() is not None:
-        raise GeoConflictError("Este trecho já foi cadastrado.")
-    values["from_node_id"] = first_id
-    values["to_node_id"] = second_id
-    if existing is None or "from_node_id" in values or "to_node_id" in values or "distance_m" in values:
-        if values.get("distance_m") is None:
-            values["distance_m"] = _edge_distance(db, tenant_id, campus_id, first_id, second_id)
-    return values
+        return existing, row
+    last_order = _photo_query(db, row, place_type).with_entities(
+        func.max(CampusPlacePhoto.sort_order),
+    ).scalar()
+    photo = CampusPlacePhoto(
+        tenant_id=tenant_id, campus_id=campus_id, **{f"{place_type}_id": place_id},
+        caption=caption, sort_order=(last_order + 1 if last_order is not None else 0),
+        mime_type="image/jpeg", sha256=digest, size_bytes=len(content), content=content,
+    )
+    try:
+        db.add(photo)
+        db.commit()
+        db.refresh(photo)
+    except IntegrityError:
+        db.rollback()
+        # A retry of an upload returns the same photo rather than adding a duplicate.
+        existing = _photo_query(db, row, place_type).filter(CampusPlacePhoto.sha256 == digest).first()
+        if existing is None:
+            raise GeoConflictError("O local foi alterado. Atualize a página e tente novamente.") from None
+        return existing, row
+    return photo, row
 
 
-def create_edge(db: Session, tenant_id: str, campus_id: str, data: dict) -> CampusPathEdge:
-    _get_campus(db, tenant_id, campus_id)
-    data = _prepare_edge(db, tenant_id, campus_id, data)
-    return _save(db, CampusPathEdge(tenant_id=tenant_id, campus_id=campus_id, **data))
+def get_photo(db: Session, row, place_type: str, photo_id: str) -> CampusPlacePhoto:
+    photo = _photo_query(db, row, place_type).filter(CampusPlacePhoto.id == photo_id).first()
+    if photo is None:
+        raise GeoNotFoundError("Foto não encontrada neste local.")
+    return photo
 
 
-def update_edge(db: Session, tenant_id: str, campus_id: str, edge_id: str,
-                changes: dict) -> CampusPathEdge:
-    edge = _get_child(db, CampusPathEdge, tenant_id, campus_id, edge_id)
-    _required_update(changes, "from_node_id", "to_node_id", "accessible", "active")
-    if "from_node_id" in changes or "to_node_id" in changes or "distance_m" in changes:
-        changes = _prepare_edge(db, tenant_id, campus_id, changes, existing=edge)
-    _apply(edge, changes)
-    return _save(db, edge)
-
-
-def delete_edge(db: Session, tenant_id: str, campus_id: str, edge_id: str) -> None:
-    edge = _get_child(db, CampusPathEdge, tenant_id, campus_id, edge_id)
-    db.delete(edge)
+def delete_photo(db: Session, tenant_id: str, campus_id: str, place_type: str,
+                 place_id: str, photo_id: str) -> None:
+    row = get_place(db, tenant_id, campus_id, place_type, place_id)
+    photo = get_photo(db, row, place_type, photo_id)
+    db.delete(photo)
     _delete_commit(db)
 
 
-def public_map(db: Session, tenant_id: str) -> dict:
-    campuses = db.query(Campus).filter(Campus.tenant_id == tenant_id, Campus.active.is_(True)).order_by(
+def public_place(db: Session, tenant_id: str, place_type: str, public_code: str):
+    model = PLACE_MODELS[place_type]
+    row = db.query(model).filter_by(
+        tenant_id=tenant_id, public_code=public_code, active=True,
+    ).first()
+    if row is None:
+        raise GeoNotFoundError("Local não encontrado.")
+    campus = db.query(Campus).filter_by(
+        id=row.campus_id, tenant_id=tenant_id, active=True,
+    ).first()
+    building = None
+    if place_type == "space":
+        building = db.query(CampusBuilding).filter_by(
+            id=row.building_id, tenant_id=tenant_id, campus_id=row.campus_id, active=True,
+        ).first()
+        if building is None:
+            raise GeoNotFoundError("Local não encontrado.")
+    if campus is None:
+        raise GeoNotFoundError("Local não encontrado.")
+    return row, campus, building
+
+
+def public_map(db: Session, tenant_id: str, public_slug: str) -> dict:
+    campuses = db.query(Campus).filter_by(tenant_id=tenant_id, active=True).order_by(
         Campus.name, Campus.id,
     ).all()
     campus_ids = [campus.id for campus in campuses]
-    if not campus_ids:
-        return {"campuses": [], "buildings": [], "spaces": [], "nodes": [], "edges": []}
-
     buildings = db.query(CampusBuilding).filter(
         CampusBuilding.tenant_id == tenant_id,
-        CampusBuilding.campus_id.in_(campus_ids),
-        CampusBuilding.active.is_(True),
+        CampusBuilding.campus_id.in_(campus_ids), CampusBuilding.active.is_(True),
     ).order_by(CampusBuilding.name, CampusBuilding.id).all()
-    building_ids = [building.id for building in buildings]
     spaces = db.query(CampusSpace).filter(
-        CampusSpace.tenant_id == tenant_id,
-        CampusSpace.campus_id.in_(campus_ids),
-        CampusSpace.building_id.in_(building_ids),
+        CampusSpace.tenant_id == tenant_id, CampusSpace.campus_id.in_(campus_ids),
+        CampusSpace.building_id.in_([building.id for building in buildings]),
         CampusSpace.active.is_(True),
-    ).order_by(CampusSpace.name, CampusSpace.id).all() if building_ids else []
-    edges = db.query(CampusPathEdge).filter(
-        CampusPathEdge.tenant_id == tenant_id,
-        CampusPathEdge.campus_id.in_(campus_ids),
-        CampusPathEdge.active.is_(True),
-    ).all()
-    node_ids = {
-        node_id for edge in edges for node_id in (edge.from_node_id, edge.to_node_id)
+    ).order_by(CampusSpace.name, CampusSpace.id).all()
+    landmarks = db.query(CampusLandmark).filter(
+        CampusLandmark.tenant_id == tenant_id, CampusLandmark.campus_id.in_(campus_ids),
+        CampusLandmark.active.is_(True),
+    ).order_by(CampusLandmark.name, CampusLandmark.id).all()
+    return {
+        "campuses": campuses,
+        "buildings": places_data(db, buildings, "building", public_slug),
+        "spaces": places_data(db, spaces, "space", public_slug),
+        "landmarks": places_data(db, landmarks, "landmark", public_slug),
     }
-    node_ids.update(building.entrance_node_id for building in buildings if building.entrance_node_id)
-    nodes = db.query(CampusPathNode).filter(
-        CampusPathNode.tenant_id == tenant_id,
-        CampusPathNode.campus_id.in_(campus_ids),
-        CampusPathNode.id.in_(node_ids),
-    ).all() if node_ids else []
-    return {"campuses": campuses, "buildings": buildings, "spaces": spaces,
-            "nodes": nodes, "edges": edges}

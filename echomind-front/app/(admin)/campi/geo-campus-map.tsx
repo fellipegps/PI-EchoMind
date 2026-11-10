@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
 import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
-import type { Building, PathEdge, PathNode } from "@/lib/geocampus-api";
+import type { Building, Landmark } from "@/lib/geocampus-api";
 import styles from "./geo-campus-map.module.css";
 
 export interface GeoPoint {
@@ -15,8 +15,7 @@ interface Props {
   center: GeoPoint;
   zoom: number;
   buildings: Building[];
-  nodes: PathNode[];
-  edges: PathEdge[];
+  landmarks: Landmark[];
   draftPoint: GeoPoint | null;
   focusPoint: GeoPoint | null;
   onPickPoint?: (point: GeoPoint) => void;
@@ -35,8 +34,7 @@ export function GeoCampusMap({
   center,
   zoom,
   buildings,
-  nodes,
-  edges,
+  landmarks,
   draftPoint,
   focusPoint,
   onPickPoint,
@@ -141,27 +139,14 @@ export function GeoCampusMap({
     if (!L || !map || !overlay) return;
     overlay.clearLayers();
 
-    const byId = new Map(nodes.map((node) => [node.id, node]));
-    edges.filter((edge) => edge.active).forEach((edge) => {
-      const from = byId.get(edge.from_node_id);
-      const to = byId.get(edge.to_node_id);
-      if (!from || !to) return;
-      L.polyline([[from.lat, from.lng], [to.lat, to.lng]], {
-        color: edge.accessible ? "var(--success)" : "var(--warning)",
-        weight: 5,
-        opacity: 0.8,
-        dashArray: edge.accessible ? undefined : "6 6",
-      }).addTo(overlay).bindTooltip(label(edge.accessible ? "Trecho acessível" : "Trecho com barreira de acessibilidade"));
-    });
-
-    nodes.forEach((node) => {
-      L.circleMarker([node.lat, node.lng], {
-        radius: 5,
+    landmarks.forEach((landmark) => {
+      L.circleMarker([landmark.lat, landmark.lng], {
+        radius: 7,
         color: "var(--card)",
         weight: 2,
-        fillColor: "var(--primary)",
+        fillColor: landmark.active ? "var(--primary)" : "var(--muted-foreground)",
         fillOpacity: 1,
-      }).addTo(overlay).bindTooltip(label(node.label || "Ponto do caminho"));
+      }).addTo(overlay).bindTooltip(label(`${landmark.name}${landmark.active ? "" : " (Inativo)"}`));
     });
 
     buildings.forEach((building) => {
@@ -171,7 +156,7 @@ export function GeoCampusMap({
         weight: 3,
         fillColor: building.active ? "var(--chart-4)" : "var(--muted-foreground)",
         fillOpacity: 1,
-      }).addTo(overlay).bindTooltip(label(`Entrada: ${building.name}${building.active ? "" : " (Inativo)"}`));
+      }).addTo(overlay).bindTooltip(label(`${building.name}${building.active ? "" : " (Inativo)"}`));
     });
 
     if (draftPoint) {
@@ -192,7 +177,7 @@ export function GeoCampusMap({
         onPickRef.current?.({ lat: point.lat, lng: point.lng });
       });
     }
-  }, [buildings, nodes, edges, draftPoint, ready]);
+  }, [buildings, landmarks, draftPoint, ready]);
 
   useEffect(() => {
     if (!mapRef.current) return;

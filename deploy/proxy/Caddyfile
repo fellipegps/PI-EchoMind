@@ -29,7 +29,12 @@
 	request_body @upload {
 		max_size 11MiB
 	}
-	@other not path /documents/upload
+	# A photo may use 5 MiB plus its multipart envelope.
+	@photoUpload path /campuses/*/places/*/*/photos
+	request_body @photoUpload {
+		max_size 6MiB
+	}
+	@other not path /documents/upload /campuses/*/places/*/*/photos
 	request_body @other {
 		max_size 1MiB
 	}

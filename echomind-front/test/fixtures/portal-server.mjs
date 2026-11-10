@@ -1,5 +1,6 @@
 // DS-03: isolated public-portal fixtures. No upstream calls or real institutional data.
 import { createServer } from "node:http";
+import { testPrivacySettings } from "./privacy-settings.mjs";
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,10 +38,10 @@ createServer(async (req, res) => {
     return;
   }
   const responses = {
-    "": { public_slug: slug, company_name: slug === "ds03-longo" ? "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras" : "Campus de teste · DS-03", website: null, phone: null, address: null, business_hours: null },
+    "": { ...testPrivacySettings, public_slug: slug, company_name: slug === "ds03-longo" ? "Instituição de Ensino Superior de Teste com Nome Extenso para Verificar a Leitura e a Navegação do Portal em Todas as Larguras" : "Campus de teste · DS-03", website: null, phone: null, address: null, business_hours: null },
     "/faqs": faqs,
     "/events": events,
-    "/geo-campus": { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] },
+    "/geo-campus": { campuses: [], buildings: [], spaces: [], landmarks: [] },
   };
   if (suffix in responses) { res.end(JSON.stringify(responses[suffix])); return; }
   res.writeHead(404); res.end(JSON.stringify({ detail: "Operação não definida na fixture DS-03." }));

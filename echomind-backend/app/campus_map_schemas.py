@@ -1,10 +1,11 @@
-"""Contratos do mapa geográfico de instituições e seus caminhos."""
+"""Contratos do mapa geográfico de instituições e suas referências visuais."""
 
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class GeoInput(BaseModel):
@@ -63,7 +64,6 @@ class BuildingCreate(GeoInput):
     category: str = Field(default="predio", min_length=2, max_length=100)
     entrance_lat: float = Field(ge=-90, le=90, allow_inf_nan=False)
     entrance_lng: float = Field(ge=-180, le=180, allow_inf_nan=False)
-    entrance_node_id: str | None = Field(default=None, min_length=1)
     active: bool = True
 
 
@@ -73,11 +73,19 @@ class BuildingUpdate(GeoInput):
     category: str | None = Field(default=None, min_length=2, max_length=100)
     entrance_lat: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
     entrance_lng: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
-    entrance_node_id: str | None = Field(default=None, min_length=1)
     active: bool | None = None
 
 
+class PlacePhotoResponse(BaseModel):
+    id: str
+    caption: str | None
+    sort_order: int
+    url: str
+
+
 class BuildingResponse(BaseModel):
+    public_code: str
+    photos: list[PlacePhotoResponse] = Field(default_factory=list)
     id: str
     campus_id: str
     name: str
@@ -85,7 +93,6 @@ class BuildingResponse(BaseModel):
     category: str
     entrance_lat: float
     entrance_lng: float
-    entrance_node_id: str | None
     active: bool
     created_at: datetime
     updated_at: datetime
@@ -111,6 +118,8 @@ class SpaceUpdate(GeoInput):
 
 
 class SpaceResponse(BaseModel):
+    public_code: str
+    photos: list[PlacePhotoResponse] = Field(default_factory=list)
     id: str
     campus_id: str
     building_id: str
@@ -124,67 +133,49 @@ class SpaceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class PathNodeCreate(GeoInput):
+class LandmarkCreate(GeoInput):
+    name: str = Field(min_length=2, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
     lat: float = Field(ge=-90, le=90, allow_inf_nan=False)
     lng: float = Field(ge=-180, le=180, allow_inf_nan=False)
-    label: str | None = Field(default=None, max_length=200)
-
-
-class PathNodeUpdate(GeoInput):
-    lat: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
-    lng: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
-    label: str | None = Field(default=None, max_length=200)
-
-
-class PathNodeResponse(BaseModel):
-    id: str
-    campus_id: str
-    lat: float
-    lng: float
-    label: str | None
-    created_at: datetime
-    updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
-
-
-class PathEdgeCreate(GeoInput):
-    from_node_id: str = Field(min_length=1)
-    to_node_id: str = Field(min_length=1)
-    distance_m: float | None = Field(default=None, gt=0, allow_inf_nan=False)
-    accessible: bool = True
     active: bool = True
 
-    @model_validator(mode="after")
-    def distinct_nodes(self):
-        if self.from_node_id == self.to_node_id:
-            raise ValueError("Um trecho deve conectar dois nós diferentes.")
-        return self
 
-
-class PathEdgeUpdate(GeoInput):
-    from_node_id: str | None = Field(default=None, min_length=1)
-    to_node_id: str | None = Field(default=None, min_length=1)
-    distance_m: float | None = Field(default=None, gt=0, allow_inf_nan=False)
-    accessible: bool | None = None
+class LandmarkUpdate(GeoInput):
+    name: str | None = Field(default=None, min_length=2, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
+    lat: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
+    lng: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
     active: bool | None = None
 
 
-class PathEdgeResponse(BaseModel):
+class LandmarkResponse(BaseModel):
     id: str
     campus_id: str
-    from_node_id: str
-    to_node_id: str
-    distance_m: float | None
-    accessible: bool
+    public_code: str
+    name: str
+    description: str | None
+    lat: float
+    lng: float
     active: bool
+    photos: list[PlacePhotoResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+PlaceType = Literal["building", "space", "landmark"]
 
 
 class PublicGeoCampusResponse(BaseModel):
     campuses: list[CampusResponse]
     buildings: list[BuildingResponse]
     spaces: list[SpaceResponse]
-    nodes: list[PathNodeResponse]
-    edges: list[PathEdgeResponse]
+    landmarks: list[LandmarkResponse]
+
+
+class PublicPlaceResponse(BaseModel):
+    type: PlaceType
+    campus: CampusResponse
+    place: BuildingResponse | SpaceResponse | LandmarkResponse
+    building: BuildingResponse | None = None

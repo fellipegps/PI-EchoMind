@@ -60,8 +60,6 @@ export default function SettingsPage() {
           privacy_email: current.privacy_email === undefined ? updated.privacy_email : current.privacy_email,
           privacy_purpose: current.privacy_purpose === undefined ? updated.privacy_purpose : current.privacy_purpose,
           privacy_legal_basis: current.privacy_legal_basis === undefined ? updated.privacy_legal_basis : current.privacy_legal_basis,
-          chat_retention_days: current.chat_retention_days === undefined ? updated.chat_retention_days : current.chat_retention_days,
-          chat_retention_enabled: current.chat_retention_enabled === undefined ? updated.chat_retention_enabled : current.chat_retention_enabled,
         };
       });
       toast.success("Configurações atualizadas com sucesso!");
@@ -80,8 +78,6 @@ export default function SettingsPage() {
         privacy_email: form.privacy_email?.trim() || null,
         privacy_purpose: form.privacy_purpose?.trim() || null,
         privacy_legal_basis: form.privacy_legal_basis?.trim() || null,
-        chat_retention_days: form.chat_retention_days ?? null,
-        chat_retention_enabled: form.chat_retention_enabled ?? false,
       });
       setForm(current => ({ ...current,
         privacy_controller: updated.privacy_controller, privacy_email: updated.privacy_email,

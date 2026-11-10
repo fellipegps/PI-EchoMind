@@ -10,7 +10,9 @@ from typing import Literal, Optional
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator, model_validator
+
+from .runtime_config import chat_history_retention_days
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -281,8 +283,6 @@ class PrivacyFields(BaseModel):
     privacy_email: Optional[EmailStr] = Field(None, max_length=320)
     privacy_purpose: Optional[str] = Field(None, min_length=10, max_length=1000)
     privacy_legal_basis: Optional[str] = Field(None, min_length=5, max_length=1000)
-    chat_retention_days: Optional[int] = Field(None, ge=1, le=3650, strict=True)
-    chat_retention_enabled: bool = False
 
     @field_validator("privacy_controller", "privacy_email", "privacy_purpose", "privacy_legal_basis", mode="before")
     @classmethod
@@ -293,6 +293,7 @@ class PrivacyFields(BaseModel):
 
 
 class ConfigUpdate(PrivacyFields):
+    # Ignore old client payloads that still send the retired retention fields.
     company_name: Optional[str]       = Field(None, min_length=2, max_length=200)
     description: Optional[str]        = Field(None, max_length=5000)
     tone_of_voice: Optional[str]      = None
@@ -303,7 +304,21 @@ class ConfigUpdate(PrivacyFields):
     business_hours: Optional[str]     = Field(None, max_length=200)
 
 
-class ConfigResponse(PrivacyFields):
+class PrivacyResponse(PrivacyFields):
+    privacy_ready: bool = False
+
+    @computed_field
+    @property
+    def chat_retention_days(self) -> int:
+        return chat_history_retention_days()
+
+    @computed_field
+    @property
+    def chat_retention_enabled(self) -> bool:
+        return True
+
+
+class ConfigResponse(PrivacyResponse):
     id: str
     public_slug: str
     company_name: str
@@ -315,7 +330,6 @@ class ConfigResponse(PrivacyFields):
     address: Optional[str]
     business_hours: Optional[str]
     updated_at: Optional[datetime]
-    privacy_ready: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -335,7 +349,7 @@ class PublicEventResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class PublicInstitutionResponse(PrivacyFields):
+class PublicInstitutionResponse(PrivacyResponse):
     public_slug: str
     company_name: str
     description: Optional[str]
@@ -343,7 +357,6 @@ class PublicInstitutionResponse(PrivacyFields):
     phone: Optional[str]
     address: Optional[str]
     business_hours: Optional[str]
-    privacy_ready: bool = False
 
     model_config = {"from_attributes": True}
 
@@ -397,6 +410,7 @@ class TopFaq(BaseModel):
 
 
 class DashboardResponse(BaseModel):
+    metrics_window_days: int
     total_questions: int
     unanswered_questions: int
     avg_response_time: str

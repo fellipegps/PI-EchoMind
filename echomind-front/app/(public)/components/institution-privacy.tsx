@@ -18,7 +18,7 @@ export function InstitutionPrivacy({ publicSlug }: { publicSlug: string }) {
       <h1 className="text-3xl font-semibold">Privacidade no atendimento</h1>
       {!institution ? <p role={failed ? "alert" : "status"}>{failed ? "Não foi possível carregar as informações da instituição. Tente novamente mais tarde." : "Carregando informações de privacidade…"}</p> : <>
         <p className="text-lg">{institution.company_name}</p>
-        {!institution.privacy_ready ? <p role="status" className="rounded-lg border p-4">As informações de privacidade ainda estão incompletas. O chat está indisponível até a instituição concluir o cadastro.</p> : null}
+        {!institution.privacy_ready ? <p role="status" className="rounded-lg border p-4">As informações de privacidade ainda estão incompletas.</p> : null}
         <section className="space-y-2"><h2 className="text-xl font-semibold">Responsável e contato</h2>
           <p>Controlador: {institution.privacy_controller || "ainda não informado pela instituição"}.</p>
           {institution.privacy_email ? <p>Para solicitar acesso, correção ou eliminação quando cabível, escreva para{" "}
@@ -38,11 +38,11 @@ export function InstitutionPrivacy({ publicSlug }: { publicSlug: string }) {
           <p>Não envie CPF, senhas, dados de saúde ou informações de terceiros. As respostas da IA podem conter erros; confirme informações importantes com a instituição.</p>
         </section>
         <section className="space-y-2"><h2 className="text-xl font-semibold">Retenção</h2>
-          {institution.chat_retention_days ? <p>Prazo adotado para o histórico: {institution.chat_retention_days} dias. {institution.chat_retention_enabled ? "A limpeza automática roda a cada hora enquanto a API está ativa; registros podem permanecer até a próxima execução após o prazo." : "A limpeza automática está desativada; solicite esclarecimentos à instituição."}</p> : <p>O prazo do histórico ainda não foi definido.</p>}
+          {institution.chat_retention_days ? <p>Prazo de retenção do histórico: {institution.chat_retention_days} dias. {institution.chat_retention_enabled ? "A limpeza automática roda a cada hora enquanto a API está ativa. Registros podem permanecer até a próxima execução após o prazo." : "A limpeza automática está desativada. Solicite esclarecimentos à instituição."}</p> : <p>O prazo de retenção do histórico está indisponível.</p>}
           <p>A limpeza abrange conversas e a fila de perguntas não respondidas. Documentos, FAQs publicadas, contas, cópias de segurança e dados dos fornecedores seguem procedimentos próprios, que a instituição deve informar. As exceções legais de conservação são avaliadas no atendimento ao pedido.</p>
         </section>
         <section className="space-y-2"><h2 className="text-xl font-semibold">Mapas e armazenamento no navegador</h2>
-          <p>A localização é opcional, depende de sua ação e da permissão do navegador e é usada para trajetos no dispositivo; as coordenadas não são enviadas à API EchoMind. Tiles de mapas e imagens são carregados de terceiros, que recebem seu IP e podem inferir a área visualizada.</p>
+          <p>O mapa é um guia visual com blocos, espaços internos, pontos de referência e fotos publicados pela instituição. Tocar em um local ou escanear seu QR Code abre a mesma ficha. O guia funciona sem solicitar a localização do visitante. As imagens de fundo do mapa são carregadas de terceiros, que recebem seu IP e podem inferir a área visualizada.</p>
           <p>O navegador guarda a preferência de tema e, para administradores, dados necessários à sessão de login. Não há conta de visitante para conversar.</p>
         </section>
         <p className="text-sm text-muted-foreground">Para esclarecer as condições de tratamento dos seus dados, entre em contato com a instituição pelo canal informado acima.</p>

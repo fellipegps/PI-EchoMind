@@ -1,4 +1,4 @@
-"""Descarte de conversas por instituição, sem acessar o provedor de IA."""
+"""Descarte de conversas pela política do servidor e operações por instituição."""
 
 import asyncio
 from datetime import datetime, timedelta, timezone
@@ -6,8 +6,12 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
-from .database import Config, Interaction, SessionLocal, UnansweredQuestion, UnansweredSuppression
+from .database import ChatMetricDaily, Interaction, SessionLocal, UnansweredQuestion, UnansweredSuppression
+from .runtime_config import chat_history_retention_days
 from .structured_logging import emit_event, safe_error_code
+
+
+CHAT_METRIC_RETENTION_DAYS = 90
 
 
 def purge_chat_data(
@@ -16,26 +20,33 @@ def purge_chat_data(
     """Conta ou exclui registros anteriores ao corte; o chamador controla o commit."""
     if not tenant_id.strip():
         raise ValueError("Informe uma instituição.")
-    questions = db.query(UnansweredQuestion.id).filter(
-        UnansweredQuestion.tenant_id == tenant_id,
-        UnansweredQuestion.first_asked < cutoff,
-    )
+    return _purge_expired_history(db, cutoff=cutoff, apply=apply, tenant_id=tenant_id)
+
+
+def _purge_expired_history(
+    db: Session, *, cutoff: datetime, apply: bool, tenant_id: str | None = None,
+) -> dict[str, int]:
+    questions = db.query(UnansweredQuestion).filter(UnansweredQuestion.first_asked < cutoff)
+    suppressions = db.query(UnansweredSuppression)
+    interactions = db.query(Interaction).filter(Interaction.asked_at < cutoff)
+    if tenant_id is not None:
+        questions = questions.filter(UnansweredQuestion.tenant_id == tenant_id)
+        suppressions = suppressions.filter(UnansweredSuppression.tenant_id == tenant_id)
+        interactions = interactions.filter(Interaction.tenant_id == tenant_id)
+
+    expired_suppressed_question = questions.filter(
+        UnansweredQuestion.tenant_id == UnansweredSuppression.tenant_id,
+        UnansweredQuestion.id == UnansweredSuppression.question_id,
+    ).exists()
     targets = {
-        "suppressions": db.query(UnansweredSuppression).filter(
-            UnansweredSuppression.tenant_id == tenant_id,
+        "suppressions": suppressions.filter(
             or_(
                 UnansweredSuppression.created_at < cutoff,
-                UnansweredSuppression.question_id.in_(questions),
+                expired_suppressed_question,
             ),
         ),
-        "unanswered": db.query(UnansweredQuestion).filter(
-            UnansweredQuestion.tenant_id == tenant_id,
-            UnansweredQuestion.first_asked < cutoff,
-        ),
-        "interactions": db.query(Interaction).filter(
-            Interaction.tenant_id == tenant_id,
-            Interaction.asked_at < cutoff,
-        ),
+        "unanswered": questions,
+        "interactions": interactions,
     }
     counts = {}
     for name, query in targets.items():
@@ -43,33 +54,36 @@ def purge_chat_data(
     return counts
 
 
-def run_configured_retention(*, session_factory=None, now: datetime | None = None) -> int:
-    """Aplica apenas políticas explicitamente ativadas; falhas não afetam o chat."""
+def run_configured_retention(*, session_factory=None, now: datetime | None = None) -> dict[str, int]:
+    """Aplica o prazo do servidor a todo o histórico, inclusive registros legados."""
     factory = session_factory or SessionLocal
     timestamp = now or datetime.now(timezone.utc)
-    with factory() as db:
-        config_ids = [row[0] for row in db.query(Config.id).filter(Config.chat_retention_enabled.is_(True)).all()]
-    completed = 0
-    for config_id in config_ids:
-        try:
-            with factory() as db:
-                if db.bind.dialect.name == "postgresql":
-                    db.execute(text("SET LOCAL statement_timeout = '20s'"))
-                    db.execute(text("SET LOCAL lock_timeout = '3s'"))
-                config = db.query(Config).filter(Config.id == config_id).with_for_update(skip_locked=True).first()
-                if config is None or not config.privacy_ready:
-                    continue
-                counts = purge_chat_data(
-                    db, tenant_id=config.tenant_id,
-                    cutoff=timestamp - timedelta(days=config.chat_retention_days), apply=True,
-                )
-                db.commit()
-                completed += 1
-                emit_event(event="privacy.retention", status="success", stage="cleanup", tenant_id=config.tenant_id,
-                           counts={"deleted_interactions": counts["interactions"], "deleted_unanswered": counts["unanswered"], "deleted_suppressions": counts["suppressions"]})
-        except Exception as exc:
-            emit_event(event="privacy.retention", status="error", stage="cleanup", error_code=safe_error_code(exc))
-    return completed
+    counts: dict[str, int] = {}
+    try:
+        cutoff = timestamp - timedelta(days=chat_history_retention_days())
+        with factory() as db:
+            if db.bind.dialect.name == "postgresql":
+                db.execute(text("SET LOCAL statement_timeout = '20s'"))
+                db.execute(text("SET LOCAL lock_timeout = '3s'"))
+            deleted = _purge_expired_history(db, cutoff=cutoff, apply=True)
+            db.commit()
+            counts = deleted
+        emit_event(
+            event="privacy.retention", status="success", stage="cleanup",
+            counts={f"deleted_{kind}": count for kind, count in counts.items()},
+        )
+    except Exception as exc:
+        emit_event(event="privacy.retention", status="error", stage="cleanup", error_code=safe_error_code(exc))
+    try:
+        with factory() as db:
+            first_metric_day = timestamp.date() - timedelta(days=CHAT_METRIC_RETENTION_DAYS - 1)
+            db.query(ChatMetricDaily).filter(ChatMetricDaily.metric_date < first_metric_day).delete(
+                synchronize_session=False,
+            )
+            db.commit()
+    except Exception as exc:
+        emit_event(event="privacy.chat-metrics-retention", status="error", stage="cleanup", error_code=safe_error_code(exc))
+    return counts
 
 
 async def retention_worker(stop: asyncio.Event, *, interval_seconds: float = 3600) -> None:

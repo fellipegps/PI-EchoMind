@@ -41,8 +41,8 @@ def check(domain: str, origin: str) -> dict:
     assert rejected == 400 and "access-control-allow-origin" not in other_headers
     assert "max-age=" in headers.get("strict-transport-security", "")
     unauthorized, _, _ = request("GET", "/auth/me")
-    # The pinned FastAPI HTTPBearer returns 403 when the header is absent;
-    # invalid supplied sessions return 401. Both must deny access.
+    # Missing or invalid Bearer credentials must deny access. The current
+    # pinned FastAPI returns 401; accept 403 for compatible older deployments.
     assert unauthorized in {401, 403}
     return {
         "checked_at": datetime.now(timezone.utc).isoformat(), "domain": domain,

@@ -75,7 +75,7 @@ def test_submit_accepts_only_the_opaque_token(client, public_chat, body):
     assert client.post(f"{public_chat}/unanswered", json=body).status_code == 422
 
 
-def test_expired_deleted_and_paused_offers_cannot_submit(client, db, public_chat):
+def test_expired_deleted_offers_are_rejected_but_cleanup_does_not_block_submission(client, db, public_chat):
     token = offer(client, public_chat)
     row = db.query(Interaction).one()
     row.asked_at = utc_now() - HANDOFF_TTL - timedelta(seconds=1)
@@ -84,9 +84,21 @@ def test_expired_deleted_and_paused_offers_cannot_submit(client, db, public_chat
     db.delete(row); db.commit()
     assert client.post(f"{public_chat}/unanswered", json={"token": token}).status_code == 400
     token = offer(client, public_chat)
-    client.put("/config", json={"chat_retention_enabled": False})
-    assert client.post(f"{public_chat}/unanswered", json={"token": token}).status_code == 503
+    client.put("/config", json={"privacy_email": None})
+    assert client.post(f"{public_chat}/unanswered", json={"token": token}).status_code == 204
+    assert db.query(UnansweredQuestion).count() == 1
+
+
+def test_public_chat_and_confirmation_work_without_privacy_configuration(client, db, fake_rag_engine):
+    config = client.get("/config").json()
+    assert config["privacy_ready"] is False
+    assert config["chat_retention_enabled"] is True
+    fake_rag_engine.has_context = False
+    path = f"/public/{config['public_slug']}"
+    token = offer(client, path)
     assert db.query(UnansweredQuestion).count() == 0
+    assert client.post(f"{path}/unanswered", json={"token": token}).status_code == 204
+    assert db.query(UnansweredQuestion).one().count == 1
 
 
 def test_failures_roll_back_receipt_and_queue_and_allow_retry(client, db, public_chat, caplog):

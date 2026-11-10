@@ -67,7 +67,7 @@ def main() -> None:
         sql("INSERT INTO campus_locations (id,tenant_id,name,x,y) "
             "VALUES ('release-sentinel','synthetic-tenant','Restore sentinel',50,50)")
         before = preflight()
-        assert before["current"] == ["0022"] and before["pending"] == ["0023", "0024", "0025", "0026"]
+        assert before["current"] == ["0022"] and before["pending"] == ["0023", "0024", "0025", "0026", "0027", "0028"]
         assert before["legacy_location_count"] == 1 and not before["ready"]
         print("PASS: read-only preflight detects pending destructive migration", flush=True)
 
@@ -76,7 +76,7 @@ def main() -> None:
         inside("pg_restore", "--list", "/tmp/before.dump")
         migrate("head")
         after = preflight()
-        assert after["ready"] and after["current"] == ["0026"]
+        assert after["ready"] and after["current"] == ["0028"]
         assert sql("SELECT to_regclass('public.campus_locations') IS NULL") == "t"
         print("PASS: migration reaches head and removes retired table", flush=True)
 

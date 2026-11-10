@@ -17,14 +17,13 @@ A checklist oficial de LGPD e segurança interna reúne a
 análise do tratamento de dados, correções, pendências essenciais, rotina de
 descarte e resumo das alterações. O aviso do produto está em `/privacidade`;
 o da instituição, em `/p/{slug}/privacidade`. Em **Configurações → Privacidade e
-retenção**, cadastre o responsável, contato, finalidade, base legal e prazo aprovado.
-O chat público só é liberado após concluir esses dados e ativar a limpeza.
-Cada instituição informa sua própria política no painel, sem nome, e-mail,
-finalidade ou prazo preenchidos pelo produto. A UniEVANGÉLICA e os 30 dias são
-dados do primeiro cadastro usado nos testes, não padrões do sistema. É possível
-salvar um cadastro incompleto com a limpeza desativada; o chat segue bloqueado.
+retenção**, cadastre o responsável, contato, finalidade e base legal da instituição.
+O chat público funciona durante a revisão desse cadastro. O painel e o aviso
+mostram o prazo definido no servidor. A limpeza é automática e usa 30 dias por
+padrão. A operação pode ajustar `CHAT_HISTORY_RETENTION_DAYS` no ambiente do
+backend, entre 1 e 90 dias.
 O contato técnico da Horizon Code fica separado do canal de cada instituição.
-O modelo de ficha interna interna reúne as decisões,
+O modelo de ficha interna reúne as decisões,
 responsáveis e fornecedores por instituição. Manter a cópia preenchida em local
 privado, fora do Git e do site; o aviso público apresenta somente as informações
 necessárias aos visitantes.
@@ -36,11 +35,11 @@ Esta etapa exige aplicar as migrations `0024`, `0025` e `0026` antes da nova API
 veja o [guia de deploy](deploy/README.md). A `0025` remove permissões diretas
 dos clientes nas tabelas exclusivas do backend; o login pelo Supabase é preservado.
 Rotas legadas com `tenant_id` agora exigem login do proprietário; o portal
-público continua em `/public/{public_slug}`. A limpeza depende de ativação
-explícita no painel e não foi aplicada ao banco real nesta revisão.
+público continua em `/public/{public_slug}`. A limpeza aplica o prazo do servidor
+ao histórico de todas as instituições.
 No chat público, perguntas não respondidas só são encaminhadas após o visitante
 escolher **Enviar pergunta**; **Agora não** não envia à fila e preserva o histórico
-pelo prazo configurado. A `0026` guarda a confirmação sem duplicar envios.
+pelo prazo definido no servidor. A `0026` guarda a confirmação sem duplicar envios.
 Pedidos de acesso/eliminação de conversas específicas contam com a ferramenta
 operacional `manage_chat_data.py`, com seleção conferida por instituição,
 prévia por padrão e exportação privada para revisão. O procedimento e seus
@@ -541,10 +540,13 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `PATCH` | `/faqs/{id}/toggle-chatbot` | Exibe ou oculta uma FAQ no chat publico |
 | `GET` | `/public/{slug}/faqs` | FAQs publicas do portal web |
 | `GET` | `/public/{slug}/events` | Eventos programados no portal web |
-| `GET` | `/public/{slug}/geo-campus` | Campi, prédios, espaços e caminhos ativos da instituição |
+| `GET` | `/public/{slug}/geo-campus` | Campi, blocos, espaços e pontos de referência publicados |
+| `GET` | `/public/{slug}/places/{type}/{code}` | Ficha pública do local, com fotos e bloco associado |
 | `POST` | `/public/{slug}/chat` | Chat publico vinculado ao slug da instituicao |
 | `GET/POST/PUT/DELETE` | `/events` | CRUD de eventos autenticado |
-| `GET/POST/PUT/DELETE` | `/campuses` e sub-recursos | Cadastro geográfico autenticado de campi, prédios, espaços e caminhos |
+| `GET/POST/PUT/DELETE` | `/campuses` e sub-recursos | Cadastro autenticado de campi, blocos, espaços e pontos de referência |
+| `POST` | `/campuses/{campus}/places/{type}/{id}/photos` | Envio autenticado de uma foto do local via multipart |
+| `GET/DELETE` | `/campuses/{campus}/places/{type}/{id}/photos/{photo}` | Consulta ou exclusão autenticada de uma foto |
 | `GET/POST` | `/events/courses` | Lista ou cria cursos relacionados a eventos |
 | `GET/PUT` | `/config` | Configuracoes autenticadas do tenant |
 | `GET` | `/config/public` | Configuracao publica por `tenant_id` |
@@ -557,9 +559,19 @@ Nao existe mais tabela local `admin_users` para login. Usuarios administrativos 
 | `POST` | `/feedback` | Feedback publico do chatbot |
 | `GET` | `/health` | Health check |
 
-O cadastro geográfico de campi, prédios, espaços e caminhos é feito em `/campi`.
-A aba pública Locais usa somente esse cadastro, incluindo origem manual, GPS e
-rotas acessíveis. Sem cadastro publicado, o portal informa indisponibilidade.
+O guia visual dos campi é administrado em `/campi`. O administrador marca blocos
+e pontos de referência no mapa, cadastra salas, laboratórios e auditórios dentro
+dos blocos e envia várias fotos para cada local. As fotos JPEG, PNG e WebP são
+validadas e convertidas para JPEG, com limite de 5 MiB e 16 megapixels por envio. As imagens ficam
+no banco, junto aos vínculos com a instituição e o local, e acompanham seu backup.
+A aba pública Locais apresenta os locais publicados. A seleção de um local e a
+leitura de seu QR Code abrem a mesma ficha em
+`/p/{slug}/locais/{type}/{public_code}`, com descrição, fotos e identificação do
+bloco quando se trata de um espaço interno. O administrador pode baixar e
+imprimir o QR Code. O código do local é estável após alterações no cadastro.
+O guia substitui o cálculo de rotas e o uso da localização do visitante.
+A migração `0028` adiciona os códigos dos locais existentes e as novas estruturas
+de referências e fotos, preservando o cadastro e os registros legados de caminhos.
 A revisão Alembic `0023` retira a tabela do recurso descontinuado; ela remove
 seus registros quando aplicada. Faça backup antes de aplicá-la em um banco
 existente. A reversão recria somente a estrutura, sem recuperar registros.
@@ -842,7 +854,8 @@ Para reproduzir o gate do backend:
 ```bash
 cd echomind-backend
 python -m pip install -r requirements.txt -r requirements-dev.txt
-python -m pytest -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
+PYTHON_DOTENV_DISABLED=1 RAG_WARMUP_ENABLED=false DOCUMENT_RECOVERY_ENABLED=false \
+  python -m pytest tests/quick -m "not integration and not e2e" --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=72
 python scripts/check_document_coverage.py coverage.xml
 ```
 
@@ -867,6 +880,20 @@ Para gerar o relatorio de cobertura sem impor um limite bloqueante, use
 O build de CI recebe somente placeholders publicos para
 `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL` e
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Nenhum segredo de producao e usado.
+
+### Teste E2E do chat público
+
+Dentro de `echomind-front`, após instalar as dependências:
+
+```bash
+corepack pnpm exec playwright install chromium --only-shell
+corepack pnpm test:e2e
+```
+
+O Playwright abre o portal local, verifica o aviso de falha e confirma que o
+envio seguinte recebe uma resposta da API simulada. As duas capturas ficam em
+`.next/e2e-results/`. Execute separadamente do Vitest e deixe livres as portas
+3019 e 4105.
 
 ## CI PostgreSQL E pgvector
 

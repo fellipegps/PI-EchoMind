@@ -23,9 +23,10 @@ BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 REQUIRED_TABLES = {
     "alembic_version", "config", "faqs", "events", "event_courses", "interactions",
-    "documents", "document_chunks", "document_chunk_parents", "rag_metric_daily",
+    "documents", "document_chunks", "document_chunk_parents", "rag_metric_daily", "chat_metric_daily",
     "unanswered_questions", "unanswered_suppressions", "campuses", "campus_buildings",
     "campus_spaces", "campus_path_nodes", "campus_path_edges",
+    "campus_landmarks", "campus_place_photos",
 }
 
 
@@ -63,6 +64,20 @@ def check(database_url: str) -> dict:
             )).all()
             unprotected = sorted(row[0] for row in tables if not row[1])
             missing = sorted(REQUIRED_TABLES - {row[0] for row in tables})
+            visual_columns = {
+                ("campus_buildings", "public_code"),
+                ("campus_spaces", "public_code"),
+                ("campus_landmarks", "public_code"),
+                ("campus_place_photos", "content"),
+            }
+            existing_columns = set(connection.execute(text(
+                "SELECT table_name, column_name FROM information_schema.columns "
+                "WHERE table_schema='public' AND table_name IN "
+                "('campus_buildings','campus_spaces','campus_landmarks','campus_place_photos')"
+            )).all())
+            missing_visual_columns = sorted(
+                f"{table}.{column}" for table, column in visual_columns - existing_columns
+            )
             client_grants = [
                 {"table": row[0], "role": row[1]}
                 for row in connection.execute(text(
@@ -102,9 +117,11 @@ def check(database_url: str) -> dict:
                 "public_tables_without_rls": unprotected,
                 "public_client_table_grants": client_grants,
                 "missing_tables": missing, "vector_columns_not_384": wrong_dimensions,
+                "missing_visual_columns": missing_visual_columns,
                 "legacy_location_count": legacy_count,
                 "ready": current == [head] and vector is not None and not unprotected and
-                         not missing and not wrong_dimensions and not client_grants and major == 17,
+                         not missing and not missing_visual_columns and not wrong_dimensions and
+                         not client_grants and major == 17,
             }
     finally:
         engine.dispose()

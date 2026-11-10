@@ -38,6 +38,10 @@ jobs:
   backend-unit-api:
     name: Backend / unit-api
     runs-on: ubuntu-latest
+    env:
+      PYTHON_DOTENV_DISABLED: "1"
+      RAG_WARMUP_ENABLED: "false"
+      DOCUMENT_RECOVERY_ENABLED: "false"
     defaults:
       run:
         working-directory: echomind-backend
@@ -60,7 +64,7 @@ jobs:
 
       - name: Run unit and API tests with coverage
         run: >-
-          python -m pytest -m "not integration and not e2e"
+          python -m pytest tests/quick -m "not integration and not e2e"
           --cov=app
           --cov-report=term-missing
           --cov-report=xml:coverage.xml

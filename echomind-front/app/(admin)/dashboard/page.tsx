@@ -50,15 +50,17 @@ export default function DashboardPage() {
     );
   }
 
+  const metricsWindow = data?.metrics_window_days;
+
   return (
     <PageContainer>
       <PageHeader title="Dashboard de Insights" description="Visão geral das interações com o Agente de IA" />
 
       <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Total de Perguntas" value={data?.total_questions.toLocaleString("pt-BR") ?? "0"} icon={MessageCircle} />
-        <MetricCard label="Não Respondidas" value={data?.unanswered_questions.toLocaleString("pt-BR") ?? "0"} icon={MessageCircleQuestion} tone="destructive" />
+        <MetricCard label={metricsWindow ? `Perguntas nos últimos ${metricsWindow} dias` : "Interações no histórico retido"} value={data?.total_questions.toLocaleString("pt-BR") ?? "0"} icon={MessageCircle} />
+        <MetricCard label="Pendentes de triagem" value={data?.unanswered_questions.toLocaleString("pt-BR") ?? "0"} icon={MessageCircleQuestion} tone="destructive" />
         <MetricCard label="Tempo Médio de Resposta" value={data?.avg_response_time ?? "—"} icon={Clock} tone="success" />
-        <MetricCard label="Satisfação" value={`${data?.satisfaction_rate.toLocaleString("pt-BR") ?? 0}%`} icon={ThumbsUp} />
+        <MetricCard label={metricsWindow ? `Satisfação nos últimos ${metricsWindow} dias` : "Satisfação no histórico retido"} value={`${data?.satisfaction_rate.toLocaleString("pt-BR") ?? 0}%`} icon={ThumbsUp} />
       </div>
 
       <DashboardCharts daily_interactions={data?.daily_interactions ?? []} top_faqs={data?.top_faqs ?? []} />

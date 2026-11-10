@@ -8,11 +8,11 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    create_engine, Column, String, Boolean, Text,
+    create_engine, BigInteger, Column, String, Boolean, Text, LargeBinary,
     CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer,
     UniqueConstraint, text,
 )
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, deferred, relationship, sessionmaker
 from .runtime_config import load_runtime_environment
 
 # ─── Conexão ─────────────────────────────────────────────────────────────────
@@ -138,11 +138,12 @@ class Campus(Base):
 
 
 class CampusBuilding(Base):
-    """Prédio e sua entrada física; um nó opcional ancora a rota nesta entrada."""
+    """Bloco e sua posição no guia visual; vínculos de rotas são legados."""
 
     __tablename__ = "campus_buildings"
     __table_args__ = (
         UniqueConstraint("id", "tenant_id", "campus_id", name="uq_campus_buildings_identity"),
+        UniqueConstraint("public_code", name="uq_campus_buildings_public_code"),
         UniqueConstraint("tenant_id", "campus_id", "name", name="uq_campus_buildings_name"),
         ForeignKeyConstraint(
             ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
@@ -167,6 +168,7 @@ class CampusBuilding(Base):
     entrance_lat = Column(Float, nullable=False)
     entrance_lng = Column(Float, nullable=False)
     entrance_node_id = Column(String, nullable=True)
+    public_code = Column(String(36), nullable=False, default=new_uuid)
     active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, default=utc_now, nullable=False)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
@@ -177,6 +179,8 @@ class CampusSpace(Base):
 
     __tablename__ = "campus_spaces"
     __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "campus_id", name="uq_campus_spaces_identity"),
+        UniqueConstraint("public_code", name="uq_campus_spaces_public_code"),
         UniqueConstraint("tenant_id", "campus_id", "building_id", "name", name="uq_campus_spaces_name"),
         ForeignKeyConstraint(
             ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
@@ -198,9 +202,89 @@ class CampusSpace(Base):
     kind = Column(String(100), nullable=False, default="outro")
     floor = Column(String(50), nullable=True)
     description = Column(Text, nullable=True)
+    public_code = Column(String(36), nullable=False, default=new_uuid)
     active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, default=utc_now, nullable=False)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class CampusLandmark(Base):
+    """Referência visual posicionada livremente dentro de um campus."""
+
+    __tablename__ = "campus_landmarks"
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "campus_id", name="uq_campus_landmarks_identity"),
+        UniqueConstraint("public_code", name="uq_campus_landmarks_public_code"),
+        UniqueConstraint("tenant_id", "campus_id", "name", name="uq_campus_landmarks_name"),
+        ForeignKeyConstraint(
+            ["campus_id", "tenant_id"], ["campuses.id", "campuses.tenant_id"],
+            name="fk_campus_landmarks_campus", ondelete="RESTRICT",
+        ),
+        CheckConstraint("lat BETWEEN -90 AND 90", name="ck_campus_landmarks_lat"),
+        CheckConstraint("lng BETWEEN -180 AND 180", name="ck_campus_landmarks_lng"),
+        Index("ix_campus_landmarks_tenant_campus_active", "tenant_id", "campus_id", "active"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    campus_id = Column(String, nullable=False)
+    public_code = Column(String(36), nullable=False, default=new_uuid)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    lat = Column(Float, nullable=False)
+    lng = Column(Float, nullable=False)
+    active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, default=utc_now, nullable=False)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
+class CampusPlacePhoto(Base):
+    """Imagem e metadados persistidos na mesma transação do cadastro do local."""
+
+    __tablename__ = "campus_place_photos"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["building_id", "tenant_id", "campus_id"],
+            ["campus_buildings.id", "campus_buildings.tenant_id", "campus_buildings.campus_id"],
+            name="fk_campus_photos_building", ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["space_id", "tenant_id", "campus_id"],
+            ["campus_spaces.id", "campus_spaces.tenant_id", "campus_spaces.campus_id"],
+            name="fk_campus_photos_space", ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["landmark_id", "tenant_id", "campus_id"],
+            ["campus_landmarks.id", "campus_landmarks.tenant_id", "campus_landmarks.campus_id"],
+            name="fk_campus_photos_landmark", ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "(CASE WHEN building_id IS NOT NULL THEN 1 ELSE 0 END + "
+            "CASE WHEN space_id IS NOT NULL THEN 1 ELSE 0 END + "
+            "CASE WHEN landmark_id IS NOT NULL THEN 1 ELSE 0 END) = 1",
+            name="ck_campus_photos_one_place",
+        ),
+        CheckConstraint("size_bytes > 0 AND size_bytes <= 5242880", name="ck_campus_photos_size"),
+        CheckConstraint("sort_order >= 0", name="ck_campus_photos_order"),
+        UniqueConstraint("building_id", "sha256", name="uq_campus_photos_building_digest"),
+        UniqueConstraint("space_id", "sha256", name="uq_campus_photos_space_digest"),
+        UniqueConstraint("landmark_id", "sha256", name="uq_campus_photos_landmark_digest"),
+        Index("ix_campus_photos_tenant_campus", "tenant_id", "campus_id"),
+    )
+
+    id = Column(String, primary_key=True, default=new_uuid)
+    tenant_id = Column(String, nullable=False)
+    campus_id = Column(String, nullable=False)
+    building_id = Column(String, nullable=True)
+    space_id = Column(String, nullable=True)
+    landmark_id = Column(String, nullable=True)
+    caption = Column(String(300), nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
+    mime_type = Column(String(30), nullable=False)
+    sha256 = Column(String(64), nullable=False)
+    size_bytes = Column(Integer, nullable=False)
+    content = deferred(Column(LargeBinary, nullable=False))
+    created_at = Column(DateTime, default=utc_now, nullable=False)
 
 
 class CampusPathNode(Base):
@@ -295,6 +379,7 @@ class Config(Base):
     privacy_email = Column(String(320), nullable=True)
     privacy_purpose = Column(String(1000), nullable=True)
     privacy_legal_basis = Column(String(1000), nullable=True)
+    # Retained for compatibility with earlier releases. The server owns the live policy.
     chat_retention_days = Column(Integer, nullable=True)
     chat_retention_enabled = Column(Boolean, nullable=False, default=False, server_default="false")
     updated_at      = Column(DateTime, default=utc_now, onupdate=utc_now)
@@ -303,8 +388,7 @@ class Config(Base):
     def privacy_ready(self) -> bool:
         return bool(
             self.privacy_controller and self.privacy_email and self.privacy_purpose
-            and self.privacy_legal_basis and self.chat_retention_days
-            and self.chat_retention_enabled
+            and self.privacy_legal_basis
         )
 
 
@@ -553,6 +637,25 @@ class DocumentChunk(Base):
 
     document = relationship("Document", back_populates="chunks")
     parent = relationship("DocumentChunkParent", back_populates="children")
+
+
+class ChatMetricDaily(Base):
+    """Contagens de atendimento por instituição e dia em UTC, sem texto do chat."""
+
+    __tablename__ = "chat_metric_daily"
+    __table_args__ = (
+        CheckConstraint(
+            "question_count >= 0 AND positive_feedback_count >= 0 AND negative_feedback_count >= 0",
+            name="ck_chat_metric_daily_counts_nonnegative",
+        ),
+        Index("ix_chat_metric_daily_metric_date", "metric_date"),
+    )
+
+    tenant_id = Column(String, primary_key=True)
+    metric_date = Column(Date, primary_key=True)
+    question_count = Column(BigInteger, nullable=False, server_default="0")
+    positive_feedback_count = Column(BigInteger, nullable=False, server_default="0")
+    negative_feedback_count = Column(BigInteger, nullable=False, server_default="0")
 
 
 class RagMetricDaily(Base):

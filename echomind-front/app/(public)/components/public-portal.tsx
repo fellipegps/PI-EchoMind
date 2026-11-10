@@ -23,13 +23,13 @@ const INITIAL_MESSAGE: ChatMessage = {
 
 type PublicPortalProps = {
   publicSlug?: string;
+  initialTab?: TabId;
 };
 
-export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("chat");
+export function PublicPortal({ publicSlug = "", initialTab = "chat" }: PublicPortalProps) {
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const normalizedSlug = publicSlug.trim();
   const privacyHref = `/p/${encodeURIComponent(normalizedSlug)}/privacidade`;
-  const [privacyReady, setPrivacyReady] = useState(false);
   const [companyName, setCompanyName] = useState("Portal Acadêmico");
   const [faqs, setFaqs] = useState<PublicFaq[]>([]);
   const [events, setEvents] = useState<PublicEvent[]>([]);
@@ -67,7 +67,6 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
       .getInstitution(normalizedSlug)
       .then((institution) => {
         setCompanyName(institution.company_name || "Portal Acadêmico");
-        setPrivacyReady(institution.privacy_ready === true);
       })
       .catch(() => {
         setCompanyName("Portal Acadêmico");
@@ -93,10 +92,6 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
     if (!question || sending || portalLoading) return;
     if (!normalizedSlug || portalError) {
       setChatError("Link inválido. Solicite à instituição o endereço correto do portal.");
-      return;
-    }
-    if (!privacyReady) {
-      setChatError("A instituição precisa concluir as informações de privacidade para liberar o atendimento.");
       return;
     }
 
@@ -172,17 +167,16 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
     <div>
       <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName} privacyHref={privacyHref}
         auxiliary={<ChatAuxiliary faqs={faqs} events={events} eventsLoading={eventsLoading} eventsError={eventsError}
-          disabled={sending || portalLoading || Boolean(portalError) || !privacyReady} onQuestion={(question) => void sendQuestion(question)}
+          disabled={sending || portalLoading || Boolean(portalError)} onQuestion={(question) => void sendQuestion(question)}
           onEvents={() => setActiveTab("eventos")} />}>
           {activeTab === "chat" && (
             <section className={styles.panel} aria-labelledby="chat-title">
               <PortalSectionHeading id="chat-title" eyebrow="Atendimento digital" title="Como podemos ajudar?" icon={<Sparkles className="size-5" />} />
-              {!portalLoading && !portalError && !privacyReady ? <p role="status" className="mb-4 rounded-lg border p-4 text-sm text-muted-foreground">A instituição precisa concluir as informações de privacidade para liberar o chat. Consulte o aviso de privacidade para ver o canal de atendimento disponível.</p> : null}
 
               <PublicChat messages={messages} scrollRef={chatScroll} input={input} onInput={setInput}
                 onSubmit={submitChat} onQuestion={(question) => void sendQuestion(question)} faqs={faqs}
                 sending={sending} waitingForFirstToken={waitingForFirstToken}
-                blocked={sending || portalLoading || Boolean(portalError) || !privacyReady} portalLoading={portalLoading}
+                blocked={sending || portalLoading || Boolean(portalError)} portalLoading={portalLoading}
                 portalError={portalError} chatError={chatError} privacyHref={privacyHref}
                 onHandoff={id => void sendHandoff(id)}
                 onDeclineHandoff={id => changeHandoff(id, { status: "declined", token: "", error: undefined })} />
@@ -198,7 +192,7 @@ export function PublicPortal({ publicSlug = "" }: PublicPortalProps) {
 
           {activeTab === "locais" && (
             <section className={styles.panel} aria-labelledby="places-title">
-              <PortalSectionHeading id="places-title" eyebrow="Encontre seu caminho" title="Locais do campus" description="Pesquise os espaços cadastrados pela instituição." />
+              <PortalSectionHeading id="places-title" eyebrow="Guia visual" title="Locais do campus" description="Consulte os blocos, espaços e fotos de referência publicados pela instituição." />
 
               <PublicCampusNavigator publicSlug={normalizedSlug} />
             </section>

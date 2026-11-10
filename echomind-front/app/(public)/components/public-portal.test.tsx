@@ -48,13 +48,23 @@ const publicEvent = {
 };
 
 describe("PublicPortal", () => {
-  it("bloqueia o envio sem aviso completo, mantendo as abas de eventos e locais", async () => {
+  it("retorna diretamente à lista de locais depois de consultar uma ficha", async () => {
+    render(<PublicPortal publicSlug="universidade" initialTab="locais" />);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    expect(screen.getByRole("button", { name: "Locais" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("region", { name: "Navegação geográfica do campus" })).toHaveTextContent("universidade");
+    expect(screen.queryByRole("textbox", { name: "Digite sua pergunta" })).not.toBeInTheDocument();
+  });
+  it("permite conversar sem aviso completo, mantendo as abas de eventos e locais", async () => {
     apiMocks.getInstitution.mockResolvedValue({ company_name: "Instituição", privacy_ready: false });
     render(<PublicPortal publicSlug="instituicao" />);
     await screen.findByRole("heading", { name: "Instituição" });
-    expect(screen.getByRole("textbox", { name: "Digite sua pergunta" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Enviar pergunta" })).toBeDisabled();
-    expect(apiMocks.streamPublicChat).not.toHaveBeenCalled();
+    const input = screen.getByRole("textbox", { name: "Digite sua pergunta" });
+    expect(input).toBeEnabled();
+    await userEvent.type(input, "Onde fica a secretaria?");
+    expect(screen.getByRole("button", { name: "Enviar pergunta" })).toBeEnabled();
+    await userEvent.click(screen.getByRole("button", { name: "Enviar pergunta" }));
+    expect(apiMocks.streamPublicChat).toHaveBeenCalledWith("Onde fica a secretaria?", "instituicao", expect.any(Function), expect.any(Function), expect.any(Function));
     expect(screen.getByRole("button", { name: "Eventos" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Locais" })).toBeEnabled();
   });

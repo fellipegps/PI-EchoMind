@@ -11,5 +11,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./test/setup.ts"],
+    // Limita a concorrência dos ambientes jsdom nos runners locais e da CI.
+    maxWorkers: 2,
   },
 });

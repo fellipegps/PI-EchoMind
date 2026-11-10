@@ -1,203 +1,95 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { PlaceType, PublicGeoCampus } from "@/lib/geocampus-api";
 
-import type { PublicGeoCampus } from "@/lib/geocampus-api";
-
-const apiMocks = vi.hoisted(() => ({ publicMap: vi.fn() }));
-
-vi.mock("@/lib/geocampus-api", () => ({
-  geoCampusApi: { publicMap: apiMocks.publicMap },
+const mocks = vi.hoisted(() => ({ publicMap: vi.fn(), push: vi.fn() }));
+vi.mock("@/lib/api", () => ({ tokenStore: { get: vi.fn(), clear: vi.fn() } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
+vi.mock("@/lib/geocampus-api", async (original) => ({
+  ...await original<typeof import("@/lib/geocampus-api")>(),
+  geoCampusApi: { publicMap: mocks.publicMap },
 }));
-
 vi.mock("./campus-map-view", () => ({
-  CampusMapView: ({ onSelectManualOrigin }: { onSelectManualOrigin: (point: { lat: number; lng: number }) => void }) => (
-    <button type="button" onClick={() => onSelectManualOrigin({ lat: 0, lng: 0 })}>Marcar origem no mapa</button>
+  CampusMapView: ({ onOpenPlace }: { onOpenPlace: (type: PlaceType, code: string) => void }) => (
+    <button type="button" onClick={() => onOpenPlace("building", "block-code")}>Abrir bloco pelo mapa</button>
   ),
 }));
-
 import { PublicCampusNavigator } from "./public-campus-navigator";
 
 const campusData: PublicGeoCampus = {
-  campuses: [{ id: "campus-1", name: "Campus Centro", description: null, center_lat: 0, center_lng: 0, zoom: 17, active: true }],
+  campuses: [
+    { id: "c1", name: "Campus Centro", description: null, center_lat: 0, center_lng: 0, zoom: 17, active: true },
+    { id: "c2", name: "Campus Norte", description: null, center_lat: 1, center_lng: 1, zoom: 17, active: true },
+  ],
   buildings: [
-    { id: "gate", campus_id: "campus-1", name: "Portaria", description: null, category: "acesso", entrance_lat: 0, entrance_lng: 0, entrance_node_id: "a", active: true },
-    { id: "block", campus_id: "campus-1", name: "Bloco A", description: "Ensino e pesquisa", category: "ensino", entrance_lat: 0.0001, entrance_lng: 0.0001, entrance_node_id: "d", active: true },
+    { id: "b1", campus_id: "c1", public_code: "block-code", name: "Bloco A", description: "Ensino e pesquisa", category: "ensino", entrance_lat: 0, entrance_lng: 0, active: true, photos: [] },
+    { id: "b2", campus_id: "c2", public_code: "north-code", name: "Bloco Norte", description: null, category: "ensino", entrance_lat: 1, entrance_lng: 1, active: true, photos: [] },
+    { id: "hidden", campus_id: "c1", public_code: "hidden-code", name: "Bloco inativo", description: null, category: "ensino", entrance_lat: 0, entrance_lng: 0, active: false, photos: [] },
   ],
-  spaces: [{ id: "lab", campus_id: "campus-1", building_id: "block", name: "Laboratório de Química", kind: "laboratório", floor: "1º andar", description: "Ala leste", active: true }],
-  nodes: [
-    { id: "a", campus_id: "campus-1", lat: 0, lng: 0, label: "Portaria" },
-    { id: "b", campus_id: "campus-1", lat: 0, lng: 0.0001, label: "Praça" },
-    { id: "c", campus_id: "campus-1", lat: 0.0001, lng: 0, label: "Rampa" },
-    { id: "d", campus_id: "campus-1", lat: 0.0001, lng: 0.0001, label: "Bloco A" },
+  spaces: [
+    { id: "lab", campus_id: "c1", public_code: "lab-code", building_id: "b1", name: "Laboratório de Química", kind: "laboratório", floor: "1º andar", description: null, active: true, photos: [] },
+    { id: "hidden-lab", campus_id: "c1", public_code: "hidden-lab-code", building_id: "hidden", name: "Sala oculta", kind: "sala", floor: null, description: null, active: true, photos: [] },
   ],
-  edges: [
-    { id: "ab", campus_id: "campus-1", from_node_id: "a", to_node_id: "b", distance_m: 10, accessible: false, active: true },
-    { id: "bd", campus_id: "campus-1", from_node_id: "b", to_node_id: "d", distance_m: 10, accessible: true, active: true },
-    { id: "ac", campus_id: "campus-1", from_node_id: "a", to_node_id: "c", distance_m: 16, accessible: true, active: true },
-    { id: "cd", campus_id: "campus-1", from_node_id: "c", to_node_id: "d", distance_m: 16, accessible: true, active: true },
-  ],
+  landmarks: [{ id: "ref", campus_id: "c1", public_code: "ref-code", name: "Praça central", description: "Junto ao jardim", lat: 0, lng: 0, active: true, photos: [] }],
 };
 
-describe("PublicCampusNavigator", () => {
-  beforeEach(() => {
-    apiMocks.publicMap.mockReset();
-    apiMocks.publicMap.mockResolvedValue(campusData);
-  });
+describe("Guia visual público", () => {
+  beforeEach(() => { vi.clearAllMocks(); mocks.publicMap.mockResolvedValue(campusData); });
 
-  it("busca espaços e calcula o caminho acessível a partir de origem manual", async () => {
+  it("abre a mesma ficha estável pelo mapa e pela lista e encontra um espaço interno", async () => {
     const user = userEvent.setup();
     render(<PublicCampusNavigator publicSlug="universidade" />);
-
-    expect(await screen.findByText("Encontre o caminho até a entrada")).toBeInTheDocument();
-    expect(apiMocks.publicMap).toHaveBeenCalledWith("universidade");
-    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
-    await user.type(screen.getByLabelText("Buscar prédio ou espaço"), "química");
-    await user.click(screen.getByRole("button", { name: /Laboratório de Química · 1º andar/ }));
-
-    expect(screen.getByText(/20 m · cerca de 1 min a pé/)).toBeInTheDocument();
-    expect(screen.getByText(/Bloco A · 1º andar · Ala leste/)).toBeInTheDocument();
-    await user.click(screen.getByLabelText("Usar apenas caminhos acessíveis"));
-    expect(screen.getByText(/32 m · cerca de 1 min a pé/)).toBeInTheDocument();
+    expect(await screen.findByText("Reconheça os locais do campus")).toBeInTheDocument();
+    const href = "/p/universidade/locais/building/block-code";
+    expect(screen.getByRole("link", { name: "Ver ficha de Bloco A" })).toHaveAttribute("href", href);
+    await user.click(screen.getByRole("button", { name: "Abrir bloco pelo mapa" }));
+    expect(mocks.push).toHaveBeenCalledWith(href);
+    expect(screen.getByRole("link", { name: "Ver ficha de Praça central" })).toHaveAttribute("href", "/p/universidade/locais/landmark/ref-code");
+    await user.type(screen.getByLabelText("Buscar bloco, espaço ou referência"), "química");
+    expect(screen.getByRole("link", { name: "Laboratório de Química · 1º andar" })).toHaveAttribute("href", "/p/universidade/locais/space/lab-code");
+    expect(screen.queryByText("Praça central")).not.toBeInTheDocument();
   });
 
-  it("acompanha a posição somente após interação, mostra precisão e cancela watch", async () => {
+  it("mantém o guia sem solicitar geolocalização e separa campi e locais publicados", async () => {
     const user = userEvent.setup();
-    let success: PositionCallback = () => {};
-    let failure: PositionErrorCallback = () => {};
-    const watchPosition = vi.fn((onSuccess: PositionCallback, onError: PositionErrorCallback) => {
-      success = onSuccess;
-      failure = onError;
-      return 42;
-    });
-    const clearWatch = vi.fn();
-    Object.defineProperty(navigator, "geolocation", {
-      configurable: true,
-      value: { watchPosition, clearWatch },
-    });
-    const { unmount } = render(<PublicCampusNavigator publicSlug="universidade" />);
-
-    await screen.findByText("Encontre o caminho até a entrada");
+    const watchPosition = vi.fn(), getCurrentPosition = vi.fn();
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, getCurrentPosition } });
+    render(<PublicCampusNavigator publicSlug="universidade" />);
+    await screen.findByText("Reconheça os locais do campus");
+    expect(screen.queryByText("Bloco inativo")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sala oculta")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /minha localização|acompanhamento/i })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/caminhos acessíveis|Origem cadastrada/)).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Campus"), "c2");
+    expect(screen.getByRole("link", { name: "Ver ficha de Bloco Norte" })).toBeInTheDocument();
+    expect(screen.queryByText("Praça central")).not.toBeInTheDocument();
     expect(watchPosition).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
-    expect(watchPosition).toHaveBeenCalledOnce();
-    act(() => success({ coords: { latitude: 0, longitude: 0, accuracy: 12 }, timestamp: 1 } as GeolocationPosition));
-    expect(screen.getByText("Precisão da localização: ±12 m")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Parar acompanhamento" }));
-    expect(clearWatch).toHaveBeenCalledWith(42);
-    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
-    act(() => failure({ code: 1 } as GeolocationPositionError));
-    expect(screen.getByText(/A localização foi negada/)).toBeInTheDocument();
-    expect(clearWatch).toHaveBeenCalledTimes(2);
-    unmount();
+    expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 
-  it("permite marcar a origem no mapa quando não há GPS", async () => {
+  it("oferece os pontos de referência mesmo sem blocos e mostra busca vazia", async () => {
+    mocks.publicMap.mockResolvedValue({ ...campusData, buildings: [], spaces: [] });
     const user = userEvent.setup();
     render(<PublicCampusNavigator publicSlug="universidade" />);
-    await screen.findByText("Encontre o caminho até a entrada");
-    await user.click(screen.getByRole("button", { name: "Marcar origem no mapa" }));
-    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
-    expect(screen.getByText(/20 m · cerca de 1 min a pé/)).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "Ver ficha de Praça central" })).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Buscar bloco, espaço ou referência"), "auditório");
+    expect(screen.getByRole("status")).toHaveTextContent("Nenhum local encontrado");
   });
 
-  it("informa indisponibilidade quando a instituição ainda não marcou prédios", async () => {
-    apiMocks.publicMap.mockResolvedValueOnce({ ...campusData, buildings: [] });
-    render(<PublicCampusNavigator publicSlug="universidade" />);
-    expect(await screen.findByRole("heading", { name: "Mapa do campus indisponível" })).toBeInTheDocument();
-    expect(screen.queryByText("Encontre o caminho até a entrada")).not.toBeInTheDocument();
+  it("mostra indisponibilidade, erro sanitizado e não mantém dados de outra instituição", async () => {
+    const { rerender } = render(<PublicCampusNavigator publicSlug="universidade" />);
+    await screen.findByText("Bloco A");
+    let resolve: (value: PublicGeoCampus) => void = () => {};
+    mocks.publicMap.mockImplementationOnce(() => new Promise<PublicGeoCampus>((done) => { resolve = done; }));
+    rerender(<PublicCampusNavigator publicSlug="outra" />);
+    expect(screen.queryByText("Bloco A")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Carregando");
+    await act(async () => resolve({ campuses: [], buildings: [], spaces: [], landmarks: [] }));
+    expect(await screen.findByText("Mapa do campus indisponível")).toBeInTheDocument();
+    mocks.publicMap.mockRejectedValueOnce(new Error("postgres credencial interna"));
+    rerender(<PublicCampusNavigator publicSlug="falha" />);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível carregar o mapa");
+    expect(screen.queryByText(/credencial/)).not.toBeInTheDocument();
   });
-
-  it("informa carregamento e trata falha de leitura sem expor o erro interno", async () => {
-    let reject!: (error: Error) => void;
-    apiMocks.publicMap.mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; }));
-    render(<PublicCampusNavigator publicSlug="universidade" />);
-    expect(screen.getByRole("status")).toHaveTextContent("Carregando mapa do campus…");
-    await act(async () => reject(new Error("SEGREDO_INTERNO")));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível carregar o mapa do campus agora.");
-    expect(screen.getByRole("alert")).not.toHaveTextContent("SEGREDO_INTERNO");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
-  });
-
-  it("isola campi ativos e limpa origem/destino ao trocar campus", async () => {
-    const user = userEvent.setup();
-    apiMocks.publicMap.mockResolvedValueOnce({ ...campusData,
-      campuses: [...campusData.campuses, { ...campusData.campuses[0], id: "campus-2", name: "Campus Norte" }, { ...campusData.campuses[0], id: "inactive", name: "Campus inativo", active: false }],
-      buildings: [...campusData.buildings, { ...campusData.buildings[0], id: "north", campus_id: "campus-2", name: "Biblioteca Norte" }, { ...campusData.buildings[0], id: "inactive", name: "Prédio inativo", active: false }],
-    });
-    render(<PublicCampusNavigator publicSlug="universidade" />);
-    await screen.findByText("Encontre o caminho até a entrada");
-    expect(screen.queryByRole("option", { name: "Campus inativo" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Biblioteca Norte/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Prédio inativo/ })).not.toBeInTheDocument();
-    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
-    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
-    await user.selectOptions(screen.getByLabelText("Campus", { exact: true }), "campus-2");
-    expect(screen.getByRole("button", { name: /Biblioteca Norte/ })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Bloco A ensino/ })).not.toBeInTheDocument();
-    expect(screen.queryByText(/20 m · cerca/)).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Origem cadastrada")).toHaveValue("");
-  });
-
-  it("mostra ausência de percurso sem inventar uma rota substituta", async () => {
-    const user = userEvent.setup();
-    apiMocks.publicMap.mockResolvedValueOnce({ ...campusData, edges: [] });
-    render(<PublicCampusNavigator publicSlug="universidade" />);
-    await screen.findByText("Encontre o caminho até a entrada");
-    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
-    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
-    expect(screen.getByText(/Não há caminho conectado cadastrado/)).toBeInTheDocument();
-    await user.click(screen.getByLabelText("Usar apenas caminhos acessíveis"));
-    expect(screen.getByText(/Não há caminho acessível cadastrado/)).toBeInTheDocument();
-    expect(screen.queryByText(/min a pé/)).not.toBeInTheDocument();
-  });
-
-  it.each([[2, "Não foi possível determinar sua posição"], [3, "A localização demorou a responder"]])("preserva alternativa manual após erro GPS %s", async (code, message) => {
-    let failure: PositionErrorCallback = () => {};
-    const watchPosition = vi.fn((_success: PositionCallback, error: PositionErrorCallback) => { failure = error; return 90; });
-    const clearWatch = vi.fn();
-    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch } });
-    const user = userEvent.setup();
-    render(<PublicCampusNavigator publicSlug="universidade" />);
-    await screen.findByText("Encontre o caminho até a entrada");
-    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
-    expect(screen.getByRole("status")).toHaveTextContent("Aguardando localização do aparelho...");
-    act(() => failure({ code } as GeolocationPositionError));
-    expect(screen.getByRole("status")).toHaveTextContent(message);
-    expect(clearWatch).toHaveBeenCalledWith(90);
-    await user.selectOptions(screen.getByLabelText("Origem cadastrada"), "gate");
-    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
-    expect(screen.getByText(/20 m · cerca de 1 min a pé/)).toBeInTheDocument();
-  });
-
-  it("filtra sinal impreciso e pequenos saltos; recalcula, chega e libera o observador", async () => {
-    let success: PositionCallback = () => {};
-    const watchPosition = vi.fn((callback: PositionCallback) => { success = callback; return 71; });
-    const clearWatch = vi.fn();
-    Object.defineProperty(navigator, "geolocation", { configurable: true, value: { watchPosition, clearWatch } });
-    const user = userEvent.setup();
-    const { unmount } = render(<PublicCampusNavigator publicSlug="universidade" />);
-    await screen.findByText("Encontre o caminho até a entrada");
-    await user.click(screen.getByRole("button", { name: /Bloco A ensino/ }));
-    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
-    const emit = (lat: number, lng: number, accuracy: number, timestamp: number) => act(() => success({ coords: { latitude: lat, longitude: lng, accuracy }, timestamp } as GeolocationPosition));
-    emit(0, -0.0002, 90, 1);
-    expect(screen.getByRole("status")).toHaveTextContent("Sinal impreciso (±90 m)");
-    expect(screen.queryByText(/min a pé/)).not.toBeInTheDocument();
-    emit(0, -0.0002, 12, 2);
-    const metric = screen.getByText(/min a pé/).textContent;
-    emit(0, -0.000199, 12, 3);
-    expect(screen.getByText(/min a pé/)).toHaveTextContent(metric!);
-    emit(0, 0, 30, 4);
-    expect(screen.getByText(/min a pé/)).not.toHaveTextContent(metric!);
-    emit(0.0001, 0.0001, 10, 5);
-    expect(screen.getByText(/Você chegou à entrada de Bloco A/)).toBeInTheDocument();
-    expect(clearWatch).toHaveBeenCalledWith(71);
-    expect(watchPosition).toHaveBeenCalledOnce();
-    await user.click(screen.getByRole("button", { name: "Usar minha localização" }));
-    unmount();
-    expect(watchPosition).toHaveBeenCalledTimes(2);
-    expect(clearWatch).toHaveBeenCalledTimes(2);
-  });
-
 });
