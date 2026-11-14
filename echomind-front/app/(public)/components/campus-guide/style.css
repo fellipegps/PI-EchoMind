@@ -1,0 +1,251 @@
+.campus-guide { container: campus-guide / inline-size; min-width: 0; }
+
+@scope (.campus-guide) {
+  :scope {
+    color: var(--card-foreground);
+    --map-shadow: 0 4px 15px rgb(0 0 0 / 14%), 0 1px 3px rgb(0 0 0 / 12%);
+  }
+  * { box-sizing: border-box; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
+  button:disabled { cursor: default; opacity: .48; }
+  button > span[data-icon] { display: grid; place-items: center; }
+  svg { display: block; }
+  [hidden] { display: none !important; }
+  a { color: var(--primary); text-decoration: underline; text-underline-offset: .18em; }
+  .about-button {
+    min-height: 43px;
+    width: 43px;
+    justify-content: center;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 10px;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .about-button svg { width: 17px; height: 17px; }
+  .about-button:hover, .tool-group button:hover, .compass:hover { background: var(--accent); }
+  .map-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-width: 0;
+    height: var(--campus-map-height, clamp(380px, calc(100svh - 9rem), 900px));
+    background: var(--muted);
+    border-block: 1px solid var(--border);
+  }
+  .map, .markers { position: absolute; inset: 0; }
+  .fallback-canvas, .campus-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+  .campus-canvas { cursor: grab; }
+  .campus-canvas:active { cursor: grabbing; }
+  .tool-group button[aria-pressed="true"] { background: var(--primary); color: var(--primary-foreground); }
+  .map:empty { background: var(--muted); }
+  .satellite-map { background: var(--muted); cursor: grab; touch-action: none; }
+  .satellite-map:active { cursor: grabbing; }
+  .satellite-imagery, .satellite-outlines { position: absolute; inset: 0; pointer-events: none; }
+  .satellite-imagery { isolation: isolate; overflow: hidden; }
+  .satellite-imagery img { position: absolute; top: 0; left: 0; max-width: none; user-select: none; }
+  .satellite-outlines { width: 100%; height: 100%; }
+  .satellite-outlines polygon { fill: var(--secondary); stroke: var(--muted-foreground); stroke-width: 1.5; pointer-events: visiblePainted; cursor: pointer; }
+  .satellite-outlines .selected { fill: color-mix(in srgb, var(--primary) 24%, transparent); stroke: var(--primary); stroke-width: 2.5; }
+  .markers { z-index: 1; pointer-events: none; }
+  .map-top, .map-dock { position: absolute; z-index: 2; inset-inline: 19px; pointer-events: none; }
+  .map-top { top: 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .map-dock { bottom: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .map-bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; }
+  .map-credit {
+    margin-inline-start: auto;
+    min-width: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 550;
+    line-height: 1.25;
+    text-align: right;
+    overflow-wrap: anywhere;
+    color: var(--muted-foreground);
+    pointer-events: auto;
+  }
+  .view-switch {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--map-shadow);
+    pointer-events: auto;
+  }
+  .view-switch button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 35px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+  .view-switch button[aria-pressed="true"] { background: var(--primary); color: var(--primary-foreground); }
+  .view-switch svg { width: 17px; height: 17px; }
+  .map-orientation { display: flex; gap: 7px; align-items: flex-start; }
+  .compass {
+    width: 43px;
+    min-height: 51px;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--map-shadow);
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+    padding: 5px 0 3px;
+    font-size: 9px;
+    font-weight: 800;
+  }
+  .compass svg { width: 22px; height: 22px; color: var(--primary); }
+  .map-tools {
+    justify-self: end;
+    display: grid;
+    gap: 9px;
+    pointer-events: auto;
+  }
+  .tool-group { display: grid; border-radius: 10px; box-shadow: var(--map-shadow); border: 1px solid var(--border); overflow: hidden; }
+  .tool-group button { border: 0; background: var(--card); width: 41px; height: 40px; display: grid; place-items: center; }
+  .tool-group button + button { border-top: 1px solid var(--border); }
+  .tool-group button:focus-visible { outline-offset: -4px; }
+  .tool-group svg { width: 19px; height: 19px; }
+  #satellite-logo { flex: none; pointer-events: auto; }
+  #satellite-logo img { width: 90px; height: 22px; object-fit: contain; object-position: left bottom; }
+  .public-place-link { display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; font-weight: 750; }
+  .map-status-stack {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    top: 63px;
+    left: 19px;
+    right: 65px;
+    display: grid;
+    justify-items: start;
+    gap: 5px;
+  }
+  .map-message {
+    max-width: max-content;
+    margin: 0;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    padding: 7px 9px;
+    border-radius: 7px;
+    background: var(--card);
+  }
+  .map-pin, .entry-pin {
+    position: absolute;
+    top: 0;
+    left: 0;
+    translate: -50% -100%;
+    white-space: nowrap;
+    box-shadow: var(--map-shadow);
+  }
+  .map-pin {
+    justify-content: center;
+    padding: 0 7px;
+    min-width: 29px;
+    min-height: 28px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--card-foreground);
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 750;
+    border-radius: 10px;
+    pointer-events: auto;
+  }
+  .map-pin::after, .entry-pin::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: calc(50% - 4px);
+    width: 8px;
+    height: 8px;
+    rotate: 45deg;
+    background: inherit;
+    border-radius: 0 0 2px 0;
+  }
+  .map-pin:hover { background: var(--accent); }
+  .map-pin[aria-pressed="true"] { z-index: 2; border-color: var(--primary); color: var(--primary-foreground); background: var(--primary); }
+  .map-detail { position: absolute; z-index: 3; left: var(--map-detail-left, 12px); top: var(--map-detail-top, 60px); width: 278px; max-width: calc(100% - 84px); max-height: calc(100% - 112px); overflow: auto; padding: 10px 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--card); box-shadow: var(--map-shadow); }
+  .map-detail-header { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .map-detail h2 { margin: 0; font-size: 15px; }
+  .map-detail p, .map-detail ul { margin: 4px 0 0; font-size: 12px; line-height: 1.5; }
+  .map-detail ul { padding-left: 17px; }
+  ul { list-style: disc; }
+  .map-detail li + li { margin-top: 4px; }
+  .map-detail button { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border: 0; border-radius: 7px; background: var(--accent); color: var(--primary); }
+  .map-detail button svg { width: 17px; height: 17px; }
+  .entry-pin {
+    z-index: 3;
+    border: 1px dashed var(--warning);
+    color: var(--warning);
+    background: var(--card);
+    border-radius: 7px;
+    padding: 5px 7px;
+    min-height: 25px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 750;
+  }
+  .entry-pin.confirmed { color: var(--success); background: var(--card); border: 1px solid var(--success); }
+  .entry-pin svg { width: 13px; height: 13px; }
+  .entry-pin::after { bottom: -4px; border-bottom: inherit; border-right: inherit; }
+  .entry-pin::before { content: ""; position: absolute; left: calc(50% - 3px); bottom: -9px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 2px var(--card); }
+  dialog p, dialog li { line-height: 1.55; }
+  dialog p, dialog ul { margin-top: 12px; }
+  dialog ul { padding-left: 19px; }
+  dialog li + li { margin-top: 7px; }
+  dialog { position: fixed; margin: auto; width: min(450px, calc(100% - 30px)); border: 1px solid var(--border); border-radius: 16px; padding: 21px; background: var(--popover); color: var(--popover-foreground); box-shadow: 0 15px 60px rgb(0 0 0 / 22%); font-size: 14px; }
+  dialog::backdrop { background: rgb(0 0 0 / 50%); }
+  .dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .dialog-heading h2 { margin: 0; font-size: 23px; letter-spacing: -.04em; }
+  .dialog-heading button { border: 0; border-radius: 8px; background: var(--accent); width: 41px; height: 41px; display: grid; place-items: center; }
+  .dialog-heading svg { width: 19px; height: 19px; }
+
+  @media (width < 64rem) {
+    .map-stage { border-bottom: 0; }
+  }
+
+  @container campus-guide (max-width: 700px) {
+    .map-stage { height: var(--campus-map-height, clamp(340px, calc(100svh - 13rem), 680px)); }
+    .map-top, .map-dock { inset-inline: 10px; }
+    .map-top { top: 10px; }
+    .map-dock { bottom: 18px; gap: 8px; }
+    .map-detail { left: 10px; right: 62px; top: auto; bottom: 68px; width: auto; max-width: none; max-height: calc(100% - 128px); }
+    .map-tools { gap: 5px; }
+    .tool-group button { width: 43px; height: 40px; }
+    .tool-group svg { width: 17px; height: 17px; }
+    .compass { width: 45px; min-height: 43px; }
+    .map-credit { padding: 5px 7px; font-size: 10px; }
+    .view-switch button { min-height: 36px; }
+    .view-switch svg { width: 15px; height: 15px; }
+    .map-pin { min-height: 29px; min-width: 29px; padding: 0 6px; font-size: 11px; }
+    .map-status-stack { left: 10px; right: 54px; top: 59px; }
+  }
+
+  @container campus-guide (max-width: 340px) {
+    .view-switch svg { display: none; }
+  }
+}

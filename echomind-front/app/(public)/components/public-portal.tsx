@@ -28,6 +28,7 @@ type PublicPortalProps = {
 
 export function PublicPortal({ publicSlug = "", initialTab = "chat" }: PublicPortalProps) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+  const [placesDirectory, setPlacesDirectory] = useState<HTMLDivElement | null>(null);
   const normalizedSlug = publicSlug.trim();
   const privacyHref = `/p/${encodeURIComponent(normalizedSlug)}/privacidade`;
   const [companyName, setCompanyName] = useState("Portal Acadêmico");
@@ -166,6 +167,7 @@ export function PublicPortal({ publicSlug = "", initialTab = "chat" }: PublicPor
   return (
     <div>
       <PortalShell activeTab={activeTab} onTabChange={setActiveTab} companyName={companyName} privacyHref={privacyHref}
+        placesDirectoryRef={setPlacesDirectory}
         auxiliary={<ChatAuxiliary faqs={faqs} events={events} eventsLoading={eventsLoading} eventsError={eventsError}
           disabled={sending || portalLoading || Boolean(portalError)} onQuestion={(question) => void sendQuestion(question)}
           onEvents={() => setActiveTab("eventos")} />}>
@@ -177,7 +179,7 @@ export function PublicPortal({ publicSlug = "", initialTab = "chat" }: PublicPor
                 onSubmit={submitChat} onQuestion={(question) => void sendQuestion(question)} faqs={faqs}
                 sending={sending} waitingForFirstToken={waitingForFirstToken}
                 blocked={sending || portalLoading || Boolean(portalError)} portalLoading={portalLoading}
-                portalError={portalError} chatError={chatError} privacyHref={privacyHref}
+                portalError={portalError} chatError={chatError}
                 onHandoff={id => void sendHandoff(id)}
                 onDeclineHandoff={id => changeHandoff(id, { status: "declined", token: "", error: undefined })} />
             </section>
@@ -191,10 +193,10 @@ export function PublicPortal({ publicSlug = "", initialTab = "chat" }: PublicPor
           )}
 
           {activeTab === "locais" && (
-            <section className={styles.panel} aria-labelledby="places-title">
-              <PortalSectionHeading id="places-title" eyebrow="Guia visual" title="Locais do campus" description="Consulte os blocos, espaços e fotos de referência publicados pela instituição." />
+            <section className={styles.mapPanel} aria-labelledby="places-title">
+              <h2 id="places-title" className="sr-only">Locais do campus</h2>
 
-              <PublicCampusNavigator publicSlug={normalizedSlug} />
+              <PublicCampusNavigator publicSlug={normalizedSlug} companyName={companyName} directoryTarget={placesDirectory} />
             </section>
           )}
       </PortalShell>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Trash2, Upload } from "lucide-react";
+import { ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { geoCampusApi, type PlacePhoto, type PlaceType } from "@/lib/geocampus-api";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,7 @@ export function PlaceMediaManager({ campusId, placeType, placeId, placeName, pho
   const fileInput = useRef<HTMLInputElement>(null);
   const operationPending = useRef(false);
   const inputId = "photos-" + placeId;
+  const controlsDisabled = busy || Boolean(deleting);
 
   const upload = async () => {
     if (!files.length || operationPending.current) return;
@@ -102,18 +103,26 @@ export function PlaceMediaManager({ campusId, placeType, placeId, placeName, pho
   };
 
   return (
-    <section aria-label={"Fotos de " + placeName} className="min-w-0 space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor={inputId}>Adicionar fotos de referência</Label>
-        <Input id={inputId} ref={fileInput} type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={busy || Boolean(deleting)} aria-describedby={inputId + "-help"} onChange={(event) => setFiles(Array.from(event.target.files || []))} />
-        <p id={inputId + "-help"} className="text-sm text-muted-foreground">JPEG, PNG ou WebP, até 5 MiB e 16 megapixels por foto. Você pode selecionar várias imagens.</p>
-        {files.length > 0 && <p role="status" className="text-sm">{files.length} foto(s) para enviar.</p>}
+    <section aria-label={"Fotos de " + placeName} className="min-w-0 space-y-4 rounded-lg border border-border p-4 sm:p-5">
+      <h3 className="font-medium">Fotos de referência</h3>
+      <div className="space-y-3 rounded-md border border-dashed border-input bg-muted/30 p-3">
+        <Label htmlFor={inputId} className="sr-only">Adicionar fotos de referência</Label>
+        <input id={inputId} ref={fileInput} type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={controlsDisabled} tabIndex={-1} className="sr-only" onChange={(event) => setFiles(Array.from(event.target.files || []))} />
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+          <Button type="button" variant="outline" disabled={controlsDisabled} aria-describedby={inputId + "-help"} onClick={() => fileInput.current?.click()}>
+            <ImagePlus aria-hidden="true" />Escolher fotos
+          </Button>
+          <p role="status" className="min-w-0 text-sm text-muted-foreground [overflow-wrap:anywhere]">
+            {files.length === 0 ? "Nenhuma foto selecionada" : files.length === 1 ? files[0].name : `${files.length} fotos selecionadas`}
+          </p>
+        </div>
+        <p id={inputId + "-help"} className="text-xs leading-5 text-muted-foreground">JPEG, PNG ou WebP · Até 5 MiB e 16 megapixels por foto.</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor={inputId + "-caption"}>Descrição das fotos selecionadas (opcional)</Label>
-        <Input id={inputId + "-caption"} value={caption} maxLength={300} onChange={(event) => setCaption(event.target.value)} disabled={busy || Boolean(deleting)} placeholder="Ex.: fachada vista da praça central" />
+        <Input id={inputId + "-caption"} value={caption} maxLength={300} onChange={(event) => setCaption(event.target.value)} disabled={controlsDisabled} placeholder="Ex.: fachada vista da praça central" />
       </div>
-      <Button onClick={() => void upload()} disabled={!files.length || busy || Boolean(deleting)} aria-busy={busy}>
+      <Button onClick={() => void upload()} disabled={!files.length || controlsDisabled} aria-busy={busy}>
         {busy ? <Loader2 aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" /> : <Upload aria-hidden="true" className="size-4" />}
         {busy ? "Enviando fotos..." : "Enviar fotos"}
       </Button>

@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
-import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
+import {
+  CAMPUS_MAP_TILE_OPTIONS,
+  CAMPUS_MAP_TILE_URL,
+  CAMPUS_SATELLITE_TILE_ATTRIBUTION as SATELLITE_TILE_ATTRIBUTION,
+  CAMPUS_SATELLITE_TILE_URL as SATELLITE_TILE_URL,
+} from "@/lib/campus-map-tiles";
 import type { Building, Landmark } from "@/lib/geocampus-api";
 import styles from "./geo-campus-map.module.css";
 
@@ -26,9 +31,6 @@ function label(text: string): HTMLElement {
   element.textContent = text;
   return element;
 }
-
-const SATELLITE_TILE_URL = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_URL?.trim();
-const SATELLITE_TILE_ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_ATTRIBUTION?.trim();
 
 export function GeoCampusMap({
   center,

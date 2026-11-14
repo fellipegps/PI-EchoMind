@@ -14,3 +14,6 @@ export const CAMPUS_MAP_TILE_OPTIONS: TileLayerOptions = {
     ? "strict-origin"
     : undefined,
 };
+
+export const CAMPUS_SATELLITE_TILE_URL = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_URL?.trim();
+export const CAMPUS_SATELLITE_TILE_ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_ATTRIBUTION?.trim();

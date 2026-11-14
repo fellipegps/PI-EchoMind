@@ -569,7 +569,17 @@ leitura de seu QR Code abrem a mesma ficha em
 `/p/{slug}/locais/{type}/{public_code}`, com descrição, fotos e identificação do
 bloco quando se trata de um espaço interno. O administrador pode baixar e
 imprimir o QR Code. O código do local é estável após alterações no cadastro.
-O guia substitui o cálculo de rotas e o uso da localização do visitante.
+Na aba Locais da UniEVANGÉLICA, o campus de Anápolis dispõe da maquete 3D
+do setor leste e da visão Satélite. As duas vistas compartilham a seleção
+dos blocos e suas fichas flutuantes. O mapa e o diretório de locais apontam
+para as mesmas fichas em `/p/{slug}/locais/mapa/{id}`. As fichas listam
+laboratórios e referências de acesso e, quando há um local correspondente,
+incluem um link para o cadastro publicado pela instituição. A maquete usa dados locais do
+[OpenStreetMap](https://www.openstreetmap.org/copyright) sob a licença ODbL.
+As fachadas, alturas e referências de acesso são ilustrativas. Para habilitar
+as imagens de satélite, configure `NEXT_PUBLIC_MAP_SATELLITE_TILE_URL` e
+`NEXT_PUBLIC_MAP_SATELLITE_TILE_ATTRIBUTION` no frontend. Sem as imagens,
+a visão Satélite exibe os contornos da maquete.
 A migração `0028` adiciona os códigos dos locais existentes e as novas estruturas
 de referências e fotos, preservando o cadastro e os registros legados de caminhos.
 A revisão Alembic `0023` retira a tabela do recurso descontinuado; ela remove

@@ -465,7 +465,7 @@ export function GeoCampusManager() {
       {campus && mediaTarget && mediaPlace && (
         <Card role="region" aria-labelledby="place-media-title">
           <CardHeader><CardTitle><h2 id="place-media-title" tabIndex={-1} ref={mediaHeading} className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [overflow-wrap:anywhere]">Fotos e QR Code de {mediaPlace.name}</h2></CardTitle></CardHeader>
-          <CardContent className="grid min-w-0 gap-6 lg:grid-cols-2">
+          <CardContent className="grid min-w-0 items-start gap-4 lg:grid-cols-2">
             <PlaceMediaManager key={mediaTarget.kind + mediaPlace.id} campusId={campus.id} placeType={mediaTarget.kind} placeId={mediaPlace.id} placeName={mediaPlace.name} photos={mediaPlace.photos || []} onChanged={() => loadMap(campus.id)} />
             <PlaceQrCode key={mediaPlace.public_code} publicSlug={publicSlug} placeType={mediaTarget.kind} publicCode={mediaPlace.public_code} placeName={mediaPlace.name} />
           </CardContent>
