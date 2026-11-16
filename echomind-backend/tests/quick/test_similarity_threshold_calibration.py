@@ -210,11 +210,10 @@ def test_versioned_report_uses_production_embedding_outputs() -> None:
 
 def test_runtime_default_and_documented_configuration_are_consistent() -> None:
     backend_root = EVALS.parent
-    repository_root = backend_root.parent
 
     assert "SIMILARITY_THRESHOLD=0.45" in (
         backend_root / ".env.example"
     ).read_text(encoding="utf-8")
-    assert "SIMILARITY_THRESHOLD=0.45" in (
-        repository_root / "README.md"
+    assert "`SIMILARITY_THRESHOLD` permanece em `0.45`" in (
+        backend_root / "RAG.md"
     ).read_text(encoding="utf-8")
