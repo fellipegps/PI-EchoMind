@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const toDataURL = vi.hoisted(() => vi.fn());
 vi.mock("qrcode", () => ({ default: { toDataURL } }));
-vi.mock("@/lib/api", () => ({ tokenStore: { get: vi.fn(), clear: vi.fn() } }));
+vi.mock("@/lib/supabase", () => ({ supabase: {} }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 import { PlaceQrCode } from "./place-qr-code";
 import { toast } from "sonner";

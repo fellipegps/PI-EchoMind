@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PublicPlace } from "@/lib/geocampus-api";
 const apiMocks = vi.hoisted(() => ({ publicPlace: vi.fn() }));
-vi.mock("@/lib/api", () => ({ tokenStore: { get: vi.fn(), clear: vi.fn() } }));
+vi.mock("@/lib/supabase", () => ({ supabase: {} }));
 vi.mock("@/lib/geocampus-api", async (original) => ({
   ...await original<typeof import("@/lib/geocampus-api")>(),
   geoCampusApi: { publicPlace: apiMocks.publicPlace },

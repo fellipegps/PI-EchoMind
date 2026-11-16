@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from supabase import AuthApiError, AuthError
 
 from .supabase_client import supabase
 
@@ -38,10 +39,18 @@ def get_current_user(
 
     try:
         response = supabase.auth.get_user(credentials.credentials)
-        user = response.user
-    except Exception:
-        raise credentials_exception
+    except AuthError as exc:
+        if isinstance(exc, AuthApiError) and (
+            exc.status in (401, 403)
+            or exc.code in ("bad_jwt", "session_not_found", "user_not_found")
+        ):
+            raise credentials_exception from None
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Não foi possível verificar a sessão neste momento. Tente novamente.",
+        ) from None
 
+    user = response.user if response is not None else None
     if not user or not user.email:
         raise credentials_exception
 

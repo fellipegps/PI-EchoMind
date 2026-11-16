@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./supabase", () => ({
-  supabase: {
-    auth: {},
-  },
-}));
+const auth = vi.hoisted(() => ({ getSession: vi.fn(), refreshSession: vi.fn() }));
+vi.mock("./supabase", () => ({ supabase: { auth } }));
 
 import {
   configApi,
@@ -18,14 +15,20 @@ import {
   type DocumentListResponse,
   type DocumentUploadMetadata,
   type KnowledgeDocument,
-  tokenStore,
 } from "./api";
 
 const API_URL = "http://localhost:8000";
 
+function sessionResult(token: string, userId = "admin-1") {
+  return { data: { session: { access_token: token, user: { id: userId } } }, error: null };
+}
+
+beforeEach(() => {
+  auth.getSession.mockReset().mockResolvedValue(sessionResult("token-do-admin"));
+  auth.refreshSession.mockReset();
+});
+
 it("envia autenticação em todos os clientes legados que aceitam tenant", async () => {
-  localStorage.clear();
-  tokenStore.set("token-do-admin");
   const fetchMock = vi.fn<typeof fetch>().mockImplementation(async () => jsonResponse({}));
   vi.stubGlobal("fetch", fetchMock);
   try {
@@ -40,7 +43,6 @@ it("envia autenticação em todos os clientes legados que aceitam tenant", async
     }
   } finally {
     vi.unstubAllGlobals();
-    localStorage.clear();
   }
 });
 
@@ -79,12 +81,8 @@ describe("documentApi", () => {
   const fetchMock = vi.fn<typeof fetch>();
 
   beforeEach(() => {
-    vi.restoreAllMocks();
     fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);
-    localStorage.clear();
-    window.history.replaceState({}, "", "/");
-    tokenStore.set("token-do-admin");
   });
 
   it("lista, consulta e exclui documentos com método, URL e autorização corretos", async () => {
@@ -162,14 +160,14 @@ describe("documentApi", () => {
       init?.signal?.addEventListener("abort", () => reject(new DOMException("Cancelado", "AbortError")));
     }));
     const request = documentApi.list(controller.signal).catch((error: unknown) => error);
-    expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/documents`, expect.objectContaining({
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledWith(`${API_URL}/documents`, expect.objectContaining({
       method: "GET", signal: controller.signal,
-    }));
+    })));
     expect(requestHeaders(fetchMock.mock.calls[0]).get("Authorization")).toBe("Bearer token-do-admin");
     controller.abort();
     expect(await request).toBeInstanceOf(Error);
     expect(controller.signal.aborted).toBe(true);
-    expect(tokenStore.get()).toBe("token-do-admin");
+    expect(auth.refreshSession).not.toHaveBeenCalled();
   });
 
   it("consulta somente o limite documental com autenticação e sinal de cancelamento", async () => {
@@ -193,15 +191,43 @@ describe("documentApi", () => {
     expect(Array.from(formData.keys())).toEqual(["file"]);
   });
 
-  it("preserva o tratamento existente de 401", async () => {
-    window.history.replaceState({}, "", "/login");
-    fetchMock.mockResolvedValueOnce(jsonResponse({ detail: "token inválido" }, 401));
+  it("renova uma vez para requisições concorrentes rejeitadas com o mesmo token", async () => {
+    const listing = { documents: [], total: 0 };
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({}, 401))
+      .mockResolvedValueOnce(jsonResponse({}, 401))
+      .mockResolvedValueOnce(jsonResponse(listing))
+      .mockResolvedValueOnce(jsonResponse(listing));
+    auth.refreshSession.mockResolvedValueOnce(sessionResult("renovado"));
 
-    await expect(documentApi.list()).rejects.toThrow(
-      "Sessão expirada. Faça login novamente."
-    );
-    expect(tokenStore.get()).toBeNull();
-    expect(window.location.pathname).toBe("/login");
+    await expect(Promise.all([documentApi.list(), documentApi.list()])).resolves.toEqual([listing, listing]);
+    expect(auth.refreshSession).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls.map((call) => requestHeaders(call).get("Authorization"))).toEqual([
+      "Bearer token-do-admin", "Bearer token-do-admin", "Bearer renovado", "Bearer renovado",
+    ]);
+  });
+
+  it("usa o token que já foi renovado e encerra a tentativa se outro 401 chegar", async () => {
+    auth.getSession
+      .mockResolvedValueOnce(sessionResult("token-do-admin"))
+      .mockResolvedValueOnce(sessionResult("renovado"));
+    fetchMock.mockImplementation(async () => jsonResponse({}, 401));
+
+    await expect(documentApi.list()).rejects.toThrow("Não foi possível validar sua sessão no painel");
+    expect(auth.refreshSession).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(requestHeaders(fetchMock.mock.calls[1]).get("Authorization")).toBe("Bearer renovado");
+  });
+
+  it("não reenvia uma operação quando a conta muda durante a requisição", async () => {
+    auth.getSession
+      .mockResolvedValueOnce(sessionResult("token-do-admin"))
+      .mockResolvedValueOnce(sessionResult("outra-conta", "admin-2"));
+    fetchMock.mockResolvedValueOnce(jsonResponse({}, 401));
+
+    await expect(documentApi.delete("document-1")).rejects.toThrow("Não foi possível validar sua sessão no painel");
+    expect(auth.refreshSession).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it.each([
@@ -224,7 +250,6 @@ describe("publicPortalApi", () => {
   const fetchMock = vi.fn<typeof fetch>();
 
   beforeEach(() => {
-    vi.restoreAllMocks();
     fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);
     localStorage.clear();

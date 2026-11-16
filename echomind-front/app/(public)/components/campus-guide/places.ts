@@ -1,4 +1,4 @@
-import { type Building, type Campus, type Landmark } from "@/lib/geocampus-api";
+import { type Building, type Campus, type Landmark, type PlacePhoto } from "@/lib/geocampus-api";
 import anapolisData from "@/public/campus-guide/destinations.json";
 
 export function normalizePlaceText(name: string) {
@@ -34,6 +34,24 @@ const aliases: Record<string, readonly string[]> = {
 export const anapolisDestinations = anapolisData.destinations;
 export type AnapolisDestination = (typeof anapolisDestinations)[number];
 
+export type MapPlace = {
+  id: string;
+  destinationId?: string | null;
+  name: string;
+  description: string | null;
+  kind: string;
+  coordinates: [number, number];
+  photos: PlacePhoto[];
+  href: string;
+  spaces?: { name: string; floor: string | null; description: string | null; href: string }[];
+};
+
+export function campusModelKey(campus: Campus | undefined, publicSlug: string, companyName: string) {
+  if (!campus) return null;
+  if (campus?.model_key) return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(campus.model_key) ? campus.model_key : null;
+  return hasAnapolisModel(publicSlug, companyName, campus) ? "anapolis" : null;
+}
+
 export function anapolisDestinationHref(publicSlug: string, id: string) {
   return `/p/${encodeURIComponent(publicSlug)}/locais/mapa/${encodeURIComponent(id)}`;
 }
@@ -44,8 +62,13 @@ export function anapolisPublishedPlaces(buildings: Building[], landmarks: Landma
     ...landmarks.map((place) => ({ ...place, type: "landmark" as const })),
   ];
   const matchesByDestination = new Map<string, (typeof places)[number]>();
+  for (const place of places) {
+    if (place.type === "building" && place.model_destination_id) matchesByDestination.set(place.model_destination_id, place);
+  }
   for (const [id, names] of Object.entries(aliases)) {
-    const matches = places.filter((place) => names.includes(normalizePlaceText(place.name)));
+    if (matchesByDestination.has(id)) continue;
+    const matches = places.filter((place) =>
+      (place.type !== "building" || !place.model_destination_id) && names.includes(normalizePlaceText(place.name)));
     if (matches.length === 1) {
       matchesByDestination.set(id, matches[0]);
     }

@@ -10,8 +10,11 @@ export const campusGuideMarkup = `
         <button id="map-detail-close" type="button" aria-label="Fechar ficha"><span data-icon="close" aria-hidden="true"></span></button>
       </div>
       <p id="map-detail-kind" hidden></p>
-      <ul id="map-detail-labs" aria-label="Laboratórios" hidden></ul>
+      <p id="map-detail-description" hidden></p>
+      <ul id="map-detail-labs" aria-label="Locais internos" hidden></ul>
+      <div id="map-detail-photos"></div>
       <a id="public-place-link" class="public-place-link">Abrir ficha completa</a>
+      <button id="manage-map-place" class="public-place-link" type="button" hidden>Editar neste painel</button>
     </section>
     <div class="map-top">
       <div class="view-switch" role="group" aria-label="Vista do mapa">

@@ -22,23 +22,29 @@ function extent(points) {
   return {left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys)};
 }
 
-export function createSatelliteMap({element, buildings, markers, onSelect, onStatus, tiles: imageryTiles}) {
+export function createSatelliteMap({element, buildings, destinations, origin, markers, onSelect, onStatus, tiles: imageryTiles}) {
   const imagery = document.createElement('div');
   imagery.className = 'satellite-imagery';
   imagery.setAttribute('aria-hidden', 'true');
   const outlines = document.createElementNS(svgNamespace, 'svg');
   outlines.classList.add('satellite-outlines');
   outlines.setAttribute('aria-hidden', 'true');
+  const selectable = new Set(destinations.map(({id}) => id));
   const footprints = buildings.features.filter(({properties}) => properties.kind === 'destination').map(({id, geometry}) => {
     const outline = document.createElementNS(svgNamespace, 'polygon');
-    outline.addEventListener('click', () => onSelect(id));
+    if (selectable.has(id)) outline.addEventListener('click', () => onSelect(id));
+    else outline.style.pointerEvents = 'none';
     outlines.append(outline);
     return {id, outline, ring: geometry.coordinates[0].map(mercator)};
   });
   element.append(imagery, outlines);
 
-  const campus = extent(footprints.flatMap(({ring}) => ring));
-  const panLimits = extent([mercator([-48.947, -16.299]), mercator([-48.940, -16.289])]);
+  const footprintPoints = footprints.flatMap(({ring}) => ring);
+  const campus = extent(footprintPoints.length ? footprintPoints : [mercator(origin)]);
+  const visibleBounds = extent([...footprintPoints, ...destinations.map(({labelCoordinates}) => mercator(labelCoordinates))]);
+  const padding = Math.max(visibleBounds.right - visibleBounds.left, visibleBounds.bottom - visibleBounds.top, .00001);
+  const panLimits = {left: visibleBounds.left - padding, right: visibleBounds.right + padding,
+    top: visibleBounds.top - padding, bottom: visibleBounds.bottom + padding};
   const tiles = new Map();
   let center, selected, zoom, frame;
   let destroyed = false;
@@ -238,8 +244,8 @@ export function createSatelliteMap({element, buildings, markers, onSelect, onSta
     select(destination) {
       selected = destination?.id;
       const footprint = footprints.find(({id}) => id === selected);
-      const points = footprint?.ring.slice();
-      if (destination?.entry.coordinates) points?.push(mercator(destination.entry.coordinates));
+      const points = footprint?.ring.slice() ?? (destination ? [mercator(destination.labelCoordinates)] : null);
+      if (destination?.entry.coordinates) points.push(mercator(destination.entry.coordinates));
       fit(points ? extent(points) : campus, points ? 19.8 : 18.4);
     },
     zoom: zoomBy,

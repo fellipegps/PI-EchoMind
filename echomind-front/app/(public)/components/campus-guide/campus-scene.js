@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {campusPosition, createCampusModel} from './campus-model.js';
+import {createCampusModel} from './campus-model.js';
 import {createCanvasRenderer} from './campus-canvas-renderer.js';
 import {positionMarkers} from './map-markers.js';
 
@@ -22,18 +22,17 @@ function createRenderer() {
   return renderer;
 }
 
-export function createDetailedCampus({element, buildings, context, destinations, markers, onSelect, onBearing}) {
+export function createDetailedCampus({element, buildings, context, destinations, origin, markers, onSelect, onBearing}) {
   const renderer = createRenderer();
-  const {scene, models, pickMeshes, accessRing} = createCampusModel({buildings, context, destinations});
-  const extent = new THREE.Box3();
-  for (const mesh of pickMeshes) extent.expandByObject(mesh);
-  const overviewTarget = extent.getCenter(new THREE.Vector3()).setY(3);
+  const {scene, models, pickMeshes, accessRing, campusPosition} = createCampusModel({buildings, context, destinations, origin});
   const overviewRight = north.clone().cross(overviewDirection).normalize();
   const overviewUp = overviewDirection.clone().cross(overviewRight);
   const campusCorners = buildings.features.filter(({properties}) => properties.kind === 'destination')
     .flatMap(({geometry, properties}) => geometry.coordinates[0].slice(0, -1)
-      .flatMap((point) => [campusPosition(point), campusPosition(point, properties.heightMeters + 3)]))
-    .map((point) => point.sub(overviewTarget));
+      .flatMap((point) => [campusPosition(point), campusPosition(point, properties.heightMeters + 3)]));
+  const extent = new THREE.Box3().setFromPoints(campusCorners);
+  const overviewTarget = extent.getCenter(new THREE.Vector3()).setY(3);
+  campusCorners.forEach((point) => point.sub(overviewTarget));
   const canvas = renderer.domElement;
   canvas.className = 'campus-canvas';
   canvas.setAttribute('aria-hidden', 'true');
@@ -50,7 +49,8 @@ export function createDetailedCampus({element, buildings, context, destinations,
   controls.minPolarAngle = .22;
   controls.maxPolarAngle = Math.PI / 2;
   controls.cursor.copy(overviewTarget);
-  controls.maxTargetRadius = 530;
+  controls.maxTargetRadius = destinations.reduce((radius, destination) =>
+    Math.max(radius, campusPosition(destination.labelCoordinates).distanceTo(overviewTarget) + 80), 530);
 
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const raycaster = new THREE.Raycaster();
@@ -212,7 +212,8 @@ export function createDetailedCampus({element, buildings, context, destinations,
       canvas.remove();
     },
     select(destination) {
-      if (active) models.get(active.id).outline.visible = false;
+      const previous = active && models.get(active.id);
+      if (previous) previous.outline.visible = false;
       active = destination;
       const model = active && models.get(active.id);
       accessRing.visible = Boolean(model?.access);
@@ -220,6 +221,9 @@ export function createDetailedCampus({element, buildings, context, destinations,
       if (model) {
         model.outline.visible = true;
         moveTo(facade(active));
+      } else if (active) {
+        const target = campusPosition(active.labelCoordinates);
+        moveTo({target, position: target.clone().addScaledVector(overviewDirection, 65)});
       } else {
         moveTo(overview());
       }

@@ -9,9 +9,10 @@ import { geoCampusApi, publicPlaceHref, type PublicGeoCampus } from "@/lib/geoca
 import {
   anapolisDestinationSources,
   anapolisPublishedPlaces,
-  hasAnapolisModel,
+  campusModelKey,
   type AnapolisDestination,
 } from "./campus-guide/places";
+import { PublicCampusPhotos } from "./public-campus-place";
 
 export function PublicCampusDestination({ publicSlug, destination }: {
   publicSlug: string;
@@ -38,14 +39,12 @@ export function PublicCampusDestination({ publicSlug, destination }: {
 
   const loaded = result?.slug === publicSlug;
   const campuses = result?.map?.campuses.filter((campus) => campus.active) ?? [];
-  const campus = campuses.find((item) => hasAnapolisModel(publicSlug, result?.companyName ?? "", item));
-  const available = loaded && result.companyName !== null && (
-    campus || (campuses.length === 0 && hasAnapolisModel(publicSlug, result.companyName, undefined))
-  );
+  const campus = campuses.find((item) => campusModelKey(item, publicSlug, result?.companyName ?? "") === "anapolis");
   const published = campus && anapolisPublishedPlaces(
-    result?.map?.buildings.filter((item) => item.active && item.campus_id === campus.id) ?? [],
-    result?.map?.landmarks.filter((item) => item.active && item.campus_id === campus.id) ?? [],
+    result?.map?.buildings.filter((item) => item.active && item.campus_id === campus.id && (!campus.model_key || item.model_destination_id)) ?? [],
+    campus.model_key ? [] : result?.map?.landmarks.filter((item) => item.active && item.campus_id === campus.id) ?? [],
   ).get(destination.id);
+  const available = loaded && result.companyName !== null && campus && (!campus.model_key || published);
   const spaces = published?.type === "building"
     ? result?.map?.spaces.filter((space) => space.active && space.campus_id === campus?.id && space.building_id === published.id)
     : undefined;
@@ -71,11 +70,11 @@ export function PublicCampusDestination({ publicSlug, destination }: {
             <p className="flex items-center gap-2 text-sm font-medium text-primary">
               <MapPin aria-hidden="true" className="size-4" />Campus Anápolis · Setor leste
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight">{destination.name}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">{published?.name ?? destination.name}</h1>
             <p className="text-muted-foreground">{destination.kind}</p>
           </div>
 
-          {destination.laboratories?.length ? <section aria-labelledby="destination-labs" className="space-y-3">
+          {destination.laboratories?.length && !spaces?.length && !campus?.model_defaults_applied ? <section aria-labelledby="destination-labs" className="space-y-3">
             <h2 id="destination-labs" className="text-xl font-semibold">Laboratórios</h2>
             <ul className="list-disc space-y-2 pl-6">
               {destination.laboratories.map((lab) => <li key={lab}>{lab}</li>)}
@@ -100,9 +99,12 @@ export function PublicCampusDestination({ publicSlug, destination }: {
                 <Link href={publicPlaceHref(publicSlug, "space", space.public_code)} className={linkClass}>
                   {space.name}{space.floor ? ` · ${space.floor}` : ""}
                 </Link>
+                {space.description && <p className="text-sm text-muted-foreground">{space.description}</p>}
               </li>)}
             </ul> : null}
           </section>}
+
+          {published?.photos.length ? <PublicCampusPhotos photos={published.photos} name={published.name} /> : null}
 
           <details className="border-t border-border pt-4">
             <summary className="cursor-pointer py-2 font-medium">Fontes da maquete</summary>

@@ -5,10 +5,14 @@ import { anapolisDestinations } from "./campus-guide/places";
 import { PublicCampusDestination } from "./public-campus-destination";
 
 const destination = anapolisDestinations.find((item) => item.id === "bloco-a")!;
-const map: PublicGeoCampus = { campuses: [], buildings: [], landmarks: [], spaces: [] };
+const map: PublicGeoCampus = {
+  campuses: [{ id: "anapolis", name: "Campus Anápolis", description: null, center_lat: -16.294, center_lng: -48.944, zoom: 17, active: true }],
+  buildings: [], landmarks: [], spaces: [],
+};
 
 const mocks = vi.hoisted(() => ({ getInstitution: vi.fn(), publicMap: vi.fn() }));
 vi.mock("@/lib/api", () => ({ publicPortalApi: { getInstitution: mocks.getInstitution } }));
+vi.mock("@/lib/supabase", () => ({ supabase: {} }));
 vi.mock("@/lib/geocampus-api", async (original) => ({
   ...await original<typeof import("@/lib/geocampus-api")>(),
   geoCampusApi: { publicMap: mocks.publicMap },
@@ -19,7 +23,7 @@ beforeEach(() => {
   mocks.publicMap.mockResolvedValue(map);
 });
 
-it("abre a ficha diretamente e mostra laboratórios e acesso sem cadastro no banco", async () => {
+it("abre a ficha diretamente com laboratórios e acesso do campus legado", async () => {
   mocks.getInstitution.mockResolvedValue({ company_name: "UniEVANGÉLICA" });
 
   render(<PublicCampusDestination publicSlug="unievangelica" destination={destination} />);

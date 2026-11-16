@@ -167,8 +167,12 @@ class Host:
         # Only reviewed pairs may reuse the newer checker after runtime rollback.
         # 0027 adds a table and aggregates existing INSERTs without changing their contract.
         # 0028 adds tables and server-generated codes, preserving the old map writes.
+        # 0029 adds nullable links to model assets without changing existing rows.
+        # 0030 adds a defaulted flag for the campus catalog import.
         if (previous_head, candidate_head) not in {
             ("0023", "0026"), ("0026", "0027"), ("0026", "0028"), ("0027", "0028"),
+            ("0026", "0029"), ("0027", "0029"), ("0028", "0029"),
+            ("0026", "0030"), ("0027", "0030"), ("0028", "0030"), ("0029", "0030"),
         }:
             raise ReleaseError("Database revision change has no approved rollback compatibility.")
         repository = os.environ.get("BACKEND_REPOSITORY", "")

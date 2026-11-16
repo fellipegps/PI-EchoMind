@@ -21,6 +21,8 @@ export default defineConfig({
         NEXT_PUBLIC_API_URL: fixture,
         NEXT_PUBLIC_SUPABASE_URL: fixture,
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_local_fixture_only",
+        NEXT_PUBLIC_MAP_SATELLITE_TILE_URL: `${fixture}/test-satellite/{z}/{x}/{y}.png`,
+        NEXT_PUBLIC_MAP_SATELLITE_TILE_ATTRIBUTION: "Imagem de satélite de teste",
         NEXT_TELEMETRY_DISABLED: "1",
       },
     },

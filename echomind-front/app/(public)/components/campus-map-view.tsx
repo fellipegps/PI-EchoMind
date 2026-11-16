@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./campus-map-view.module.css";
-import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
+import { mountCampusTiles } from "@/lib/campus-map-tiles";
 import type { Building, Campus, Landmark, PlaceType } from "@/lib/geocampus-api";
+import { campusPlacePhotos } from "./campus-place-photos";
 
 export function CampusMapView({ campus, buildings, landmarks, onOpenPlace }: {
   campus: Campus;
@@ -26,7 +27,7 @@ export function CampusMapView({ campus, buildings, landmarks, onOpenPlace }: {
       map = L.map(container.current, { zoomControl: true }).setView(
         [campus.center_lat, campus.center_lng], Math.min(19, campus.zoom)
       );
-      L.tileLayer(CAMPUS_MAP_TILE_URL, CAMPUS_MAP_TILE_OPTIONS).addTo(map);
+      mountCampusTiles(L, map);
       const places = [
         ...buildings.map((item) => ({ ...item, type: "building" as const, lat: item.entrance_lat, lng: item.entrance_lng })),
         ...landmarks.map((item) => ({ ...item, type: "landmark" as const })),
@@ -44,16 +45,38 @@ export function CampusMapView({ campus, buildings, landmarks, onOpenPlace }: {
         const label = document.createElement("span");
         label.textContent = place.name;
         marker.bindTooltip(label, { direction: "top" });
-        marker.on("click", open);
+        const popup = document.createElement("section");
+        popup.className = styles.popup;
+        const title = document.createElement("h3");
+        title.textContent = place.name;
+        popup.append(title);
+        if (place.description) {
+          const description = document.createElement("p");
+          description.textContent = place.description;
+          popup.append(description);
+        }
+        const link = document.createElement("button");
+        link.type = "button";
+        link.textContent = "Abrir ficha completa";
+        link.addEventListener("click", open);
+        popup.append(link);
+        marker.bindPopup(popup, { maxWidth: 248, minWidth: 172, maxHeight: 210 });
+        marker.on("popupopen", () => {
+          if (!popup.querySelector('[role="group"]')) {
+            link.before(campusPlacePhotos(place.photos, place.name));
+            marker.getPopup()?.update();
+          }
+        });
         const element = marker.getElement();
         if (element) {
           element.setAttribute("tabindex", "0");
-          element.setAttribute("role", "link");
+          element.setAttribute("role", "button");
           element.setAttribute("aria-label", `Abrir ficha de ${place.name}`);
           element.addEventListener("keydown", (event) => {
-            if (event instanceof KeyboardEvent && event.key === "Enter") {
+            if (event instanceof KeyboardEvent && (event.key === "Enter" || event.key === " ")) {
               event.preventDefault();
-              open();
+              marker.openPopup();
+              link.focus({ preventScroll: true });
             }
           });
         }

@@ -185,16 +185,22 @@
     border-radius: 0 0 2px 0;
   }
   .map-pin:hover { background: var(--accent); }
+  .reference-pin { display: inline-flex; align-items: center; gap: 4px; max-width: min(150px, 45vw); }
+  .reference-pin svg { width: 14px; height: 14px; flex: none; }
+  .reference-pin span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .map-pin[aria-pressed="true"] { z-index: 2; border-color: var(--primary); color: var(--primary-foreground); background: var(--primary); }
   .map-detail { position: absolute; z-index: 3; left: var(--map-detail-left, 12px); top: var(--map-detail-top, 60px); width: 278px; max-width: calc(100% - 84px); max-height: calc(100% - 112px); overflow: auto; padding: 10px 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--card); box-shadow: var(--map-shadow); }
   .map-detail-header { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
   .map-detail h2 { margin: 0; font-size: 15px; }
   .map-detail p, .map-detail ul { margin: 4px 0 0; font-size: 12px; line-height: 1.5; }
+  .map-detail { overflow-wrap: anywhere; }
   .map-detail ul { padding-left: 17px; }
   ul { list-style: disc; }
   .map-detail li + li { margin-top: 4px; }
   .map-detail button { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border: 0; border-radius: 7px; background: var(--accent); color: var(--primary); }
   .map-detail button svg { width: 17px; height: 17px; }
+  .map-detail .public-place-link:is(button) { width: auto; min-height: 36px; padding-inline: 10px; }
+  .map-space-description { display: block; color: var(--muted-foreground); }
   .entry-pin {
     z-index: 3;
     border: 1px dashed var(--warning);

@@ -22,6 +22,16 @@ function ReferencePhoto({ photo, name, index }: { photo: PlacePhoto; name: strin
   </figure>;
 }
 
+export function PublicCampusPhotos({ photos, name }: { photos: PlacePhoto[]; name: string }) {
+  return <section aria-labelledby="reference-photos-title" className="space-y-4">
+    <h2 id="reference-photos-title" className="flex items-center gap-2 text-xl font-semibold"><Camera aria-hidden="true" className="size-5" />Fotos de referência</h2>
+    {photos.length ? <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+      {photos.slice().sort((left, right) => left.sort_order - right.sort_order).map((photo, index) =>
+        <ReferencePhoto key={`${photo.id}:${photo.url}`} photo={photo} name={name} index={index} />)}
+    </div> : <Card className="p-6 text-sm text-muted-foreground">A instituição ainda não publicou fotos deste local.</Card>}
+  </section>;
+}
+
 export function PublicCampusPlace({ publicSlug, type, publicCode }: {
   publicSlug: string;
   type: PlaceType;
@@ -45,7 +55,6 @@ export function PublicCampusPlace({ publicSlug, type, publicCode }: {
   const loaded = loadedKey === requestKey;
   const place = loaded ? data?.place : null;
   const building = loaded ? data?.building : null;
-  const photos = [...(place?.photos ?? [])].sort((left, right) => left.sort_order - right.sort_order);
   const kindLabel = type === "building" ? "Bloco ou prédio" : type === "space" ? "Espaço interno" : "Ponto de referência";
 
   return <main className="min-h-svh bg-background px-4 py-6 text-foreground sm:px-6 [overflow-wrap:anywhere]">
@@ -70,12 +79,18 @@ export function PublicCampusPlace({ publicSlug, type, publicCode }: {
             {"floor" in place && place.floor && <p className="text-sm text-muted-foreground">Andar · {place.floor}</p>}
             {place.description && <p className="whitespace-pre-wrap leading-relaxed">{place.description}</p>}
           </Card>
-          <section aria-labelledby="reference-photos-title" className="space-y-4">
-            <h2 id="reference-photos-title" className="flex items-center gap-2 text-xl font-semibold"><Camera aria-hidden="true" className="size-5" />Fotos de referência</h2>
-            {photos.length > 0 ? <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-              {photos.map((photo, index) => <ReferencePhoto key={`${photo.id}:${photo.url}`} photo={photo} name={place.name} index={index} />)}
-            </div> : <Card className="p-6 text-sm text-muted-foreground">A instituição ainda não publicou fotos deste local.</Card>}
-          </section>
+          {Boolean(data.spaces?.length) && <section aria-labelledby="block-spaces-title" className="space-y-3">
+            <h2 id="block-spaces-title" className="text-xl font-semibold">Locais internos</h2>
+            <ul className="space-y-2">
+              {data.spaces?.map((space) => <li key={space.id}>
+                <Link href={publicPlaceHref(publicSlug, "space", space.public_code)} className="text-primary underline underline-offset-4">
+                  {space.name}{space.floor ? ` · ${space.floor}` : ""}
+                </Link>
+                {space.description && <p className="text-sm text-muted-foreground">{space.description}</p>}
+              </li>)}
+            </ul>
+          </section>}
+          <PublicCampusPhotos photos={place.photos} name={place.name} />
         </>}
     </div>
   </main>;

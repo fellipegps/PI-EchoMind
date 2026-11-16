@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./api", () => ({ tokenStore: { get: () => "admin-token", clear: vi.fn() } }));
+const auth = vi.hoisted(() => ({ getSession: vi.fn(), refreshSession: vi.fn() }));
+vi.mock("./supabase", () => ({ supabase: { auth } }));
 
 import { campusPhotoUrl, geoCampusApi, publicPlaceHref } from "./geocampus-api";
 
@@ -8,35 +9,37 @@ describe("geoCampusApi", () => {
   const fetchMock = vi.fn<typeof fetch>();
 
   beforeEach(() => {
+    auth.getSession.mockReset().mockResolvedValue({
+      data: { session: { access_token: "admin-token", user: { id: "admin-1" } } }, error: null,
+    });
+    auth.refreshSession.mockReset();
     fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);
   });
 
-  it("envia autenticação no cadastro do campus e mantém o tenant fora do payload", async () => {
+  it("envia autenticação no cadastro de um ponto e mantém o tenant fora do payload", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       status: 201,
       json: async () => ({ id: "campus-1" }),
     } as Response);
 
-    await geoCampusApi.campuses.create({
-      name: "Campus Central",
+    await geoCampusApi.landmarks.create("campus-1", {
+      name: "Praça central",
       description: null,
-      center_lat: -16.328,
-      center_lng: -48.953,
-      zoom: 17,
+      lat: -16.328,
+      lng: -48.953,
       active: true,
     });
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:8000/campuses");
+    expect(url).toBe("http://localhost:8000/campuses/campus-1/landmarks");
     expect(new Headers((init as RequestInit).headers).get("Authorization")).toBe("Bearer admin-token");
     expect(JSON.parse((init as RequestInit).body as string)).toEqual({
-      name: "Campus Central",
+      name: "Praça central",
       description: null,
-      center_lat: -16.328,
-      center_lng: -48.953,
-      zoom: 17,
+      lat: -16.328,
+      lng: -48.953,
       active: true,
     });
   });
@@ -53,6 +56,7 @@ describe("geoCampusApi", () => {
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("http://localhost:8000/public/institui%C3%A7%C3%A3o%20central/geo-campus");
     expect(new Headers((init as RequestInit).headers).has("Authorization")).toBe(false);
+    expect(auth.getSession).not.toHaveBeenCalled();
   });
 
   it("consulta a mesma ficha pública usada no link do QR sem credencial administrativa", async () => {
@@ -71,11 +75,11 @@ describe("geoCampusApi", () => {
     fetchMock.mockResolvedValue({ ok: true, status: 201, json: async () => ({ id: "foto-1" }) } as Response);
     const file = new File(["foto"], "fachada.jpg", { type: "image/jpeg" });
 
-    await geoCampusApi.photos.upload("campus-1", "building", "bloco-1", file, " Entrada principal ");
+    await geoCampusApi.photos.upload("campus-1", "landmark", "jardim-1", file, " Entrada principal ");
 
     const [url, init] = fetchMock.mock.calls[0];
     const options = init as RequestInit;
-    expect(url).toBe("http://localhost:8000/campuses/campus-1/places/building/bloco-1/photos");
+    expect(url).toBe("http://localhost:8000/campuses/campus-1/places/landmark/jardim-1/photos");
     expect(new Headers(options.headers).get("Authorization")).toBe("Bearer admin-token");
     expect(new Headers(options.headers).has("Content-Type")).toBe(false);
     expect(options.body).toBeInstanceOf(FormData);

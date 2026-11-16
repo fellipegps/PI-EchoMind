@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PlaceType, PublicGeoCampus } from "@/lib/geocampus-api";
 
 const mocks = vi.hoisted(() => ({ publicMap: vi.fn(), push: vi.fn() }));
-vi.mock("@/lib/api", () => ({ tokenStore: { get: vi.fn(), clear: vi.fn() } }));
+vi.mock("@/lib/supabase", () => ({ supabase: {} }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
 vi.mock("@/lib/geocampus-api", async (original) => ({
   ...await original<typeof import("@/lib/geocampus-api")>(),
@@ -74,8 +74,9 @@ describe("Guia visual público", () => {
     expect(screen.getByRole("button", { name: "Abrir bloco pelo mapa" })).toBeInTheDocument();
   });
 
-  it("exibe os doze destinos mesmo sem cadastros e pesquisa pelo número do laboratório", async () => {
-    mocks.publicMap.mockResolvedValue({ campuses: [], buildings: [], spaces: [], landmarks: [] });
+  it("exibe os doze destinos do campus legado e pesquisa pelo número do laboratório", async () => {
+    const anapolis = { ...campusData.campuses[0], center_lat: -16.294, center_lng: -48.944 };
+    mocks.publicMap.mockResolvedValue({ campuses: [anapolis], buildings: [], spaces: [], landmarks: [] });
     const user = userEvent.setup();
     render(<PublicCampusNavigator directoryTarget={directoryTarget} publicSlug="unievangelica" />);
 

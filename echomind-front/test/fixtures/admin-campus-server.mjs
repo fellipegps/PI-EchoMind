@@ -79,7 +79,12 @@ createServer(async (req, res) => {
   if (match) {
     if (!req.headers.authorization) { res.writeHead(401); res.end("{}"); return; }
     const [, campusId, resource, itemId] = match; const key = resource || "campuses";
+    const editableMethods = { buildings: ["PUT"], spaces: ["POST", "PUT"], landmarks: ["POST", "PUT", "DELETE"] };
+    if (req.method !== "GET" && !editableMethods[resource]?.includes(req.method)) { res.writeHead(405); res.end("{}"); return; }
     let raw = ""; for await (const chunk of req) raw += chunk; const body = JSON.parse(raw || "{}");
+    if (resource === "buildings" && req.method === "PUT" && Object.keys(body).some(field => field !== "name")) {
+      res.writeHead(422); res.end("{}"); return;
+    }
     const operation = req.method === "GET" ? "list" : req.method === "POST" ? "create" : req.method === "PUT" ? "update" : "delete";
     // A held list captures its old response, so release can exercise out-of-order delivery.
     const snapshot = data[key].filter(item => !resource || item.campus_id === campusId);
@@ -90,7 +95,7 @@ createServer(async (req, res) => {
     if (cfg.mode === "delete-conflict" && operation === "delete") { send(409, { detail: "Cadastro possui vínculos. Remova as ligações antes de excluir." }); return; }
     if (operation === "list") { send(200, cfg.mode === "empty" ? [] : snapshot); return; }
     if (operation === "create") { const created = { ...body, id: `${key}-created-${sequence}`, ...(resource ? { campus_id: campusId, public_code: "public-created-" + sequence, photos: [] } : {}) }; data[key].push(created); send(201, created); return; }
-    const index = data[key].findIndex(item => item.id === (resource ? itemId : campusId));
+    const index = data[key].findIndex(item => item.id === itemId && item.campus_id === campusId);
     if (index < 0) { send(404, { detail: "Cadastro sintético ausente" }); return; }
     if (operation === "update") { data[key][index] = { ...data[key][index], ...body }; send(200, data[key][index]); return; }
     data[key].splice(index, 1); send(204); return;

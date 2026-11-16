@@ -1,7 +1,9 @@
 import {icon} from './icons.js';
 import {createSatelliteMap} from './campus-satellite.js';
+import {campusPlacePhotos} from '../campus-place-photos';
 
-export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
+export function mountCampusGuide(root, {satelliteTiles, placeLinks, places, modelKey, origin, showUnlinked, onUnavailable,
+  managePlace, initialView, onViewChange}) {
   const get = (id) => root.querySelector('#' + id);
   const markersElement = get('markers');
   const about = get('about');
@@ -16,6 +18,8 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
   const usesMapTiler = satelliteTiles?.url.startsWith('https://api.maptiler.com/');
   let destroyScene;
   let destroySatellite;
+  let openPlace;
+  let pendingPlace;
   if (satelliteTiles) {
     credit.innerHTML = satelliteTiles.attribution;
     if (usesMapTiler) logo.querySelector('img').src = 'https://api.maptiler.com/resources/logo.svg';
@@ -26,7 +30,8 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
   aboutButton.addEventListener('click', () => about.showModal());
 
   async function readData(file) {
-    const response = await fetch('/campus-guide/' + file, {signal});
+    const folder = modelKey === 'anapolis' ? '/campus-guide/' : `/campus-guide/${encodeURIComponent(modelKey)}/`;
+    const response = await fetch(folder + file, {signal});
     if (!response.ok) throw new Error('Falha ao carregar ' + file);
     return response.json();
   }
@@ -45,11 +50,25 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
   }
 
   async function init() {
-    const [{destinations, sources, aboutSources}, buildings, context] = await Promise.all([
+    const [{destinations: modelDestinations, sources, aboutSources}, buildings, context] = await Promise.all([
       readData('destinations.json'), readData('buildings.geojson'), readData('context.geojson'),
     ]);
     if (signal.aborted) return;
     const buildingById = new Map(buildings.features.map((feature) => [feature.id, feature]));
+    const linkedPlaces = new Map(places.map((place) => [place.destinationId, place]));
+    const destinations = modelDestinations.flatMap((destination) => {
+      const place = linkedPlaces.get(destination.id);
+      if (!place && !showUnlinked) return [];
+      return [{...destination, place, href: place?.href ?? placeLinks[destination.id]}];
+    });
+    const mappedPlaces = new Set(destinations.map(({place}) => place?.id));
+    for (const place of places) {
+      if (mappedPlaces.has(place.id)) continue;
+      destinations.push({id: place.id, name: place.name, kind: place.kind, shortName: place.name,
+        labelCoordinates: place.coordinates, entry: {}, place, href: place.href});
+    }
+    const destinationsById = new Map(destinations.map((destination) => [destination.id, destination]));
+    const pinByPlaceId = new Map(destinations.filter(({place}) => place).map(({place, id}) => [place.id, id]));
     const pins = new Map();
     let active, scene;
     let view = '3d';
@@ -66,22 +85,43 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
     entryLabel.className = 'entry-pin';
     entryLabel.hidden = true;
     markersElement.append(entryLabel);
-    sourceLinks(get('about-sources'), aboutSources, sources);
+    sourceLinks(get('about-sources'), aboutSources ?? [], sources ?? {});
+    const manageButton = get('manage-map-place');
+    manageButton.addEventListener('click', () => {
+      if (active?.place) managePlace?.(active.place.id);
+    });
 
     function select(id) {
-      const destination = destinations.find((item) => item.id === id);
+      const destination = destinationsById.get(id);
       if (!destination) return;
       active = destination;
       const confirmed = destination.entry.status === 'confirmed';
       const hasPoint = Boolean(destination.entry.coordinates);
-      const laboratories = destination.laboratories ?? [];
-      get('map-detail-name').textContent = destination.name;
+      const internalPlaces = destination.place?.spaces ?? (destination.laboratories ?? []).map((name) => ({name}));
+      const name = destination.place?.name ?? destination.name;
+      get('map-detail-name').textContent = name;
       get('map-detail-kind').textContent = destination.kind;
-      get('map-detail-kind').hidden = laboratories.length > 0;
-      get('map-detail-labs').hidden = laboratories.length === 0;
-      const labItems = laboratories.map((description) => {
+      get('map-detail-kind').hidden = internalPlaces.length > 0;
+      const description = get('map-detail-description');
+      description.textContent = destination.place?.description ?? '';
+      description.hidden = !description.textContent;
+      get('map-detail-photos').replaceChildren(campusPlacePhotos(destination.place?.photos ?? [], name));
+      get('map-detail-labs').hidden = internalPlaces.length === 0;
+      const labItems = internalPlaces.map(({name, floor, description, href}) => {
         const item = document.createElement('li');
-        item.textContent = description;
+        const title = floor ? `${name} · ${floor}` : name;
+        if (href) {
+          const link = document.createElement('a');
+          link.href = href;
+          link.textContent = title;
+          item.append(link);
+        } else item.textContent = title;
+        if (description) {
+          const detail = document.createElement('span');
+          detail.className = 'map-space-description';
+          detail.textContent = description;
+          item.append(detail);
+        }
         return item;
       });
       get('map-detail-labs').replaceChildren(...labItems);
@@ -91,10 +131,11 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
       entryLabel.append(confirmed ? 'Entrada' : 'Entrada aproximada');
       entryLabel.hidden = !hasPoint;
       const placeLink = get('public-place-link');
-      const href = placeLinks[destination.id];
+      const href = destination.href;
       placeLink.hidden = !href;
       if (href) placeLink.href = href;
       else placeLink.removeAttribute('href');
+      manageButton.hidden = !managePlace || !destination.place;
 
       for (const [pinId, pin] of pins) pin.setAttribute('aria-pressed', String(pinId === id));
       selectInView(destination);
@@ -105,14 +146,22 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
       pin.type = 'button';
       pin.className = 'map-pin';
       pin.style.visibility = 'hidden';
-      pin.setAttribute('aria-label', destination.name);
-      pin.title = destination.name;
+      const name = destination.place?.name ?? destination.name;
+      pin.setAttribute('aria-label', name);
+      pin.title = name;
       pin.setAttribute('aria-pressed', 'false');
       pin.setAttribute('aria-controls', 'map-detail');
-      pin.textContent = destination.shortName;
+      const point = !buildingById.has(destination.id);
+      if (point) {
+        pin.classList.add('reference-pin');
+        pin.innerHTML = icon('locate');
+        const label = document.createElement('span');
+        label.textContent = name;
+        pin.append(label);
+      } else pin.textContent = destination.shortName;
       pin.addEventListener('click', (event) => {
         select(destination.id);
-        if (event.detail === 0) get('public-place-link').focus({preventScroll: true});
+        if (event.detail === 0) get('map-detail-close').focus({preventScroll: true});
       });
       pins.set(destination.id, pin);
       markersElement.append(pin);
@@ -125,6 +174,7 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
       const previous = active;
       active = undefined;
       mapDetail.hidden = true;
+      get('map-detail-photos').replaceChildren();
       entryLabel.hidden = true;
       pins.forEach((pin) => pin.setAttribute('aria-pressed', 'false'));
       selectInView(undefined);
@@ -154,7 +204,7 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
 
     const roofPins = destinations.map((destination) => ({
       id: destination.id, element: pins.get(destination.id), coordinates: destination.labelCoordinates,
-      elevation: buildingById.get(destination.id).properties.heightMeters + 3,
+      elevation: (buildingById.get(destination.id)?.properties.heightMeters ?? 0) + 3,
     }));
 
     function visibleMarkers(mode) {
@@ -177,6 +227,7 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
     function switchView(mode) {
       if (view === mode) return;
       view = mode;
+      onViewChange(mode);
       const showingSatellite = mode === 'satellite';
       pins.forEach((pin) => { pin.style.visibility = 'hidden'; });
       entryLabel.style.visibility = 'hidden';
@@ -193,7 +244,7 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
       osmCredit.hidden = showingSatellite && attributionIncludesOsm;
 
       if (showingSatellite && !satellite) {
-        satellite = createSatelliteMap({element: satelliteElement, buildings, onSelect: select, onStatus: showMapMessage,
+        satellite = createSatelliteMap({element: satelliteElement, buildings, destinations, origin, onSelect: select, onStatus: showMapMessage,
           markers: () => visibleMarkers('satellite'), tiles: satelliteTiles});
         destroySatellite = satellite.destroy;
         selectInView(active);
@@ -206,13 +257,18 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
 
     modelButton.addEventListener('click', () => switchView('3d'));
     satelliteButton.addEventListener('click', () => switchView('satellite'));
+    openPlace = (id) => {
+      select(pinByPlaceId.get(id) ?? id);
+      if (!mapDetail.hidden) get('map-detail-close').focus({preventScroll: true});
+    };
+    if (pendingPlace) openPlace(pendingPlace);
 
     let sceneFailed = false;
     try {
       const {createDetailedCampus} = await import('./campus-scene.js');
       if (signal.aborted) return;
       scene = createDetailedCampus({
-        element: get('map'), buildings, context, destinations,
+        element: get('map'), buildings, context, destinations, origin,
         onSelect: select,
         onBearing: (bearing) => { get('north-arrow').style.rotate = -bearing + 'deg'; },
         markers: () => visibleMarkers('3d'),
@@ -231,6 +287,7 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
     modelButton.disabled = sceneFailed;
     satelliteButton.disabled = false;
     mapTools.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+    if (initialView === 'satellite') switchView('satellite');
   }
 
   init().catch((error) => {
@@ -238,12 +295,19 @@ export function mountCampusGuide(root, {satelliteTiles, placeLinks}) {
     console.error(error);
     mapMessage.textContent = 'Não foi possível carregar os dados do campus.';
     mapMessage.hidden = false;
+    onUnavailable();
   });
 
-  return () => {
-    controller.abort();
-    destroyScene?.();
-    destroySatellite?.();
-    if (about.open) about.close();
+  return {
+    open(id) {
+      if (openPlace) openPlace(id);
+      else pendingPlace = id;
+    },
+    destroy() {
+      controller.abort();
+      destroyScene?.();
+      destroySatellite?.();
+      if (about.open) about.close();
+    },
   };
 }

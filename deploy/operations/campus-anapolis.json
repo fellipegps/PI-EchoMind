@@ -1,0 +1,8 @@
+{
+  "name": "Campus Anápolis",
+  "description": "Guia visual do campus da UniEVANGÉLICA em Anápolis.",
+  "center_lat": -16.294593,
+  "center_lng": -48.944138,
+  "zoom": 18,
+  "model_key": "anapolis"
+}

@@ -68,6 +68,23 @@
   .searchPanel { position: static; gap: 6px; padding-block: 10px 6px; }
   .searchInput { font-size: 1rem; }
 
-  .destinations { grid-template-columns: minmax(0, 1fr); }
-  .publishedDestination { background: var(--card); }
+  .destinations {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(104px, 34%);
+    align-items: start;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    padding-bottom: 8px;
+  }
+
+  .destinations > p:only-child { grid-column: span 2; }
+  .destination, .publishedDestination { scroll-snap-align: start; }
+  .publishedDestination { grid-column: span 2; background: var(--card); }
+  .destinationLink { grid-template-columns: auto minmax(0, 1fr); gap: 6px; min-height: 52px; padding: 6px; }
+  .destinationLink strong { font-size: 12px; }
+  .destinationLink small, .destinationLink > svg { display: none; }
+  .destinationIcon { width: 25px; height: 25px; border-radius: 6px; }
+  .destinationIcon svg { width: 15px; height: 15px; }
 }

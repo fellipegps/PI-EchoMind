@@ -1,0 +1,14 @@
+[
+  {"id":"bloco-a","name":"Bloco A","coordinates":[-48.9446974,-16.2945378],"laboratories":["Laboratório 12 · Piso 1 · Sala A 114"]},
+  {"id":"biblioteca","name":"Bloco B1 · Biblioteca Central","coordinates":[-48.944106,-16.2952793],"laboratories":["Laboratório 09 · Piso 2 · Sala B1 301","Laboratório 10 · Piso 2 · Sala B1 302"]},
+  {"id":"bloco-b2","name":"Bloco B2","coordinates":[-48.9440357,-16.2951922],"laboratories":["Laboratório 11 · Piso 4 · Sala B2 410/411"]},
+  {"id":"bloco-c","name":"Bloco C","coordinates":[-48.9440669,-16.2946645],"laboratories":["Laboratório 04 · Piso 4 · Sala C 403"]},
+  {"id":"bloco-d","name":"Bloco D","coordinates":[-48.9438599,-16.294626]},
+  {"id":"bloco-e","name":"Bloco E","coordinates":[-48.9437862,-16.2943127],"laboratories":["Laboratório 02 · Piso 2 · Sala E 208","Laboratório 05 · Piso 2 · Sala E 209","Laboratório 06 · Piso 2 · Sala E212"]},
+  {"id":"bloco-f","name":"Bloco F","coordinates":[-48.9436549,-16.2938958]},
+  {"id":"bloco-g","name":"Bloco J","coordinates":[-48.9439865,-16.2926946],"laboratories":["Laboratório 03 · Piso 2 · Sala J 204","Laboratório DG · Piso 2 · Sala J205"]},
+  {"id":"bloco-h","name":"Bloco H","coordinates":[-48.9436095,-16.292904],"laboratories":["Laboratório EngSoft · Piso 2 · Sala H 201/202"]},
+  {"id":"bloco-i","name":"Bloco I","coordinates":[-48.9435611,-16.2926258],"laboratories":["Laboratório 07 · Piso 2 · Sala I 207","Laboratório 08 · Piso 2 · Sala I206"]},
+  {"id":"ginasio","name":"Ginásio Poliesportivo","coordinates":[-48.9447369,-16.2940997]},
+  {"id":"tecnologico","name":"Centro Tecnológico","coordinates":[-48.944355,-16.2926355],"laboratories":["Laboratório CT"]}
+]

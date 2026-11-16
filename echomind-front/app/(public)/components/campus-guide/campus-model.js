@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 
-const origin = [-48.944138, -16.294593];
+const anapolisOrigin = [-48.944138, -16.294593];
 const latitudeMeters = 111319.49;
-const longitudeMeters = latitudeMeters * Math.cos(THREE.MathUtils.degToRad(origin[1]));
 
 const profiles = {
   biblioteca: {levels: 3, wall: '#e7dcc3', roof: '#c5bda8', accent: '#965c49', windows: 'ribbon'},
@@ -13,8 +12,10 @@ const profiles = {
 const contextProfile = {wall: '#bfc0ae', roof: '#a4ab9c', accent: '#8d9c90'};
 const campusProfile = {wall: '#e1d8c3', roof: '#b5b9ad', accent: '#8b7960', windows: 'framed'};
 
-export function campusPosition([lng, lat], elevation = 0) {
-  return new THREE.Vector3((lng - origin[0]) * longitudeMeters, elevation, (origin[1] - lat) * latitudeMeters);
+function campusProjection(origin) {
+  const longitudeMeters = latitudeMeters * Math.cos(THREE.MathUtils.degToRad(origin[1]));
+  return ([lng, lat], elevation = 0) =>
+    new THREE.Vector3((lng - origin[0]) * longitudeMeters, elevation, (origin[1] - lat) * latitudeMeters);
 }
 
 function material(color, properties = {}) {
@@ -218,7 +219,7 @@ function buildArchitecture(group, {points, edges, profile, height, access, roofD
   return entrance && {outward: entrance.edge.outward};
 }
 
-function addGround(scene, context) {
+function addGround(scene, context, campusPosition) {
   const terrain = new THREE.Group();
   terrain.userData.ground = true;
   scene.add(terrain);
@@ -259,7 +260,7 @@ function addGround(scene, context) {
   roads.flush();
 }
 
-function addTrees(scene, context) {
+function addTrees(scene, context, campusPosition) {
   const trees = context.features.filter(({properties}) => properties.kind === 'tree');
   if (!trees.length) return;
   const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(.14, .22, 1, 6), material('#645c46'), trees.length);
@@ -288,7 +289,8 @@ function addTrees(scene, context) {
   scene.add(trunk, foliage);
 }
 
-export function createCampusModel({buildings, context, destinations}) {
+export function createCampusModel({buildings, context, destinations, origin}) {
+  const campusPosition = campusProjection(origin ?? anapolisOrigin);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#b9c7b6');
   scene.fog = new THREE.FogExp2('#b9c7b6', .0016);
@@ -306,7 +308,7 @@ export function createCampusModel({buildings, context, destinations}) {
   sun.shadow.bias = -.00028;
   scene.add(sun);
 
-  addGround(scene, context);
+  addGround(scene, context, campusPosition);
   const models = new Map();
   const pickMeshes = [];
   const destinationsById = new Map(destinations.map((destination) => [destination.id, destination]));
@@ -316,18 +318,19 @@ export function createCampusModel({buildings, context, destinations}) {
     const points = ring.slice(0, -1).map((point) => campusPosition(point));
     const {heightMeters: height, kind} = properties;
     const destination = destinationsById.get(id);
-    const profile = profiles[id] ?? (destination ? campusProfile : contextProfile);
+    const profile = (!origin ? profiles[id] : undefined) ?? (destination ? campusProfile : contextProfile);
     const access = destination?.entry.coordinates ? campusPosition(destination.entry.coordinates) : null;
     const approach = destination?.approachCoordinates ? campusPosition(destination.approachCoordinates) : access;
     const base = kind === 'bridge' ? 3 : .11;
     const group = new THREE.Group();
     group.name = destination?.name ?? id;
-    const wallHeight = id === 'ginasio' ? height - 6 : height;
+    const gymRoof = !origin && id === 'ginasio';
+    const wallHeight = gymRoof ? height - 6 : height;
     const roofMaterial = material(profile.roof);
     const wallMaterial = material(profile.wall);
     const body = polygonMesh(points, roofMaterial, base, wallHeight - base, wallMaterial);
     group.add(body);
-    if (id === 'ginasio') addGymRoof(group, points, wallHeight, height, roofMaterial, wallMaterial);
+    if (gymRoof) addGymRoof(group, points, wallHeight, height, roofMaterial, wallMaterial);
     scene.add(group);
     if (!destination) continue;
     const isSubdivision = properties.geometryStatus === 'subdivision';
@@ -344,7 +347,7 @@ export function createCampusModel({buildings, context, destinations}) {
     pickMeshes.push(body);
     models.set(id, {body, outline, entrance, height, access});
   }
-  addTrees(scene, context);
+  addTrees(scene, context, campusPosition);
 
   const accessRing = new THREE.Mesh(new THREE.RingGeometry(1.95, 2.3, 32), new THREE.MeshBasicMaterial({
     side: THREE.DoubleSide, depthWrite: false,
@@ -353,5 +356,5 @@ export function createCampusModel({buildings, context, destinations}) {
   accessRing.visible = false;
   scene.add(accessRing);
   scene.updateMatrixWorld(true);
-  return {scene, models, pickMeshes, accessRing};
+  return {scene, models, pickMeshes, accessRing, campusPosition};
 }
