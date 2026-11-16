@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy import (
     create_engine, BigInteger, Column, String, Boolean, Text, LargeBinary,
     CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Index, Integer,
-    UniqueConstraint, text,
+    UniqueConstraint, false, text,
 )
 from sqlalchemy.orm import declarative_base, deferred, relationship, sessionmaker
 from .runtime_config import load_runtime_environment
@@ -129,6 +129,8 @@ class Campus(Base):
     tenant_id = Column(String, nullable=False)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
+    model_key = Column(String(80), nullable=True)
+    model_defaults_applied = Column(Boolean, nullable=False, default=False, server_default=false())
     center_lat = Column(Float, nullable=False)
     center_lng = Column(Float, nullable=False)
     zoom = Column(Integer, nullable=False, default=17)
@@ -154,6 +156,7 @@ class CampusBuilding(Base):
             ["campus_path_nodes.id", "campus_path_nodes.tenant_id", "campus_path_nodes.campus_id"],
             name="fk_campus_buildings_entrance_node", ondelete="RESTRICT",
         ),
+        UniqueConstraint("tenant_id", "campus_id", "model_destination_id", name="uq_campus_buildings_model_destination"),
         CheckConstraint("entrance_lat BETWEEN -90 AND 90", name="ck_campus_buildings_lat"),
         CheckConstraint("entrance_lng BETWEEN -180 AND 180", name="ck_campus_buildings_lng"),
         Index("ix_campus_buildings_tenant_campus_active", "tenant_id", "campus_id", "active"),
@@ -165,6 +168,7 @@ class CampusBuilding(Base):
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String(100), nullable=False, default="predio")
+    model_destination_id = Column(String(80), nullable=True)
     entrance_lat = Column(Float, nullable=False)
     entrance_lng = Column(Float, nullable=False)
     entrance_node_id = Column(String, nullable=True)

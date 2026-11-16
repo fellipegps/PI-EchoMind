@@ -61,18 +61,23 @@ export function PlaceQrCode({ publicSlug, placeType, publicCode, placeName }: Pr
   };
 
   return (
-    <section aria-label={"QR Code de " + placeName} className="min-w-0 space-y-3">
+    <section aria-label={"QR Code de " + placeName} className="min-w-0 space-y-4 rounded-lg border border-border p-4 sm:p-5">
       <h3 className="font-medium">Ficha pública do local</h3>
-      <p className="text-sm text-muted-foreground">O mapa e este QR Code abrem a mesma ficha. O endereço permanece o mesmo quando o nome, a descrição ou as fotos mudam.</p>
       {!href ? <p role="status" className="text-sm">Abra Configurações e confira o endereço público da instituição para gerar o QR Code.</p> : <>
-        <Label htmlFor={"place-link-" + publicCode}>Link público do local</Label>
-        <Input id={"place-link-" + publicCode} value={current.url} readOnly />
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor={"place-link-" + publicCode}>Link público do local</Label>
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+            <Input id={"place-link-" + publicCode} value={current.url} title={current.url} readOnly className="min-w-0 truncate" />
+            <Button type="button" variant="outline" size="icon" disabled={!current.url} onClick={() => void copyLink()} aria-label="Copiar link" title="Copiar link"><Copy aria-hidden="true" /></Button>
+          </div>
+        </div>
         {current.error && <p role="alert" className="text-sm text-destructive">{current.error}</p>}
-        {current.image ? <Image src={current.image} width={192} height={192} unoptimized alt={"QR Code de " + placeName} className="rounded-lg border bg-white p-2" /> : !current.error && <p role="status" className="text-sm">Gerando QR Code...</p>}
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" disabled={!current.url} onClick={() => void copyLink()}><Copy aria-hidden="true" className="size-4" />Copiar link</Button>
-          {current.image && <Button asChild variant="outline"><a href={current.image} download={"local-" + publicCode + ".png"}><Download aria-hidden="true" className="size-4" />Baixar QR Code</a></Button>}
+        {current.image ? <div className="grid place-items-center rounded-md bg-muted/40 p-4">
+          <Image src={current.image} width={160} height={160} unoptimized alt={"QR Code de " + placeName} className="h-auto max-w-full rounded-md border bg-white p-2" />
+        </div> : !current.error && <p role="status" className="text-sm">Gerando QR Code...</p>}
+        <div className="flex flex-wrap justify-center gap-2">
           <Button disabled={!current.image} onClick={print}><Printer aria-hidden="true" className="size-4" />Imprimir QR Code</Button>
+          {current.image && <Button asChild variant="outline"><a href={current.image} download={"local-" + publicCode + ".png"}><Download aria-hidden="true" className="size-4" />Baixar QR Code</a></Button>}
           {current.url && <Button asChild variant="outline"><a href={current.url} target="_blank" rel="noopener noreferrer">Abrir ficha</a></Button>}
         </div>
       </>}

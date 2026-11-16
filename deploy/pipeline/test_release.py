@@ -137,7 +137,11 @@ class ReleaseTests(unittest.TestCase):
 
     def test_reviewed_rollback_uses_new_checker_for_old_runtime(self):
         self.new["backend"] = "approved@sha256:" + "a" * 64
-        for previous, candidate in (("0023", "0026"), ("0026", "0027"), ("0026", "0028"), ("0027", "0028")):
+        for previous, candidate in (
+            ("0023", "0026"), ("0026", "0027"), ("0026", "0028"), ("0027", "0028"),
+            ("0026", "0029"), ("0027", "0029"), ("0028", "0029"),
+            ("0026", "0030"), ("0027", "0030"), ("0028", "0030"), ("0029", "0030"),
+        ):
             with self.subTest(previous=previous, candidate=candidate):
                 host = FakeHost({("healthy", "new")}, heads={"old": previous, "new": candidate})
                 with patch.dict("os.environ", {"BACKEND_REPOSITORY": "approved"}):

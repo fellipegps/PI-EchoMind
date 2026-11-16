@@ -168,11 +168,15 @@ def delete_building(db: Session, tenant_id: str, campus_id: str, building_id: st
     _delete_commit(db)
 
 
-def list_spaces(db: Session, tenant_id: str, campus_id: str) -> list[CampusSpace]:
+def list_spaces(db: Session, tenant_id: str, campus_id: str, *, building_id: str | None = None,
+                active_only: bool = False) -> list[CampusSpace]:
     _get_campus(db, tenant_id, campus_id)
-    return db.query(CampusSpace).filter_by(tenant_id=tenant_id, campus_id=campus_id).order_by(
-        CampusSpace.name, CampusSpace.id,
-    ).all()
+    query = db.query(CampusSpace).filter_by(tenant_id=tenant_id, campus_id=campus_id)
+    if building_id is not None:
+        query = query.filter_by(building_id=building_id)
+    if active_only:
+        query = query.filter_by(active=True)
+    return query.order_by(CampusSpace.name, CampusSpace.id).all()
 
 
 def create_space(db: Session, tenant_id: str, campus_id: str, data: dict) -> CampusSpace:

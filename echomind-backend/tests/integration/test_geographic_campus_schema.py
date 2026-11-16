@@ -25,6 +25,11 @@ def test_geographic_tables_have_rls_and_tenant_scoped_foreign_keys(
 ) -> None:
     inspector = inspect(postgres_engine)
     assert set(GEO_TABLES) <= set(inspector.get_table_names(schema="public"))
+    assert any(column["name"] == "model_key" and column["nullable"] for column in inspector.get_columns("campuses"))
+    assert any(
+        constraint["column_names"] == ["tenant_id", "campus_id", "model_destination_id"]
+        for constraint in inspector.get_unique_constraints("campus_buildings")
+    )
 
     with postgres_engine.connect() as connection:
         enabled = dict(connection.execute(text(

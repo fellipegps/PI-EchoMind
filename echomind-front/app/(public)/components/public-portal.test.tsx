@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createPortal } from "react-dom";
 
 const apiMocks = vi.hoisted(() => ({
   streamPublicChat: vi.fn(),
@@ -21,7 +22,10 @@ vi.mock("@/lib/api", () => ({
 }));
 
 vi.mock("./public-campus-navigator", () => ({
-  PublicCampusNavigator: ({ publicSlug }: { publicSlug: string }) => <div role="region" aria-label="Navegação geográfica do campus">{publicSlug}</div>,
+  PublicCampusNavigator: ({ publicSlug, directoryTarget }: { publicSlug: string; directoryTarget: HTMLElement | null }) => <>
+    <div role="region" aria-label="Navegação geográfica do campus">{publicSlug}</div>
+    {directoryTarget && createPortal(<input type="search" aria-label="Buscar no campus" />, directoryTarget)}
+  </>,
 }));
 
 import { PublicPortal } from "./public-portal";
@@ -68,12 +72,14 @@ describe("PublicPortal", () => {
     expect(screen.getByRole("button", { name: "Eventos" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Locais" })).toBeEnabled();
   });
-  it("informa o uso dos dados antes do envio e oferece o aviso de privacidade", async () => {
+  it("oferece o aviso de privacidade no rodapé sem exibir o aviso acima do campo de pergunta", async () => {
     render(<PublicPortal publicSlug="universidade" />);
-    const input = await screen.findByRole("textbox", { name: "Digite sua pergunta" });
-    expect(input).toHaveAccessibleDescription(/armazenadas.*Groq/);
+    await screen.findByRole("heading", { name: "UniEVANGÉLICA" });
+    const input = screen.getByRole("textbox", { name: "Digite sua pergunta" });
     expect(input).toHaveAttribute("maxLength", "2000");
-    expect(screen.getByRole("link", { name: "Saiba como seus dados são usados" })).toHaveAttribute("href", "/p/universidade/privacidade");
+    expect(screen.queryByText(/Você conversa com uma IA/)).not.toBeInTheDocument();
+    const footer = screen.getByRole("contentinfo");
+    expect(within(footer).getByRole("link", { name: "Privacidade e contato sobre dados pessoais" })).toHaveAttribute("href", "/p/universidade/privacidade");
   });
   it("oferece somente o navegador geográfico na aba Locais", async () => {
     render(<PublicPortal publicSlug="universidade" />);
@@ -291,7 +297,17 @@ describe("PublicPortal", () => {
     expect(within(navigation).getByRole("button", { name: "Eventos" })).toHaveAttribute("aria-current", "page");
     await user.tab();
     await user.keyboard(" ");
-    expect(screen.getByRole("region", { name: "Locais do campus" })).toBeInTheDocument();
+    const mapSection = screen.getByRole("region", { name: "Locais do campus" });
+    const places = within(navigation).getByRole("button", { name: "Locais" });
+    expect(places).toHaveAttribute("aria-expanded", "true");
+    await user.tab();
+    const search = within(navigation).getByRole("searchbox", { name: "Buscar no campus" });
+    expect(search).toHaveFocus();
+    expect(mapSection).not.toContainElement(search);
+    await user.click(places);
+    expect(places).toHaveAttribute("aria-expanded", "false");
+    expect(search).not.toBeVisible();
+    expect(mapSection).toBeVisible();
     expect(within(navigation).getAllByRole("button").filter((button) => button.getAttribute("aria-current") === "page")).toHaveLength(1);
   });
 

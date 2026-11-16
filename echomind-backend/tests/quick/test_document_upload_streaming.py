@@ -286,21 +286,18 @@ async def test_valid_campus_photo_stream_uses_photo_bound_and_closes_files(
 ):
     from io import BytesIO
     from PIL import Image
+    from app import campus_map_repository as geo
     from app.database import CampusPlacePhoto
 
     monkeypatch.setenv("MAX_DOCUMENT_SIZE_MB", "invalid")
-    campus = client.post("/campuses", json={
-        "name": "Campus de fotos", "center_lat": 0, "center_lng": 0,
-    }).json()
-    building = client.post(f"/campuses/{campus['id']}/buildings", json={
-        "name": "Bloco", "entrance_lat": 0, "entrance_lng": 0,
-    }).json()
+    campus = geo.create_campus(db, "test-admin", {"name": "Campus de fotos", "center_lat": 0, "center_lng": 0})
+    landmark = geo.create_landmark(db, "test-admin", campus.id, {"name": "Praça", "lat": 0, "lng": 0})
     output = BytesIO()
     Image.new("RGB", (20, 20), "blue").save(output, format="PNG")
     body = multipart_body(output.getvalue(), metadata={"caption": b"Fachada do bloco"})
     result = await send_stream(
         quick_test_context.app, body, content_length=content_length,
-        path=f"/campuses/{campus['id']}/places/building/{building['id']}/photos",
+        path=f"/campuses/{campus.id}/places/landmark/{landmark.id}/photos",
     )
     assert result.status == 201
     assert json.loads(result.body)["caption"] == "Fachada do bloco"

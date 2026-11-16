@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class GeoInput(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", protected_namespaces=("model_validate", "model_dump"))
 
     @field_validator("name", "category", "kind", check_fields=False)
     @classmethod
@@ -30,6 +30,7 @@ class GeoInput(BaseModel):
 class CampusCreate(GeoInput):
     name: str = Field(min_length=2, max_length=200)
     description: str | None = Field(default=None, max_length=2000)
+    model_key: str | None = Field(default=None, max_length=80, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     center_lat: float = Field(ge=-90, le=90, allow_inf_nan=False)
     center_lng: float = Field(ge=-180, le=180, allow_inf_nan=False)
     zoom: int = Field(default=17, ge=1, le=22)
@@ -49,19 +50,22 @@ class CampusResponse(BaseModel):
     id: str
     name: str
     description: str | None
+    model_key: str | None = None
+    model_defaults_applied: bool = False
     center_lat: float
     center_lng: float
     zoom: int
     active: bool
     created_at: datetime
     updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=("model_validate", "model_dump"))
 
 
 class BuildingCreate(GeoInput):
     name: str = Field(min_length=2, max_length=200)
     description: str | None = Field(default=None, max_length=2000)
     category: str = Field(default="predio", min_length=2, max_length=100)
+    model_destination_id: str | None = Field(default=None, max_length=80, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     entrance_lat: float = Field(ge=-90, le=90, allow_inf_nan=False)
     entrance_lng: float = Field(ge=-180, le=180, allow_inf_nan=False)
     active: bool = True
@@ -74,6 +78,10 @@ class BuildingUpdate(GeoInput):
     entrance_lat: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
     entrance_lng: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
     active: bool | None = None
+
+
+class BuildingNameUpdate(GeoInput):
+    name: str = Field(min_length=2, max_length=200)
 
 
 class PlacePhotoResponse(BaseModel):
@@ -91,12 +99,13 @@ class BuildingResponse(BaseModel):
     name: str
     description: str | None
     category: str
+    model_destination_id: str | None = None
     entrance_lat: float
     entrance_lng: float
     active: bool
     created_at: datetime
     updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=("model_validate", "model_dump"))
 
 
 class SpaceCreate(GeoInput):
@@ -108,8 +117,7 @@ class SpaceCreate(GeoInput):
     active: bool = True
 
 
-class SpaceUpdate(GeoInput):
-    building_id: str | None = Field(default=None, min_length=1)
+class SpaceDetailsUpdate(GeoInput):
     name: str | None = Field(default=None, min_length=2, max_length=200)
     kind: str | None = Field(default=None, min_length=2, max_length=100)
     floor: str | None = Field(default=None, max_length=50)
@@ -179,3 +187,4 @@ class PublicPlaceResponse(BaseModel):
     campus: CampusResponse
     place: BuildingResponse | SpaceResponse | LandmarkResponse
     building: BuildingResponse | None = None
+    spaces: list[SpaceResponse] = Field(default_factory=list)

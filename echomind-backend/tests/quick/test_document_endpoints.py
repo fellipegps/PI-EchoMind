@@ -103,12 +103,14 @@ def test_documents_rejects_invalid_authentication(
     quick_test_context,
     monkeypatch,
 ) -> None:
+    from supabase import AuthApiError
+
     from app import auth
 
     monkeypatch.setattr(
         auth.supabase.auth,
         "get_user",
-        MagicMock(side_effect=RuntimeError("token invalido")),
+        MagicMock(side_effect=AuthApiError("token invalido", 401, "bad_jwt")),
     )
     response = _request_without_auth(
         client,

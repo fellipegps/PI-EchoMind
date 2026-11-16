@@ -57,7 +57,7 @@ createServer(async (req, res) => {
     "": { ...testPrivacySettings, public_slug: slug, company_name: slug === "ds05-alternate" ? "Outra instituição · DS-05" : "Campus de teste · DS-05", website: null, phone: null, address: null, business_hours: null },
     "/faqs": faqs,
     "/events": slug === "ds05-empty" ? [] : slug === "ds05-alternate" ? [{ ...events[0], id: "ds05-other", title: "Evento exclusivo da segunda instituição" }] : events,
-    "/geo-campus": { campuses: [], buildings: [], spaces: [], nodes: [], edges: [] },
+    "/geo-campus": { campuses: [], buildings: [], spaces: [], landmarks: [] },
   };
   if (suffix in responses) { res.end(JSON.stringify(responses[suffix])); return; }
   res.writeHead(404); res.end(JSON.stringify({ detail: "Operação não definida na fixture DS-05." }));

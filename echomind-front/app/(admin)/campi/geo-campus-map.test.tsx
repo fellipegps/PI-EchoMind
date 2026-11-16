@@ -51,15 +51,14 @@ describe("GeoCampusMap lifecycle and geography", () => {
     queued.forEach(callback => callback(0));
     expect(fake.map.invalidateSize).toHaveBeenCalledTimes(before);
   });
-  it("mostra blocos e referências com texto seguro sem desenhar caminhos", async () => {
+  it("mostra referências com texto seguro sem marcadores de blocos na edição", async () => {
     const landmark = { id: "ref", campus_id: "c", public_code: "ref", lat: 1, lng: 2, name: "<script>praça</script>", description: null, active: true, photos: [] };
-    const building = { id: "block", campus_id: "c", public_code: "block", name: "Bloco A", description: null, category: "bloco", entrance_lat: 3, entrance_lng: 4, active: false, photos: [] };
-    render(<GeoCampusMap {...props} landmarks={[landmark]} buildings={[building]} />);
+    render(<GeoCampusMap {...props} landmarks={[landmark]} />);
     await waitFor(() => expect(fake.circleMarker).toHaveBeenCalled());
     expect(fake.circleMarker).toHaveBeenCalledWith([1, 2], expect.objectContaining({ fillColor: "var(--primary)" }));
     expect(fake.polyline).not.toHaveBeenCalled();
     const labels = fake.layer.bindTooltip.mock.calls.map(([element]) => element as HTMLElement);
     expect(labels.some(element => element.textContent === "<script>praça</script>" && element.children.length === 0)).toBe(true);
-    expect(labels.some(element => element.textContent === "Bloco A (Inativo)")).toBe(true);
+    expect(labels).toHaveLength(1);
   });
 });

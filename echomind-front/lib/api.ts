@@ -5,6 +5,7 @@
  */
 
 import { supabase } from "./supabase";
+import { fetchWithSession } from "./authenticated-fetch";
 import { readChatStream, type PublicChatCompletion } from "./chat-stream";
 export type { PublicChatCompletion } from "./chat-stream";
 
@@ -221,33 +222,12 @@ export interface DocumentUploadMetadata {
   valid_until?: string;
 }
 
-// ─── Gerenciamento do token JWT ───────────────────────────────────────────────
-
-const TOKEN_KEY = "echomind_token";
-
-export const tokenStore = {
-  get: (): string | null =>
-    typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) : null,
-  set: (token: string) =>
-    typeof window !== "undefined" && localStorage.setItem(TOKEN_KEY, token),
-  clear: () =>
-    typeof window !== "undefined" && localStorage.removeItem(TOKEN_KEY),
-};
-
 // ─── Helper interno ───────────────────────────────────────────────────────────
 
 const CLIENT_ERROR_MESSAGE = "Não foi possível concluir a solicitação.";
 const SERVER_ERROR_MESSAGE = "O servidor não conseguiu concluir a solicitação.";
-const CONNECTION_ERROR_MESSAGE = "Não foi possível conectar ao servidor.";
 
 async function handleAuthenticatedResponse<T>(res: Response): Promise<T> {
-  // Token expirado ou inválido — redireciona para login
-  if (res.status === 401) {
-    tokenStore.clear();
-    if (typeof window !== "undefined") window.location.href = "/login";
-    throw new Error("Sessão expirada. Faça login novamente.");
-  }
-
   if (!res.ok) {
     throw new Error(res.status >= 500 ? SERVER_ERROR_MESSAGE : CLIENT_ERROR_MESSAGE);
   }
@@ -263,45 +243,19 @@ async function handleAuthenticatedResponse<T>(res: Response): Promise<T> {
 }
 
 async function authenticatedFetch<T>(path: string, init: RequestInit): Promise<T> {
-  const url = apiUrl(path);
-  let res: Response;
-  try {
-    res = await fetch(url, init);
-  } catch {
-    throw new Error(CONNECTION_ERROR_MESSAGE);
-  }
-
+  const res = await fetchWithSession(apiUrl(path), init);
   return handleAuthenticatedResponse<T>(res);
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = tokenStore.get();
   const headers = new Headers(init?.headers);
   headers.set("Content-Type", "application/json");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  return authenticatedFetch<T>(path, {
-    ...init,
-    headers: {
-      ...Object.fromEntries(headers.entries()),
-    },
-  });
+  return authenticatedFetch<T>(path, { ...init, headers });
 }
 
 async function multipartRequest<T>(path: string, formData: FormData): Promise<T> {
-  const token = tokenStore.get();
-  const headers = new Headers();
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
   return authenticatedFetch<T>(path, {
     method: "POST",
-    headers: {
-      ...Object.fromEntries(headers.entries()),
-    },
     body: formData,
   });
 }
@@ -343,7 +297,6 @@ export const authApi = {
       throw new Error("Sessão inválida. Tente novamente.");
     }
 
-    tokenStore.set(accessToken);
     return {
       access_token: accessToken,
       token_type: "bearer",
@@ -384,11 +337,7 @@ export const authApi = {
 
   logout: async () => {
     await supabase.auth.signOut();
-    tokenStore.clear();
-    if (typeof window !== "undefined") window.location.href = "/login";
   },
-
-  isAuthenticated: () => !!tokenStore.get(),
 
   me: () => request<CurrentUser>("/auth/me"),
 };
@@ -422,17 +371,19 @@ async function streamResponse(
   // 1. Tenta conectar ao backend
   let res: Response;
   try {
-    res = await fetch(url, {
+    const send = authenticated ? fetchWithSession : fetch;
+    res = await send(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(events ? { Accept: "text/event-stream" } : {}),
-        ...(authenticated && tokenStore.get() ? { Authorization: `Bearer ${tokenStore.get()}` } : {}),
       },
       body: JSON.stringify(payload),
     });
-  } catch {
-    onError(new Error("Não foi possível conectar ao servidor. Verifique se o backend está rodando."));
+  } catch (error) {
+    onError(authenticated && error instanceof Error
+      ? error
+      : new Error("Não foi possível conectar ao servidor. Verifique se o backend está rodando."));
     return;
   }
 

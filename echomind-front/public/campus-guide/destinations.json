@@ -1,0 +1,505 @@
+{
+  "sources": {
+    "campus": {
+      "label": "Mapa institucional dos blocos (2014)",
+      "url": "https://www4.unievangelica.edu.br/noticia/4461-confira-os-horarios-de-aula-e-localizacao-de-salas-para-o-inicio-do-semestre"
+    },
+    "campusImage": {
+      "label": "Imagem aérea institucional com identificação dos blocos (2014)",
+      "url": "https://www.unievangelica.edu.br/files/noticias/4461/Campus%20An%C3%A1polis2.jpg"
+    },
+    "osm": {
+      "label": "© Contribuidores do OpenStreetMap · base cartográfica (ODbL)",
+      "url": "https://www.openstreetmap.org/copyright"
+    },
+    "panorama": {
+      "label": "Google Maps · referência de perspectiva (2019)",
+      "url": "https://www.google.com/maps/@-16.2938062,-48.9445026,3a,75y,170.78h,45.3t/data=!3m7!1e1!3m5!1sCIHM0ogKEICAgICEiqCOIA!2e10!7i7000!8i3500"
+    },
+    "library": {
+      "label": "Página oficial da Biblioteca Central",
+      "url": "https://www4.unievangelica.edu.br/departamento/biblioteca"
+    },
+    "libraryBlock": {
+      "label": "Catálogo institucional · Biblioteca no Bloco B1",
+      "url": "https://www4.unievangelica.edu.br/storage/7407/Catalogo_UniEVANG%C3%89LICA-.pdf"
+    },
+    "libraryAccess": {
+      "label": "Memorial do NACI · rampas, escadas e piso tátil",
+      "url": "https://www4.unievangelica.edu.br/storage/4183/Memorial-Descritivo-NACI---2020.pdf#page=3"
+    },
+    "libraryFacade": {
+      "label": "Fachada histórica da Biblioteca · relatório da CPA",
+      "url": "https://www.unievangelica.edu.br/novo/img/pdf/Relato%20de%20Melhorias%20-%20Infraestrutura%20Centro%20Universit%C3%A1rio%20-%20UniEVANG%C3%89LICA.pdf#page=7"
+    },
+    "blockA": {
+      "label": "UniCUIDAR e Secretaria Geral · notícia institucional de 2026",
+      "url": "https://www4.unievangelica.edu.br/noticia/unicuidar-fortalece-cuidado-com-a-saude-no-ambiente-universitario"
+    },
+    "blockC": {
+      "label": "Bloco C e Secretaria de Odontologia · contato institucional",
+      "url": "https://www4.unievangelica.edu.br/departamento/comite-de-etica-em-pesquisa/contato"
+    },
+    "guia": {
+      "label": "Guia Acadêmico · vista aérea do setor leste (2017)",
+      "url": "https://www.unievangelica.edu.br/novo/img/pdf/Guia%20Acad%C3%AAmico.pdf#page=29"
+    },
+    "satellite": {
+      "label": "Google Maps · vista de satélite para conferência visual",
+      "url": "https://www.google.com/maps/@-16.29422,-48.9451,17.7z/data=!3m1!1e3"
+    },
+    "tour": {
+      "label": "Tour 360° da UniEVANGÉLICA",
+      "url": "https://www4.unievangelica.edu.br/pagina/tour-360"
+    },
+    "pdi": {
+      "label": "PDI revisado em 2023 · infraestrutura da sede",
+      "url": "https://www4.unievangelica.edu.br/storage/9971/UniEVANGE%CC%81LICA---PDI-2019-2023-Rev-28.6.2023-compactado.pdf#page=190"
+    },
+    "enfermagem": {
+      "label": "Notícia institucional de 2025 · Enfermagem no Bloco B2",
+      "url": "https://www4.unievangelica.edu.br/evento/4a-mostra-cientifica-do-curso-de-enfermagem-27-de-novembro"
+    },
+    "bim": {
+      "label": "Pesquisa institucional BIM · blocos H e I (2026)",
+      "url": "https://anais.unievangelica.edu.br/index.php/CIPEEX/en/article/view/13577"
+    },
+    "blocoG": {
+      "label": "PPC de Direito · referência aos blocos G e H",
+      "url": "https://www.unievangelica.edu.br/files/images/aaappcs/PPC%20Direito%20-%20An%C3%A1polis.pdf#page=124"
+    },
+    "gym": {
+      "label": "OpenStreetMap · Ginásio Poliesportivo (via 288589263)",
+      "url": "https://www.openstreetmap.org/way/288589263"
+    }
+  },
+  "aboutSources": [
+    "guia",
+    "campusImage",
+    "satellite",
+    "tour",
+    "osm",
+    "pdi"
+  ],
+  "destinations": [
+    {
+      "id": "bloco-a",
+      "name": "Bloco A",
+      "shortName": "A",
+      "kind": "Secretaria Geral · UniCUIDAR",
+      "laboratories": [
+        "Laboratório 12 · Piso 1 · Sala A 114"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9446077,
+        -16.2949011
+      ],
+      "approachCoordinates": [
+        -48.9446974,
+        -16.2945378
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": [
+          -48.9446974,
+          -16.2945378
+        ],
+        "status": "demo",
+        "description": "Use a Secretaria Geral e o UniCUIDAR como referências no Bloco A. O ponto ilustra o lado do estacionamento junto à Av. Universitária, onde o mapa institucional mostra a ligação coberta.",
+        "sources": [
+          "campusImage",
+          "blockA"
+        ],
+        "photo": null
+      },
+      "photoNote": "Foto da entrada indisponível.",
+      "sources": [
+        "guia",
+        "osm",
+        "blockA",
+        "campusImage"
+      ]
+    },
+    {
+      "id": "biblioteca",
+      "name": "Bloco B1 · Biblioteca Central",
+      "shortName": "B1",
+      "kind": "Biblioteca Central",
+      "laboratories": [
+        "Laboratório 09 · Piso 2 · Sala B1 301",
+        "Laboratório 10 · Piso 2 · Sala B1 302"
+      ],
+      "sector": "leste",
+      "icon": "book",
+      "labelCoordinates": [
+        -48.9440678,
+        -16.2954304
+      ],
+      "approachCoordinates": [
+        -48.944106,
+        -16.2952793
+      ],
+      "placementStatus": "approximate",
+      "entry": {
+        "coordinates": [
+          -48.944106,
+          -16.2952793
+        ],
+        "status": "demo",
+        "description": "Procure o Bloco B1. O memorial do campus registra rampas, escadas e piso tátil entre a Biblioteca e os demais blocos. O ponto no mapa ilustra a aproximação pelo lado voltado ao Bloco A.",
+        "sources": [
+          "libraryAccess"
+        ],
+        "photo": null
+      },
+      "photoNote": "Foto da porta sinalizada indisponível. O relatório da CPA contém uma foto histórica da fachada.",
+      "sources": [
+        "guia",
+        "osm",
+        "library",
+        "libraryBlock",
+        "libraryFacade",
+        "campusImage"
+      ]
+    },
+    {
+      "id": "bloco-b2",
+      "name": "Bloco B2",
+      "shortName": "B2",
+      "kind": "Enfermagem",
+      "laboratories": [
+        "Laboratório 11 · Piso 4 · Sala B2 410/411"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9440357,
+        -16.2951922
+      ],
+      "approachCoordinates": [
+        -48.9442288,
+        -16.2953367
+      ],
+      "placementStatus": "approximate",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm",
+        "enfermagem"
+      ]
+    },
+    {
+      "id": "bloco-c",
+      "name": "Bloco C",
+      "shortName": "C",
+      "kind": "Secretaria de Odontologia",
+      "laboratories": [
+        "Laboratório 04 · Piso 4 · Sala C 403"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9439193,
+        -16.2948195
+      ],
+      "approachCoordinates": [
+        -48.9440669,
+        -16.2946645
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": [
+          -48.9440669,
+          -16.2946645
+        ],
+        "status": "demo",
+        "description": "Identifique o Bloco C pelo lado do Bloco B, em direção aos blocos D e E. A Secretaria de Odontologia é uma referência institucional do prédio. O ponto ilustra o lado voltado ao corredor entre os blocos.",
+        "sources": [
+          "campusImage",
+          "blockC"
+        ],
+        "photo": null
+      },
+      "photoNote": "Foto da entrada indisponível.",
+      "sources": [
+        "guia",
+        "osm",
+        "blockC",
+        "campusImage"
+      ]
+    },
+    {
+      "id": "bloco-d",
+      "name": "Bloco D",
+      "shortName": "D",
+      "kind": "Praça de alimentação",
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9438599,
+        -16.294626
+      ],
+      "approachCoordinates": [
+        -48.9440538,
+        -16.2947233
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm",
+        "pdi"
+      ]
+    },
+    {
+      "id": "bloco-e",
+      "name": "Bloco E",
+      "shortName": "E",
+      "kind": "Auditório Carlos Hassel Mendes",
+      "laboratories": [
+        "Laboratório 02 · Piso 2 · Sala E 208",
+        "Laboratório 05 · Piso 2 · Sala E 209",
+        "Laboratório 06 · Piso 2 · Sala E212"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9437862,
+        -16.2943127
+      ],
+      "approachCoordinates": [
+        -48.9439913,
+        -16.2944573
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm",
+        "pdi"
+      ]
+    },
+    {
+      "id": "bloco-f",
+      "name": "Bloco F",
+      "shortName": "F",
+      "kind": "Auditório do Bloco F",
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9436549,
+        -16.2938958
+      ],
+      "approachCoordinates": [
+        -48.9439565,
+        -16.2939739
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm"
+      ]
+    },
+    {
+      "id": "bloco-g",
+      "name": "Bloco J",
+      "shortName": "J",
+      "kind": "Referência histórica de localização",
+      "laboratories": [
+        "Laboratório 03 · Piso 2 · Sala J 204",
+        "Laboratório DG · Piso 2 · Sala J205"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9439865,
+        -16.2926946
+      ],
+      "approachCoordinates": [
+        -48.9441345,
+        -16.2927957
+      ],
+      "placementStatus": "approximate",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O Bloco J está representado em frente à área do Bloco H. A posição é aproximada e precisa de conferência no campus.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm"
+      ]
+    },
+    {
+      "id": "bloco-h",
+      "name": "Bloco H",
+      "shortName": "H",
+      "kind": "Área acadêmica",
+      "laboratories": [
+        "Laboratório EngSoft · Piso 2 · Sala H 201/202"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9436095,
+        -16.292904
+      ],
+      "approachCoordinates": [
+        -48.9438339,
+        -16.2930156
+      ],
+      "placementStatus": "approximate",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm",
+        "bim",
+        "pdi"
+      ]
+    },
+    {
+      "id": "bloco-i",
+      "name": "Bloco I",
+      "shortName": "I",
+      "kind": "Área acadêmica",
+      "laboratories": [
+        "Laboratório 07 · Piso 2 · Sala I 207",
+        "Laboratório 08 · Piso 2 · Sala I206"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.9435611,
+        -16.2926258
+      ],
+      "approachCoordinates": [
+        -48.9437917,
+        -16.2924757
+      ],
+      "placementStatus": "approximate",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm",
+        "bim"
+      ]
+    },
+    {
+      "id": "ginasio",
+      "name": "Ginásio Poliesportivo",
+      "shortName": "Ginásio",
+      "kind": "Complexo esportivo · Avenida Universitária",
+      "sector": "leste",
+      "icon": "sport",
+      "labelCoordinates": [
+        -48.9449183,
+        -16.2935216
+      ],
+      "approachCoordinates": [
+        -48.9447369,
+        -16.2940997
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": [
+          -48.9447369,
+          -16.2940997
+        ],
+        "status": "demo",
+        "description": "O ginásio fica ao lado da Avenida Universitária, em frente ao setor da pista de atletismo. O marcador indica uma aproximação ilustrativa pelo lado sul; a porta deve ser confirmada no local.",
+        "sources": [
+          "gym",
+          "pdi"
+        ],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm",
+        "gym",
+        "pdi"
+      ]
+    },
+    {
+      "id": "tecnologico",
+      "name": "Centro Tecnológico",
+      "shortName": "CT",
+      "kind": "Área acadêmica · setor leste",
+      "laboratories": [
+        "Laboratório CT"
+      ],
+      "sector": "leste",
+      "icon": "building",
+      "labelCoordinates": [
+        -48.944355,
+        -16.2926355
+      ],
+      "approachCoordinates": [
+        -48.9443806,
+        -16.2929068
+      ],
+      "placementStatus": "cross-referenced",
+      "entry": {
+        "coordinates": null,
+        "status": "unknown",
+        "description": "O contorno indica a área do destino. A porta de acesso ainda não foi identificada nas fontes consultadas.",
+        "sources": [],
+        "photo": null
+      },
+      "photoNote": null,
+      "sources": [
+        "guia",
+        "osm"
+      ]
+    }
+  ]
+}

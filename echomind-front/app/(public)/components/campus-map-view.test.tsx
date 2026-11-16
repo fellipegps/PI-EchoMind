@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Building, Campus, Landmark } from "@/lib/geocampus-api";
+vi.mock("@/lib/supabase", () => ({ supabase: {} }));
 const calls = vi.hoisted(() => ({ map: vi.fn(), remove: vi.fn(), invalidate: vi.fn(), polyline: vi.fn() }));
 vi.mock("leaflet", () => ({
   map: (container: HTMLElement) => {
@@ -11,7 +12,17 @@ vi.mock("leaflet", () => ({
   tileLayer: () => ({ addTo: vi.fn() }),
   circleMarker: () => {
     const element = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const marker = { addTo: (target: { container?: HTMLElement }) => { target.container?.append(element); return marker; }, getElement: () => element, bindTooltip: vi.fn(), on: vi.fn() };
+    let parent: HTMLElement | undefined;
+    let popup: HTMLElement;
+    let onOpen: (() => void) | undefined;
+    const marker = {
+      addTo: (target: { container?: HTMLElement }) => { parent = target.container; parent?.append(element); return marker; },
+      getElement: () => element, bindTooltip: vi.fn(),
+      bindPopup: (content: HTMLElement) => { popup = content; },
+      on: (event: string, callback: () => void) => { if (event === "popupopen") onOpen = callback; },
+      openPopup: () => { parent?.querySelector("section")?.remove(); parent?.append(popup); onOpen?.(); },
+      getPopup: () => ({ update: vi.fn() }),
+    };
     return marker;
   },
   polyline: calls.polyline,
@@ -26,12 +37,14 @@ describe("Mapa visual e acessibilidade", () => {
     vi.clearAllMocks();
     const firstOpen = vi.fn(), latestOpen = vi.fn();
     const { rerender, unmount } = render(<CampusMapView campus={campus} buildings={buildings} landmarks={landmarks} onOpenPlace={firstOpen} />);
-    const block = await screen.findByRole("link", { name: "Abrir ficha de Bloco A" });
-    const landmark = screen.getByRole("link", { name: "Abrir ficha de Jardim" });
+    const block = await screen.findByRole("button", { name: "Abrir ficha de Bloco A" });
+    const landmark = screen.getByRole("button", { name: "Abrir ficha de Jardim" });
     fireEvent.keyDown(block, { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ficha completa" }));
     expect(firstOpen).toHaveBeenCalledWith("building", "code-b");
     rerender(<CampusMapView campus={campus} buildings={buildings} landmarks={landmarks} onOpenPlace={latestOpen} />);
     fireEvent.keyDown(landmark, { key: "Enter" });
+    fireEvent.click(screen.getByRole("button", { name: "Abrir ficha completa" }));
     expect(latestOpen).toHaveBeenCalledWith("landmark", "code-l");
     expect(calls.map).toHaveBeenCalledOnce();
     expect(calls.polyline).not.toHaveBeenCalled();

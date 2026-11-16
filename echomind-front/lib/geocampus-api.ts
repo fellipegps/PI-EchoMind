@@ -1,4 +1,4 @@
-import { tokenStore } from "./api";
+import { fetchFromApi, fetchWithSession } from "./authenticated-fetch";
 
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 const baseUrl = configuredApiUrl
@@ -11,13 +11,13 @@ export interface Campus {
   id: string;
   name: string;
   description: string | null;
+  model_key?: string | null;
+  model_defaults_applied?: boolean;
   center_lat: number;
   center_lng: number;
   zoom: number;
   active: boolean;
 }
-
-export type CampusInput = Omit<Campus, "id">;
 
 export type PlaceType = "building" | "space" | "landmark";
 
@@ -35,13 +35,12 @@ export interface Building {
   name: string;
   description: string | null;
   category: string;
+  model_destination_id?: string | null;
   entrance_lat: number;
   entrance_lng: number;
   active: boolean;
   photos: PlacePhoto[];
 }
-
-export type BuildingInput = Omit<Building, "id" | "campus_id" | "public_code" | "photos">;
 
 export interface IndoorSpace {
   id: string;
@@ -56,7 +55,7 @@ export interface IndoorSpace {
   photos: PlacePhoto[];
 }
 
-export type IndoorSpaceInput = Omit<IndoorSpace, "id" | "campus_id" | "public_code" | "photos">;
+export type IndoorSpaceDetails = Pick<IndoorSpace, "name" | "description" | "kind" | "floor" | "active">;
 
 export interface Landmark {
   id: string;
@@ -79,6 +78,7 @@ export interface PublicPlace {
   campus: Campus;
   place: CampusPlace;
   building: Building | null;
+  spaces?: IndoorSpace[];
 }
 
 export interface PublicGeoCampus {
@@ -110,23 +110,8 @@ async function geoRequest<T>(
   if (!baseUrl) throw new Error("O servidor do EchoMind ainda não está disponível.");
   const headers = new Headers(init.headers);
   if (typeof init.body === "string") headers.set("Content-Type", "application/json");
-  if (authenticated) {
-    const token = tokenStore.get();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  let response: Response;
-  try {
-    response = await fetch(`${baseUrl}${path}`, { ...init, headers });
-  } catch {
-    throw new Error("Não foi possível conectar ao servidor.");
-  }
-
-  if (response.status === 401 && authenticated) {
-    tokenStore.clear();
-    if (typeof window !== "undefined") window.location.href = "/login";
-    throw new Error("Sessão expirada. Faça login novamente.");
-  }
+  const send = authenticated ? fetchWithSession : fetchFromApi;
+  const response = await send(`${baseUrl}${path}`, { ...init, headers });
   if (!response.ok) {
     if (response.status >= 500) throw new Error("O servidor não conseguiu concluir a solicitação.");
     const body = await response.json().catch(() => null);
@@ -161,13 +146,22 @@ function resourceApi<T, I>(resource: string) {
 export const geoCampusApi = {
   campuses: {
     list: () => geoRequest<Campus[]>("/campuses"),
-    create: (input: CampusInput) => geoRequest<Campus>("/campuses", jsonBody(input)),
-    update: (id: string, input: CampusInput) =>
-      geoRequest<Campus>(`/campuses/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(input) }),
-    delete: (id: string) => geoRequest<void>(`/campuses/${encodeURIComponent(id)}`, { method: "DELETE" }),
+    prepareModel: (campusId: string) => geoRequest<void>(resourcePath(campusId, "model-defaults"), { method: "POST" }),
   },
-  buildings: resourceApi<Building, BuildingInput>("buildings"),
-  spaces: resourceApi<IndoorSpace, IndoorSpaceInput>("spaces"),
+  buildings: {
+    list: (campusId: string) => geoRequest<Building[]>(resourcePath(campusId, "buildings")),
+    rename: (campusId: string, id: string, name: string) => geoRequest<Building>(resourcePath(campusId, "buildings", id), {
+      method: "PUT", body: JSON.stringify({ name }),
+    }),
+  },
+  spaces: {
+    list: (campusId: string) => geoRequest<IndoorSpace[]>(resourcePath(campusId, "spaces")),
+    create: (campusId: string, buildingId: string, details: IndoorSpaceDetails) =>
+      geoRequest<IndoorSpace>(resourcePath(campusId, "spaces"), jsonBody({ ...details, building_id: buildingId })),
+    update: (campusId: string, id: string, details: IndoorSpaceDetails) => geoRequest<IndoorSpace>(resourcePath(campusId, "spaces", id), {
+      method: "PUT", body: JSON.stringify(details),
+    }),
+  },
   landmarks: resourceApi<Landmark, LandmarkInput>("landmarks"),
   photos: {
     upload: (campusId: string, type: PlaceType, placeId: string, file: File, caption?: string) => {

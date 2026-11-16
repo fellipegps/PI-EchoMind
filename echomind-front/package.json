@@ -32,7 +32,8 @@
     "react-markdown": "^10.1.0",
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

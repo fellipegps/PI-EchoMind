@@ -10,12 +10,13 @@ from .auth import CurrentUser, get_current_user
 from .campus_map_repository import GeoConflictError, GeoNotFoundError, GeoValidationError
 from . import campus_map_repository as geo
 from .campus_map_schemas import (
-    BuildingCreate, BuildingResponse, BuildingUpdate,
-    CampusCreate, CampusResponse, CampusUpdate,
+    BuildingNameUpdate, BuildingResponse,
+    CampusResponse,
     LandmarkCreate, LandmarkResponse, LandmarkUpdate,
     PlacePhotoResponse, PlaceType, PublicGeoCampusResponse, PublicPlaceResponse,
-    SpaceCreate, SpaceResponse, SpaceUpdate,
+    SpaceCreate, SpaceDetailsUpdate, SpaceResponse,
 )
+from .campus_model_defaults import prepare_anapolis
 from .database import get_db
 from .campus_photo import InvalidPhoto, MAX_PHOTO_BYTES, normalize_photo
 from .document_upload import DocumentUploadRoute
@@ -55,41 +56,23 @@ def list_campuses(db: Session = Depends(get_db), tenant_id: str = Depends(_tenan
     return geo.list_campuses(db, tenant_id)
 
 
-@router_campuses.post("", response_model=CampusResponse, status_code=201)
-def create_campus(payload: CampusCreate, db: Session = Depends(get_db),
-                  tenant_id: str = Depends(_tenant_id)):
-    return _call(geo.create_campus, db, tenant_id, payload.model_dump())
-
-
 @router_campuses.get("/{campus_id}", response_model=CampusResponse)
 def get_campus(campus_id: str, db: Session = Depends(get_db),
                tenant_id: str = Depends(_tenant_id)):
     return _call(geo._get_campus, db, tenant_id, campus_id)
 
 
-@router_campuses.put("/{campus_id}", response_model=CampusResponse)
-def update_campus(campus_id: str, payload: CampusUpdate, db: Session = Depends(get_db),
-                  tenant_id: str = Depends(_tenant_id)):
-    return _call(geo.update_campus, db, tenant_id, campus_id,
-                 payload.model_dump(exclude_unset=True))
-
-
-@router_campuses.delete("/{campus_id}", status_code=204)
-def delete_campus(campus_id: str, db: Session = Depends(get_db),
-                  tenant_id: str = Depends(_tenant_id)):
-    _call(geo.delete_campus, db, tenant_id, campus_id)
+@router_campuses.post("/{campus_id}/model-defaults", status_code=204)
+def prepare_model_defaults(campus_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(_tenant_id)):
+    config = crud.get_config(db, tenant_id)
+    if config:
+        _call(prepare_anapolis, db, tenant_id, campus_id, config.public_slug, config.company_name or "")
 
 
 @router_campuses.get("/{campus_id}/buildings", response_model=list[BuildingResponse])
 def list_buildings(campus_id: str, db: Session = Depends(get_db),
                    tenant_id: str = Depends(_tenant_id)):
     return geo.places_data(db, _call(geo.list_buildings, db, tenant_id, campus_id), "building")
-
-
-@router_campuses.post("/{campus_id}/buildings", response_model=BuildingResponse, status_code=201)
-def create_building(campus_id: str, payload: BuildingCreate, db: Session = Depends(get_db),
-                    tenant_id: str = Depends(_tenant_id)):
-    return geo.place_data(db, _call(geo.create_building, db, tenant_id, campus_id, payload.model_dump()), "building")
 
 
 @router_campuses.get("/{campus_id}/buildings/{building_id}", response_model=BuildingResponse)
@@ -99,16 +82,10 @@ def get_building(campus_id: str, building_id: str, db: Session = Depends(get_db)
 
 
 @router_campuses.put("/{campus_id}/buildings/{building_id}", response_model=BuildingResponse)
-def update_building(campus_id: str, building_id: str, payload: BuildingUpdate,
+def rename_building(campus_id: str, building_id: str, payload: BuildingNameUpdate,
                     db: Session = Depends(get_db), tenant_id: str = Depends(_tenant_id)):
-    return geo.place_data(db, _call(geo.update_building, db, tenant_id, campus_id, building_id,
-                 payload.model_dump(exclude_unset=True)), "building")
-
-
-@router_campuses.delete("/{campus_id}/buildings/{building_id}", status_code=204)
-def delete_building(campus_id: str, building_id: str, db: Session = Depends(get_db),
-                    tenant_id: str = Depends(_tenant_id)):
-    _call(geo.delete_building, db, tenant_id, campus_id, building_id)
+    row = _call(geo.update_building, db, tenant_id, campus_id, building_id, payload.model_dump())
+    return geo.place_data(db, row, "building")
 
 
 @router_campuses.get("/{campus_id}/spaces", response_model=list[SpaceResponse])
@@ -117,29 +94,23 @@ def list_spaces(campus_id: str, db: Session = Depends(get_db),
     return geo.places_data(db, _call(geo.list_spaces, db, tenant_id, campus_id), "space")
 
 
-@router_campuses.post("/{campus_id}/spaces", response_model=SpaceResponse, status_code=201)
-def create_space(campus_id: str, payload: SpaceCreate, db: Session = Depends(get_db),
-                 tenant_id: str = Depends(_tenant_id)):
-    return geo.place_data(db, _call(geo.create_space, db, tenant_id, campus_id, payload.model_dump()), "space")
-
-
 @router_campuses.get("/{campus_id}/spaces/{space_id}", response_model=SpaceResponse)
 def get_space(campus_id: str, space_id: str, db: Session = Depends(get_db),
               tenant_id: str = Depends(_tenant_id)):
     return geo.place_data(db, _call(geo.get_place, db, tenant_id, campus_id, "space", space_id), "space")
 
 
+@router_campuses.post("/{campus_id}/spaces", response_model=SpaceResponse, status_code=201)
+def create_space(campus_id: str, payload: SpaceCreate, db: Session = Depends(get_db), tenant_id: str = Depends(_tenant_id)):
+    row = _call(geo.create_space, db, tenant_id, campus_id, payload.model_dump())
+    return geo.place_data(db, row, "space")
+
+
 @router_campuses.put("/{campus_id}/spaces/{space_id}", response_model=SpaceResponse)
-def update_space(campus_id: str, space_id: str, payload: SpaceUpdate,
-                 db: Session = Depends(get_db), tenant_id: str = Depends(_tenant_id)):
-    return geo.place_data(db, _call(geo.update_space, db, tenant_id, campus_id, space_id,
-                 payload.model_dump(exclude_unset=True)), "space")
-
-
-@router_campuses.delete("/{campus_id}/spaces/{space_id}", status_code=204)
-def delete_space(campus_id: str, space_id: str, db: Session = Depends(get_db),
-                 tenant_id: str = Depends(_tenant_id)):
-    _call(geo.delete_space, db, tenant_id, campus_id, space_id)
+def edit_space(campus_id: str, space_id: str, payload: SpaceDetailsUpdate,
+               db: Session = Depends(get_db), tenant_id: str = Depends(_tenant_id)):
+    row = _call(geo.update_space, db, tenant_id, campus_id, space_id, payload.model_dump(exclude_unset=True))
+    return geo.place_data(db, row, "space")
 
 
 @router_campuses.get("/{campus_id}/landmarks", response_model=list[LandmarkResponse])
@@ -236,10 +207,12 @@ def get_public_place(public_slug: str, place_type: PlaceType, public_code: str,
                      db: Session = Depends(get_db)):
     config = _public_config(db, public_slug)
     row, campus, building = _call(geo.public_place, db, config.tenant_id, place_type, public_code)
+    spaces = geo.list_spaces(db, config.tenant_id, campus.id, building_id=row.id, active_only=True) if place_type == "building" else []
     return {
         "type": place_type, "campus": campus,
         "place": geo.place_data(db, row, place_type, public_slug),
         "building": geo.place_data(db, building, "building", public_slug) if building else None,
+        "spaces": geo.places_data(db, spaces, "space", public_slug),
     }
 
 

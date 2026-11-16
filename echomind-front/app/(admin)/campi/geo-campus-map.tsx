@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type * as Leaflet from "leaflet";
-import { CAMPUS_MAP_TILE_OPTIONS, CAMPUS_MAP_TILE_URL } from "@/lib/campus-map-tiles";
-import type { Building, Landmark } from "@/lib/geocampus-api";
+import { mountCampusTiles } from "@/lib/campus-map-tiles";
+import type { Landmark } from "@/lib/geocampus-api";
 import styles from "./geo-campus-map.module.css";
 
 export interface GeoPoint {
@@ -14,7 +14,6 @@ export interface GeoPoint {
 interface Props {
   center: GeoPoint;
   zoom: number;
-  buildings: Building[];
   landmarks: Landmark[];
   draftPoint: GeoPoint | null;
   focusPoint: GeoPoint | null;
@@ -27,13 +26,9 @@ function label(text: string): HTMLElement {
   return element;
 }
 
-const SATELLITE_TILE_URL = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_URL?.trim();
-const SATELLITE_TILE_ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_SATELLITE_TILE_ATTRIBUTION?.trim();
-
 export function GeoCampusMap({
   center,
   zoom,
-  buildings,
   landmarks,
   draftPoint,
   focusPoint,
@@ -64,42 +59,7 @@ export function GeoCampusMap({
         zoomControl: false,
       });
       L.control.zoom({ zoomInTitle: "Aproximar mapa", zoomOutTitle: "Afastar mapa" }).addTo(map);
-      const mapTiles = L.tileLayer(CAMPUS_MAP_TILE_URL, CAMPUS_MAP_TILE_OPTIONS);
-      if (SATELLITE_TILE_URL && SATELLITE_TILE_ATTRIBUTION) {
-        const satelliteTiles = L.tileLayer(SATELLITE_TILE_URL, {
-          attribution: SATELLITE_TILE_ATTRIBUTION,
-          maxZoom: 19,
-        }).addTo(map);
-        L.control.layers(
-          { "Satélite": satelliteTiles, "Mapa": mapTiles },
-          undefined,
-          { collapsed: false, position: "topright" },
-        ).addTo(map);
-        if (SATELLITE_TILE_URL.startsWith("https://api.maptiler.com/")) {
-          const logo = new L.Control({ position: "bottomleft" });
-          logo.onAdd = () => {
-            const link = L.DomUtil.create("a", "leaflet-control");
-            link.href = "https://www.maptiler.com/";
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.setAttribute("aria-label", "MapTiler");
-            const image = document.createElement("img");
-            image.src = "https://api.maptiler.com/resources/logo.svg";
-            image.alt = "MapTiler";
-            image.width = 90;
-            image.style.display = "block";
-            link.appendChild(image);
-            return link;
-          };
-          logo.addTo(map);
-          map.on("baselayerchange", (event: Leaflet.LayersControlEvent) => {
-            if (event.name === "Satélite" && map) logo.addTo(map);
-            else logo.remove();
-          });
-        }
-      } else {
-        mapTiles.addTo(map);
-      }
+      mountCampusTiles(L, map);
       const overlay = L.layerGroup().addTo(map);
       map.on("click", (event: Leaflet.LeafletMouseEvent) => {
         onPickRef.current?.({ lat: event.latlng.lat, lng: event.latlng.lng });
@@ -149,16 +109,6 @@ export function GeoCampusMap({
       }).addTo(overlay).bindTooltip(label(`${landmark.name}${landmark.active ? "" : " (Inativo)"}`));
     });
 
-    buildings.forEach((building) => {
-      L.circleMarker([building.entrance_lat, building.entrance_lng], {
-        radius: 9,
-        color: "var(--card)",
-        weight: 3,
-        fillColor: building.active ? "var(--chart-4)" : "var(--muted-foreground)",
-        fillOpacity: 1,
-      }).addTo(overlay).bindTooltip(label(`${building.name}${building.active ? "" : " (Inativo)"}`));
-    });
-
     if (draftPoint) {
       const marker = L.marker([draftPoint.lat, draftPoint.lng], {
         draggable: Boolean(onPickRef.current),
@@ -177,7 +127,7 @@ export function GeoCampusMap({
         onPickRef.current?.({ lat: point.lat, lng: point.lng });
       });
     }
-  }, [buildings, landmarks, draftPoint, ready]);
+  }, [landmarks, draftPoint, ready]);
 
   useEffect(() => {
     if (!mapRef.current) return;

@@ -1,0 +1,36 @@
+.gallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(100%, 230px);
+  gap: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  margin-block: 8px;
+}
+
+.gallery:empty { display: none; }
+.gallery:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
+
+.gallery figure {
+  min-width: 0;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--muted);
+}
+
+.gallery figcaption {
+  padding-top: 3px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
